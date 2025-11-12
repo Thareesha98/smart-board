@@ -154,7 +154,7 @@ Use Cases:
 - Generate Bills  
 - Send Notifications  
 
-*(See attached `/docs/UseCaseDiagram.png`)*
+*(See attached `/docs/UseCaseDiagram.drawio`)*
 
 ### 5.2 System Architecture (High-Level)
 - **Frontend (React)** → interacts with **API Gateway**  
