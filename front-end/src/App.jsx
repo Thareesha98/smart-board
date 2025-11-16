@@ -3,6 +3,7 @@ import { Navbar } from "./components/Navbar";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import CreateAdPage from "./pages/owner/CreateAdPage";
+import EditAdPage from "./pages/owner/EditAdPage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route index element={<HomePage />}/>
             <Route path="login" element={<LoginPage />}/>
             <Route path="createAd" element={<CreateAdPage />} />
+            <Route path="editAd/:adId" element={<EditAdPage />} />
           </Routes>
         </div>
       </div>
