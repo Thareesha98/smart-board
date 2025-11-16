@@ -4,6 +4,7 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import CreateAdPage from "./pages/owner/CreateAdPage";
 import EditAdPage from "./pages/owner/EditAdPage";
+import MyAdsPage from "./pages/owner/MyAdsPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="login" element={<LoginPage />}/>
             <Route path="createAd" element={<CreateAdPage />} />
             <Route path="editAd/:adId" element={<EditAdPage />} />
+            <Route path="myAds" element={<MyAdsPage />} />
           </Routes>
         </div>
       </div>
