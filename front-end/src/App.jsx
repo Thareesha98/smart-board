@@ -6,6 +6,7 @@ import OwnerLayout from "./layouts/OwnerLayout";
 import AppointmentsPage from "./pages/owner/AppointmentsPage";
 import ProfilePage from "./pages/owner/ProfilePage";
 import Dashboard from "./pages/owner/Dashboard";
+import MyBoardingsPage from "./pages/owner/MyBoardingsPage";
 
 function App() {
   return (
@@ -15,7 +16,8 @@ function App() {
         <div className="grow">
           <Routes>
             <Route path="ownerLayout" element={<OwnerLayout />} >  
-              <Route path="dashboard" element={<Dashboard />} />     
+              <Route path="dashboard" element={<Dashboard />} />    
+              <Route path="myboardings" element={<MyBoardingsPage />} />
               <Route path="createAd" element={<CreateAdPage />} />
               <Route path="editAd/:adId" element={<EditAdPage />} />
               <Route path="myAds" element={<MyAdsPage />} />
