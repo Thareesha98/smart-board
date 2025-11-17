@@ -1,29 +1,19 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from "react-router-dom";
-// Assuming Logo is correctly imported based on your file structure
 import Logo from '../assets/logo.jpg'; 
 
-// Exact colors and styling constants from my-appointments.css
-const COLORS = {
-  primary: '#D84C38',
-  accent: '#FF7A00',
-  cardBg: '#FFFFFF',
-  light: '#E8DBC7',
-  radius: '25px',
-  shadow: '0 6px 20px rgba(0,0,0,0.08)',
-};
 
 // Define the navigation items
+
 const ownerNavigation = [
-    { name: 'Dashboard', path: '/owner/dashboard', icon: 'fas fa-home' },
-    { name: 'My Ads', path: '/owner/my-ads', icon: 'fas fa-bullhorn' },
-    { name: 'Create Ad', path: '/owner/create-ad', icon: 'fas fa-plus-square' },
-    { name: 'Appointments', path: '/owner/appointments', icon: 'fas fa-calendar-alt' },
+    { name: 'Dashboard', path: '/ownerLayout/dashboard', icon: 'fas fa-home' },
+    { name: 'My Ads', path: '/ownerLayout/myAds', icon: 'fas fa-bullhorn' },
+    { name: 'Create Ad', path: '/ownerLayout/createAd', icon: 'fas fa-plus-square' },
+    { name: 'Appointments', path: '/ownerLayout/appointments', icon: 'fas fa-calendar-alt' },
     { name: 'Billing', path: '/owner/billing', icon: 'fas fa-credit-card' },
     { name: 'Analytics', path: '/owner/analytics', icon: 'fas fa-chart-line' },
 ];
 
-// Reusable Tailwind classes for sidebar links
 const BASE_LINK_CLASSES = "mx-3 my-1 p-3 flex items-center gap-3 transition duration-300 rounded-[12px] no-underline text-base font-medium";
 const FOOTER_LINK_CLASSES = "flex items-center gap-3 p-3 text-white no-underline rounded-[12px] hover:bg-white hover:bg-opacity-10 transition duration-300";
 
@@ -34,7 +24,7 @@ export default function OwnerLayout() {
   // --- Path Matching Logic (simplified into a single function) ---
   const getActivePath = () => {
     // 1. Check for nested paths like /owner/edit-ad/123
-    if (currentPath.includes('/owner/edit-ad/')) return '/owner/my-ads';
+    if (currentPath.includes('/owner/editAd/:adId')) return '/owner/myAds';
     
     // 2. Normalize current path for dashboard index route
     const normalizedPath = (currentPath === '/owner' || currentPath === '/owner/') 
@@ -52,23 +42,23 @@ export default function OwnerLayout() {
     const isActive = activePath === path;
     
     return `${BASE_LINK_CLASSES} ${isActive 
-        ? 'bg-white text-red-600' // Active: Matches .sidebar-nav a.active
-        : 'text-white hover:bg-white hover:bg-opacity-10' // Inactive
+        ? 'bg-white text-red-600' // Active
+        : 'text-white hover:text-red-600 hover:bg-white' // Inactive
     }`;
   };
 
   return (
     // Body and Dashboard Layout wrapper
-    <div className="flex min-h-screen" style={{ backgroundColor: COLORS.light }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: 'var(--light)' }}>
       
       {/* 1. Vertical Sidebar */}
       <aside 
           className="flex flex-col shrink-0 w-[280px] p-6 pt-0 m-6 overflow-y-auto"
           style={{ 
-              backgroundColor: COLORS.primary, 
-              color: COLORS.cardBg, 
-              borderRadius: COLORS.radius, 
-              boxShadow: COLORS.shadow,
+              backgroundColor: 'var(--primary)', 
+              color: 'var(--cardBg)', 
+              borderRadius: 'var(--radius)', 
+              boxShadow: 'var(--shadow)',
               position: 'sticky',
               top: '1.5rem',
               height: 'calc(100vh - 3rem)'
@@ -89,7 +79,7 @@ export default function OwnerLayout() {
           {/* Navigation Links */}
           <nav className="flex-1">
               <h3 className="px-6 pb-2 text-xs font-semibold uppercase tracking-wider border-b" 
-                  style={{ color: COLORS.accent, borderColor: 'rgba(255,255,255,0.1)' }}>
+                  style={{ color: 'var(--accent)', borderColor: 'rgba(255,255,255,0.1)' }}>
                   MAIN NAVIGATION
               </h3>
               
@@ -100,7 +90,7 @@ export default function OwnerLayout() {
                         // Use /owner for the index route, otherwise use the path
                         to={item.path === '/owner/dashboard' ? '/owner' : item.path} 
                         className={getLinkClasses(item.path)}
-                        style={{ color: activePath === item.path ? COLORS.primary : 'white' }}
+                        
                     >
                         <i className={`${item.icon} w-5 text-center text-lg`}></i>
                         <span>{item.name}</span>
@@ -116,7 +106,7 @@ export default function OwnerLayout() {
                   <span>{userName}</span>
               </Link>
               
-              <a href="/" className={`${FOOTER_LINK_CLASSES} mt-1`} style={{ color: COLORS.accent }}>
+              <a href="/" className={`${FOOTER_LINK_CLASSES} mt-1`} style={{ color: 'var(--accent)' }}>
                   <i className="fas fa-sign-out-alt w-5 text-center"></i>
                   <span>Logout</span>
               </a>
