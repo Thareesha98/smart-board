@@ -5,6 +5,7 @@ import MyAdsPage from "./pages/owner/MyAdsPage";
 import OwnerLayout from "./layouts/OwnerLayout";
 import AppointmentsPage from "./pages/owner/AppointmentsPage";
 import ProfilePage from "./pages/owner/ProfilePage";
+import Dashboard from "./pages/owner/Dashboard";
 
 function App() {
   return (
@@ -13,12 +14,13 @@ function App() {
         
         <div className="grow">
           <Routes>
-            <Route path="ownerLayout" element={<OwnerLayout />} >        
-            <Route path="createAd" element={<CreateAdPage />} />
-            <Route path="editAd/:adId" element={<EditAdPage />} />
-            <Route path="myAds" element={<MyAdsPage />} />
-            <Route path="appointments" element={<AppointmentsPage />} />
-            <Route path="profile" element={<ProfilePage />} />
+            <Route path="ownerLayout" element={<OwnerLayout />} >  
+              <Route path="dashboard" element={<Dashboard />} />     
+              <Route path="createAd" element={<CreateAdPage />} />
+              <Route path="editAd/:adId" element={<EditAdPage />} />
+              <Route path="myAds" element={<MyAdsPage />} />
+              <Route path="appointments" element={<AppointmentsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route >
           </Routes>
         </div>
