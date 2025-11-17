@@ -5,6 +5,7 @@ import CreateAdPage from "./pages/owner/CreateAdPage";
 import EditAdPage from "./pages/owner/EditAdPage";
 import MyAdsPage from "./pages/owner/MyAdsPage";
 import OwnerLayout from "./layouts/OwnerLayout";
+import AppointmentsPage from "./pages/owner/AppointmentsPage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="createAd" element={<CreateAdPage />} />
             <Route path="editAd/:adId" element={<EditAdPage />} />
             <Route path="myAds" element={<MyAdsPage />} />
+            <Route path="appointments" element={<AppointmentsPage />} />
             </Route >
           </Routes>
         </div>
