@@ -1,21 +1,23 @@
-import { Routes, Route } from "react-router-dom";
-import { Navbar } from "./components/Navbar";
-import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import StudentDashbord from "./pages/student/StudentDashbord";
+import AppointmentsPage from "./pages/student/AppointmentsPage";
+import MaintenancePage from "./pages/student/MaintenancePage ";
+import MyBoardingsPage from "./pages/student/MyBoardingsPage";
+import BillingPage from "./pages/student/BillingPage";
+import ProfilePage from "./pages/student/ProfilePage";
 
 function App() {
   return (
-    <>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="grow">
-          <Routes>
-            <Route index element={<HomePage />}/>
-            <Route path="login" element={<LoginPage />}/>
-          </Routes>
-        </div>
-      </div>
-    </>
+    <Router>
+      <Routes>
+        <Route index element={<StudentDashbord />} />
+        <Route path="appointmentpage" element={<AppointmentsPage />} />
+        <Route path="maintenance" element={<MaintenancePage />} />
+        <Route path="my-boardings" element={<MyBoardingsPage />} />
+        <Route path="billing" element={<BillingPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+      </Routes>
+    </Router>
   );
 }
 

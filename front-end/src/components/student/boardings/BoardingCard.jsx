@@ -1,0 +1,171 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { 
+  FaEye, FaCog, FaMapMarkerAlt, FaCalendarAlt, 
+  FaDollarSign, FaUserFriends, FaCreditCard, 
+  FaTools, FaEnvelope, FaFileContract, FaStar,
+  FaSpinner, FaCheck
+} from 'react-icons/fa';
+
+const BoardingCard = ({
+  boarding,
+  onViewDetails,
+  onManage,
+  onPayRent,
+  onRequestMaintenance,
+  onContactOwner,
+  onViewDocuments,
+  isPayingRent
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -5 }}
+      className="bg-card-bg rounded-large shadow-custom mb-8 overflow-hidden transition-shadow duration-300 hover:shadow-xl"
+    >
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 pb-4">
+        <div className="px-4 py-2 rounded-full bg-gradient-to-r from-success to-success/80 text-white font-semibold text-sm uppercase tracking-wider">
+          Current Boarding
+        </div>
+        <div className="flex gap-3 w-full md:w-auto">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onViewDetails}
+            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-large font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
+          >
+            <FaEye />
+            View Details
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onManage}
+            className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-large font-semibold bg-accent text-white hover:bg-primary transition-all duration-300 shadow-md"
+          >
+            <FaCog />
+            Manage
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 p-6">
+        {/* Image */}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="rounded-large overflow-hidden h-48 lg:h-52"
+        >
+          <img
+            src={boarding.image}
+            alt={boarding.name}
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+
+        {/* Info */}
+        <div>
+          <h3 className="text-2xl font-bold text-text-dark mb-4">{boarding.name}</h3>
+          
+          {/* Meta Items */}
+          <div className="space-y-3 mb-6">
+            <div className="flex items-center gap-3 text-text-muted">
+              <FaMapMarkerAlt className="text-accent w-4" />
+              <span>{boarding.address}</span>
+            </div>
+            <div className="flex items-center gap-3 text-text-muted">
+              <FaCalendarAlt className="text-accent w-4" />
+              <span>Since {boarding.joinedDate}</span>
+            </div>
+            <div className="flex items-center gap-3 text-text-muted">
+              <FaDollarSign className="text-accent w-4" />
+              <span>${boarding.rent}/month (Utilities included)</span>
+            </div>
+            <div className="flex items-center gap-3 text-text-muted">
+              <FaUserFriends className="text-accent w-4" />
+              <span>{boarding.roommates} Roommates</span>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="flex gap-8">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent flex items-center gap-1">
+                {boarding.rating} <FaStar className="text-yellow-500 text-lg" />
+              </div>
+              <span className="text-sm text-text-muted">Rating</span>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent">{boarding.area}</div>
+              <span className="text-sm text-text-muted">sq ft</span>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-accent">{boarding.responseRate}%</div>
+              <span className="text-sm text-text-muted">Response Rate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="bg-background-light p-6 border-t border-gray-200">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 items-center">
+          {/* Payment Section */}
+          <div>
+            <h4 className="text-lg font-bold text-text-dark mb-2">Next Payment</h4>
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-3xl font-bold text-accent">${boarding.nextPayment.amount}</span>
+              <span className="text-text-muted">Due {boarding.nextPayment.dueDate}</span>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onPayRent}
+              disabled={isPayingRent}
+              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-large font-semibold transition-all duration-300 w-full md:w-auto ${
+                isPayingRent
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-accent text-white hover:bg-primary shadow-md'
+              }`}
+            >
+              {isPayingRent ? (
+                <>
+                  <FaSpinner className="animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <FaCreditCard />
+                  Pay Now
+                </>
+              )}
+            </motion.button>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-3 justify-center lg:justify-end">
+            <ActionButton icon={FaTools} label="Maintenance" onClick={onRequestMaintenance} />
+            <ActionButton icon={FaEnvelope} label="Contact Owner" onClick={onContactOwner} />
+            <ActionButton icon={FaFileContract} label="Documents" onClick={onViewDocuments} />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const ActionButton = ({ icon: Icon, label, onClick }) => (
+  <motion.button
+    whileHover={{ scale: 1.05, y: -2 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={onClick}
+    className="flex items-center gap-2 px-4 py-2 rounded-large font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
+  >
+    <Icon />
+    {label}
+  </motion.button>
+);
+
+export default BoardingCard;
