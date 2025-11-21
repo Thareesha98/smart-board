@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import StudentLayout from '../../components/student/common/StudentLayout';
-import StatWidget from '../../components/student/StatWidget';
+import StatWidget from '../../components/student/dashbord/StatWidget';
 import QuickActionsSection from '../../components/student/dashboard/QuickActionsSection';
 import RecentActivitySection from '../../components/student/dashboard/RecentActivitySection';
 import { 
