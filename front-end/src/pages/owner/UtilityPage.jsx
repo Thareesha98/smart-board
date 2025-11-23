@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import { UtilityCard} from "../../components/Owner/UtilityCard"
+import { UtilityCard } from "../../components/Owner/UtilityCard"
 
 
-const boardingsData = [
+
+
+const INITIAL_BOARDINGS_DATA = [
   {
     id: "sunshine-hostel",
     name: "Sunshine Hostel",
     image:
       "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&h=150&fit=crop",
     address: "123 University Road, Colombo 03",
-    baseRent: 250, // Base monthly rent (USD)
+    baseRent: 30000,
     lastUpdated: "Nov 2025",
-    electricityCost: 5500,
-    waterCost: 1200, // LKR Utility Costs
+    electricityCost: 5500, // Initial Mock Value
+    waterCost: 1200, // Initial Mock Value
     totalTenants: 6,
     status: "active",
   },
@@ -22,7 +24,7 @@ const boardingsData = [
     image:
       "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=200&h=150&fit=crop",
     address: "45 Galle Road, Colombo 04",
-    baseRent: 400, // Base monthly rent
+    baseRent: 40000,
     lastUpdated: "Dec 2025",
     electricityCost: 4800,
     waterCost: 900,
@@ -35,53 +37,57 @@ const boardingsData = [
     image:
       "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=200&h=150&fit=crop",
     address: "78 Kandy Road, Kadawatha",
-    baseRent: 200, // Base monthly rent
+    baseRent: 20000,
     lastUpdated: "N/A",
     electricityCost: 0,
     waterCost: 0,
     totalTenants: 0,
     status: "pending",
   },
+  {
+    id: "Eliyakanda-hostel",
+    name: "Eliyakanda Hostel",
+    image:
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&h=150&fit=crop",
+    address: "123 University Road, Colombo 03",
+    baseRent: 30000,
+    lastUpdated: "Nov 2025",
+    electricityCost: 5500, // Initial Mock Value
+    waterCost: 1200, // Initial Mock Value
+    totalTenants: 6,
+    status: "active",
+  },
+  
 ];
 
 
-const formatCost = (cost, currency = "$", fixed = 0) =>
-  `${currency}${Math.round(cost).toFixed(fixed).toLocaleString()}`;
+const formatCost = (cost) => `LKR ${Math.round(cost).toLocaleString()}`;
 
-
-const calculateDynamicBill = (form, baseRent, tenantCount) => {
+const calculateDynamicBill = (form, baseRent) => {
   const electricity = parseFloat(form.electricity) || 0;
   const water = parseFloat(form.water) || 0;
 
-  const totalUtilityCostLKR = electricity + water;
+  const totalUtilityCost = electricity + water;
 
-  if (tenantCount === 0 || totalUtilityCostLKR < 0) {
+  if (totalUtilityCost < 0) {
     return {
-      utilityShareLKR: 0,
-      totalUtilityCostLKR,
-      totalMonthlyBillUSD: baseRent,
+      totalUtilityCost: 0,
+      totalMonthlyBill: baseRent,
     };
   }
 
-  const utilityShareLKR = totalUtilityCostLKR / tenantCount;
-
-  // Assume fixed rate for display purposes: 1 USD = 300 LKR
-  const LKR_TO_USD_RATE = 300;
-  const utilityShareUSD = utilityShareLKR / LKR_TO_USD_RATE;
-
-  const totalMonthlyBillUSD = baseRent + utilityShareUSD;
+  const totalMonthlyBill = baseRent + totalUtilityCost;
 
   return {
-    utilityShareLKR: utilityShareLKR,
-    totalUtilityCostLKR: totalUtilityCostLKR,
-    totalMonthlyBillUSD: totalMonthlyBillUSD,
+    totalUtilityCost: totalUtilityCost,
+    totalMonthlyBill: totalMonthlyBill,
   };
 };
 
 
 
-// --- Main Owner Utility Page Component ---
 export default function UtilityPage() {
+  const [boardings, setBoardings] = useState(INITIAL_BOARDINGS_DATA);
   const [selectedBoarding, setSelectedBoarding] = useState(null);
   const [formData, setFormData] = useState({
     electricity: "",
@@ -92,8 +98,9 @@ export default function UtilityPage() {
   const openModal = (boarding) => {
     setSelectedBoarding(boarding);
     setFormData({
-      electricity: boarding.electricityCost || "",
-      water: boarding.waterCost || "",
+      // Populate form with existing data for editing
+      electricity: boarding.electricityCost.toString(),
+      water: boarding.waterCost.toString(),
       period: new Date().toISOString().substring(0, 7),
     });
   };
@@ -110,27 +117,38 @@ export default function UtilityPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (
-      parseFloat(formData.electricity) < 0 ||
-      parseFloat(formData.water) < 0
-    ) {
+    const newElectricity = parseFloat(formData.electricity);
+    const newWater = parseFloat(formData.water);
+    const period = formData.period;
+
+    if (newElectricity < 0 || newWater < 0) {
       alert("Costs cannot be negative.");
       return;
     }
 
+    // 1. Update the component's state list (boardings)
+    setBoardings((prevBoardings) =>
+      prevBoardings.map((b) =>
+        b.id === selectedBoarding.id
+          ? {
+              ...b,
+              electricityCost: newElectricity,
+              waterCost: newWater,
+              lastUpdated: period,
+            }
+          : b
+      )
+    );
+
     alert(
-      `Costs for ${selectedBoarding.name} updated successfully for ${formData.period}.`
+      `Costs for ${selectedBoarding.name} updated successfully for ${period}. The cards have been updated.`
     );
     closeModal();
   };
 
   // Calculate dynamic results for the modal display
   const dynamicBill = selectedBoarding
-    ? calculateDynamicBill(
-        formData,
-        selectedBoarding.baseRent,
-        selectedBoarding.totalTenants
-      )
+    ? calculateDynamicBill(formData, selectedBoarding.baseRent)
     : {};
 
   return (
@@ -161,7 +179,8 @@ export default function UtilityPage() {
       {/* Utility Overview Cards */}
       <section className="billing-overview">
         <div className="overview-cards grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {boardingsData.map((boarding) => (
+          {/* Map over the state variable 'boardings' */}
+          {boardings.map((boarding) => (
             <UtilityCard
               key={boarding.id}
               boarding={boarding}
@@ -315,27 +334,7 @@ export default function UtilityPage() {
                       className="font-semibold"
                       style={{ color: "var(--text)" }}
                     >
-                      {formatCost(
-                        dynamicBill.totalUtilityCostLKR || 0,
-                        "LKR",
-                        0
-                      )}
-                    </span>
-                  </div>
-
-                  <div
-                    className="detail-row flex justify-between text-sm py-1"
-                    style={{ borderBottom: `1px solid ${"var(--light)"}` }}
-                  >
-                    <span style={{ color: "var(--muted)" }}>
-                      Utility Share Per Tenant ({selectedBoarding.totalTenants}{" "}
-                      tenants)
-                    </span>
-                    <span
-                      className="font-semibold"
-                      style={{ color: "var(--warning)" }}
-                    >
-                      {formatCost(dynamicBill.utilityShareLKR || 0, "LKR", 0)}
+                      {formatCost(dynamicBill.totalUtilityCost || 0)}
                     </span>
                   </div>
 
@@ -348,10 +347,8 @@ export default function UtilityPage() {
                       style={{ color: "var(--success)" }}
                     >
                       {formatCost(
-                        dynamicBill.totalMonthlyBillUSD ||
-                          selectedBoarding.baseRent,
-                        "$",
-                        2
+                        dynamicBill.totalMonthlyBill ||
+                          selectedBoarding.baseRent
                       )}
                     </strong>
                   </div>

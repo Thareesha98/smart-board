@@ -1,28 +1,10 @@
-const formatCost = (cost, currency = "$", fixed = 0) =>
-  `${currency}${Math.round(cost).toFixed(fixed).toLocaleString()}`;
+const formatCost = (cost) => `LKR ${Math.round(cost).toLocaleString()}`;
 
-const calculateTotalMonthlyBill = (property) => {
-  if (
-    property.totalTenants === 0 ||
-    (property.electricityCost === 0 && property.waterCost === 0)
-  ) {
-    return property.baseRent;
-  }
-
-  const totalUtilityCostLKR = property.electricityCost + property.waterCost;
-  const utilityShareLKR = totalUtilityCostLKR / property.totalTenants;
-
-  // Assume fixed rate for display purposes: 1 USD = 300 LKR
-  const LKR_TO_USD_RATE = 300;
-  const utilityShareUSD = utilityShareLKR / LKR_TO_USD_RATE;
-
-  return property.baseRent + utilityShareUSD;
-};
 
 export const UtilityCard = ({ boarding, onOpenModal }) => {
-  // This call is now valid due to function hoisting
-  const billPerTenant = calculateTotalMonthlyBill(boarding);
   const totalUtilityCost = boarding.electricityCost + boarding.waterCost;
+  // Note: Since tenant division is complex, we just add total cost for simplicity as per the current component logic
+  const totalMonthlyBill = boarding.baseRent + totalUtilityCost;
   const isUpdated = boarding.lastUpdated !== "N/A";
 
   return (
@@ -52,7 +34,7 @@ export const UtilityCard = ({ boarding, onOpenModal }) => {
           className="amount text-3xl font-bold mb-1"
           style={{ color: "var(--primary)" }}
         >
-          {formatCost(billPerTenant, "$")}
+          {formatCost(totalMonthlyBill)}
         </div>
         <span
           className="text-sm font-semibold mb-2 block"
@@ -66,13 +48,13 @@ export const UtilityCard = ({ boarding, onOpenModal }) => {
           className="due-date text-sm block"
           style={{ color: "var(--muted)" }}
         >
-          Base Rent: {formatCost(boarding.baseRent)}
+          Base Rent(LKR) : {formatCost(boarding.baseRent)}
         </span>
         <span
           className="due-date text-sm block"
           style={{ color: "var(--muted)" }}
         >
-          Total Utility Bill: {formatCost(totalUtilityCost, "LKR", 0)}
+          Total Utility Bill(LKR) : {formatCost(totalUtilityCost)}
         </span>
         <span
           className="due-date text-xs block mt-1"
