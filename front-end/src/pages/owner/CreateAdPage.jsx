@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FormGroup } from "../../components/Owner/FormGroup";
+import { useNavigate } from "react-router-dom";
 
 const availableAmenities = [
   { label: "Attached Bathroom", icon: "fa-bath" },
@@ -21,6 +22,12 @@ const CreateAdPage = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('../myAds');
+  }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -44,6 +51,7 @@ const CreateAdPage = () => {
       alert("Boarding Ad Created Successfully!");
       setIsSubmitting(false);
     }, 2000);
+    
   };
 
 
@@ -75,6 +83,15 @@ const CreateAdPage = () => {
             List a new boarding space for students (Owner View)
           </p>
         </div>
+
+        <button 
+                    className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+                    style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
+                    onClick={handleBack}
+                >
+                    
+                    Back
+                </button>
 
         
       </header>

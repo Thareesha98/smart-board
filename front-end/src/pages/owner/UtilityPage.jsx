@@ -1,0 +1,394 @@
+import React, { useState } from "react";
+import { UtilityCard} from "../../components/Owner/UtilityCard"
+
+
+const boardingsData = [
+  {
+    id: "sunshine-hostel",
+    name: "Sunshine Hostel",
+    image:
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&h=150&fit=crop",
+    address: "123 University Road, Colombo 03",
+    baseRent: 250, // Base monthly rent (USD)
+    lastUpdated: "Nov 2025",
+    electricityCost: 5500,
+    waterCost: 1200, // LKR Utility Costs
+    totalTenants: 6,
+    status: "active",
+  },
+  {
+    id: "city-view",
+    name: "City View Apartments",
+    image:
+      "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=200&h=150&fit=crop",
+    address: "45 Galle Road, Colombo 04",
+    baseRent: 400, // Base monthly rent
+    lastUpdated: "Dec 2025",
+    electricityCost: 4800,
+    waterCost: 900,
+    totalTenants: 4,
+    status: "active",
+  },
+  {
+    id: "green-valley",
+    name: "Green Valley Hostel",
+    image:
+      "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=200&h=150&fit=crop",
+    address: "78 Kandy Road, Kadawatha",
+    baseRent: 200, // Base monthly rent
+    lastUpdated: "N/A",
+    electricityCost: 0,
+    waterCost: 0,
+    totalTenants: 0,
+    status: "pending",
+  },
+];
+
+
+const formatCost = (cost, currency = "$", fixed = 0) =>
+  `${currency}${Math.round(cost).toFixed(fixed).toLocaleString()}`;
+
+
+const calculateDynamicBill = (form, baseRent, tenantCount) => {
+  const electricity = parseFloat(form.electricity) || 0;
+  const water = parseFloat(form.water) || 0;
+
+  const totalUtilityCostLKR = electricity + water;
+
+  if (tenantCount === 0 || totalUtilityCostLKR < 0) {
+    return {
+      utilityShareLKR: 0,
+      totalUtilityCostLKR,
+      totalMonthlyBillUSD: baseRent,
+    };
+  }
+
+  const utilityShareLKR = totalUtilityCostLKR / tenantCount;
+
+  // Assume fixed rate for display purposes: 1 USD = 300 LKR
+  const LKR_TO_USD_RATE = 300;
+  const utilityShareUSD = utilityShareLKR / LKR_TO_USD_RATE;
+
+  const totalMonthlyBillUSD = baseRent + utilityShareUSD;
+
+  return {
+    utilityShareLKR: utilityShareLKR,
+    totalUtilityCostLKR: totalUtilityCostLKR,
+    totalMonthlyBillUSD: totalMonthlyBillUSD,
+  };
+};
+
+
+
+// --- Main Owner Utility Page Component ---
+export default function UtilityPage() {
+  const [selectedBoarding, setSelectedBoarding] = useState(null);
+  const [formData, setFormData] = useState({
+    electricity: "",
+    water: "",
+    period: "",
+  });
+
+  const openModal = (boarding) => {
+    setSelectedBoarding(boarding);
+    setFormData({
+      electricity: boarding.electricityCost || "",
+      water: boarding.waterCost || "",
+      period: new Date().toISOString().substring(0, 7),
+    });
+  };
+
+  const closeModal = () => {
+    setSelectedBoarding(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (
+      parseFloat(formData.electricity) < 0 ||
+      parseFloat(formData.water) < 0
+    ) {
+      alert("Costs cannot be negative.");
+      return;
+    }
+
+    alert(
+      `Costs for ${selectedBoarding.name} updated successfully for ${formData.period}.`
+    );
+    closeModal();
+  };
+
+  // Calculate dynamic results for the modal display
+  const dynamicBill = selectedBoarding
+    ? calculateDynamicBill(
+        formData,
+        selectedBoarding.baseRent,
+        selectedBoarding.totalTenants
+      )
+    : {};
+
+  return (
+    <div className="pt-4 space-y-6">
+      {/* Horizontal Header (content-header equivalent) */}
+      <header
+        className="content-header flex justify-between items-center p-6 rounded-[25px] shadow-lg sticky top-0 z-10"
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(5px)",
+          boxShadow: "var(--shadow)",
+        }}
+      >
+        <div className="header-left flex flex-col">
+          <h1
+            className="text-[1.8rem] font-bold leading-tight"
+            style={{ color: "var(--primary)" }}
+          >
+            Utilities Management
+          </h1>
+          <p className="text-base" style={{ color: "var(--muted)" }}>
+            Add and manage monthly water and electricity costs for your
+            boardings.
+          </p>
+        </div>
+      </header>
+
+      {/* Utility Overview Cards */}
+      <section className="billing-overview">
+        <div className="overview-cards grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {boardingsData.map((boarding) => (
+            <UtilityCard
+              key={boarding.id}
+              boarding={boarding}
+              onOpenModal={openModal}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Utility Cost Logging Modal */}
+      {selectedBoarding && (
+        <div
+          id="utilityModal"
+          className="modal fixed top-0 left-0 w-full h-full flex items-center justify-center z-2000 p-4"
+          style={{
+            backgroundColor: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(5px)",
+          }}
+        >
+          <div
+            className="modal-content w-full max-w-[500px] rounded-[25px] shadow-2xl"
+            style={{ backgroundColor: "var(--card-bg)" }}
+          >
+            <div
+              className="modal-header flex justify-between items-center p-6 border-b"
+              style={{ borderColor: "var(--light)" }}
+            >
+              <h3
+                className="text-[1.3rem] font-bold"
+                style={{ color: "var(--primary)" }}
+              >
+                Log Utility Costs: {selectedBoarding.name}
+              </h3>
+              <button
+                className="close-modal text-3xl cursor-pointer p-1 rounded-sm"
+                style={{ color: "var(--muted)" }}
+                onClick={closeModal}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="modal-body p-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="form-group">
+                  <label
+                    className="font-semibold mb-1 block"
+                    style={{ color: "var(--text)" }}
+                  >
+                    Billing Period
+                  </label>
+                  <input
+                    type="month"
+                    name="period"
+                    value={formData.period}
+                    onChange={handleInputChange}
+                    required
+                    className="form-input w-full p-4 border-2 rounded-xl text-base"
+                    style={{
+                      borderColor: "var(--light)",
+                      backgroundColor: "var(--card-bg)",
+                    }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label
+                    className="font-semibold mb-1 block"
+                    style={{ color: "var(--text)" }}
+                  >
+                    Electricity Cost (LKR)
+                  </label>
+                  <div className="amount-input relative flex items-center">
+                    <span
+                      className="currency absolute left-4 font-semibold z-10"
+                      style={{ color: "var(--muted)" }}
+                    >
+                      LKR
+                    </span>
+                    <input
+                      type="number"
+                      name="electricity"
+                      value={formData.electricity}
+                      onChange={handleInputChange}
+                      required
+                      min="0"
+                      placeholder="Enter total electricity bill"
+                      className="form-input w-full p-4 pl-14 border-2 rounded-xl text-lg font-semibold"
+                      style={{
+                        borderColor: "var(--light)",
+                        backgroundColor: "var(--card-bg)",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label
+                    className="font-semibold mb-1 block"
+                    style={{ color: "var(--text)" }}
+                  >
+                    Water Cost (LKR)
+                  </label>
+                  <div className="amount-input relative flex items-center">
+                    <span
+                      className="currency absolute left-4 font-semibold z-10"
+                      style={{ color: "var(--muted)" }}
+                    >
+                      LKR
+                    </span>
+                    <input
+                      type="number"
+                      name="water"
+                      value={formData.water}
+                      onChange={handleInputChange}
+                      required
+                      min="0"
+                      placeholder="Enter total water bill"
+                      className="form-input w-full p-4 pl-14 border-2 rounded-xl text-lg font-semibold"
+                      style={{
+                        borderColor: "var(--light)",
+                        backgroundColor: "var(--card-bg)",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* 💡 LIVE BILLING SUMMARY */}
+                <div
+                  className="billing-summary bg-opacity-30 p-4 rounded-xl"
+                  style={{
+                    backgroundColor: "var(--light)",
+                    borderLeft: `4px solid ${"var(--accent)"}`,
+                  }}
+                >
+                  <h4
+                    className="font-bold text-base mb-2"
+                    style={{ color: "var(--primary)" }}
+                  >
+                    Live Calculation Summary
+                  </h4>
+
+                  <div
+                    className="detail-row flex justify-between text-sm py-1"
+                    style={{ borderBottom: `1px solid ${"var(--light)"}` }}
+                  >
+                    <span style={{ color: "var(--muted)" }}>
+                      Total Utility Cost (LKR)
+                    </span>
+                    <span
+                      className="font-semibold"
+                      style={{ color: "var(--text)" }}
+                    >
+                      {formatCost(
+                        dynamicBill.totalUtilityCostLKR || 0,
+                        "LKR",
+                        0
+                      )}
+                    </span>
+                  </div>
+
+                  <div
+                    className="detail-row flex justify-between text-sm py-1"
+                    style={{ borderBottom: `1px solid ${"var(--light)"}` }}
+                  >
+                    <span style={{ color: "var(--muted)" }}>
+                      Utility Share Per Tenant ({selectedBoarding.totalTenants}{" "}
+                      tenants)
+                    </span>
+                    <span
+                      className="font-semibold"
+                      style={{ color: "var(--warning)" }}
+                    >
+                      {formatCost(dynamicBill.utilityShareLKR || 0, "LKR", 0)}
+                    </span>
+                  </div>
+
+                  <div className="detail-row flex justify-between text-base pt-2">
+                    <strong style={{ color: "var(--text)" }}>
+                      Total Monthly Bill (Est.)
+                    </strong>
+                    <strong
+                      className="text-lg"
+                      style={{ color: "var(--success)" }}
+                    >
+                      {formatCost(
+                        dynamicBill.totalMonthlyBillUSD ||
+                          selectedBoarding.baseRent,
+                        "$",
+                        2
+                      )}
+                    </strong>
+                  </div>
+                </div>
+                {/* ------------------------------------ */}
+
+                <div
+                  className="form-actions flex justify-end gap-3 pt-4 border-t"
+                  style={{ borderColor: "var(--light)" }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-secondary px-4 py-2 rounded-[25px] font-semibold"
+                    style={{
+                      backgroundColor: "var(--light)",
+                      color: "var(--text)",
+                    }}
+                    onClick={closeModal}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary px-4 py-2 rounded-[25px] font-semibold"
+                    style={{
+                      backgroundColor: "var(--accent)",
+                      color: "var(--card-bg)",
+                    }}
+                  >
+                    <i className="fas fa-save"></i> Save Costs
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

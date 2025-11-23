@@ -8,10 +8,10 @@ import Logo from '../assets/logo.jpg';
 const ownerNavigation = [
     { name: 'Dashboard', path: '/ownerLayout/dashboard', icon: 'fas fa-home' },
     { name: 'My Ads', path: '/ownerLayout/myAds', icon: 'fas fa-bullhorn' },
-    { name: 'Create Ad', path: '/ownerLayout/createAd', icon: 'fas fa-plus-square' },
     { name: 'Appointments', path: '/ownerLayout/appointments', icon: 'fas fa-calendar-alt' },
-    { name: 'Billing', path: '/owner/billing', icon: 'fas fa-credit-card' },
-    { name: 'Analytics', path: '/owner/analytics', icon: 'fas fa-chart-line' },
+    { name: 'My Boardings', path: '/ownerLayout/myboardings', icon: 'fas fa-dog' },
+    { name: 'Utility', path: '/ownerLayout/utility', icon: 'fas fa-cogs' },
+    { name: 'Profile', path: '/ownerLayout/profile', icon: 'fas fa-user' },
 ];
 
 const BASE_LINK_CLASSES = "mx-3 my-1 p-3 flex items-center gap-3 transition duration-300 rounded-[12px] no-underline text-base font-medium";

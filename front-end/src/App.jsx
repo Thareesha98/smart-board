@@ -7,6 +7,7 @@ import AppointmentsPage from "./pages/owner/AppointmentsPage";
 import ProfilePage from "./pages/owner/ProfilePage";
 import Dashboard from "./pages/owner/Dashboard";
 import MyBoardingsPage from "./pages/owner/MyBoardingsPage";
+import UtilityPage from "./pages/owner/UtilityPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
               <Route path="editAd/:adId" element={<EditAdPage />} />
               <Route path="myAds" element={<MyAdsPage />} />
               <Route path="appointments" element={<AppointmentsPage />} />
+              <Route path="utility" element={<UtilityPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route >
           </Routes>

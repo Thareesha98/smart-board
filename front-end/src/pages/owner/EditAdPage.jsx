@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from 'react';
-// ⚠️ We need to import the hooks from React Router DOM (assumed to be installed)
 import { useParams } from 'react-router-dom'; 
 
-// Custom colors... (COLORS object remains the same)
-const COLORS = {
-  primary: '#D84C38', // --primary
-  accent: '#FF7A00',   // --accent
-  text: '#332720',    // --text
-  muted: '#665345',    // --muted
-  cardBg: '#FFFFFF',   // --card-bg
-  light: '#E8DBC7',    // --light
-  success: '#10B981', // --success
-  error: '#EF4444',   // --error
-};
+
 
 // ⚠️ MOCK DATABASE/API DATA
 // In a real application, this data would come from an API based on the ID.
@@ -78,8 +67,8 @@ const EditAdPage = () => {
     // Ensure formData is loaded before allowing interaction
     if (isLoading || !formData) {
         return (
-            <div className="min-h-screen p-8 flex justify-center items-center" style={{ backgroundColor: COLORS.light }}>
-                <div className="flex items-center space-x-3 text-xl font-semibold" style={{ color: COLORS.primary }}>
+            <div className="min-h-screen p-8 flex justify-center items-center" style={{ backgroundColor: 'var(--light)' }}>
+                <div className="flex items-center space-x-3 text-xl font-semibold" style={{ color: 'var(--primary)' }}>
                     <i className="fas fa-spinner fa-spin"></i>
                     <span>Loading Ad Details for ID: {adId}...</span>
                 </div>
@@ -144,15 +133,15 @@ const EditAdPage = () => {
     const getStatusBadgeStyle = (status) => {
         // ... (getStatusBadgeStyle logic remains the same)
         switch (status) {
-            case 'Active': return { backgroundColor: COLORS.success, color: 'white' };
-            case 'Pending': return { backgroundColor: COLORS.accent, color: 'white' };
-            case 'Draft': return { backgroundColor: COLORS.muted, color: 'white' };
-            default: return { backgroundColor: COLORS.light, color: COLORS.text };
+            case 'Active': return { backgroundColor: 'var(--success)', color: 'white' };
+            case 'Pending': return { backgroundColor: 'var(--accent)', color: 'white' };
+            case 'Draft': return { backgroundColor: 'var(--muted)', color: 'white' };
+            default: return { backgroundColor: 'var(--light)', color: 'var(--text)' };
         }
     };
     
     return (
-        <div className="min-h-screen p-8" style={{ backgroundColor: COLORS.light }}>
+        <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--light)' }}>
             {/* Header */}
             <header 
                 className="flex flex-col sm:flex-row justify-between items-center mb-8 p-6 rounded-3xl shadow-lg sticky top-6 z-10"
@@ -163,10 +152,10 @@ const EditAdPage = () => {
                 }}
             >
                 <div className="flex flex-col mb-4 sm:mb-0">
-                    <h1 className="text-3xl font-bold" style={{ color: COLORS.primary }}>
+                    <h1 className="text-3xl font-bold" style={{ color: 'var(--primary)' }}>
                         Edit Boarding Ad: {adId}
                     </h1>
-                    <p className="text-sm" style={{ color: COLORS.muted }}>
+                    <p className="text-sm" style={{ color: 'var(--muted)' }}>
                         Updating: **{formData.title}**
                     </p>
                 </div>
@@ -179,7 +168,7 @@ const EditAdPage = () => {
                     </span>
                     <button 
                         className="px-6 py-2 font-semibold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-                        style={{ backgroundColor: COLORS.primary, color: COLORS.cardBg }}
+                        style={{ backgroundColor: 'var(--primary)', color: 'var(--card-bg)' }}
                         onClick={() => console.log('Delete Ad')}
                     >
                         <i className="fas fa-trash-alt mr-2"></i>
@@ -194,7 +183,7 @@ const EditAdPage = () => {
                     className="bg-white p-8 rounded-3xl shadow-xl" 
                     style={{ boxShadow: '0 6px 20px rgba(0,0,0,0.08)' }}
                 >
-                    <h2 className="text-xl font-semibold mb-6 pb-3 border-b" style={{ color: COLORS.primary, borderColor: COLORS.light }}>
+                    <h2 className="text-xl font-semibold mb-6 pb-3 border-b" style={{ color: 'var(--primary)', borderColor: 'var(--light)' }}>
                         Ad Information
                     </h2>
                     
@@ -205,7 +194,7 @@ const EditAdPage = () => {
                         <FormGroup label="Key Money/Deposit (LKR)" name="deposit" value={formData.deposit} onChange={handleChange} placeholder="e.g., 30000" type="number" />
 
                         <div className="flex flex-col">
-                            <label htmlFor="adStatus" className="block font-semibold mb-2" style={{ color: COLORS.primary }}>
+                            <label htmlFor="adStatus" className="block font-semibold mb-2" style={{ color: 'var(--primary)' }}>
                                 Ad Status
                             </label>
                             <select
@@ -214,9 +203,9 @@ const EditAdPage = () => {
                                 value={formData.adStatus}
                                 onChange={handleChange}
                                 className="p-3 rounded-xl border-2 transition duration-300 focus:outline-none"
-                                style={{ borderColor: COLORS.light, color: COLORS.text, backgroundColor: COLORS.cardBg }}
-                                onFocus={(e) => e.target.style.borderColor = COLORS.accent}
-                                onBlur={(e) => e.target.style.borderColor = COLORS.light}
+                                style={{ borderColor: 'var(--light)', color: 'var(--text)', backgroundColor: 'var(--card-bg)' }}
+                                onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+                                onBlur={(e) => e.target.style.borderColor = 'var(--light)'}
                             >
                                 <option value="Active">Active (Visible to Students)</option>
                                 <option value="Draft">Draft (Hidden)</option>
@@ -227,7 +216,7 @@ const EditAdPage = () => {
                     </div>
 
                     <div className="mt-6">
-                        <label className="block font-semibold mb-2" style={{ color: COLORS.primary }}>
+                        <label className="block font-semibold mb-2" style={{ color: 'var(--primary)' }}>
                             Description
                         </label>
                         <textarea
@@ -237,9 +226,9 @@ const EditAdPage = () => {
                             rows="4"
                             placeholder="Describe your boarding space in detail."
                             className="w-full p-3 rounded-xl border-2 transition duration-300 focus:outline-none"
-                            style={{ borderColor: COLORS.light, color: COLORS.text, backgroundColor: COLORS.cardBg }}
-                            onFocus={(e) => e.target.style.borderColor = COLORS.accent}
-                            onBlur={(e) => e.target.style.borderColor = COLORS.light}
+                            style={{ borderColor: 'var(--light)', color: 'var(--text)', backgroundColor: 'var(--card-bg)' }}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--light)'}
                             required
                         ></textarea>
                     </div>
@@ -250,18 +239,18 @@ const EditAdPage = () => {
                     className="bg-white p-8 rounded-3xl shadow-xl"
                     style={{ boxShadow: '0 6px 20px rgba(0,0,0,0.08)' }}
                 >
-                    <h2 className="text-xl font-semibold mb-6 pb-3 border-b" style={{ color: COLORS.primary, borderColor: COLORS.light }}>
+                    <h2 className="text-xl font-semibold mb-6 pb-3 border-b" style={{ color: 'var(--primary)', borderColor: 'var(--light)' }}>
                         Features & Media
                     </h2>
 
                     {/* Amenities */}
                     <div className="mb-8">
-                        <h4 className="font-semibold mb-3" style={{ color: COLORS.primary }}>
+                        <h4 className="font-semibold mb-3" style={{ color: 'var(--primary)' }}>
                             Edit Amenities
                         </h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             {availableAmenities.map(item => (
-                                <label key={item.label} className="flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition duration-200 hover:bg-opacity-80" style={{ backgroundColor: COLORS.light }}>
+                                <label key={item.label} className="flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition duration-200 hover:bg-opacity-80" style={{ backgroundColor: 'var(--light)' }}>
                                     <input
                                         type="checkbox"
                                         name="amenities"
@@ -269,10 +258,10 @@ const EditAdPage = () => {
                                         checked={formData.amenities.includes(item.label)}
                                         onChange={handleChange}
                                         className="h-5 w-5 rounded transition duration-200 checked:bg-orange-500 checked:border-transparent"
-                                        style={{ borderColor: COLORS.muted, color: COLORS.accent }}
+                                        style={{ borderColor: 'var(--muted)', color: 'var(--accent)' }}
                                     />
-                                    <i className={`fas ${item.icon}`} style={{ color: COLORS.accent }}></i>
-                                    <span className="text-sm font-medium" style={{ color: COLORS.text }}>{item.label}</span>
+                                    <i className={`fas ${item.icon}`} style={{ color: 'var(--accent)' }}></i>
+                                    <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>{item.label}</span>
                                 </label>
                             ))}
                         </div>
@@ -280,7 +269,7 @@ const EditAdPage = () => {
                     
                     {/* Current Images */}
                     <div className="mb-8">
-                        <h4 className="font-semibold mb-3" style={{ color: COLORS.primary }}>
+                        <h4 className="font-semibold mb-3" style={{ color: 'var(--primary)' }}>
                             Current Photos ({formData.currentImages.length})
                         </h4>
                         <div className="flex flex-wrap gap-4">
@@ -297,7 +286,7 @@ const EditAdPage = () => {
                                 </div>
                             ))}
                         </div>
-                        <p className="text-xs mt-2" style={{ color: COLORS.muted }}>
+                        <p className="text-xs mt-2" style={{ color: 'var(--muted)' }}>
                             * Click the 'X' to remove an image. It will be deleted upon saving.
                         </p>
                     </div>
@@ -313,8 +302,8 @@ const EditAdPage = () => {
                         className="px-6 py-3 text-lg font-bold rounded-3xl transition-all duration-300 hover:scale-[1.02]"
                         style={{ 
                             backgroundColor: 'transparent',
-                            border: `2px solid ${COLORS.primary}`,
-                            color: COLORS.primary,
+                            border: `2px solid ${'var(--primary)'}`,
+                            color: 'var(--primary)',
                         }}
                         onClick={() => console.log('Discard Changes')}
                     >
@@ -326,8 +315,8 @@ const EditAdPage = () => {
                         disabled={isSubmitting}
                         className="px-8 py-3 text-lg font-bold rounded-3xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed"
                         style={{ 
-                            backgroundColor: COLORS.accent, 
-                            color: COLORS.cardBg, 
+                            backgroundColor: 'var(--accent)', 
+                            color: 'var(--card-bg)', 
                             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' 
                         }}
                     >
@@ -355,8 +344,8 @@ const FormGroup = ({ label, name, value, onChange, placeholder, type = 'text' })
     const COLORS = { primary: '#D84C38', accent: '#FF7A00', text: '#332720', light: '#E8DBC7', cardBg: '#FFFFFF' };
     return (
         <div className="flex flex-col">
-            <label htmlFor={name} className="block font-semibold mb-2" style={{ color: COLORS.primary }}>{label}</label>
-            <input type={type} id={name} name={name} value={value} onChange={onChange} placeholder={placeholder} required className="p-3 rounded-xl border-2 transition duration-300 focus:outline-none" style={{ borderColor: COLORS.light, color: COLORS.text, backgroundColor: COLORS.cardBg }} onFocus={(e) => e.target.style.borderColor = COLORS.accent} onBlur={(e) => e.target.style.borderColor = COLORS.light} />
+            <label htmlFor={name} className="block font-semibold mb-2" style={{ color: 'var(--primary)' }}>{label}</label>
+            <input type={type} id={name} name={name} value={value} onChange={onChange} placeholder={placeholder} required className="p-3 rounded-xl border-2 transition duration-300 focus:outline-none" style={{ borderColor: 'var(--light)', color: 'var(--text)', backgroundColor: 'var(--card-bg)' }} onFocus={(e) => e.target.style.borderColor = 'var(--accent)'} onBlur={(e) => e.target.style.borderColor = 'var(--light)'} />
         </div>
     );
 };
