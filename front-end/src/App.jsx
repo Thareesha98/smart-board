@@ -7,6 +7,7 @@ import BillingPage from "./pages/student/BillingPage";
 import ProfilePage from "./pages/student/ProfilePage";
 import ReportsPage from "./pages/student/ReportsPage";
 import SearchBoardingsPage from "./pages/student/SearchBoardingsPage";
+import BoardingDetailsPage from "./pages/student/BoardingDetailsPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="reports" element={<ReportsPage />} /> 
         <Route path="search-boardings" element={<SearchBoardingsPage />} />
+        <Route path="boarding-details" element={<BoardingDetailsPage />} />
       </Routes>
     </Router>
   );
