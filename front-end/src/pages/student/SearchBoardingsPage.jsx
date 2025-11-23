@@ -52,11 +52,6 @@ const SearchBoardingsPage = () => {
     alert('Redirecting to appointment booking...');
   };
 
-  const handleViewDetails = (id) => {
-    console.log(`Viewing details for boarding ${id}`);
-    alert('Opening boarding details...');
-  };
-
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setMoveInDate(today);
@@ -115,7 +110,6 @@ const SearchBoardingsPage = () => {
                     key={boarding.id}
                     boarding={boarding}
                     onBook={handleBookAppointment}
-                    onView={handleViewDetails}
                   />
                 ))}
               </motion.div>

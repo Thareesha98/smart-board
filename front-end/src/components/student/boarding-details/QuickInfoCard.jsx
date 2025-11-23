@@ -72,6 +72,7 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
           className="flex-1 border-2 border-accent text-accent py-3 rounded-large font-semibold hover:bg-accent hover:text-white transition-all"
         >
           <FaHeart />
+          Save
         </motion.button>
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -79,6 +80,7 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
           className="flex-1 border-2 border-accent text-accent py-3 rounded-large font-semibold hover:bg-accent hover:text-white transition-all"
         >
           <FaShareAlt />
+          Shear
         </motion.button>
       </div>
     </motion.div>

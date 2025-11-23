@@ -1,8 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaCalendarCheck, FaEye } from 'react-icons/fa';
 
-const BoardingCard = ({ boarding, onBook, onView }) => {
+const BoardingCard = ({ boarding, onBook }) => {
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    // Navigate to details page with boarding ID and pass boarding data
+    navigate(`/boarding-details/${boarding.id}`, { 
+      state: { boarding } 
+    });
+  };
+
   return (
     <motion.div
       layout
@@ -67,7 +77,7 @@ const BoardingCard = ({ boarding, onBook, onView }) => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onView(boarding.id)}
+            onClick={handleViewDetails}
             className="flex-1 border-2 border-accent text-accent py-2.5 rounded-large font-semibold transition-all hover:bg-accent hover:text-white flex items-center justify-center gap-2"
           >
             <FaEye />

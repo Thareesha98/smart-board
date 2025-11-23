@@ -21,7 +21,7 @@ function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="reports" element={<ReportsPage />} /> 
         <Route path="search-boardings" element={<SearchBoardingsPage />} />
-        <Route path="boarding-details" element={<BoardingDetailsPage />} />
+        <Route path="boarding-details/:id" element={<BoardingDetailsPage />} />
       </Routes>
     </Router>
   );
