@@ -1,4 +1,6 @@
-export const FormGroup = ({ label, name, placeholder, type = "text" }) => (
+import React from 'react';
+
+const FormGroup = ({ label, name, placeholder, type = "text", value, onChange }) => (
   <div className="form-group">
     <label
       htmlFor={name}
@@ -13,7 +15,8 @@ export const FormGroup = ({ label, name, placeholder, type = "text" }) => (
       name={name}
       placeholder={placeholder}
       required
-      // p-[0.75rem] -> p-3, px-[1rem] -> px-4
+      value={value}
+      onChange={onChange}
       className="w-full p-3 px-4 border rounded-xl text-[1rem] transition duration-300 bg-white focus:outline-none"
       style={{ borderColor: "var(--light)", color: "var(--text)" }}
       onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
@@ -21,3 +24,5 @@ export const FormGroup = ({ label, name, placeholder, type = "text" }) => (
     />
   </div>
 );
+
+export default FormGroup;

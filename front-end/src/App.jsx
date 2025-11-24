@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import CreateAdPage from "./pages/owner/CreateAdPage";
 import EditAdPage from "./pages/owner/EditAdPage";
 import MyAdsPage from "./pages/owner/MyAdsPage";
@@ -13,19 +13,35 @@ function App() {
   return (
     <>
       <div className="min-h-screen flex flex-col">
-        
         <div className="grow">
           <Routes>
-            <Route path="ownerLayout" element={<OwnerLayout />} >  
+            {/* 0. Optional: Redirect root path '/' to the default dashboard view */}
+            <Route path="/" element={<Navigate to="/ownerLayout/dashboard" replace />} />
+
+            {/* 1. Nested Route using OwnerLayout */}
+            <Route path="ownerLayout" element={<OwnerLayout />}>  
+              
+              {/* 2. Index Route: Dashboard is the default view for /ownerLayout */}
+              <Route index element={<Dashboard />} /> 
               <Route path="dashboard" element={<Dashboard />} />    
+              
+              {/* Other main navigation routes */}
               <Route path="myboardings" element={<MyBoardingsPage />} />
-              <Route path="createAd" element={<CreateAdPage />} />
-              <Route path="editAd/:adId" element={<EditAdPage />} />
               <Route path="myAds" element={<MyAdsPage />} />
               <Route path="appointments" element={<AppointmentsPage />} />
               <Route path="utility" element={<UtilityPage />} />
               <Route path="profile" element={<ProfilePage />} />
+              
+              {/* Specific Ad Management Routes */}
+              <Route path="createAd" element={<CreateAdPage />} />
+              <Route path="editAd/:adId" element={<EditAdPage />} />
+              
+              {/* Optional: Catch-all for 404 within the layout */}
+              <Route path="*" element={<h1 className="text-3xl text-red-500 p-8">404 Not Found</h1>} />
             </Route >
+            
+            {/* Optional: Catch-all for 404 outside the layout */}
+            <Route path="*" element={<h1 className="text-3xl text-red-500 p-8">404 Page Not Found</h1>} />
           </Routes>
         </div>
       </div>

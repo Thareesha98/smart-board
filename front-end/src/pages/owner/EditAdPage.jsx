@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom'; 
-
+import FormGroup from "../../components/Owner/forms/FormGroup"; // Import the reusable FormGroup
 
 
 // ⚠️ MOCK DATABASE/API DATA
-// In a real application, this data would come from an API based on the ID.
 const mockAdDatabase = {
-    '456': { // Ad ID: 456 - The new ad we are fetching
+    // ... (mock data remains the same)
+    '456': {
         title: 'Budget Friendly Room, 10 min to Campus',
         address: '777 Suburb Road, Matara',
         rent: '10000',
@@ -16,7 +16,7 @@ const mockAdDatabase = {
         currentImages: ['url-to-budget-room-img-1', 'url-to-budget-room-img-2'],
         adStatus: 'Draft',
     },
-    '123': { // Ad ID: 123 - The previous static example ad
+    '123': {
         title: 'Luxury Studio near University',
         address: 'No. 34, Temple Road, Matara',
         rent: '18000',
@@ -28,43 +28,51 @@ const mockAdDatabase = {
     },
 };
 
+const availableAmenities = [
+    { label: 'Attached Bathroom', icon: 'fa-bath' },
+    { label: 'Wi-Fi', icon: 'fa-wifi' },
+    { label: 'Kitchen Access', icon: 'fa-utensils' },
+    { label: 'Parking', icon: 'fa-car' },
+    { label: 'Laundry', icon: 'fa-washing-machine' },
+];
+
+const getStatusBadgeStyle = (status) => {
+    switch (status) {
+        case 'Active': return { backgroundColor: 'var(--success)', color: 'white' };
+        case 'Pending': return { backgroundColor: 'var(--accent)', color: 'white' };
+        case 'Draft': return { backgroundColor: 'var(--muted)', color: 'white' };
+        case 'Deactivated': return { backgroundColor: 'var(--error)', color: 'white' };
+        default: return { backgroundColor: 'var(--light)', color: 'var(--text)' };
+    }
+};
+
+
 const EditAdPage = () => {
-    // 1. Get the adId from the URL parameters
     const { adId } = useParams(); 
-    
-    // Initial state set to null, indicating data hasn't loaded yet
     const [formData, setFormData] = useState(null); 
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [newImages, setNewImages] = useState([]);
     
-    // 2. Data Fetching Logic (using useEffect and the adId)
     useEffect(() => {
         setIsLoading(true);
-        setFormData(null); // Clear previous data
+        setFormData(null); 
         
-        // --- START MOCK FETCH ---
         setTimeout(() => {
             const adData = mockAdDatabase[adId];
             
             if (adData) {
                 setFormData(adData);
-                console.log(`Successfully loaded ad data for ID: ${adId}`);
             } else {
-                console.error(`Ad ID ${adId} not found.`);
-                // Set a default/empty state or redirect to an error page
                 setFormData({
                     title: 'Ad Not Found', address: '', rent: '', deposit: '', 
                     description: '', amenities: [], currentImages: [], adStatus: 'Error' 
                 });
             }
             setIsLoading(false);
-        }, 1000); // Simulate network delay
-        // --- END MOCK FETCH ---
-        
-    }, [adId]); // Rerun effect whenever adId changes (user navigates to a different ad)
+        }, 1000); 
+    }, [adId]); 
 
-    // Ensure formData is loaded before allowing interaction
     if (isLoading || !formData) {
         return (
             <div className="min-h-screen p-8 flex justify-center items-center" style={{ backgroundColor: 'var(--light)' }}>
@@ -76,10 +84,8 @@ const EditAdPage = () => {
         );
     }
 
-    // --- Form Handlers (remain mostly the same) ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        // ... (rest of handleChange logic)
         if (type === 'checkbox') {
             setFormData(prev => ({
                 ...prev,
@@ -90,11 +96,6 @@ const EditAdPage = () => {
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
         }
-    };
-    
-    // ... (handleFileChange, handleRemoveImage, handleSubmit remain the same)
-    const handleFileChange = (e) => {
-        setNewImages([...newImages, ...e.target.files]);
     };
     
     const handleRemoveImage = (index, type) => {
@@ -111,33 +112,11 @@ const EditAdPage = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        // Simulate API call for updating the ad
         setTimeout(() => {
             alert(`Ad ID ${adId} Updated Successfully!`);
             setIsSubmitting(false);
             setNewImages([]);
-            // In a real app: Navigate back to the "My Boardings" list
         }, 2000);
-    };
-    // ---------------------------------------------
-    
-    const availableAmenities = [
-        // ... (amenities list remains the same)
-        { label: 'Attached Bathroom', icon: 'fa-bath' },
-        { label: 'Wi-Fi', icon: 'fa-wifi' },
-        { label: 'Kitchen Access', icon: 'fa-utensils' },
-        { label: 'Parking', icon: 'fa-car' },
-        { label: 'Laundry', icon: 'fa-washing-machine' },
-    ];
-    
-    const getStatusBadgeStyle = (status) => {
-        // ... (getStatusBadgeStyle logic remains the same)
-        switch (status) {
-            case 'Active': return { backgroundColor: 'var(--success)', color: 'white' };
-            case 'Pending': return { backgroundColor: 'var(--accent)', color: 'white' };
-            case 'Draft': return { backgroundColor: 'var(--muted)', color: 'white' };
-            default: return { backgroundColor: 'var(--light)', color: 'var(--text)' };
-        }
     };
     
     return (
@@ -291,8 +270,7 @@ const EditAdPage = () => {
                         </p>
                     </div>
 
-                    {/* New Photos Upload (omitted for brevity, assume the same logic as before) */}
-                    {/* ... (New Photos Upload section) */}
+                    {/* New Photos Upload section goes here (omitted for brevity) */}
                 </div>
 
                 {/* Submission Button */}
@@ -334,18 +312,6 @@ const EditAdPage = () => {
                     </button>
                 </div>
             </form>
-        </div>
-    );
-};
-
-// Reusable form group component (remains the same)
-const FormGroup = ({ label, name, value, onChange, placeholder, type = 'text' }) => {
-    // ... (FormGroup logic remains the same)
-    const COLORS = { primary: '#D84C38', accent: '#FF7A00', text: '#332720', light: '#E8DBC7', cardBg: '#FFFFFF' };
-    return (
-        <div className="flex flex-col">
-            <label htmlFor={name} className="block font-semibold mb-2" style={{ color: 'var(--primary)' }}>{label}</label>
-            <input type={type} id={name} name={name} value={value} onChange={onChange} placeholder={placeholder} required className="p-3 rounded-xl border-2 transition duration-300 focus:outline-none" style={{ borderColor: 'var(--light)', color: 'var(--text)', backgroundColor: 'var(--card-bg)' }} onFocus={(e) => e.target.style.borderColor = 'var(--accent)'} onBlur={(e) => e.target.style.borderColor = 'var(--light)'} />
         </div>
     );
 };

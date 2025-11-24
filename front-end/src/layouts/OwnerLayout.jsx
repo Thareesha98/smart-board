@@ -3,7 +3,6 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import Logo from "../assets/logo.jpg";
 
 // Define the navigation items
-
 const ownerNavigation = [
   { name: "Dashboard", path: "/ownerLayout/dashboard", icon: "fas fa-home" },
   { name: "My Ads", path: "/ownerLayout/myAds", icon: "fas fa-bullhorn" },
@@ -18,38 +17,30 @@ const ownerNavigation = [
     icon: "fas fa-dog",
   },
   { name: "Utility", path: "/ownerLayout/utility", icon: "fas fa-cogs" }
-  
 ];
 
 const BASE_LINK_CLASSES =
   "mx-3 my-1 p-3 flex items-center gap-3 transition duration-300 rounded-[12px] no-underline text-base font-medium";
-// Removed the old FOOTER_LINK_CLASSES as they will now use the logic from getLinkClasses
 
 export default function OwnerLayout() {
   const { pathname: currentPath } = useLocation();
   const userName = "Mr. Silva";
 
-  // --- Path Matching Logic (simplified into a single function) ---
   const getActivePath = () => {
-    // 1. Check for nested paths like /owner/edit-ad/123
-    // NOTE: The path '/owner/editAd/:adId' seems to be a hardcoded string that won't match a path like '/ownerLayout/editAd/123'.
-    // Assuming the user meant a path that STARTS with the base route of My Ads, which is '/ownerLayout/myAds'.
+    // Check for specific sub-paths first
     if (currentPath.includes("/ownerLayout/myAds")) return "/ownerLayout/myAds";
-
-    // 2. Normalize current path for dashboard index route
+    if (currentPath.includes("/ownerLayout/profile")) return "/ownerLayout/profile";
+    
+    // Normalize current path for dashboard index route
     const normalizedPath =
       currentPath === "/owner" || currentPath === "/owner/"
         ? "/ownerLayout/dashboard"
         : currentPath;
 
-    // 3. Check for direct match
-    const foundItem = ownerNavigation.find(
-      (item) => item.path === normalizedPath
-    );
-    // If not found, try to match by including the path (e.g. for sub-routes like /profile/edit)
+    // Check for direct match or sub-route match
+    const foundItem = ownerNavigation.find((item) => item.path === normalizedPath);
     if (foundItem) return foundItem.path;
 
-    // Check if currentPath is a sub-route of any main path (e.g., /ownerLayout/profile/edit -> active profile)
     for (const item of ownerNavigation) {
       if (normalizedPath.startsWith(item.path + "/")) {
         return item.path;
@@ -58,13 +49,11 @@ export default function OwnerLayout() {
 
     return "";
   };
+  
   const activePath = getActivePath();
 
-  // Helper to determine the classes for a navigation link (including the footer links now)
   const getLinkClasses = (path) => {
-    // For the Logout link, we treat it as always inactive for styling purposes, but apply the BASE_LINK_CLASSES structure
     if (path === "logout") {
-      // Applying the 'inactive' style from the navigation links structure but with a top margin
       return `${BASE_LINK_CLASSES} mt-1 text-white hover:text-red-600 hover:bg-white`;
     }
 
@@ -72,13 +61,12 @@ export default function OwnerLayout() {
 
     return `${BASE_LINK_CLASSES} ${
       isActive
-        ? "bg-white text-red-600" // Active
-        : "text-white hover:text-red-600 hover:bg-white" // Inactive
+        ? "bg-white text-red-600" 
+        : "text-white hover:text-red-600 hover:bg-white"
     }`;
   };
 
   return (
-    // Body and Dashboard Layout wrapper
     <div
       className="flex min-h-screen"
       style={{ backgroundColor: "var(--light)" }}
@@ -138,10 +126,7 @@ export default function OwnerLayout() {
             {ownerNavigation.map((item) => (
               <Link
                 key={item.name}
-                // Use /owner for the index route, otherwise use the path
-                to={
-                  item.path === "/ownerLayout/dashboard" ? "/ownerLayout/dashboard" : item.path
-                }
+                to={item.path}
                 className={getLinkClasses(item.path)}
               >
                 <i className={`${item.icon} w-5 text-center text-lg`}></i>
@@ -156,7 +141,7 @@ export default function OwnerLayout() {
           className="pt-4 mt-auto border-t" 
           style={{ borderColor: "rgba(255,255,255,0.1)" }}
         >
-          {/* Profile Link (styled like a navigation link) */}
+          {/* Profile Link */}
           <Link
             to="/ownerLayout/profile"
             className={getLinkClasses("/ownerLayout/profile")}
@@ -165,7 +150,7 @@ export default function OwnerLayout() {
             <span>{userName}</span>
           </Link>
 
-          {/* Logout Link (styled like an inactive navigation link) */}
+          {/* Logout Link */}
           <a
             href="/"
             className={getLinkClasses("logout")}

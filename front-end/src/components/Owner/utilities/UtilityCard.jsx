@@ -1,9 +1,9 @@
+import React from 'react';
+
 const formatCost = (cost) => `LKR ${Math.round(cost).toLocaleString()}`;
 
-
-export const UtilityCard = ({ boarding, onOpenModal }) => {
+const UtilityCard = ({ boarding, onOpenModal }) => {
   const totalUtilityCost = boarding.electricityCost + boarding.waterCost;
-  // Note: Since tenant division is complex, we just add total cost for simplicity as per the current component logic
   const totalMonthlyBill = boarding.baseRent + totalUtilityCost;
   const isUpdated = boarding.lastUpdated !== "N/A";
 
@@ -83,3 +83,5 @@ export const UtilityCard = ({ boarding, onOpenModal }) => {
     </div>
   );
 };
+
+export default UtilityCard;

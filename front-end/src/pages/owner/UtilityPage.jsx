@@ -1,67 +1,11 @@
 import React, { useState } from "react";
-import { UtilityCard } from "../../components/Owner/UtilityCard"
+import UtilityCard from "../../components/Owner/utilities/UtilityCard"; // Import the reusable UtilityCard
 
-
-
-
-const INITIAL_BOARDINGS_DATA = [
-  {
-    id: "sunshine-hostel",
-    name: "Sunshine Hostel",
-    image:
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&h=150&fit=crop",
-    address: "123 University Road, Colombo 03",
-    baseRent: 30000,
-    lastUpdated: "Nov 2025",
-    electricityCost: 5500, // Initial Mock Value
-    waterCost: 1200, // Initial Mock Value
-    totalTenants: 6,
-    status: "active",
-  },
-  {
-    id: "city-view",
-    name: "City View Apartments",
-    image:
-      "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=200&h=150&fit=crop",
-    address: "45 Galle Road, Colombo 04",
-    baseRent: 40000,
-    lastUpdated: "Dec 2025",
-    electricityCost: 4800,
-    waterCost: 900,
-    totalTenants: 4,
-    status: "active",
-  },
-  {
-    id: "green-valley",
-    name: "Green Valley Hostel",
-    image:
-      "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=200&h=150&fit=crop",
-    address: "78 Kandy Road, Kadawatha",
-    baseRent: 20000,
-    lastUpdated: "N/A",
-    electricityCost: 0,
-    waterCost: 0,
-    totalTenants: 0,
-    status: "pending",
-  },
-  {
-    id: "Eliyakanda-hostel",
-    name: "Eliyakanda Hostel",
-    image:
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&h=150&fit=crop",
-    address: "123 University Road, Colombo 03",
-    baseRent: 30000,
-    lastUpdated: "Nov 2025",
-    electricityCost: 5500, // Initial Mock Value
-    waterCost: 1200, // Initial Mock Value
-    totalTenants: 6,
-    status: "active",
-  },
-  
-];
+import { INITIAL_BOARDINGS_DATA } from "../../data/mockData.js";
 
 
 const formatCost = (cost) => `LKR ${Math.round(cost).toLocaleString()}`;
+
 
 const calculateDynamicBill = (form, baseRent) => {
   const electricity = parseFloat(form.electricity) || 0;
@@ -83,7 +27,6 @@ const calculateDynamicBill = (form, baseRent) => {
     totalMonthlyBill: totalMonthlyBill,
   };
 };
-
 
 
 export default function UtilityPage() {
@@ -179,7 +122,7 @@ export default function UtilityPage() {
       {/* Utility Overview Cards */}
       <section className="billing-overview">
         <div className="overview-cards grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Map over the state variable 'boardings' */}
+          {/* Map over the state variable 'boardings' and use the imported UtilityCard */}
           {boardings.map((boarding) => (
             <UtilityCard
               key={boarding.id}

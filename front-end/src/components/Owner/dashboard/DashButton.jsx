@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-export const DashButton = ({ to, icon, label }) => (
+const DashButton = ({ to, icon, label }) => (
   <Link
     to={to}
     className="dash-btn flex items-center gap-3 p-3 px-4 font-semibold rounded-[25px] transition duration-200 shadow-sm"
@@ -10,7 +11,6 @@ export const DashButton = ({ to, icon, label }) => (
       color: 'var(--text)',
       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
     }}
-    // Uses the complex hover styles defined in the prompt conversion
     onMouseEnter={(e) => {
       e.currentTarget.style.backgroundColor = 'var(--accent)';
       e.currentTarget.style.color = "white";
@@ -28,3 +28,5 @@ export const DashButton = ({ to, icon, label }) => (
     <span>{label}</span>
   </Link>
 );
+
+export default DashButton;

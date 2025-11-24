@@ -1,49 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import HeaderBar from '../../components/Owner/common/HeaderBar';
+import ProfileStatItem from '../../components/Owner/common/ProfileStatItem';
+import InfoItem from '../../components/Owner/common/InfoItem';
+import ToggleSwitch from '../../components/Owner/common/ToggleSwitch';
 
+import { ownerData } from "../../data/mockData.js";
+const notificationCount = 2;
 
-// Mock Data for the Boarding Owner
-const ownerData = {
-    firstName: 'Mr.',
-    lastName: 'Silva',
-    businessName: 'Sunshine Hostels & Rooms',
-    email: 'sunshinehostels@gmail.com',
-    role: 'Boarding Owner',
-    avatar: 'https://randomuser.me/api/portraits/men/57.jpg', // Using male avatar for owner
-    totalAds: 4,
-    activeTenants: 15,
-    appointmentsCompleted: 78,
-    rating: '4.7 / 5',
-    phone: '+94 77 123 4567',
-    contactAddress: '123 University Avenue, Matara',
-    joined: 'January 2023',
-    verificationStatus: 'University Verified',
-    paymentAcc: 'BOC Account **** 5678',
-};
-
-// --- Reusable Components (Adapted for Owner) ---
-
-const ProfileStatItem = ({ number, label }) => (
-    <div className="stat-item text-center p-4 rounded-xl" style={{ backgroundColor: "var(--light)" }}>
-        <div className="stat-number text-3xl font-bold mb-0.5" style={{ color: "var(--primary)" }}>
-            {number}
-        </div>
-        <div className="stat-label text-sm" style={{ color: "var(--muted)" }}>
-            {label}
-        </div>
-    </div>
-);
-
-const InfoItem = ({ label, value, fullWidth = false }) => (
-    <div className={`info-item flex flex-col gap-1 p-4 rounded-xl transition duration-300 ${fullWidth ? 'col-span-full' : ''}`}
-         style={{ transitionProperty: 'background-color' }}
-         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(232, 219, 199, 0.3)'}
-         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-    >
-        <label className="font-semibold text-sm" style={{ color: "var(--muted)" }}>{label}</label>
-        <p className="text-base" style={{ color: "var(--text)" }}>{value}</p>
-    </div>
-);
+// --- Helper Components ---
+// ProfileSection remains here as it's highly specific to the profile page layout
 
 const ProfileSection = ({ title, icon, children, onEdit }) => (
     <section className="profile-section bg-white p-6 rounded-[25px] shadow-xl transition duration-300" style={{ boxShadow: "var(--shadow)" }}>
@@ -68,56 +34,23 @@ const ProfileSection = ({ title, icon, children, onEdit }) => (
 // --- Main Owner Profile Component ---
 
 export default function ProfilePage() {
-    // State management for modals (simplified)
     const [isEditBusinessModalOpen, setIsEditBusinessModalOpen] = useState(false);
-    
-    // Mock Header Data (assuming the OwnerLayout is NOT rendering its own header bar)
-    const notificationCount = 2; 
 
     return (
         <div className="pt-4 space-y-6">
-            
-            {/* Horizontal Header (Replicated from CreateAdPage for consistency) */}
-            <header 
-                className="content-header flex justify-between items-center p-6 rounded-[25px] shadow-lg sticky top-0 z-10"
-                style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(5px)',
-                    WebkitBackdropFilter: 'blur(5px)',
-                    boxShadow: "var(--shadow)",
-                }}
-            >
-                <div className="header-left flex flex-col">
-                    <h1 className="text-[1.8rem] font-bold leading-tight" style={{ color: "var(--primary)" }}>
-                        My Profile
-                    </h1>
-                    <p className="text-base" style={{ color: "var(--muted)" }}>
-                        Manage your business and personal account settings
-                    </p>
-                </div>
-                
-                <div className="header-right flex items-center gap-6">
-                    <div className="notification-bell relative cursor-pointer p-3 rounded-full"
-                          style={{ backgroundColor: "var(--light)", color: "var(--text)" }}>
-                        <i className="fas fa-bell"></i>
-                        <span className="notification-count absolute top-[-5px] right-[-5px] w-5 h-5 text-[0.75rem] flex items-center justify-center font-bold rounded-full"
-                              style={{ backgroundColor: "var(--error)", color: 'white' }}>
-                            {notificationCount}
-                        </span>
-                    </div>
 
-                    <div className="user-menu flex items-center gap-3 cursor-pointer p-2 px-4 rounded-[25px] transition duration-300"
-                         style={{ backgroundColor: "var(--light)", color: "var(--text)" }}>
-                        <img src={ownerData.avatar} alt={ownerData.firstName} className="user-avatar w-10 h-10 rounded-full object-cover" 
-                            style={{ border: `2px solid ${"var(--accent)"}` }} />
-                        <span>{ownerData.firstName} {ownerData.lastName}</span>
-                    </div>
-                </div>
-            </header>
+            <HeaderBar
+                title="My Profile"
+                subtitle="Manage your business and personal account settings"
+                notificationCount={notificationCount}
+                userAvatar={ownerData.avatar}
+                userName={`${ownerData.firstName} ${ownerData.lastName}`}
+            />
 
             {/* Profile Overview Section */}
             <section className="dashboard-section">
                 <div className="profile-header bg-white p-8 rounded-[25px] shadow-xl flex justify-between items-start gap-8" style={{ boxShadow: "var(--shadow)" }}>
+                    {/* ... Avatar and Info (no changes) ... */}
                     <div className="profile-avatar-section flex gap-6 items-start">
                         <div className="avatar-container relative shrink-0">
                             <img src={ownerData.avatar} alt="Owner Avatar" className="profile-avatar w-[120px] h-[120px] rounded-full object-cover" style={{ border: `4px solid ${"var(--accent)"}` }} />
@@ -141,8 +74,8 @@ export default function ProfilePage() {
                             </div>
                         </div>
                     </div>
-                    
-                    {/* Owner Stats */}
+
+                    {/* Owner Stats (using ProfileStatItem) */}
                     <div className="profile-stats grid grid-cols-2 gap-4">
                         <ProfileStatItem number={ownerData.totalAds} label="Active Listings" />
                         <ProfileStatItem number={ownerData.activeTenants} label="Current Tenants" />
@@ -154,12 +87,12 @@ export default function ProfilePage() {
 
             {/* Profile Information & Account Settings */}
             <div className="profile-content grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                {/* 1. Business & Contact Information (2/3 width) */}
+
+                {/* 1. Business & Contact Information */}
                 <div className="lg:col-span-2 space-y-6">
-                    <ProfileSection 
-                        title="Business & Contact Information" 
-                        icon="fas fa-building" 
+                    <ProfileSection
+                        title="Business & Contact Information"
+                        icon="fas fa-building"
                         onEdit={() => setIsEditBusinessModalOpen(true)}
                     >
                         <div className="info-grid grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
@@ -171,9 +104,9 @@ export default function ProfilePage() {
                         </div>
                     </ProfileSection>
 
-                    <ProfileSection 
-                        title="Account Management" 
-                        icon="fas fa-key" 
+                    <ProfileSection
+                        title="Account Management"
+                        icon="fas fa-key"
                         onEdit={() => alert('Opening Edit Account Modal')}
                     >
                         <div className="info-grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
@@ -187,11 +120,10 @@ export default function ProfilePage() {
 
                 {/* 2. Preferences (1/3 width) */}
                 <div className="lg:col-span-1 space-y-6">
-                    
                     {/* Preferences */}
-                    <ProfileSection 
-                        title="Preferences & Notifications" 
-                        icon="fas fa-sliders-h" 
+                    <ProfileSection
+                        title="Preferences & Notifications"
+                        icon="fas fa-sliders-h"
                         onEdit={() => alert('Opening Settings Modal')}
                     >
                         <div className="preferences-grid flex flex-col gap-3">
@@ -215,6 +147,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Placeholder for Modals (Business Info Edit Modal) */}
+            {/* ... (Modal remains the same) ... */}
             {isEditBusinessModalOpen && (
                  <div className="modal fixed top-0 left-0 w-full h-full flex items-center justify-center p-4 z-50" 
                       style={{ background: 'rgba(0,0,0,0.5)' }}>
@@ -238,16 +171,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-// Helper: Toggle Switch component (moved outside main function)
-const ToggleSwitch = ({ id, checked, onChange }) => (
-    <label className="toggle-switch relative inline-block w-[60px] h-[34px]">
-        <input type="checkbox" id={id} checked={checked} onChange={onChange} className="opacity-0 w-0 h-0" />
-        <span className="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 rounded-full"
-              style={{ backgroundColor: checked ? "var(--accent)" : '#ccc', transition: '.4s' }}>
-            <span className="absolute content-none h-[26px] w-[26px] left-1 bottom-1 bg-white rounded-full"
-                  style={{ transition: '.4s', transform: checked ? 'translateX(26px)' : 'translateX(0)' }}>
-            </span>
-        </span>
-    </label>
-);

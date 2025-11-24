@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
+import StatWidget from "../../components/Owner/dashboard/StatWidget"; // Reusable StatWidget
 
 // Mock Data for the Boardings
-const boardingsData = [
+const boardingsData = [ /* ... boardingsData data ... */
   {
     id: "sunshine-hostel",
     name: "Sunshine Hostel",
@@ -61,38 +61,7 @@ const statData = {
   reviewCount: 45,
 };
 
-// --- Helper Components ---
-
-const StatWidget = ({ icon, title, mainValue, subValue }) => (
-  <div
-    className="stat-widget flex p-6 rounded-[25px] shadow-lg transition duration-300 hover:translate-y-[-5px] relative"
-    style={{ backgroundColor: "var(--card-bg)", boxShadow: "var(--shadow)" }}
-  >
-    <div
-      className="widget-icon p-4 rounded-[15px] text-2xl shrink-0"
-      style={{ backgroundColor: "var(--light)", color: "var(--accent)" }}
-    >
-      <i className={icon}></i>
-    </div>
-    <div className="widget-content ml-4 flex-1">
-      <h3
-        className="text-sm font-semibold mb-3"
-        style={{ color: "var(--muted)" }}
-      >
-        {title}
-      </h3>
-      <div className="widget-details flex flex-col gap-1">
-        <strong className="text-xl font-bold" style={{ color: "var(--text)" }}>
-          {mainValue}
-        </strong>
-        <span className="text-sm" style={{ color: "var(--muted)" }}>
-          {subValue}
-        </span>
-      </div>
-    </div>
-  </div>
-);
-
+// --- Helper Component (BoardingCard is kept here as it's complex and unique to this page) ---
 const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
   const statusColor =
     property.status === "active"
@@ -268,24 +237,22 @@ const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
   );
 };
 
-// --- Main Component ---
 
+// --- Main Component ---
 export default function MyBoardingsPage() {
   const [viewMode, setViewMode] = useState("grid");
 
   const handleManage = (id) => {
-    // In a real app, this would open the Manage Boarding Modal
     alert(`Opening Manage Modal for Property ID: ${id}`);
   };
 
   const handleViewTenants = (id) => {
-    // In a real app, this would open the View Tenants Modal/Page
     alert(`Opening Tenants List for Property ID: ${id}`);
   };
 
   return (
     <div className="pt-4 space-y-6">
-      {/* Horizontal Header (Replicated from CreateAdPage for consistency) */}
+      {/* Horizontal Header (Inline, can be replaced by HeaderBar if needed) */}
       <header
         className="content-header flex justify-between items-center p-6 rounded-[25px] shadow-lg sticky top-6 z-10"
         style={{
@@ -313,11 +280,10 @@ export default function MyBoardingsPage() {
             <i className="fas fa-plus"></i>
             Post New Boarding
           </button>
-          {/* Notification/User Menu omitted for brevity, assuming they are in OwnerLayout or a separate header component */}
         </div>
       </header>
 
-      {/* 1. Stats Overview */}
+      {/* 1. Stats Overview (using StatWidget) */}
       <section className="stats-overview">
         <div className="widget-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatWidget

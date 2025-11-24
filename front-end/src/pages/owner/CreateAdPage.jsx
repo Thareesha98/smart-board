@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { FormGroup } from "../../components/Owner/FormGroup";
 import { useNavigate } from "react-router-dom";
+import FormGroup from "../../components/Owner/forms/FormGroup";
 
 const availableAmenities = [
   { label: "Attached Bathroom", icon: "fa-bath" },
@@ -22,7 +22,6 @@ const CreateAdPage = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -50,17 +49,16 @@ const CreateAdPage = () => {
     setTimeout(() => {
       alert("Boarding Ad Created Successfully!");
       setIsSubmitting(false);
+      navigate('../myAds'); // Redirect after successful creation
     }, 2000);
-    
   };
-
 
   const primaryBtnClass =
     "btn btn-primary p-[0.6rem] px-4 rounded-[25px] font-semibold shadow-md transition duration-300 flex items-center gap-1";
 
   return (
     <div className="space-y-6">
-      {/* Horizontal Header(including Notifications/Profile) */}
+      {/* Horizontal Header */}
       <header
         className="content-header flex justify-between items-center p-6 rounded-[25px] shadow-lg sticky top-3 z-10"
         style={{
@@ -71,7 +69,6 @@ const CreateAdPage = () => {
           marginTop: 0,
         }}
       >
-        {/* Header Left (Title and Subtitle) */}
         <div className="header-left flex flex-col">
           <h1
             className="text-[1.8rem] font-bold leading-tight"
@@ -85,15 +82,12 @@ const CreateAdPage = () => {
         </div>
 
         <button 
-                    className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-                    style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
-                    onClick={handleBack}
-                >
-                    
-                    Back
-                </button>
-
-        
+          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+          style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
+          onClick={handleBack}
+        >
+          <i className="fas fa-arrow-left mr-2"></i> Back to Ads
+        </button>
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -114,23 +108,31 @@ const CreateAdPage = () => {
               label="Ad Title"
               name="title"
               placeholder="e.g., Spacious Room near Campus"
+              value={formData.title}
+              onChange={handleChange}
             />
             <FormGroup
               label="Full Address"
               name="address"
               placeholder="e.g., 456 Main St, Matara"
+              value={formData.address}
+              onChange={handleChange}
             />
             <FormGroup
               label="Monthly Rent (LKR)"
               name="rent"
               placeholder="e.g., 15000"
               type="number"
+              value={formData.rent}
+              onChange={handleChange}
             />
             <FormGroup
               label="Key Money/Deposit (LKR)"
               name="deposit"
               placeholder="e.g., 30000"
               type="number"
+              value={formData.deposit}
+              onChange={handleChange}
             />
           </div>
 
@@ -145,6 +147,8 @@ const CreateAdPage = () => {
               name="description"
               rows="4"
               placeholder="Describe your boarding space in detail."
+              value={formData.description}
+              onChange={handleChange}
               className="w-full p-3 px-4 border rounded-xl text-[1rem] transition duration-300 bg-white focus:outline-none"
               style={{ borderColor: "var(--light)", color: "var(--text)" }}
               onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}

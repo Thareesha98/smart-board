@@ -1,12 +1,14 @@
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-export const StatWidget = ({
+const StatWidget = ({
   icon,
   title,
   mainValue,
   subValue,
   subLabel,
   hasButton = false,
+  to = "#", // Default link target
 }) => (
   <div
     className="stat-widget flex p-6 rounded-[25px] shadow-lg transition duration-300 hover:translate-y-[-5px] relative"
@@ -35,7 +37,7 @@ export const StatWidget = ({
       </div>
       {hasButton && (
         <Link
-          to="/owner/billing"
+          to={to}
           className="btn btn-primary view-earnings p-2 px-4 text-sm font-semibold rounded-[25px] mt-3 inline-block no-underline"
           style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
         >
@@ -45,3 +47,5 @@ export const StatWidget = ({
     </div>
   </div>
 );
+
+export default StatWidget;
