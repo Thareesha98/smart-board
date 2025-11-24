@@ -5,7 +5,6 @@ import { DashButton } from "../../components/Owner/DashButton";
 import { AppointmentItem } from "../../components/Owner/AppointmentItem";
 import { ActivityItem } from "../../components/Owner/ActivityItem";
 
-
 // Mock Data for the Dashboard
 const dashboardData = {
   userName: "Rajesh K.",
@@ -90,9 +89,8 @@ const recentActivity = [
 
 // Mock Data for Header (Owner)
 const userName = "Mr. Silva";
-  const userAvatar = "https://randomuser.me/api/portraits/men/57.jpg";
-  const notificationCount = 3;
-
+const userAvatar = "https://randomuser.me/api/portraits/men/57.jpg";
+const notificationCount = 3;
 
 export default function Dashboard() {
   return (
@@ -102,17 +100,17 @@ export default function Dashboard() {
         style={{
           backgroundColor: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(5px)",
-          boxShadow: 'var(--shadow)',
+          boxShadow: "var(--shadow)",
         }}
       >
         <div className="header-left flex flex-col">
           <h1
             className="text-[1.8rem] font-bold leading-tight"
-            style={{ color: 'var(--primary)' }}
+            style={{ color: "var(--primary)" }}
           >
             Welcome back, {dashboardData.userName.split(" ")[0]}!
           </h1>
-          <p className="text-base" style={{ color: 'var(--muted)' }}>
+          <p className="text-base" style={{ color: "var(--muted)" }}>
             Manage your boarding properties efficiently
           </p>
         </div>
@@ -135,18 +133,20 @@ export default function Dashboard() {
           </div>
 
           {/* User Menu  */}
-          <div
-            className="user-menu flex items-center gap-3 cursor-pointer p-2 px-4 rounded-[25px] transition duration-300"
-            style={{ backgroundColor: "var(--light)", color: "var(--text)" }}
-          >
-            <img
-              src={userAvatar}
-              alt={userName}
-              className="user-avatar w-10 h-10 rounded-full object-cover"
-              style={{ border: `2px solid ${"var(--accent)"}` }}
-            />
-            <span>{userName}</span>
-          </div>
+          <Link to="/ownerLayout/profile">
+            <div
+              className="user-menu flex items-center gap-3 cursor-pointer p-2 px-4 rounded-[25px] transition duration-300"
+              style={{ backgroundColor: "var(--light)", color: "var(--text)" }}
+            >
+              <img
+                src={userAvatar}
+                alt={userName}
+                className="user-avatar w-10 h-10 rounded-full object-cover"
+                style={{ border: `2px solid ${"var(--accent)"}` }}
+              />
+              <span>{userName}</span>
+            </div>
+          </Link>
         </div>
       </header>
 
@@ -189,44 +189,44 @@ export default function Dashboard() {
           <div className="column">
             <h2
               className="text-[1.5rem] font-bold mb-4 flex items-center gap-2"
-              style={{ color: 'var(--primary)' }}
+              style={{ color: "var(--primary)" }}
             >
               Quick Actions
             </h2>
             <div
               className="quick-actions bg-white p-6 rounded-[25px] shadow-lg flex flex-wrap gap-4"
-              style={{ boxShadow: 'var(--shadow)' }}
+              style={{ boxShadow: "var(--shadow)" }}
             >
               <div className="action-column flex flex-col grow min-w-[250px] gap-3">
                 <DashButton
-                  to="/owner/create-ad"
+                  to="/ownerLayout/createAd"
                   icon="fas fa-plus"
                   label="Add New Boarding"
                 />
                 <DashButton
-                  to="/owner/appointments"
+                  to="/ownerLayout/appointments"
                   icon="fas fa-calendar-check"
                   label="Manage Appointments"
                 />
                 <DashButton
-                  to="/owner/utilities"
+                  to="/ownerLayout/utility"
                   icon="fas fa-bolt"
                   label="Add Utility Costs"
                 />
               </div>
               <div className="action-column flex flex-col grow min-w-[250px] gap-3">
                 <DashButton
-                  to="/owner/subscriptions"
+                  to="/ownerLayout/subscriptions"
                   icon="fas fa-crown"
                   label="Boost Ads"
                 />
                 <DashButton
-                  to="/owner/my-ads"
+                  to="/ownerLayout/myAds"
                   icon="fas fa-eye"
                   label="View Ads"
                 />
                 <DashButton
-                  to="/owner/billing"
+                  to="/ownerLayout/payments"
                   icon="fas fa-credit-card"
                   label="View Payments"
                 />
@@ -238,19 +238,22 @@ export default function Dashboard() {
           <div className="column">
             <h2
               className="text-[1.5rem] font-bold mb-4 flex items-center gap-2"
-              style={{ color: 'var(--primary)' }}
+              style={{ color: "var(--primary)" }}
             >
               Recent Appointments
               <span
                 className="badge text-[0.75rem] px-2 py-1 rounded-xl font-semibold"
-                style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
+                style={{
+                  backgroundColor: "var(--accent)",
+                  color: "var(--card-bg)",
+                }}
               >
                 {dashboardData.newAppointmentsCount} New
               </span>
             </h2>
             <div
               className="appointments-feed bg-white rounded-[25px] shadow-lg overflow-hidden"
-              style={{ boxShadow: 'var(--shadow)' }}
+              style={{ boxShadow: "var(--shadow)" }}
             >
               {recentAppointments.map((app) => (
                 <AppointmentItem key={app.id} appointment={app} />
@@ -264,7 +267,7 @@ export default function Dashboard() {
       <section className="dashboard-section">
         <h2
           className="text-[1.5rem] font-bold mb-4 flex items-center gap-2"
-          style={{ color: 'var(--primary)' }}
+          style={{ color: "var(--primary)" }}
         >
           Performance Analytics
         </h2>
@@ -272,45 +275,45 @@ export default function Dashboard() {
           {/* Occupancy Rate Card */}
           <div
             className="analytics-card bg-white p-6 rounded-[25px] shadow-lg"
-            style={{ boxShadow: 'var(--shadow)' }}
+            style={{ boxShadow: "var(--shadow)" }}
           >
             <div className="analytics-header flex justify-between items-center mb-4">
               <h3
                 className="text-base font-semibold"
-                style={{ color: 'var(--muted)' }}
+                style={{ color: "var(--muted)" }}
               >
                 Occupancy Rate
               </h3>
               <span
                 className="analytics-value text-xl font-bold"
-                style={{ color: 'var(--text)' }}
+                style={{ color: "var(--text)" }}
               >
                 {dashboardData.occupancyRate}
               </span>
             </div>
             <div
               className="progress-bar rounded-lg h-2 mb-4"
-              style={{ backgroundColor: 'var(--light)' }}
+              style={{ backgroundColor: "var(--light)" }}
             >
               <div
                 className="progress-fill h-full rounded-lg"
                 style={{
                   width: dashboardData.occupancyRate,
-                  backgroundColor: 'var(--success)',
+                  backgroundColor: "var(--success)",
                 }}
               ></div>
             </div>
             <div className="analytics-footer flex justify-between items-center">
               <span
                 className="trend text-sm font-semibold"
-                style={{ color: 'var(--success)' }}
+                style={{ color: "var(--success)" }}
               >
                 +5% this month
               </span>
               <Link
                 to="/owner/my-ads"
                 className="text-sm font-semibold no-underline"
-                style={{ color: 'var(--accent)' }}
+                style={{ color: "var(--accent)" }}
               >
                 View Details
               </Link>
@@ -320,18 +323,18 @@ export default function Dashboard() {
           {/* Revenue Trend Card */}
           <div
             className="analytics-card bg-white p-6 rounded-[25px] shadow-lg"
-            style={{ boxShadow: 'var(--shadow)' }}
+            style={{ boxShadow: "var(--shadow)" }}
           >
             <div className="analytics-header flex justify-between items-center mb-4">
               <h3
                 className="text-base font-semibold"
-                style={{ color: 'var(--muted)' }}
+                style={{ color: "var(--muted)" }}
               >
                 Revenue Trend
               </h3>
               <span
                 className="analytics-value text-xl font-bold"
-                style={{ color: 'var(--text)' }}
+                style={{ color: "var(--text)" }}
               >
                 ${dashboardData.monthlyRevenue.toLocaleString()}
               </span>
@@ -340,33 +343,33 @@ export default function Dashboard() {
               <div className="chart-bars flex items-end gap-1 w-full h-full">
                 <div
                   className="chart-bar flex-1 rounded-t"
-                  style={{ height: "60%", backgroundColor: 'var(--accent)' }}
+                  style={{ height: "60%", backgroundColor: "var(--accent)" }}
                 ></div>
                 <div
                   className="chart-bar flex-1 rounded-t"
-                  style={{ height: "75%", backgroundColor: 'var(--accent)' }}
+                  style={{ height: "75%", backgroundColor: "var(--accent)" }}
                 ></div>
                 <div
                   className="chart-bar flex-1 rounded-t"
-                  style={{ height: "80%", backgroundColor: 'var(--accent)' }}
+                  style={{ height: "80%", backgroundColor: "var(--accent)" }}
                 ></div>
                 <div
                   className="chart-bar flex-1 rounded-t"
-                  style={{ height: "90%", backgroundColor: 'var(--accent)' }}
+                  style={{ height: "90%", backgroundColor: "var(--accent)" }}
                 ></div>
               </div>
             </div>
             <div className="analytics-footer flex justify-between items-center">
               <span
                 className="trend text-sm font-semibold"
-                style={{ color: 'var(--success)' }}
+                style={{ color: "var(--success)" }}
               >
                 {dashboardData.revenueGrowth} growth
               </span>
               <Link
                 to="/owner/billing"
                 className="text-sm font-semibold no-underline"
-                style={{ color: 'var(--accent)' }}
+                style={{ color: "var(--accent)" }}
               >
                 View Details
               </Link>
@@ -376,18 +379,18 @@ export default function Dashboard() {
           {/* Ad Performance Card */}
           <div
             className="analytics-card bg-white p-6 rounded-[25px] shadow-lg"
-            style={{ boxShadow: 'var(--shadow)' }}
+            style={{ boxShadow: "var(--shadow)" }}
           >
             <div className="analytics-header flex justify-between items-center mb-4">
               <h3
                 className="text-base font-semibold"
-                style={{ color: 'var(--muted)' }}
+                style={{ color: "var(--muted)" }}
               >
                 Ad Performance
               </h3>
               <span
                 className="analytics-value text-xl font-bold"
-                style={{ color: 'var(--text)' }}
+                style={{ color: "var(--text)" }}
               >
                 85%
               </span>
@@ -396,13 +399,13 @@ export default function Dashboard() {
               <div className="stat flex justify-between items-center">
                 <span
                   className="stat-label text-sm"
-                  style={{ color: 'var(--muted)' }}
+                  style={{ color: "var(--muted)" }}
                 >
                   Views
                 </span>
                 <span
                   className="stat-value font-semibold"
-                  style={{ color: 'var(--text)' }}
+                  style={{ color: "var(--text)" }}
                 >
                   1,245
                 </span>
@@ -410,13 +413,13 @@ export default function Dashboard() {
               <div className="stat flex justify-between items-center">
                 <span
                   className="stat-label text-sm"
-                  style={{ color: 'var(--muted)' }}
+                  style={{ color: "var(--muted)" }}
                 >
                   Appointments
                 </span>
                 <span
                   className="stat-value font-semibold"
-                  style={{ color: 'var(--text)' }}
+                  style={{ color: "var(--text)" }}
                 >
                   28
                 </span>
@@ -424,13 +427,13 @@ export default function Dashboard() {
               <div className="stat flex justify-between items-center">
                 <span
                   className="stat-label text-sm"
-                  style={{ color: 'var(--muted)' }}
+                  style={{ color: "var(--muted)" }}
                 >
                   Conversion
                 </span>
                 <span
                   className="stat-value font-semibold"
-                  style={{ color: 'var(--text)' }}
+                  style={{ color: "var(--text)" }}
                 >
                   2.2%
                 </span>
@@ -444,13 +447,13 @@ export default function Dashboard() {
       <section className="dashboard-section">
         <h2
           className="text-[1.5rem] font-bold mb-4 flex items-center gap-2"
-          style={{ color: 'var(--primary)' }}
+          style={{ color: "var(--primary)" }}
         >
           Recent Activity
         </h2>
         <div
           className="activity-feed bg-white rounded-[25px] shadow-lg overflow-hidden"
-          style={{ boxShadow: 'var(--shadow)' }}
+          style={{ boxShadow: "var(--shadow)" }}
         >
           {recentActivity.map((activity, index) => (
             <ActivityItem key={index} data={activity} />

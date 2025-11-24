@@ -62,15 +62,6 @@ export const AppointmentItem = ({ appointment }) => {
         </span>
       </div>
 
-      <div className="appointment-actions flex gap-2 shrink-0">
-        <Link
-          to={`/owner/appointments`}
-          className="btn btn-primary btn-sm px-3 py-1.5 text-xs font-semibold rounded-[25px] no-underline"
-          style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
-        >
-          View
-        </Link>
-      </div>
     </div>
   );
 };

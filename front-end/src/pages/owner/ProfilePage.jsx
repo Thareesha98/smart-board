@@ -1,20 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// Exact colors and styling constants from profile.css
-const COLORS = {
-    primary: '#D84C38',
-    accent: '#FF7A00',
-    text: '#332720',
-    muted: '#665345',
-    cardBg: '#FFFFFF',
-    light: '#E8DBC7',
-    radius: '25px',
-    shadow: '0 6px 20px rgba(0,0,0,0.08)',
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-};
 
 // Mock Data for the Boarding Owner
 const ownerData = {
@@ -38,11 +24,11 @@ const ownerData = {
 // --- Reusable Components (Adapted for Owner) ---
 
 const ProfileStatItem = ({ number, label }) => (
-    <div className="stat-item text-center p-4 rounded-xl" style={{ backgroundColor: COLORS.light }}>
-        <div className="stat-number text-3xl font-bold mb-0.5" style={{ color: COLORS.primary }}>
+    <div className="stat-item text-center p-4 rounded-xl" style={{ backgroundColor: "var(--light)" }}>
+        <div className="stat-number text-3xl font-bold mb-0.5" style={{ color: "var(--primary)" }}>
             {number}
         </div>
-        <div className="stat-label text-sm" style={{ color: COLORS.muted }}>
+        <div className="stat-label text-sm" style={{ color: "var(--muted)" }}>
             {label}
         </div>
     </div>
@@ -54,21 +40,21 @@ const InfoItem = ({ label, value, fullWidth = false }) => (
          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(232, 219, 199, 0.3)'}
          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
     >
-        <label className="font-semibold text-sm" style={{ color: COLORS.muted }}>{label}</label>
-        <p className="text-base" style={{ color: COLORS.text }}>{value}</p>
+        <label className="font-semibold text-sm" style={{ color: "var(--muted)" }}>{label}</label>
+        <p className="text-base" style={{ color: "var(--text)" }}>{value}</p>
     </div>
 );
 
 const ProfileSection = ({ title, icon, children, onEdit }) => (
-    <section className="profile-section bg-white p-6 rounded-[25px] shadow-xl transition duration-300" style={{ boxShadow: COLORS.shadow }}>
-        <div className="section-header-with-edit flex justify-between items-center mb-4 pb-4 border-b" style={{ borderColor: COLORS.light }}>
-            <h3 className="text-[1.3rem] font-semibold flex items-center gap-2" style={{ color: COLORS.primary }}>
+    <section className="profile-section bg-white p-6 rounded-[25px] shadow-xl transition duration-300" style={{ boxShadow: "var(--shadow)" }}>
+        <div className="section-header-with-edit flex justify-between items-center mb-4 pb-4 border-b" style={{ borderColor: "var(--light)" }}>
+            <h3 className="text-[1.3rem] font-semibold flex items-center gap-2" style={{ color: "var(--primary)" }}>
                 <i className={icon}></i>
                 {title}
             </h3>
             {onEdit && (
                 <button className="btn btn-secondary btn-sm px-3 py-2 text-sm font-semibold flex items-center gap-1 rounded-[25px] transition duration-300" 
-                        style={{ backgroundColor: COLORS.light, color: COLORS.text }}
+                        style={{ backgroundColor: "var(--light)", color: "var(--text)" }}
                         onClick={onEdit}>
                     <i className="fas fa-edit text-xs"></i> Edit
                 </button>
@@ -98,32 +84,32 @@ export default function ProfilePage() {
                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
                     backdropFilter: 'blur(5px)',
                     WebkitBackdropFilter: 'blur(5px)',
-                    boxShadow: COLORS.shadow,
+                    boxShadow: "var(--shadow)",
                 }}
             >
                 <div className="header-left flex flex-col">
-                    <h1 className="text-[1.8rem] font-bold leading-tight" style={{ color: COLORS.primary }}>
+                    <h1 className="text-[1.8rem] font-bold leading-tight" style={{ color: "var(--primary)" }}>
                         My Profile
                     </h1>
-                    <p className="text-base" style={{ color: COLORS.muted }}>
+                    <p className="text-base" style={{ color: "var(--muted)" }}>
                         Manage your business and personal account settings
                     </p>
                 </div>
                 
                 <div className="header-right flex items-center gap-6">
                     <div className="notification-bell relative cursor-pointer p-3 rounded-full"
-                          style={{ backgroundColor: COLORS.light, color: COLORS.text }}>
+                          style={{ backgroundColor: "var(--light)", color: "var(--text)" }}>
                         <i className="fas fa-bell"></i>
                         <span className="notification-count absolute top-[-5px] right-[-5px] w-5 h-5 text-[0.75rem] flex items-center justify-center font-bold rounded-full"
-                              style={{ backgroundColor: COLORS.error, color: 'white' }}>
+                              style={{ backgroundColor: "var(--error)", color: 'white' }}>
                             {notificationCount}
                         </span>
                     </div>
 
                     <div className="user-menu flex items-center gap-3 cursor-pointer p-2 px-4 rounded-[25px] transition duration-300"
-                         style={{ backgroundColor: COLORS.light, color: COLORS.text }}>
+                         style={{ backgroundColor: "var(--light)", color: "var(--text)" }}>
                         <img src={ownerData.avatar} alt={ownerData.firstName} className="user-avatar w-10 h-10 rounded-full object-cover" 
-                            style={{ border: `2px solid ${COLORS.accent}` }} />
+                            style={{ border: `2px solid ${"var(--accent)"}` }} />
                         <span>{ownerData.firstName} {ownerData.lastName}</span>
                     </div>
                 </div>
@@ -131,20 +117,20 @@ export default function ProfilePage() {
 
             {/* Profile Overview Section */}
             <section className="dashboard-section">
-                <div className="profile-header bg-white p-8 rounded-[25px] shadow-xl flex justify-between items-start gap-8" style={{ boxShadow: COLORS.shadow }}>
+                <div className="profile-header bg-white p-8 rounded-[25px] shadow-xl flex justify-between items-start gap-8" style={{ boxShadow: "var(--shadow)" }}>
                     <div className="profile-avatar-section flex gap-6 items-start">
                         <div className="avatar-container relative shrink-0">
-                            <img src={ownerData.avatar} alt="Owner Avatar" className="profile-avatar w-[120px] h-[120px] rounded-full object-cover" style={{ border: `4px solid ${COLORS.accent}` }} />
+                            <img src={ownerData.avatar} alt="Owner Avatar" className="profile-avatar w-[120px] h-[120px] rounded-full object-cover" style={{ border: `4px solid ${"var(--accent)"}` }} />
                             <button className="avatar-edit-btn absolute bottom-1 right-1 w-9 h-9 bg-orange-500 text-white rounded-full flex items-center justify-center transition duration-300 hover:scale-110" 
-                                    style={{ backgroundColor: COLORS.accent }} 
+                                    style={{ backgroundColor: "var(--accent)" }} 
                                     onClick={() => alert('Opening Change Avatar Modal')}>
                                 <i className="fas fa-camera text-sm"></i>
                             </button>
                         </div>
                         <div className="avatar-info">
-                            <h2 className="text-[1.8rem] font-semibold mb-1" style={{ color: COLORS.text }}>{ownerData.businessName}</h2>
-                            <p className="profile-email text-lg" style={{ color: COLORS.muted }}>{ownerData.email}</p>
-                            <p className="profile-role font-semibold mb-3" style={{ color: COLORS.accent }}>{ownerData.role}</p>
+                            <h2 className="text-[1.8rem] font-semibold mb-1" style={{ color: "var(--text)" }}>{ownerData.businessName}</h2>
+                            <p className="profile-email text-lg" style={{ color: "var(--muted)" }}>{ownerData.email}</p>
+                            <p className="profile-role font-semibold mb-3" style={{ color: "var(--accent)" }}>{ownerData.role}</p>
                             <div className="profile-badges flex gap-2 flex-wrap">
                                 <span className="badge verified px-3 py-1 text-xs font-semibold rounded-full" style={{ background: '#DCFCE7', color: '#16A34A' }}>
                                     <i className="fas fa-check-circle mr-1"></i> {ownerData.verificationStatus}
@@ -209,17 +195,17 @@ export default function ProfilePage() {
                         onEdit={() => alert('Opening Settings Modal')}
                     >
                         <div className="preferences-grid flex flex-col gap-3">
-                            <div className="preference-item flex justify-between items-center p-4 rounded-xl" style={{ backgroundColor: COLORS.light }}>
+                            <div className="preference-item flex justify-between items-center p-4 rounded-xl" style={{ backgroundColor: "var(--light)" }}>
                                 <div className="preference-info">
-                                    <h4 className="font-semibold" style={{ color: COLORS.text }}>New Appointment Alerts</h4>
-                                    <p className="text-sm" style={{ color: COLORS.muted }}>Receive instant alerts for student visit requests.</p>
+                                    <h4 className="font-semibold" style={{ color: "var(--text)" }}>New Appointment Alerts</h4>
+                                    <p className="text-sm" style={{ color: "var(--muted)" }}>Receive instant alerts for student visit requests.</p>
                                 </div>
                                 <ToggleSwitch id="apptAlerts" checked={true} onChange={() => {}} />
                             </div>
-                            <div className="preference-item flex justify-between items-center p-4 rounded-xl" style={{ backgroundColor: COLORS.light }}>
+                            <div className="preference-item flex justify-between items-center p-4 rounded-xl" style={{ backgroundColor: "var(--light)" }}>
                                 <div className="preference-info">
-                                    <h4 className="font-semibold" style={{ color: COLORS.text }}>Auto-Confirmation</h4>
-                                    <p className="text-sm" style={{ color: COLORS.muted }}>Automatically confirm visits if slot is open.</p>
+                                    <h4 className="font-semibold" style={{ color: "var(--text)" }}>Auto-Confirmation</h4>
+                                    <p className="text-sm" style={{ color: "var(--muted)" }}>Automatically confirm visits if slot is open.</p>
                                 </div>
                                 <ToggleSwitch id="autoConfirm" checked={false} onChange={() => {}} />
                             </div>
@@ -233,15 +219,15 @@ export default function ProfilePage() {
                  <div className="modal fixed top-0 left-0 w-full h-full flex items-center justify-center p-4 z-50" 
                       style={{ background: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-content bg-white rounded-[25px] shadow-2xl w-full max-w-[500px] max-h-[90vh] overflow-y-auto">
-                        <div className="modal-header flex justify-between items-center p-6 border-b" style={{ borderColor: COLORS.light }}>
-                            <h3 className="text-xl font-bold" style={{ color: COLORS.primary }}>Edit Business Details</h3>
-                            <button className="modal-close text-3xl cursor-pointer" style={{ color: COLORS.muted }} onClick={() => setIsEditBusinessModalOpen(false)}>&times;</button>
+                        <div className="modal-header flex justify-between items-center p-6 border-b" style={{ borderColor: "var(--light)" }}>
+                            <h3 className="text-xl font-bold" style={{ color: "var(--primary)" }}>Edit Business Details</h3>
+                            <button className="modal-close text-3xl cursor-pointer" style={{ color: "var(--muted)" }} onClick={() => setIsEditBusinessModalOpen(false)}>&times;</button>
                         </div>
                         <div className="modal-body p-6">
-                            <p style={{ color: COLORS.muted }}>This modal would contain the form fields to update the business name, address, and primary contact information.</p>
-                            <div className="form-actions flex justify-end gap-3 pt-4 border-t" style={{ borderColor: COLORS.light }}>
+                            <p style={{ color: "var(--muted)" }}>This modal would contain the form fields to update the business name, address, and primary contact information.</p>
+                            <div className="form-actions flex justify-end gap-3 pt-4 border-t" style={{ borderColor: "var(--light)" }}>
                                 <button className="btn btn-secondary px-4 py-2 rounded-[25px] font-semibold" onClick={() => setIsEditBusinessModalOpen(false)}>Cancel</button>
-                                <button className="btn btn-primary px-4 py-2 rounded-[25px] font-semibold" style={{ backgroundColor: COLORS.accent, color: 'white' }}>
+                                <button className="btn btn-primary px-4 py-2 rounded-[25px] font-semibold" style={{ backgroundColor: "var(--accent)", color: 'white' }}>
                                     <i className="fas fa-save mr-1"></i> Save Changes
                                 </button>
                             </div>
@@ -258,7 +244,7 @@ const ToggleSwitch = ({ id, checked, onChange }) => (
     <label className="toggle-switch relative inline-block w-[60px] h-[34px]">
         <input type="checkbox" id={id} checked={checked} onChange={onChange} className="opacity-0 w-0 h-0" />
         <span className="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 rounded-full"
-              style={{ backgroundColor: checked ? COLORS.accent : '#ccc', transition: '.4s' }}>
+              style={{ backgroundColor: checked ? "var(--accent)" : '#ccc', transition: '.4s' }}>
             <span className="absolute content-none h-[26px] w-[26px] left-1 bottom-1 bg-white rounded-full"
                   style={{ transition: '.4s', transform: checked ? 'translateX(26px)' : 'translateX(0)' }}>
             </span>
