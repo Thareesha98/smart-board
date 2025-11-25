@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FormGroup from "../../components/Owner/forms/FormGroup";
+import HeaderBar from "../../components/Owner/common/HeaderBar";
+import { ownerData } from "../../data/mockData.js";
 
 const availableAmenities = [
   { label: "Attached Bathroom", icon: "fa-bath" },
@@ -9,6 +11,8 @@ const availableAmenities = [
   { label: "Parking", icon: "fa-car" },
   { label: "Laundry", icon: "fa-washing-machine" },
 ];
+
+const notificationCount = 3;
 
 const CreateAdPage = () => {
   const [formData, setFormData] = useState({
@@ -25,8 +29,8 @@ const CreateAdPage = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('../myAds');
-  }
+    navigate("../myAds");
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -49,7 +53,7 @@ const CreateAdPage = () => {
     setTimeout(() => {
       alert("Boarding Ad Created Successfully!");
       setIsSubmitting(false);
-      navigate('../myAds'); // Redirect after successful creation
+      navigate("../myAds"); // Redirect after successful creation
     }, 2000);
   };
 
@@ -59,36 +63,23 @@ const CreateAdPage = () => {
   return (
     <div className="space-y-6">
       {/* Horizontal Header */}
-      <header
-        className="content-header flex justify-between items-center p-6 rounded-[25px] shadow-lg sticky top-3 z-10"
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(5px)",
-          WebkitBackdropFilter: "blur(5px)",
-          boxShadow: "var(--shadow)",
-          marginTop: 0,
-        }}
+      <HeaderBar
+        title="Create New Ad"
+        subtitle="List a new boarding space for students (Owner View)"
+        notificationCount={notificationCount}
+        userAvatar={ownerData.avatar}
+        userName={ownerData.firstName}
       >
-        <div className="header-left flex flex-col">
-          <h1
-            className="text-[1.8rem] font-bold leading-tight"
-            style={{ color: "var(--primary)" }}
-          >
-            Create New Ad
-          </h1>
-          <p className="text-base" style={{ color: "var(--muted)" }}>
-            List a new boarding space for students (Owner View)
-          </p>
-        </div>
-
-        <button 
-          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-          style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
+        {/* Action Button for Delete Ad */}
+        <button
+          className="px-6 py-2 font-semibold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+          style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
           onClick={handleBack}
         >
-          <i className="fas fa-arrow-left mr-2"></i> Back to Ads
+          <i className="fas fa-arrow-left mr-2"></i>
+          Back to Ads
         </button>
-      </header>
+      </HeaderBar>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Main Form Card */}

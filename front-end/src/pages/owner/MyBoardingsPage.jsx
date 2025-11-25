@@ -1,65 +1,9 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import StatWidget from "../../components/Owner/dashboard/StatWidget"; // Reusable StatWidget
 
-// Mock Data for the Boardings
-const boardingsData = [ /* ... boardingsData data ... */
-  {
-    id: "sunshine-hostel",
-    name: "Sunshine Hostel",
-    address: "123 University Road, Colombo 03",
-    image:
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop",
-    rent: "$200 - $300",
-    availableRooms: 2,
-    totalRooms: 4,
-    totalTenants: 6,
-    rating: 4.5,
-    status: "active",
-    features: ["4 Rooms", "6 Tenants"],
-  },
-  {
-    id: "city-view",
-    name: "City View Apartments",
-    address: "45 Galle Road, Colombo 04",
-    image:
-      "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=400&h=250&fit=crop",
-    rent: "$350 - $500",
-    availableRooms: 2,
-    totalRooms: 6,
-    totalTenants: 4,
-    rating: 4.2,
-    status: "active",
-    features: ["6 Rooms", "4 Tenants"],
-  },
-  {
-    id: "green-valley",
-    name: "Green Valley Hostel",
-    address: "78 Kandy Road, Kadawatha",
-    image:
-      "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400&h=250&fit=crop",
-    rent: "$150 - $250",
-    availableRooms: 3,
-    totalRooms: 3,
-    totalTenants: 0,
-    rating: 0.0,
-    status: "pending",
-    features: ["3 Rooms", "0 Tenants"],
-  },
-];
-
-// Mock Stat Data
-const statData = {
-  totalProperties: 8,
-  activeProperties: 6,
-  pendingProperties: 2,
-  currentTenants: 12,
-  occupancyRate: "75%",
-  availableRooms: 4,
-  totalRooms: 16,
-  avgRating: "4.2/5.0",
-  reviewCount: 45,
-};
+import { boardingsData, statData, ownerData } from "../../data/mockData.js";
+import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
 
 // --- Helper Component (BoardingCard is kept here as it's complex and unique to this page) ---
 const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
@@ -237,10 +181,15 @@ const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
   );
 };
 
+const notificationCount = 3;
 
 // --- Main Component ---
 export default function MyBoardingsPage() {
   const [viewMode, setViewMode] = useState("grid");
+
+  const handleCreateNewAd = () => {
+        Navigate('../createAd');
+    };
 
   const handleManage = (id) => {
     alert(`Opening Manage Modal for Property ID: ${id}`);
@@ -253,35 +202,22 @@ export default function MyBoardingsPage() {
   return (
     <div className="pt-4 space-y-6">
       {/* Horizontal Header (Inline, can be replaced by HeaderBar if needed) */}
-      <header
-        className="content-header flex justify-between items-center p-6 rounded-[25px] shadow-lg sticky top-6 z-10"
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(5px)",
-          boxShadow: "var(--shadow)",
-        }}
+      <HeaderBar
+        title="My Boardings"
+        subtitle="Manage your properties and view tenant details"
+        notificationCount={notificationCount}
+        userAvatar={ownerData.avatar}
+        userName={ownerData.firstName}
       >
-        <div className="header-left flex flex-col">
-          <h1
-            className="text-[1.8rem] font-bold leading-tight"
-            style={{ color: "var(--primary)" }}
-          >
-            My Boardings
-          </h1>
-          <p className="text-base" style={{ color: "var(--muted)" }}>
-            Manage your properties and view tenant details
-          </p>
-        </div>
-        <div className="header-right flex items-center gap-6">
-          <button
-            className="btn btn-primary px-4 py-2 rounded-[25px] font-semibold"
-            style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
-          >
-            <i className="fas fa-plus"></i>
-            Post New Boarding
-          </button>
-        </div>
-      </header>
+        <button
+          className="btn btn-primary px-4 py-2 rounded-[25px] font-semibold"
+          style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
+          onClick={handleCreateNewAd}
+        >
+          <i className="fas fa-plus"></i>
+          Post New Boarding
+        </button>
+      </HeaderBar>
 
       {/* 1. Stats Overview (using StatWidget) */}
       <section className="stats-overview">

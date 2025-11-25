@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { mockAppointments } from "../../data/mockData";
+import { mockAppointments, ownerData } from "../../data/mockData";
+import HeaderBar from "../../components/Owner/common/HeaderBar";
 
 
 
@@ -46,6 +47,7 @@ const getStatusBadgeStyle = (status) => {
     }
   };
 
+const notificationCount = 2;
 
 const AppointmentsPage = () => {
   const [appointments, setAppointments] = useState(mockAppointments);
@@ -211,30 +213,15 @@ const AppointmentsPage = () => {
   };
 
   return (
-    <div className="pt-4">
+    <div className="pt-4 space-y-6">
       {/* Owner Header */}
-      <header
-        className="flex justify-between items-center mb-6 p-6 rounded-[25px] shadow-lg sticky top-[1rem] z-10"
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.7)",
-          backdropFilter: "blur(5px)",
-          boxShadow: "var(--shadow)",
-          marginTop: "0",
-          top: "1.5rem",
-        }}
-      >
-        <div className="flex flex-col">
-          <h1
-            className="text-[1.8rem] font-bold leading-tight"
-            style={{ color: "var(--primary)" }}
-          >
-            Appointments Management
-          </h1>
-          <p className="text-base" style={{ color: "var(--muted)" }}>
-            Review, confirm, or reject incoming visit requests from students.
-          </p>
-        </div>
-      </header>
+      <HeaderBar
+        title="Appointments Management"
+        subtitle="Review, confirm, or reject incoming visit requests from students."
+        notificationCount={notificationCount}
+        userAvatar={ownerData.avatar}
+        userName={ownerData.firstName}
+      />
 
       {/* Appointment Categories */}
       <section

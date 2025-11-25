@@ -115,11 +115,11 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 pt-4">
       <HeaderBar
-        title={`Welcome back, ${dashboardData.userName.split(" ")[0]}!`}
+        title={`Welcome back, ${ownerData.firstName}!`}
         subtitle="Manage your boarding properties efficiently"
         notificationCount={notificationCount}
-        userAvatar={userAvatar}
-        userName={userName}
+        userAvatar={ownerData.avatar}
+        userName={ownerData.firstName}
       />
 
       {/* 1. Stats Overview */}

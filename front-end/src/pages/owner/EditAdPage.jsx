@@ -1,32 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'; 
+import { useNavigate, useParams } from 'react-router-dom'; 
 import FormGroup from "../../components/Owner/forms/FormGroup"; // Import the reusable FormGroup
+import { ownerData,mockAds } from '../../data/mockData';
+import HeaderBar from '../../components/Owner/common/HeaderBar';
 
-
-// ⚠️ MOCK DATABASE/API DATA
-const mockAdDatabase = {
-    // ... (mock data remains the same)
-    '456': {
-        title: 'Budget Friendly Room, 10 min to Campus',
-        address: '777 Suburb Road, Matara',
-        rent: '10000',
-        deposit: '20000',
-        description: "A secure, clean room suitable for male students. Shared bathroom. Includes essential furniture.",
-        amenities: ['Kitchen Access', 'Laundry'],
-        currentImages: ['url-to-budget-room-img-1', 'url-to-budget-room-img-2'],
-        adStatus: 'Draft',
-    },
-    '123': {
-        title: 'Luxury Studio near University',
-        address: 'No. 34, Temple Road, Matara',
-        rent: '18000',
-        deposit: '36000',
-        description: "A newly built, fully furnished luxury studio apartment...",
-        amenities: ['Attached Bathroom', 'Wi-Fi', 'Parking'],
-        currentImages: ['url-to-luxury-img-1', 'url-to-luxury-img-2', 'url-to-luxury-img-3'],
-        adStatus: 'Active',
-    },
-};
 
 const availableAmenities = [
     { label: 'Attached Bathroom', icon: 'fa-bath' },
@@ -46,44 +23,54 @@ const getStatusBadgeStyle = (status) => {
     }
 };
 
-
+// --- Main Component ---
 const EditAdPage = () => {
     const { adId } = useParams(); 
+    const navigate = useNavigate();
+    
     const [formData, setFormData] = useState(null); 
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [newImages, setNewImages] = useState([]);
+    const [newImages, setNewImages] = useState([]); // Array to hold new files
+
     
+    // 1. Data Fetching Logic: Find the ad details from the combined list
     useEffect(() => {
         setIsLoading(true);
         setFormData(null); 
         
+        // Simulate API/DB lookup delay
         setTimeout(() => {
-            const adData = mockAdDatabase[adId];
-            
-            if (adData) {
+            // Find the ad in the central list by ID
+            const ad = mockAds.find(item => item.id === adId);
+
+            if (ad) {
+                // Map the listing data structure to the form data structure
+                const adData = {
+                    title: ad.title,
+                    address: ad.address,
+                    rent: String(ad.rent), // Ensure rent is a string for input fields
+                    deposit: '30000', // Mock deposit since it wasn't in the original mockAds structure
+                    description: `This is the detailed description for Ad ID ${adId}.`, // Placeholder description
+                    amenities: ['Wi-Fi', 'Parking'], // Placeholder amenities
+                    currentImages: ['https://source.unsplash.com/random/100x100?house', 'https://source.unsplash.com/random/100x100?room'],
+                    adStatus: ad.status || 'Draft', // Use 'status' field from combined data
+                };
+                
                 setFormData(adData);
             } else {
+                console.error(`Ad ID ${adId} not found.`);
                 setFormData({
                     title: 'Ad Not Found', address: '', rent: '', deposit: '', 
                     description: '', amenities: [], currentImages: [], adStatus: 'Error' 
                 });
             }
             setIsLoading(false);
-        }, 1000); 
+        }, 500); 
+        
     }, [adId]); 
 
-    if (isLoading || !formData) {
-        return (
-            <div className="min-h-screen p-8 flex justify-center items-center" style={{ backgroundColor: 'var(--light)' }}>
-                <div className="flex items-center space-x-3 text-xl font-semibold" style={{ color: 'var(--primary)' }}>
-                    <i className="fas fa-spinner fa-spin"></i>
-                    <span>Loading Ad Details for ID: {adId}...</span>
-                </div>
-            </div>
-        );
-    }
-
+    // --- Form Handlers ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         if (type === 'checkbox') {
@@ -116,45 +103,44 @@ const EditAdPage = () => {
             alert(`Ad ID ${adId} Updated Successfully!`);
             setIsSubmitting(false);
             setNewImages([]);
-        }, 2000);
+            navigate('/ownerLayout/myAds'); // Redirect back to My Ads list
+        }, 1500);
     };
     
+    if (isLoading || !formData) {
+        return (
+            <div className="min-h-screen p-8 flex justify-center items-center" style={{ backgroundColor: 'var(--light)' }}>
+                <div className="flex items-center space-x-3 text-xl font-semibold" style={{ color: 'var(--primary)' }}>
+                    <i className="fas fa-spinner fa-spin"></i>
+                    <span>Loading Ad Details for ID: {adId}...</span>
+                </div>
+            </div>
+        );
+    }
+    
+    const notificationCount = 1; // Example notification count
+
     return (
-        <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--light)' }}>
-            {/* Header */}
-            <header 
-                className="flex flex-col sm:flex-row justify-between items-center mb-8 p-6 rounded-3xl shadow-lg sticky top-6 z-10"
-                style={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-                    backdropFilter: 'blur(5px)',
-                    WebkitBackdropFilter: 'blur(5px)'
-                }}
+        <div className="pt-4 space-y-6" style={{ backgroundColor: 'var(--light)' }}>
+            
+            {/* 🌟 Standardized HeaderBar */}
+            <HeaderBar
+                title={`Edit Boarding Ad: ${adId}`}
+                subtitle={`Updating: **${formData.title}**`}
+                notificationCount={notificationCount}
+                userAvatar={ownerData.avatar}
+                userName={ownerData.firstName}
             >
-                <div className="flex flex-col mb-4 sm:mb-0">
-                    <h1 className="text-3xl font-bold" style={{ color: 'var(--primary)' }}>
-                        Edit Boarding Ad: {adId}
-                    </h1>
-                    <p className="text-sm" style={{ color: 'var(--muted)' }}>
-                        Updating: **{formData.title}**
-                    </p>
-                </div>
-                <div className="flex items-center space-x-4">
-                    <span 
-                        className="px-4 py-2 text-sm font-semibold rounded-full"
-                        style={getStatusBadgeStyle(formData.adStatus)}
-                    >
-                        Status: {formData.adStatus}
-                    </span>
-                    <button 
-                        className="px-6 py-2 font-semibold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-                        style={{ backgroundColor: 'var(--primary)', color: 'var(--card-bg)' }}
-                        onClick={() => console.log('Delete Ad')}
-                    >
-                        <i className="fas fa-trash-alt mr-2"></i>
-                        Delete Ad
-                    </button>
-                </div>
-            </header>
+                {/* Action Button for Delete Ad */}
+                <button 
+                    className="px-6 py-2 font-semibold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+                    style={{ backgroundColor: 'var(--primary)', color: 'var(--card-bg)' }}
+                    onClick={() => console.log('Delete Ad')}
+                >
+                    <i className="fas fa-trash-alt mr-2"></i>
+                    Delete Ad
+                </button>
+            </HeaderBar>
             
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Main Form Card */}
@@ -162,9 +148,18 @@ const EditAdPage = () => {
                     className="bg-white p-8 rounded-3xl shadow-xl" 
                     style={{ boxShadow: '0 6px 20px rgba(0,0,0,0.08)' }}
                 >
-                    <h2 className="text-xl font-semibold mb-6 pb-3 border-b" style={{ color: 'var(--primary)', borderColor: 'var(--light)' }}>
-                        Ad Information
-                    </h2>
+                    <div className="flex justify-between items-center mb-6 pb-3 border-b" style={{ borderColor: 'var(--light)' }}>
+                        <h2 className="text-xl font-semibold" style={{ color: 'var(--primary)' }}>
+                            Ad Information
+                        </h2>
+                        {/* Status Badge from the original header */}
+                        <span 
+                            className="px-4 py-2 text-sm font-semibold rounded-full"
+                            style={getStatusBadgeStyle(formData.adStatus)}
+                        >
+                            Status: {formData.adStatus}
+                        </span>
+                    </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormGroup label="Ad Title" name="title" value={formData.title} onChange={handleChange} placeholder="e.g., Spacious Room near Campus" type="text" />
@@ -270,7 +265,7 @@ const EditAdPage = () => {
                         </p>
                     </div>
 
-                    {/* New Photos Upload section goes here (omitted for brevity) */}
+                    {/* New Photos Upload (omitted for brevity) */}
                 </div>
 
                 {/* Submission Button */}
@@ -283,10 +278,10 @@ const EditAdPage = () => {
                             border: `2px solid ${'var(--primary)'}`,
                             color: 'var(--primary)',
                         }}
-                        onClick={() => console.log('Discard Changes')}
+                        onClick={() => navigate('/ownerLayout/myAds')}
                     >
                         <i className="fas fa-undo mr-2"></i>
-                        Discard Changes
+                        Discard & Go Back
                     </button>
                     <button
                         type="submit"

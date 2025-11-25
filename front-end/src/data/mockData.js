@@ -81,6 +81,32 @@ export const recentActivity = [
   },
 ];
 
+export const mockAdDatabase = [
+    // ... (mock data remains the same)
+    {
+        id : '456',
+        title: 'Budget Friendly Room, 10 min to Campus',
+        address: '777 Suburb Road, Matara',
+        rent: '10000',
+        deposit: '20000',
+        description: "A secure, clean room suitable for male students. Shared bathroom. Includes essential furniture.",
+        amenities: ['Kitchen Access', 'Laundry'],
+        currentImages: ['url-to-budget-room-img-1', 'url-to-budget-room-img-2'],
+        adStatus: 'Draft',
+    },
+    {
+        id : '123',
+        title: 'Luxury Studio near University',
+        address: 'No. 34, Temple Road, Matara',
+        rent: '18000',
+        deposit: '36000',
+        description: "A newly built, fully furnished luxury studio apartment...",
+        amenities: ['Attached Bathroom', 'Wi-Fi', 'Parking'],
+        currentImages: ['url-to-luxury-img-1', 'url-to-luxury-img-2', 'url-to-luxury-img-3'],
+        adStatus: 'Active',
+    }
+];
+
 export const mockAds = [
   {
       id: '101',
@@ -91,7 +117,7 @@ export const mockAds = [
       views: 1240,
       appointments: 42,
       selected: 3,
-      image: 'https://images.unsplash.com/photo-1558036117-15e82a2c9a9a?auto=format&fit=crop&w=200&q=80',
+      image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=200&q=80',
   },
   {
       id: '102',
@@ -136,6 +162,29 @@ export const mockAds = [
       appointments: 5,
       selected: 0,
       image: 'https://images.unsplash.com/photo-1571624436279-b272aff752b5?auto=format&fit=crop&w=200&q=80',
+  },
+  {
+    id: '456',
+    title: 'Budget Friendly Room, 10 min to Campus',
+    address: '777 Suburb Road, Matara',
+    rent: 10000,
+    status: 'Draft', // Using 'status' field for consistency
+    views: 10,
+    appointments: 0,
+    selected: 0,
+    image: 'https://images.unsplash.com/photo-1571624436279-b272aff752b5?auto=format&fit=crop&w=200&q=80',
+  },
+  // Added from mockAdDatabase '123'
+  {
+    id: '123',
+    title: 'Luxury Studio near University',
+    address: 'No. 34, Temple Road, Matara',
+    rent: 18000,
+    status: 'Active',
+    views: 2000,
+    appointments: 60,
+    selected: 5,
+    image: 'https://images.unsplash.com/photo-1571624436279-b272aff752b5?auto=format&fit=crop&w=200&q=80',
   },
 ];
 

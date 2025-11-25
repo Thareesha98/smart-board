@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import UtilityCard from "../../components/Owner/utilities/UtilityCard"; // Import the reusable UtilityCard
 
-import { INITIAL_BOARDINGS_DATA } from "../../data/mockData.js";
+import { INITIAL_BOARDINGS_DATA, ownerData } from "../../data/mockData.js";
+import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
 
 
 const formatCost = (cost) => `LKR ${Math.round(cost).toLocaleString()}`;
@@ -28,6 +29,7 @@ const calculateDynamicBill = (form, baseRent) => {
   };
 };
 
+const notificationCount = 1;
 
 export default function UtilityPage() {
   const [boardings, setBoardings] = useState(INITIAL_BOARDINGS_DATA);
@@ -97,27 +99,13 @@ export default function UtilityPage() {
   return (
     <div className="pt-4 space-y-6">
       {/* Horizontal Header (content-header equivalent) */}
-      <header
-        className="content-header flex justify-between items-center p-6 rounded-[25px] shadow-lg sticky top-0 z-10"
-        style={{
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(5px)",
-          boxShadow: "var(--shadow)",
-        }}
-      >
-        <div className="header-left flex flex-col">
-          <h1
-            className="text-[1.8rem] font-bold leading-tight"
-            style={{ color: "var(--primary)" }}
-          >
-            Utilities Management
-          </h1>
-          <p className="text-base" style={{ color: "var(--muted)" }}>
-            Add and manage monthly water and electricity costs for your
-            boardings.
-          </p>
-        </div>
-      </header>
+      <HeaderBar
+        title="Utilities Management"
+        subtitle="Add and manage monthly water and electricity costs for your boardings."
+        notificationCount={notificationCount}
+        userAvatar={ownerData.avatar}
+        userName={ownerData.firstName}
+      />
 
       {/* Utility Overview Cards */}
       <section className="billing-overview">
