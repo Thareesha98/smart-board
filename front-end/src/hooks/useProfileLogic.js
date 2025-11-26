@@ -1,12 +1,17 @@
-import { useState } from 'react';
-import { sampleProfileData } from '../data/profileData';
+import { useAuth } from '../context/AuthContext';
 
 const useProfileLogic = () => {
-  const [userData, setUserData] = useState(sampleProfileData);
+  // Get everything from AuthContext instead of local state
+  const { 
+    currentUser, 
+    updateProfile: updateProfileContext, 
+    updateAvatar: updateAvatarContext, 
+    updatePreferences: updatePreferencesContext 
+  } = useAuth();
 
+  // Update personal info - syncs with AuthContext
   const updatePersonalInfo = (data) => {
-    setUserData(prev => ({
-      ...prev,
+    const updatedData = {
       firstName: data.firstName,
       lastName: data.lastName,
       dob: data.dob,
@@ -16,12 +21,13 @@ const useProfileLogic = () => {
       studentId: data.studentId,
       address: data.address,
       emergencyContact: data.emergencyContact,
-    }));
+    };
+    updateProfileContext(updatedData);
   };
 
+  // Update full profile - syncs with AuthContext
   const updateProfile = (data) => {
-    setUserData(prev => ({
-      ...prev,
+    const updatedData = {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
@@ -33,28 +39,22 @@ const useProfileLogic = () => {
       gender: data.gender,
       address: data.address,
       emergencyContact: data.emergencyContact,
-    }));
+    };
+    updateProfileContext(updatedData);
   };
 
+  // Update avatar - syncs with AuthContext (also updates Sidebar & Header)
   const updateAvatar = (avatarUrl) => {
-    setUserData(prev => ({
-      ...prev,
-      avatar: avatarUrl,
-    }));
+    updateAvatarContext(avatarUrl);
   };
 
+  // Update preferences - syncs with AuthContext
   const updatePreferences = (preference, value) => {
-    setUserData(prev => ({
-      ...prev,
-      preferences: {
-        ...prev.preferences,
-        [preference]: value,
-      },
-    }));
+    updatePreferencesContext(preference, value);
   };
 
   return {
-    userData,
+    userData: currentUser || {}, // Return current user from AuthContext
     updatePersonalInfo,
     updateProfile,
     updateAvatar,
