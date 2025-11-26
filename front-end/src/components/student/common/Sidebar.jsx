@@ -11,6 +11,7 @@ import {
   FaUserCircle,
   FaSignOutAlt,
 } from "react-icons/fa";
+import { useAuth } from '../../../context/AuthContext';
 
 const navItems = [
   { path: "/", icon: FaHome, label: "Dashboard", key: "Dashboard" },
@@ -44,7 +45,8 @@ const navItems = [
     label: "Maintenance",
     key: "Maintenance",
   },
-  { path: "/reports", 
+  { 
+    path: "/reports", 
     icon: FaFlag, 
     label: "Report Issues", 
     key: "Reports" 
@@ -52,7 +54,6 @@ const navItems = [
 ];
 
 const SidebarItem = ({ path, Icon, label, currentPath }) => {
-  // Check if the current location matches the item's path
   const isActive =
     currentPath.endsWith(path) || (currentPath === "" && path === "/");
 
@@ -76,12 +77,19 @@ const SidebarItem = ({ path, Icon, label, currentPath }) => {
 
 const Sidebar = () => {
   const location = useLocation();
-  // Get the normalized path for active link comparison (removes leading/trailing slashes)
+  const { currentUser, logout } = useAuth(); // 🔥 GET USER & LOGOUT FROM CONTEXT
   const currentPath = location.pathname.replace(/^\/|\/$/g, "").toLowerCase();
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      logout();
+      window.location.href = '/login'; // Redirect to login
+    }
+  };
 
   return (
     <>
-      {/* Desktop Sidebar*/}
+      {/* Desktop Sidebar */}
       <aside
         className="
         hidden lg:flex flex-col flex-shrink-0 
@@ -112,17 +120,15 @@ const Sidebar = () => {
           <h3 className="px-6 pb-2 pt-1 uppercase text-xs tracking-wider text-accent border-b border-white/10 mb-2 font-semibold">
             MAIN NAVIGATION
           </h3>
-          {navItems.map((item) => {
-            return (
-              <SidebarItem
-                key={item.key}
-                currentPath={currentPath}
-                path={item.path}
-                Icon={item.icon}
-                label={item.label}
-              />
-            );
-          })}
+          {navItems.map((item) => (
+            <SidebarItem
+              key={item.key}
+              currentPath={currentPath}
+              path={item.path}
+              Icon={item.icon}
+              label={item.label}
+            />
+          ))}
         </nav>
 
         <div className="pt-4 mt-auto border-t border-white/10">
@@ -130,16 +136,24 @@ const Sidebar = () => {
             to="/profile"
             className="flex items-center gap-3 p-3 rounded-btn text-white hover:bg-white/10 transition-colors duration-300"
           >
-            <FaUserCircle className="text-xl" />
-            <span className="font-medium">Priya S.</span>
+            {/* 🔥 DYNAMIC AVATAR - Updates when user changes profile pic */}
+            <img 
+              src={currentUser?.avatar || 'https://randomuser.me/api/portraits/women/50.jpg'} 
+              alt={currentUser?.firstName || 'User'}
+              className="w-8 h-8 rounded-full object-cover border-2 border-accent"
+            />
+            {/* 🔥 DYNAMIC NAME - Shows real user name from signup */}
+            <span className="font-medium">
+              {currentUser ? `${currentUser.firstName} ${currentUser.lastName.charAt(0)}.` : 'Guest U.'}
+            </span>
           </Link>
-          <Link
-            to="logout"
-            className="flex items-center gap-3 p-3 rounded-btn text-accent hover:bg-white/10 transition-colors duration-300 mt-1"
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 p-3 rounded-btn text-accent hover:bg-white/10 transition-colors duration-300 mt-1 w-full text-left"
           >
             <FaSignOutAlt className="text-xl" />
             <span className="font-medium">Logout</span>
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -150,12 +164,9 @@ const Sidebar = () => {
           flex-shrink-0
         "
       >
-        {/* FIX APPLIED HERE: Use 'item.icon' directly */}
         {navItems.map((item) => {
           const isActive =
             currentPath.endsWith(item.path) || (currentPath === "" && item.path === "/");
-
-          // Renaming item.icon to Icon is removed, and item.icon is used directly below.
           const IconComponent = item.icon; 
 
           return (
