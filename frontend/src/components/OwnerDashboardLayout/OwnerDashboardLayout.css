@@ -1,0 +1,36 @@
+.odl-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Overview cards row */
+.odl-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Main grid for two sections */
+.odl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.odl-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .odl-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .odl-grid {
+    grid-template-columns: 1fr;
+  }
+}

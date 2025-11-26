@@ -1,0 +1,40 @@
+/* ==== DESCRIPTION CARD ==== */
+.sbms-desc-card {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+  margin-top: 22px;
+}
+
+/* Title */
+.sbms-desc-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* Description text */
+.sbms-desc-text {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.55;
+}
+
+/* ==== FEATURES LIST ==== */
+.sbms-features-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 14px;
+}
+
+.sbms-feature-item {
+  padding: 8px 0;
+  font-size: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #333;
+}
+
+.sbms-feature-item:last-child {
+  border-bottom: none;
+}
