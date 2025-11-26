@@ -1,0 +1,60 @@
+/* ===== HERO SECTION ===== */
+.sbms-hero {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: url("/background.png") center/cover no-repeat, #1e3a8a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dark overlay */
+.sbms-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+/* Content box */
+.sbms-hero-content {
+  position: relative;
+  text-align: center;
+  max-width: 680px;
+  padding: 20px;
+  color: #fff;
+}
+
+/* Title */
+.sbms-hero-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+
+/* Subtitle */
+.sbms-hero-sub {
+  font-size: 17px;
+  color: #e5e7eb;
+  margin-bottom: 24px;
+}
+
+/* CTA Button */
+.sbms-hero-btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.sbms-hero-btn:hover {
+  background: #1d4ed8;
+}

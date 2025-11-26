@@ -1,0 +1,38 @@
+/* HomePage specific styles */
+.homepage-root {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Search container (keeps SearchBar aligned with site width) */
+.homepage-search {
+  margin-top: -60px; /* pull up slightly to overlap hero (visual like template) */
+  max-width: 1100px;
+}
+
+/* Featured section */
+.homepage-feature {
+  max-width: 1100px;
+  margin: 0 auto 40px;
+  padding: 6px 18px;
+}
+
+/* Section title */
+.homepage-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* Small responsive tweak */
+@media (max-width: 880px) {
+  .homepage-search {
+    margin-top: -40px;
+    padding: 0 12px;
+  }
+
+  .homepage-feature {
+    padding: 0 12px;
+  }
+}

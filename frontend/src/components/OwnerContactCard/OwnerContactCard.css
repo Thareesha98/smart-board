@@ -1,0 +1,45 @@
+/* ==== OWNER CARD WRAPPER ==== */
+.sbms-owner-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 320px;
+}
+
+/* Title */
+.sbms-owner-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* Info details */
+.sbms-owner-details {
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: #333;
+}
+
+.sbms-owner-details p {
+  margin-bottom: 6px;
+}
+
+/* Contact button */
+.sbms-owner-btn {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.sbms-owner-btn:hover {
+  background: #1d4ed8;
+}

@@ -1,0 +1,17 @@
+.hero {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.hero-left {
+  flex: 1;
+}
+
+.hero-right {
+  width: 300px;
+}
+
+.home h1 {
+  margin: 0 0 10px 0;
+}

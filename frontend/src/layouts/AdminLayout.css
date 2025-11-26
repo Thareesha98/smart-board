@@ -1,0 +1,65 @@
+/* ==== Layout Wrapper ==== */
+.sbms-adminlayout {
+  display: flex;
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+/* ==== Sidebar ==== */
+.sbms-admin-sidebar {
+  width: 230px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  padding: 22px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.sbms-admin-sidebar-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* ==== Sidebar Navigation ==== */
+.sbms-admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sbms-admin-nav a {
+  text-decoration: none;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #374151;
+  transition: 0.25s ease;
+}
+
+.sbms-admin-nav a:hover {
+  background: #f3f4f6;
+}
+
+.sbms-admin-nav a.active {
+  background: #2563eb;
+  color: white;
+}
+
+/* ==== Main Content ==== */
+.sbms-admin-main {
+  flex: 1;
+  padding: 28px;
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+  .sbms-adminlayout {
+    flex-direction: column;
+  }
+
+  .sbms-admin-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+}

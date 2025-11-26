@@ -1,0 +1,30 @@
+.searchboardings-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Top area */
+.searchboardings-top {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.searchboardings-top h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+/* Results list */
+.searchboardings-results {
+  margin-top: 20px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 880px) {
+  .searchboardings-page {
+    padding: 10px;
+  }
+}
