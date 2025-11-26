@@ -23,10 +23,7 @@ public class BoardingController {
 
    
 
-    // -------------------------------------------------------
-    // 1) GET ALL (only APPROVED) – no filters, no search
-    // GET /api/boardings?page=0&size=10
-    // -------------------------------------------------------
+   
     @GetMapping
     public Page<BoardingSummaryDTO> getAll(
             @RequestParam(defaultValue = "0") int page,
