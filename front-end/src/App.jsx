@@ -1,29 +1,129 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import StudentDashbord from "./pages/student/StudentDashbord";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/student/common/ProtectedRoute";
+
+// Auth Pages
+import LoginPage from "./pages/student/auth/LoginPage";
+import SignupPage from "./pages/student/auth/SignupPage";
+
+// Student Pages
+import StudentDashboard from "./pages/student/StudentDashboard";
 import AppointmentsPage from "./pages/student/AppointmentsPage";
-import MaintenancePage from "./pages/student/MaintenancePage ";
-import MyBoardingsPage from "./pages/student/MyBoardingsPage";
-import BillingPage from "./pages/student/BillingPage";
-import ProfilePage from "./pages/student/ProfilePage";
-import ReportsPage from "./pages/student/ReportsPage";
 import SearchBoardingsPage from "./pages/student/SearchBoardingsPage";
 import BoardingDetailsPage from "./pages/student/BoardingDetailsPage";
+import MyBoardingsPage from "./pages/student/MyBoardingsPage";
+import BillingPage from "./pages/student/BillingPage";
+import MaintenancePage from "./pages/student/MaintenancePage";
+import ReportsPage from "./pages/student/ReportsPage";
+import ProfilePage from "./pages/student/ProfilePage";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route index element={<StudentDashbord />} />
-        <Route path="appointmentpage" element={<AppointmentsPage />} />
-        <Route path="maintenance" element={<MaintenancePage />} />
-        <Route path="my-boardings" element={<MyBoardingsPage />} />
-        <Route path="billing" element={<BillingPage />} />
-        <Route path="profile" element={<ProfilePage />} />
-        <Route path="reports" element={<ReportsPage />} /> 
-        <Route path="search-boardings" element={<SearchBoardingsPage />} />
-        <Route path="boarding-details/:id" element={<BoardingDetailsPage />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* ==================== PUBLIC ROUTES ==================== */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+
+          {/* ==================== PROTECTED ROUTES ==================== */}
+          
+          {/* Dashboard */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <StudentDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Appointments */}
+          <Route
+            path="/appointmentpage"
+            element={
+              <ProtectedRoute>
+                <AppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Search Boardings */}
+          <Route
+            path="/search-boardings"
+            element={
+              <ProtectedRoute>
+                <SearchBoardingsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Boarding Details */}
+          <Route
+            path="/boarding-details/:id"
+            element={
+              <ProtectedRoute>
+                <BoardingDetailsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* My Boardings */}
+          <Route
+            path="/my-boardings"
+            element={
+              <ProtectedRoute>
+                <MyBoardingsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Billing & Payments */}
+          <Route
+            path="/billing"
+            element={
+              <ProtectedRoute>
+                <BillingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Maintenance */}
+          <Route
+            path="/maintenance"
+            element={
+              <ProtectedRoute>
+                <MaintenancePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Reports */}
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <ReportsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Profile */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ==================== FALLBACK ROUTE ==================== */}
+          {/* Redirect any unknown routes to login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
