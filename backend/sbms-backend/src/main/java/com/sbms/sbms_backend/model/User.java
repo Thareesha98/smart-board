@@ -53,6 +53,7 @@ public class User extends BaseEntity {
 
     private boolean verifiedOwner = true;  // For admin approval later
     private int subscription_id;
+    private String accNo;
     
 
     // -----------------------

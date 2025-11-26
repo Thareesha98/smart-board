@@ -1,4 +1,4 @@
-package com.sbms.sbms_backend;
+package com.sbms.sbms_backend.mapper;
 
 
 import com.sbms.sbms_backend.dto.boarding.BoardingDetailDTO;
