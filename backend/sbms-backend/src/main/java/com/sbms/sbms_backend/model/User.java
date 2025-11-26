@@ -31,7 +31,9 @@ public class User extends BaseEntity {
     
     private Gender gender;
     
-    private String nicNumber; 
+    private String nicNumber;
+    
+    private String address;
 
 
     // -----------------------
@@ -47,10 +49,11 @@ public class User extends BaseEntity {
     // (these will be used only if role == OWNER)
     // -----------------------
           // National ID (optional)
-    private String address;             // Owner home/business address
+                // Owner home/business address
 
-    private boolean verifiedOwner = false;  // For admin approval later
-
+    private boolean verifiedOwner = true;  // For admin approval later
+    private int subscription_id;
+    
 
     // -----------------------
     // STUDENT SPECIFIC FIELDS
