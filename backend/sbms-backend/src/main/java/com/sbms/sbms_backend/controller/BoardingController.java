@@ -5,8 +5,9 @@ import com.sbms.sbms_backend.dto.boarding.BoardingSearchRequest;
 import com.sbms.sbms_backend.dto.boarding.BoardingSummaryDTO;
 import com.sbms.sbms_backend.model.enums.BoardingType;
 import com.sbms.sbms_backend.model.enums.Gender;
-import com.sbms.sbms_backend.model.enums.BoardingType;
 import com.sbms.sbms_backend.service.BoardingService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,16 +17,60 @@ import java.math.BigDecimal;
 @RequestMapping("/api/boardings")
 @CrossOrigin
 public class BoardingController {
+	
+	@Autowired
+    private BoardingService boardingService;
 
-    private final BoardingService boardingService;
+   
 
-    public BoardingController(BoardingService boardingService) {
-        this.boardingService = boardingService;
+   
+    @GetMapping
+    public Page<BoardingSummaryDTO> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        BoardingSearchRequest req = new BoardingSearchRequest();
+        req.setPage(page);
+        req.setSize(size);
+        return boardingService.getAll(req);
     }
 
-    // GET /api/boardings?genderType=MALE&boardingType=ROOM&minPrice=5000&maxPrice=15000&addressKeyword=uni
-    @GetMapping
-    public Page<BoardingSummaryDTO> searchBoardings(
+    // -------------------------------------------------------
+    // 2) FILTER ONLY – gender / type / price (NO keyword)
+    // GET /api/boardings/filter?genderType=MALE&boardingType=ROOM&minPrice=5000&maxPrice=15000&page=0&size=10
+    // -------------------------------------------------------
+    @GetMapping("/filter")
+    public Page<BoardingSummaryDTO> getAllFiltered(
+            @RequestParam(required = false) String genderType,
+            @RequestParam(required = false) String boardingType,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        BoardingSearchRequest req = new BoardingSearchRequest();
+
+        if (genderType != null && !genderType.isBlank()) {
+            req.setGenderType(Gender.valueOf(genderType.toUpperCase()));
+        }
+        if (boardingType != null && !boardingType.isBlank()) {
+            req.setBoardingType(BoardingType.valueOf(boardingType.toUpperCase()));
+        }
+
+        req.setMinPrice(minPrice);
+        req.setMaxPrice(maxPrice);
+        req.setPage(page);
+        req.setSize(size);
+
+        return boardingService.getAllFiltered(req);
+    }
+
+    // -------------------------------------------------------
+    // 3) SEARCH with filters + keyword
+    // GET /api/boardings/search?genderType=MALE&boardingType=ROOM&addressKeyword=uni&page=0&size=10
+    // -------------------------------------------------------
+    @GetMapping("/search")
+    public Page<BoardingSummaryDTO> search(
             @RequestParam(required = false) String genderType,
             @RequestParam(required = false) String boardingType,
             @RequestParam(required = false) BigDecimal minPrice,
@@ -34,29 +79,30 @@ public class BoardingController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-
-        BoardingSearchRequest request = new BoardingSearchRequest();
+        BoardingSearchRequest req = new BoardingSearchRequest();
 
         if (genderType != null && !genderType.isBlank()) {
-            request.setGenderType(Gender.valueOf(genderType.toUpperCase()));
+            req.setGenderType(Gender.valueOf(genderType.toUpperCase()));
         }
-
         if (boardingType != null && !boardingType.isBlank()) {
-            request.setBoardingType(BoardingType.valueOf(boardingType.toUpperCase()));
+            req.setBoardingType(BoardingType.valueOf(boardingType.toUpperCase()));
         }
 
-        request.setMinPrice(minPrice);
-        request.setMaxPrice(maxPrice);
-        request.setAddressKeyword(addressKeyword);
-        request.setPage(page);
-        request.setSize(size);
+        req.setMinPrice(minPrice);
+        req.setMaxPrice(maxPrice);
+        req.setAddressKeyword(addressKeyword);
+        req.setPage(page);
+        req.setSize(size);
 
-        return boardingService.searchBoardings(request);
+        return boardingService.searchBoardings(req);
     }
 
+    // -------------------------------------------------------
+    // 4) GET ONE BOARDING BY ID
     // GET /api/boardings/{id}
+    // -------------------------------------------------------
     @GetMapping("/{id}")
-    public BoardingDetailDTO getBoarding(@PathVariable Long id) {
-        return boardingService.getBoardingById(id);
+    public BoardingDetailDTO getOne(@PathVariable Long id) {
+        return boardingService.getById(id);
     }
 }
