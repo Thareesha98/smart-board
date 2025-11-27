@@ -21,7 +21,7 @@ public class UserService {
     private UserRepository userRepository;
 
     // NOTE: bcrypt will be added during JWT implementation
-    @Autowired(required = false)
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
 
