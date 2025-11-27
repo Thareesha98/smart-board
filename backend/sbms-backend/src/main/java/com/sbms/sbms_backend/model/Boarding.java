@@ -21,6 +21,11 @@ public class Boarding extends BaseEntity {
 
 	//ownerID
 	
+	@ManyToOne
+	@JoinColumn(name = "owner_id")
+	private User owner;
+
+	
     @Column(nullable = false, length = 150)
     private String title;
 
