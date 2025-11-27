@@ -6,8 +6,9 @@ import lombok.Data;
 @Data
 public class JwtAuthResponse {
 
-    private String token;          // JWT token
+    private String token;          // Access token (JWT)
+    private String refreshToken;   // DB-based refresh token
     private String tokenType = "Bearer";
 
-    private UserResponseDTO user;  // user info (id, name, role, etc.)
+    private UserResponseDTO user;
 }
