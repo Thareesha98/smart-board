@@ -20,6 +20,7 @@ public class Appointment extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
     private User student;   // representative student (logged-in user)
+    
 
     @Column(nullable = false)
     private int numberOfStudents;  // total students in group (>=1)
