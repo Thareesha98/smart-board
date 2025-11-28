@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import { useNavigate } from "react-router-dom";
+import ReportDetailModal from "../../components/Owner/report/ReportDetailModal";
+
 
 // --- Mock Data & Constants (These should be imported from mockData.js) ---
 const ownerData = {
@@ -16,8 +18,12 @@ const mockReports = [
     property: "Sunshine Hostel",
     student: "Priya Sharma",
     type: "Non-Payment / Late Rent",
+    description:
+      "Priya Sharma has failed to submit the rent for November 2025 despite multiple verbal and written reminders. The payment was due on the 1st.",
     status: "New",
     severity: "High",
+    evidenceCount: 2, // Mock evidence count
+    submittedBy: "Rajesh K.",
   },
   {
     id: 1002,
@@ -25,8 +31,12 @@ const mockReports = [
     property: "City View Apartments",
     student: "Kamal D.",
     type: "Misconduct / Noise Complaint",
+    description:
+      "Received complaints from neighboring tenants regarding loud music and disturbances late at night (past 11 PM) on Nov 18th and 19th.",
     status: "In Progress",
     severity: "Medium",
+    evidenceCount: 0,
+    submittedBy: "Rajesh K.",
   },
   {
     id: 1003,
@@ -34,8 +44,12 @@ const mockReports = [
     property: "Green Valley Hostel",
     student: "Anusha K.",
     type: "Property Damage / Vandalism",
+    description:
+      "A large hole was found punched into the drywall of Room 3. Estimated repair cost provided to the student is LKR 15,000.",
     status: "Resolved",
     severity: "High",
+    evidenceCount: 1,
+    submittedBy: "Rajesh K.",
   },
   {
     id: 1004,
@@ -43,8 +57,12 @@ const mockReports = [
     property: "Sunshine Hostel",
     student: "Rohan Mehta",
     type: "Lease Violation",
+    description:
+      "Rohan has been keeping a pet dog in his room, which is strictly against the lease agreement for the property.",
     status: "New",
     severity: "Medium",
+    evidenceCount: 0,
+    submittedBy: "Rajesh K.",
   },
 ];
 
@@ -73,6 +91,20 @@ const getStatusBadgeStyle = (status) => {
       return {};
   }
 };
+
+const getSeverityStyle = (severity) => {
+  switch (severity) {
+    case "High":
+      return { color: "var(--error)", background: "rgba(239, 68, 68, 0.1)" };
+    case "Medium":
+      return { color: "var(--warning)", background: "rgba(245, 158, 11, 0.1)" };
+    default:
+      return { color: "var(--muted)", background: "var(--light)" };
+  }
+};
+
+
+
 
 // --- Report Components (Kept local) ---
 
@@ -107,18 +139,18 @@ const StatusTab = ({ status, count, currentFilter, setFilter }) => {
   );
 };
 
-const ReportRow = ({ report }) => {
+// --- Report Row Component ---
+const ReportRow = ({ report, onViewDetails }) => {
   const statusStyle = getStatusBadgeStyle(report.status);
-  const severityColor =
-    report.severity === "High" ? "var(--error)" : "var(--warning)";
+  const severityColor = getSeverityStyle(report.severity).color;
 
   return (
     <div
-      className="report-row flex items-center gap-6 p-6 rounded-[25px] shadow-sm transition duration-300"
+      className="report-row flex items-center gap-[1.5rem] p-[1.5rem] rounded-[25px] shadow-sm transition duration-300"
       style={{ backgroundColor: "var(--card-bg)", boxShadow: "var(--shadow)" }}
     >
       {/* 1. Date and ID */}
-      <div className="flex flex-col shrink-0 w-24 text-center">
+      <div className="flex flex-col flex-shrink-0 w-24 text-center">
         <span className="text-xs uppercase" style={{ color: "var(--muted)" }}>
           Report ID
         </span>
@@ -169,9 +201,9 @@ const ReportRow = ({ report }) => {
           Severity: {report.severity}
         </span>
         <button
-          className="btn btn-sm p-2 px-4 rounded-[25px] font-semibold text-sm transition duration-300"
+          className="btn btn-sm p-[0.5rem] px-4 rounded-[25px] font-semibold text-sm transition duration-300"
           style={{ backgroundColor: "var(--primary)", color: "var(--card-bg)" }}
-          onClick={() => alert(`Viewing details for Report #${report.id}`)}
+          onClick={() => onViewDetails(report)} // <-- Call the handler to open modal
         >
           <i className="fas fa-eye"></i> View Details
         </button>
@@ -183,14 +215,18 @@ const ReportRow = ({ report }) => {
 // --- Main Component ---
 export default function ReportsPage() {
   const [filter, setFilter] = useState("New");
+  const [selectedReport, setSelectedReport] = useState(null); // State for the modal
 
   const navigate = useNavigate();
 
   const handleReportAdd = () => {
-    navigate("/ownerLayout/reports/add");
-  }
+    navigate("/ownerLayout/addReport");
+  };
 
-  const counts = mockReports.reduce(
+  // Use the mock reports (or context reports in a real app)
+  const allReports = mockReports;
+
+  const counts = allReports.reduce(
     (acc, rep) => {
       acc[rep.status] = (acc[rep.status] || 0) + 1;
       return acc;
@@ -198,7 +234,15 @@ export default function ReportsPage() {
     { New: 0, "In Progress": 0, Resolved: 0 }
   );
 
-  const filteredReports = mockReports.filter((rep) => rep.status === filter);
+  const filteredReports = allReports.filter((rep) => rep.status === filter);
+
+  const handleViewDetails = (report) => {
+    setSelectedReport(report);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedReport(null);
+  };
 
   return (
     <div className="pt-4 space-y-6">
@@ -210,14 +254,14 @@ export default function ReportsPage() {
         userAvatar={ownerData.avatar}
         userName={ownerData.firstName}
       >
-        <button 
-                    className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-                    style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
-                    onClick={handleReportAdd}
-                >
-                    <i className="fas fa-plus mr-2"></i>
-                    Add New Report
-                </button>
+        <button
+          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+          style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
+          onClick={handleReportAdd}
+        >
+          <i className="fas fa-plus mr-2"></i>
+          Add New Report
+        </button>
       </HeaderBar>
 
       {/* Report Categories */}
@@ -249,40 +293,28 @@ export default function ReportsPage() {
 
       {/* Reports List */}
       <section className="reports-section">
-        <h3
-          className="text-[1.5rem] font-bold mb-4 capitalize"
-          style={{ color: "var(--primary)" }}
-        >
-          {filter} Reports ({filteredReports.length})
+        <h3 className="text-[1.5rem] font-bold mb-4 capitalize" style={{ color: "var(--primary)" }}>
+            {filter} Reports ({filteredReports.length})
         </h3>
-
+        
         <div className="reports-grid flex flex-col gap-4">
           {filteredReports.length > 0 ? (
             filteredReports.map((rep) => (
-              <ReportRow key={rep.id} report={rep} />
+              <ReportRow key={rep.id} report={rep} onViewDetails={handleViewDetails} /> // Pass handler down
             ))
           ) : (
-            <div
-              className="empty-state text-center p-12 rounded-[25px] shadow-lg"
-              style={{ backgroundColor: "var(--card-bg)" }}
-            >
-              <i
-                className="fas fa-file-alt text-6xl mb-4"
-                style={{ color: "var(--muted)" }}
-              ></i>
-              <h3
-                className="text-2xl font-bold mb-2"
-                style={{ color: "var(--text)" }}
-              >
-                No {filter} Reports
-              </h3>
-              <p className="text-base" style={{ color: "var(--muted)" }}>
-                No reports are currently marked as **{filter}**.
-              </p>
+            // ... (Empty state logic) ...
+            <div className="empty-state text-center p-12 rounded-[25px] shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
+              <i className="fas fa-file-alt text-6xl mb-4" style={{ color: "var(--muted)" }}></i>
+              <h3 className="text-2xl font-bold mb-2" style={{ color: "var(--text)" }}>No {filter} Reports</h3>
+              <p className="text-base" style={{ color: "var(--muted)" }}>No reports are currently marked as **{filter}**.</p>
             </div>
           )}
         </div>
       </section>
+
+      {/* 🌟 Report Detail Modal (Renders if selectedReport is set) */}
+      <ReportDetailModal report={selectedReport} onClose={handleCloseModal} />
     </div>
   );
 }
