@@ -16,7 +16,8 @@ const ownerNavigation = [
     path: "/ownerLayout/myboardings",
     icon: "fas fa-dog",
   },
-  { name: "Utility", path: "/ownerLayout/utility", icon: "fas fa-cogs" }
+  { name: "Utility", path: "/ownerLayout/utility", icon: "fas fa-cogs" },
+  { name: "Reports", path: "/ownerLayout/reports", icon: "fas fa-file-alt" },
 ];
 
 const BASE_LINK_CLASSES =
@@ -29,8 +30,9 @@ export default function OwnerLayout() {
   const getActivePath = () => {
     // Check for specific sub-paths first
     if (currentPath.includes("/ownerLayout/myAds")) return "/ownerLayout/myAds";
-    if (currentPath.includes("/ownerLayout/profile")) return "/ownerLayout/profile";
-    
+    if (currentPath.includes("/ownerLayout/profile"))
+      return "/ownerLayout/profile";
+
     // Normalize current path for dashboard index route
     const normalizedPath =
       currentPath === "/owner" || currentPath === "/owner/"
@@ -38,7 +40,9 @@ export default function OwnerLayout() {
         : currentPath;
 
     // Check for direct match or sub-route match
-    const foundItem = ownerNavigation.find((item) => item.path === normalizedPath);
+    const foundItem = ownerNavigation.find(
+      (item) => item.path === normalizedPath
+    );
     if (foundItem) return foundItem.path;
 
     for (const item of ownerNavigation) {
@@ -49,7 +53,7 @@ export default function OwnerLayout() {
 
     return "";
   };
-  
+
   const activePath = getActivePath();
 
   const getLinkClasses = (path) => {
@@ -61,7 +65,7 @@ export default function OwnerLayout() {
 
     return `${BASE_LINK_CLASSES} ${
       isActive
-        ? "bg-white text-red-600" 
+        ? "bg-white text-red-600"
         : "text-white hover:text-red-600 hover:bg-white"
     }`;
   };
@@ -138,7 +142,7 @@ export default function OwnerLayout() {
 
         {/* Sidebar Footer */}
         <div
-          className="pt-4 mt-auto border-t" 
+          className="pt-4 mt-auto border-t"
           style={{ borderColor: "rgba(255,255,255,0.1)" }}
         >
           {/* Profile Link */}

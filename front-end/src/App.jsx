@@ -8,6 +8,8 @@ import ProfilePage from "./pages/owner/ProfilePage";
 import Dashboard from "./pages/owner/Dashboard";
 import MyBoardingsPage from "./pages/owner/MyBoardingsPage";
 import UtilityPage from "./pages/owner/UtilityPage";
+import AddReportPage from "./pages/owner/AddReportPage";
+import ReportsPage from "./pages/owner/ReportsPage";
 
 function App() {
   return (
@@ -27,14 +29,18 @@ function App() {
               
               {/* Other main navigation routes */}
               <Route path="myboardings" element={<MyBoardingsPage />} />
-              <Route path="myAds" element={<MyAdsPage />} />
+              <Route path="myAds" element={<MyAdsPage />} >
+                <Route path="createAd" element={<CreateAdPage />} />
+                <Route path="editAd/:adId" element={<EditAdPage />} />
+              </Route>
               <Route path="appointments" element={<AppointmentsPage />} />
               <Route path="utility" element={<UtilityPage />} />
+              <Route path="reports" element={<ReportsPage />} >
+                <Route path="addReport" element={<AddReportPage />} />
+              </Route>
               <Route path="profile" element={<ProfilePage />} />
               
-              {/* Specific Ad Management Routes */}
-              <Route path="createAd" element={<CreateAdPage />} />
-              <Route path="editAd/:adId" element={<EditAdPage />} />
+                         
               
               {/* Optional: Catch-all for 404 within the layout */}
               <Route path="*" element={<h1 className="text-3xl text-red-500 p-8">404 Not Found</h1>} />
