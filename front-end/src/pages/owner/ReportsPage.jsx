@@ -187,7 +187,7 @@ export default function ReportsPage() {
   const navigate = useNavigate();
 
   const handleReportAdd = () => {
-    navigate("/ownerLayout/reports/addReport");
+    navigate("/ownerLayout/reports/add");
   }
 
   const counts = mockReports.reduce(
