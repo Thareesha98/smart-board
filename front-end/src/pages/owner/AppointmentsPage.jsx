@@ -45,7 +45,38 @@ const getStatusBadgeStyle = (status) => {
       default:
         return {};
     }
-  };
+};
+
+const StatusTab = ({ status, count, currentFilter, setFilter }) => {
+    const isActive = currentFilter === status;
+    const statusStyle = getStatusBadgeStyle(status);
+
+    return (
+      <button
+        className={`category-tab flex flex-col items-center gap-1.5 p-6 rounded-[25px] font-semibold cursor-pointer transition duration-300 relative w-full`}
+        style={{
+          backgroundColor: isActive ? statusStyle.color : "var(--light)",
+          color: isActive ? "var(--card-bg)" : "var(--muted)",
+          boxShadow: isActive
+            ? `0 4px 12px ${statusStyle.color}80`
+            : "var(--shadow)",
+        }}
+        onClick={() => setFilter(status)}
+      >
+        <i className={`${statusStyle.icon} text-2xl`}></i>
+        <span className="text-base capitalize">{status}</span>
+        <span
+          className="tab-count absolute top-[-8px] right-[-8px] w-6 h-6 text-xs flex items-center justify-center font-bold rounded-full"
+          style={{
+            backgroundColor: isActive ? "var(--card-bg)" : "var(--primary)",
+            color: isActive ? statusStyle.color : "var(--card-bg)",
+          }}
+        >
+          {count}
+        </span>
+      </button>
+    );
+};
 
 const notificationCount = 2;
 
@@ -181,36 +212,7 @@ const AppointmentsPage = () => {
     );
   };
 
-  const StatusTab = ({ status, count, currentFilter, setFilter }) => {
-    const isActive = currentFilter === status;
-    const statusStyle = getStatusBadgeStyle(status);
-
-    return (
-      <button
-        className={`category-tab flex flex-col items-center gap-1.5 p-6 rounded-[25px] font-semibold cursor-pointer transition duration-300 relative w-full`}
-        style={{
-          backgroundColor: isActive ? statusStyle.color : "var(--light)",
-          color: isActive ? "var(--card-bg)" : "var(--muted)",
-          boxShadow: isActive
-            ? `0 4px 12px ${statusStyle.color}80`
-            : "var(--shadow)",
-        }}
-        onClick={() => setFilter(status)}
-      >
-        <i className={`${statusStyle.icon} text-2xl`}></i>
-        <span className="text-base capitalize">{status}</span>
-        <span
-          className="tab-count absolute top-[-8px] right-[-8px] w-6 h-6 text-xs flex items-center justify-center font-bold rounded-full"
-          style={{
-            backgroundColor: isActive ? "var(--card-bg)" : "var(--primary)",
-            color: isActive ? statusStyle.color : "var(--card-bg)",
-          }}
-        >
-          {count}
-        </span>
-      </button>
-    );
-  };
+  
 
   return (
     <div className="pt-4 space-y-6">
