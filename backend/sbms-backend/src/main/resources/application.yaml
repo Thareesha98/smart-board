@@ -34,3 +34,17 @@ spring:
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
+
+  # Multipart File Upload Settings
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+
+aws:
+  accessKeyId: YOUR_NEW_ACCESS_KEY      # replace after regenerating
+  secretAccessKey: YOUR_NEW_SECRET_KEY  # replace after regenerating
+  region: ap-south-1
+  s3:
+    bucketName: smart-board-project
