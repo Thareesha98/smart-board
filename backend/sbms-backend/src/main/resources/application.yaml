@@ -2,12 +2,14 @@ spring:
   application:
     name: sbms-backend
 
+  # Database Configuration
   datasource:
-    url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board-db
+    url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board
     username: smartboard_admin
     password: "09090909"
     driver-class-name: org.postgresql.Driver
 
+  # JPA / Hibernate Configuration
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,3 +17,20 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Mail / SMTP Configuration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: thareesha01@gmail.com
+    password: foewigznsutmonhm
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
