@@ -2,8 +2,11 @@ package com.sbms.sbms_backend.service;
 
 import com.sbms.sbms_backend.dto.user.*;
 import com.sbms.sbms_backend.mapper.UserMapper;
+import com.sbms.sbms_backend.model.Otp;
+import com.sbms.sbms_backend.model.PendingUser;
 import com.sbms.sbms_backend.model.User;
 import com.sbms.sbms_backend.model.enums.UserRole;
+import com.sbms.sbms_backend.repository.PendingUserRepository;
 import com.sbms.sbms_backend.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,15 @@ public class UserService {
     // NOTE: bcrypt will be added during JWT implementation
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private PendingUserRepository pendingRepo;
+
+    @Autowired
+    private OtpService otpService;
+
+    @Autowired
+    private EmailService emailService;
 
 
     // ---------------------------------------------------------
@@ -137,4 +149,110 @@ public class UserService {
                 .map(UserMapper::toAdminUser)
                 .collect(Collectors.toList());
     }
+    
+    
+    public String registerRequest(UserRegisterDTO dto) {
+
+        if (userRepository.existsByEmail(dto.getEmail()))
+            throw new RuntimeException("Email already registered");
+
+        // Save registration data temporarily
+        PendingUser pending = new PendingUser();
+        pending.setFullName(dto.getFullName());
+        pending.setEmail(dto.getEmail());
+        pending.setPassword(passwordEncoder.encode(dto.getPassword()));
+        pending.setPhone(dto.getPhone());
+        pending.setAddress(dto.getAddress());
+        pending.setGender(dto.getGender());
+        pending.setNicNumber(dto.getNicNumber());
+        pending.setAccNo(dto.getAccNo());
+        pending.setStudentUniversity(dto.getStudentUniversity());
+        pending.setRole(dto.getRole());
+
+        pendingRepo.save(pending);
+
+        // Generate OTP
+        Otp otp = otpService.createOtp(dto.getEmail());
+
+        // Send Email
+        emailService.sendOtpEmail(dto.getEmail(), otp.getOtpCode());
+
+        return "OTP sent to email!";
+    }
+
+    public UserResponseDTO verifyRegistration(String email, String otpCode) {
+
+        boolean valid = otpService.validateOtp(email, otpCode);
+
+        if (!valid) {
+            throw new RuntimeException("Invalid or expired OTP");
+        }
+
+        PendingUser p = pendingRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No pending registration found"));
+
+        User user = new User();
+        user.setFullName(p.getFullName());
+        user.setEmail(p.getEmail());
+        user.setPassword(p.getPassword());
+        user.setPhone(p.getPhone());
+        user.setAddress(p.getAddress());
+        user.setGender(p.getGender());
+        user.setNicNumber(p.getNicNumber());
+        user.setAccNo(p.getAccNo());
+        user.setStudentUniversity(p.getStudentUniversity());
+        user.setRole(p.getRole());
+        user.setVerifiedOwner(p.getRole().name().equals("OWNER"));
+
+        User saved = userRepository.save(user);
+
+        pendingRepo.delete(p);
+
+        return UserMapper.toUserResponse(saved);
+    }
+    
+    
+    
+    
+    
+ // Send OTP to email
+    public String forgotPassword(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email not found"));
+
+        Otp otp = otpService.createOtp(email);
+
+        emailService.sendResetToken(email, otp.getOtpCode());
+
+        return "Reset OTP sent to email";
+    }
+
+    // Reset password using OTP
+    public String resetPassword(String email, String otpCode, String newPassword) {
+
+        boolean valid = otpService.validateOtp(email, otpCode);
+
+        if (!valid)
+            throw new RuntimeException("Invalid or expired OTP");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+
+        return "Password reset successful";
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }

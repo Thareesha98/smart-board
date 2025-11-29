@@ -1,7 +1,9 @@
 package com.sbms.sbms_backend.controller;
 
 import com.sbms.sbms_backend.dto.auth.JwtAuthResponse;
+import com.sbms.sbms_backend.dto.auth.OtpVerifyRequest;
 import com.sbms.sbms_backend.dto.auth.RefreshTokenRequest;
+import com.sbms.sbms_backend.dto.auth.ResetPasswordRequest;
 import com.sbms.sbms_backend.dto.user.UserLoginDTO;
 import com.sbms.sbms_backend.dto.user.UserRegisterDTO;
 import com.sbms.sbms_backend.dto.user.UserResponseDTO;
@@ -40,30 +42,30 @@ public class AuthController {
     // ---------------------------------------------------------
     // REGISTER + return accessToken + refreshToken
     // ---------------------------------------------------------
-    @PostMapping("/register")
-    public JwtAuthResponse register(@RequestBody UserRegisterDTO dto) {
-
-        UserResponseDTO userDto = userService.register(dto);
-
-        User user = userRepository.findByEmail(userDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found after registration"));
-
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPassword())
-                .authorities("ROLE_" + user.getRole().name())
-                .build();
-
-        String jwt = jwtService.generateToken(userDetails);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
-
-        JwtAuthResponse response = new JwtAuthResponse();
-        response.setToken(jwt);
-        response.setRefreshToken(refreshToken.getToken());
-        response.setUser(userDto);
-
-        return response;
-    }
+//    @PostMapping("/register")
+//    public JwtAuthResponse register(@RequestBody UserRegisterDTO dto) {
+//
+//        UserResponseDTO userDto = userService.register(dto);
+//
+//        User user = userRepository.findByEmail(userDto.getEmail())
+//                .orElseThrow(() -> new RuntimeException("User not found after registration"));
+//
+//        UserDetails userDetails = org.springframework.security.core.userdetails.User
+//                .withUsername(user.getEmail())
+//                .password(user.getPassword())
+//                .authorities("ROLE_" + user.getRole().name())
+//                .build();
+//
+//        String jwt = jwtService.generateToken(userDetails);
+//        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+//
+//        JwtAuthResponse response = new JwtAuthResponse();
+//        response.setToken(jwt);
+//        response.setRefreshToken(refreshToken.getToken());
+//        response.setUser(userDto);
+//
+//        return response;
+//    }
 
 
     // ---------------------------------------------------------
@@ -132,4 +134,61 @@ public class AuthController {
 
         return response;
     }
+    
+    
+
+    // STEP 1: Register request → sends OTP
+    @PostMapping("/register/request")
+    public String registerRequest(@RequestBody UserRegisterDTO dto) {
+        return userService.registerRequest(dto);
+    }
+
+    // STEP 2: Verify OTP & complete registration
+    @PostMapping("/register/verify")
+    public JwtAuthResponse verifyOtp(@RequestBody OtpVerifyRequest req) {
+
+        UserResponseDTO userDto = userService.verifyRegistration(req.getEmail(), req.getOtp());
+
+        User user = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        UserDetails ud = org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                .authorities("ROLE_" + user.getRole().name())
+                .build();
+
+        String jwt = jwtService.generateToken(ud);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+        JwtAuthResponse response = new JwtAuthResponse();
+        response.setToken(jwt);
+        response.setRefreshToken(refreshToken.getToken());
+        response.setUser(userDto);
+
+        return response;
+    }
+
+    // FORGOT PASSWORD
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestBody ResetPasswordRequest req) {
+        return userService.forgotPassword(req.getEmail());
+    }
+
+    // RESET PASSWORD
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestBody ResetPasswordRequest req) {
+        return userService.resetPassword(
+                req.getEmail(),
+                req.getOtp(),
+                req.getNewPassword()
+        );
+    }
+
+    
+    
+    
+
+    
+    
 }

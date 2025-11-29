@@ -4,12 +4,14 @@ import com.sbms.sbms_backend.common.BaseEntity;
 import com.sbms.sbms_backend.model.enums.RegistrationStatus;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
+@Entity
 @Data
 public class Registration extends BaseEntity{
 	@ManyToOne
