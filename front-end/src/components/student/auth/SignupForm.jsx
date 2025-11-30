@@ -145,7 +145,7 @@ const SignupForm = ({ onSubmit, isLoading }) => {
           value={formData.university}
           onChange={handleChange}
           error={errors.university}
-          placeholder="University of Colombo"
+          placeholder="University of Ruhuna"
           required
         />
         <InputField
@@ -155,7 +155,7 @@ const SignupForm = ({ onSubmit, isLoading }) => {
           value={formData.studentId}
           onChange={handleChange}
           error={errors.studentId}
-          placeholder="2021/CO/12345"
+          placeholder="SC/2022/12345"
           required
         />
       </div>
