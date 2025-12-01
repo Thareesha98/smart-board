@@ -1,74 +1,117 @@
 import React from 'react';
+import { 
+  FaCalendarAlt, 
+  FaTimes, 
+  FaCheck, 
+  FaEye, 
+  FaHome, 
+  FaUser, 
+  FaMapMarkerAlt, 
+  FaPhone 
+} from 'react-icons/fa';
 
-// Helper to format date and time (using the JS logic provided)
+// Helper to format date and time
 const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 const formatTime = (timeString) => new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
 const getStatusClasses = (status) => {
   switch (status) {
-    // We only need the badge classes here, as button classes are dynamic and applied below
-    case 'upcoming': return { badge: 'bg-success/10 text-success' };
-    case 'visited': return { badge: 'bg-info/10 text-info' };
-    case 'selected': return { badge: 'bg-success/20 text-success border border-success' };
-    case 'cancelled': return { badge: 'bg-error/10 text-error' };
-    default: return { badge: 'bg-gray-200 text-text-muted' };
+    case 'upcoming': 
+      return { badge: 'bg-success/10 text-success border border-success/20' };
+    case 'visited': 
+      return { badge: 'bg-info/10 text-info border border-info/20' };
+    case 'selected': 
+      return { badge: 'bg-success/20 text-success border border-success' };
+    case 'cancelled': 
+      return { badge: 'bg-error/10 text-error border border-error/20' };
+    default: 
+      return { badge: 'bg-gray-200 text-text-muted border border-gray-300' };
   }
 };
 
 const AppointmentCard = ({ appointment, onAction }) => {
   const { id, boardingName, image, owner, address, contact, date, time, status, registered } = appointment;
-  // Destructure only what is used
   const { badge } = getStatusClasses(status); 
   const shortAddress = address.split(',')[0];
   const isRegistered = status === 'selected' && registered;
 
   const renderButtons = () => {
-    // Common base classes for actions buttons
-    const BASE_BTN_CLASSES = "text-sm py-2 px-4 rounded-large font-semibold transition-all duration-300 border-2";
+    // Common base classes for action buttons
+    const BASE_BTN_CLASSES = "text-sm py-2 px-4 rounded-large font-semibold transition-all duration-300 border-2 flex items-center gap-2";
 
     switch (status) {
       case 'upcoming':
         return (
           <>
-            <button className={`${BASE_BTN_CLASSES} text-info border-info hover:bg-info hover:text-white`} onClick={() => onAction('reschedule', id)}>
-              <i className="fas fa-calendar-alt"></i> Reschedule
+            <button 
+              className={`${BASE_BTN_CLASSES} text-info border-info hover:bg-info hover:text-white`} 
+              onClick={() => onAction('reschedule', id)}
+            >
+              <FaCalendarAlt /> Reschedule
             </button>
-            <button className={`${BASE_BTN_CLASSES} text-error border-error hover:bg-error hover:text-white`} onClick={() => onAction('cancel', id)}>
-              <i className="fas fa-times"></i> Cancel
+            <button 
+              className={`${BASE_BTN_CLASSES} text-error border-error hover:bg-error hover:text-white`} 
+              onClick={() => onAction('cancel', id)}
+            >
+              <FaTimes /> Cancel
             </button>
-            <span className={`status-badge ${badge}`}>Upcoming</span>
+            <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+              Upcoming
+            </span>
           </>
         );
       case 'visited':
         return (
           <>
-            <button className={`${BASE_BTN_CLASSES} text-success border-success hover:bg-success hover:text-white`} onClick={() => onAction('select', id)}>
-              <i className="fas fa-check"></i> Select
+            <button 
+              className={`${BASE_BTN_CLASSES} text-success border-success hover:bg-success hover:text-white`} 
+              onClick={() => onAction('select', id)}
+            >
+              <FaCheck /> Select
             </button>
-            <button className={`${BASE_BTN_CLASSES} text-error border-error hover:bg-error hover:text-white`} onClick={() => onAction('reject', id)}>
-              <i className="fas fa-times"></i> Reject
+            <button 
+              className={`${BASE_BTN_CLASSES} text-error border-error hover:bg-error hover:text-white`} 
+              onClick={() => onAction('reject', id)}
+            >
+              <FaTimes /> Reject
             </button>
-            <span className={`status-badge ${badge}`}>Visited</span>
+            <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+              Visited
+            </span>
           </>
         );
       case 'selected':
         return isRegistered ? (
           <>
-            <button className={`${BASE_BTN_CLASSES} text-accent border-accent hover:bg-accent hover:text-white`} onClick={() => onAction('view', id)}>
-              <i className="fas fa-eye"></i> View
+            <button 
+              className={`${BASE_BTN_CLASSES} text-accent border-accent hover:bg-accent hover:text-white`} 
+              onClick={() => onAction('view', id)}
+            >
+              <FaEye /> View
             </button>
-            <span className={`status-badge ${badge}`}>Registered</span>
+            <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+              Registered
+            </span>
           </>
         ) : (
           <>
-            <button className={`bg-success text-white hover:bg-success/90 ${BASE_BTN_CLASSES} border-success`} onClick={() => onAction('register', id)}>
-              <i className="fas fa-home"></i> Add to My Boardings
+            <button 
+              className={`bg-success text-white hover:bg-success/90 ${BASE_BTN_CLASSES} border-success`} 
+              onClick={() => onAction('register', id)}
+            >
+              <FaHome /> Add to My Boardings
             </button>
-            <span className={`status-badge ${badge}`}>Selected</span>
+            <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+              Selected
+            </span>
           </>
         );
       case 'cancelled':
-        return <span className={`status-badge ${badge}`}>Cancelled</span>;
+        return (
+          <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+            Cancelled
+          </span>
+        );
       default:
         return null;
     }
@@ -94,12 +137,12 @@ const AppointmentCard = ({ appointment, onAction }) => {
         <div className="flex flex-col justify-center">
           <h4 className="text-lg font-bold text-text-dark mb-1">{boardingName}</h4>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-text-muted text-sm justify-center md:justify-start">
-            <div className="flex items-center gap-1">
-              <i className="fas fa-user text-accent w-4"></i>
+            <div className="flex items-center gap-1.5">
+              <FaUser className="text-accent w-4" />
               <span>{owner}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <i className="fas fa-map-marker-alt text-accent w-4"></i>
+            <div className="flex items-center gap-1.5">
+              <FaMapMarkerAlt className="text-accent w-4" />
               <span>{shortAddress}</span>
             </div>
           </div>
@@ -109,7 +152,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
         <div className="flex flex-col justify-center">
           <span className="text-xs uppercase text-text-muted/70 tracking-wider">Contact</span>
           <div className="flex items-center gap-2 font-semibold text-text-dark mt-1 justify-center md:justify-start">
-            <i className="fas fa-phone text-success"></i>
+            <FaPhone className="text-success" />
             <span>{contact}</span>
           </div>
         </div>
@@ -126,12 +169,6 @@ const AppointmentCard = ({ appointment, onAction }) => {
       <div className="flex gap-3 justify-center md:justify-end flex-wrap flex-shrink-0">
         {renderButtons()}
       </div>
-
-      <style jsx>{`
-        .status-badge {
-          @apply text-xs py-2 px-3 rounded-full font-semibold uppercase tracking-wider min-w-[100px] text-center;
-        }
-      `}</style>
     </div>
   );
 };
