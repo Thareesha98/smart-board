@@ -54,8 +54,7 @@ const navItems = [
 ];
 
 const SidebarItem = ({ path, Icon, label, currentPath }) => {
-  const isActive =
-    currentPath.endsWith(path) || (currentPath === "" && path === "/");
+  const isActive = currentPath === path.replace(/^\/|\/$/g, "").toLowerCase();
 
   return (
     <Link
@@ -77,15 +76,18 @@ const SidebarItem = ({ path, Icon, label, currentPath }) => {
 
 const Sidebar = () => {
   const location = useLocation();
-  const { currentUser, logout } = useAuth(); // 🔥 GET USER & LOGOUT FROM CONTEXT
+  const { currentUser, logout } = useAuth();
   const currentPath = location.pathname.replace(/^\/|\/$/g, "").toLowerCase();
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       logout();
-      window.location.href = '/login'; // Redirect to login
+      window.location.href = '/login';
     }
   };
+
+  // ✅ Check if profile page is active
+  const isProfileActive = currentPath === "profile";
 
   return (
     <>
@@ -131,18 +133,27 @@ const Sidebar = () => {
           ))}
         </nav>
 
+        {/* ✅ FIXED: Profile section with active state */}
         <div className="pt-4 mt-auto border-t border-white/10">
           <Link
             to="/profile"
-            className="flex items-center gap-3 p-3 rounded-btn text-white hover:bg-white/10 transition-colors duration-300"
+            className={`
+              flex items-center gap-3 p-3 rounded-btn transition-all duration-300
+              ${
+                isProfileActive
+                  ? "bg-card-bg text-primary shadow-lg transform scale-[1.01]"
+                  : "text-white hover:bg-white/10"
+              }
+            `}
           >
-            {/* 🔥 DYNAMIC AVATAR - Updates when user changes profile pic */}
             <img 
               src={currentUser?.avatar || 'https://randomuser.me/api/portraits/women/50.jpg'} 
               alt={currentUser?.firstName || 'User'}
-              className="w-8 h-8 rounded-full object-cover border-2 border-accent"
+              className={`
+                w-8 h-8 rounded-full object-cover border-2 transition-colors duration-300
+                ${isProfileActive ? "border-primary" : "border-accent"}
+              `}
             />
-            {/* 🔥 DYNAMIC NAME - Shows real user name from signup */}
             <span className="font-medium">
               {currentUser ? `${currentUser.firstName} ${currentUser.lastName.charAt(0)}.` : 'Guest U.'}
             </span>
@@ -157,38 +168,52 @@ const Sidebar = () => {
         </div>
       </aside>
 
-      {/* Mobile Navigation (Horizontal Scroll) */}
+      {/* Mobile Navigation - ✅ Centered when fits, scrollable when overflow */}
       <nav
         className="
-          lg:hidden flex w-full p-4 bg-primary text-white shadow-lg sticky top-0 z-50 overflow-x-auto
-          flex-shrink-0
+          lg:hidden w-full bg-primary text-white shadow-lg sticky top-0 z-50 
+          overflow-x-auto scrollbar-hide
         "
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
       >
-        {navItems.map((item) => {
-          const isActive =
-            currentPath.endsWith(item.path) || (currentPath === "" && item.path === "/");
-          const IconComponent = item.icon; 
+        <div className="flex justify-center min-w-full">
+          <div className="flex gap-1 p-3 px-4">
+            {navItems.map((item) => {
+              const isActive = currentPath === item.path.replace(/^\/|\/$/g, "").toLowerCase();
+              const IconComponent = item.icon; 
 
-          return (
-            <Link
-              key={`mobile-${item.key}`}
-              to={item.path}
-              className={`
-                flex flex-col items-center justify-center p-2 min-w-[80px] text-center
-                transition-colors duration-300 mx-1 rounded-lg
-                ${
-                  isActive
-                    ? "bg-card-bg text-primary shadow-lg"
-                    : "hover:bg-white/10 text-white/90"
-                }
-              `}
-            >
-              <IconComponent className="text-lg mb-1" />
-              <span className="text-xs font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
+              return (
+                <Link
+                  key={`mobile-${item.key}`}
+                  to={item.path}
+                  className={`
+                    flex flex-col items-center justify-center p-2 min-w-[70px] flex-shrink-0
+                    text-center transition-all duration-300 rounded-lg
+                    ${
+                      isActive
+                        ? "bg-card-bg text-primary shadow-lg scale-105"
+                        : "hover:bg-white/10 text-white/90"
+                    }
+                  `}
+                >
+                  <IconComponent className="text-xl mb-1" />
+                  <span className="text-[10px] font-medium leading-tight">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </nav>
+
+      {/* Hide scrollbar styling */}
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </>
   );
 };
