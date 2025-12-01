@@ -121,7 +121,6 @@ const ProfilePage = () => {
     <StudentLayout
       title="My Profile"
       subtitle="Manage your personal information and account settings"
-      headerRightContent={customHeader}
     >
       <ProfileHeader
         userData={userData}
