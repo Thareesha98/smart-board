@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 import LoginForm from '../../../components/student/auth/LoginForm';
+import logo from '../../../assets/logo.png'
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const LoginPage = () => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <img
-                src="/logo.jpg"
+                src={logo}
                 alt="SmartBoAD Logo"
                 className="w-16 h-16 rounded-xl object-cover"
               />

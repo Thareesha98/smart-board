@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 import SignupForm from '../../../components/student/auth/SignupForm';
 import { FaArrowLeft } from 'react-icons/fa';
+import logo from '../../../assets/logo.png'
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const SignupPage = () => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <img
-                src="/logo.jpg"
+                src={logo}
                 alt="SmartBoAD Logo"
                 className="w-16 h-16 rounded-xl object-cover"
               />
