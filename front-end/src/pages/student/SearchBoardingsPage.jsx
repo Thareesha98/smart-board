@@ -62,18 +62,22 @@ const SearchBoardingsPage = () => {
       title="Search Boardings"
       subtitle="Find your perfect boarding place near campus"
     >
-      <SearchHero 
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        moveInDate={moveInDate}
-        setMoveInDate={setMoveInDate}
-        onSearch={handleSearch}
-        isSearching={isSearching}
-      />
+      {/* Search Hero Section */}
+      <div className="mb-6">
+        <SearchHero 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          moveInDate={moveInDate}
+          setMoveInDate={setMoveInDate}
+          onSearch={handleSearch}
+          isSearching={isSearching}
+        />
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Filters - Desktop */}
-        <div className="hidden lg:block lg:w-80 flex-shrink-0">
+      {/* Main Content Area */}
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+        {/* Filters Sidebar - Desktop & Mobile Button */}
+        <div className="lg:w-80 flex-shrink-0">
           <FiltersSidebar 
             filters={filters}
             onFilterChange={handleFilterChange}
@@ -83,54 +87,71 @@ const SearchBoardingsPage = () => {
         </div>
 
         {/* Results Section */}
-        <div className="flex-1">
-          <ResultsHeader 
-            resultsCount={filteredBoardings.length}
-            sortBy={sortBy}
-            onSort={(value) => handleSort(value, filteredBoardings, setFilteredBoardings)}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-          />
+        <div className="flex-1 min-w-0">
+          {/* Results Header with Sort & View Controls */}
+          <div className="mb-4 sm:mb-6">
+            <ResultsHeader 
+              resultsCount={filteredBoardings.length}
+              sortBy={sortBy}
+              onSort={(value) => handleSort(value, filteredBoardings, setFilteredBoardings)}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+            />
+          </div>
 
-          {/* Results Grid */}
+          {/* Results Grid/List */}
           <AnimatePresence mode="wait">
             {filteredBoardings.length === 0 ? (
               <EmptyResults onClearFilters={clearAllFilters} />
             ) : (
               <motion.div 
                 layout
-                className={`grid gap-6 mb-8 ${
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`grid gap-4 sm:gap-6 mb-6 sm:mb-8 ${
                   viewMode === 'grid' 
-                    ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
+                    ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' 
                     : 'grid-cols-1'
                 }`}
               >
-                {filteredBoardings.map(boarding => (
-                  <BoardingCard 
+                {filteredBoardings.map((boarding, index) => (
+                  <motion.div
                     key={boarding.id}
-                    boarding={boarding}
-                    onBook={handleBookAppointment}
-                  />
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <BoardingCard 
+                      boarding={boarding}
+                      onBook={handleBookAppointment}
+                      viewMode={viewMode}
+                    />
+                  </motion.div>
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Load More */}
+          {/* Load More Button */}
           {filteredBoardings.length > 0 && (
-            <div className="text-center py-8">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-6 sm:py-8"
+            >
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="border-2 border-accent text-accent px-6 py-3 rounded-large font-semibold hover:bg-accent hover:text-white transition-all flex items-center gap-2 mx-auto"
+                className="border-2 border-accent text-accent px-6 sm:px-8 py-2.5 sm:py-3 rounded-large font-semibold text-sm sm:text-base hover:bg-accent hover:text-white transition-all duration-300 flex items-center gap-2 mx-auto shadow-md hover:shadow-xl"
               >
-                <FaPlus />
+                <FaPlus className="text-sm sm:text-base" />
                 Load More Results
               </motion.button>
-              <p className="text-text-muted text-sm mt-4">
+              <p className="text-text-muted text-xs sm:text-sm mt-3 sm:mt-4">
                 Showing {filteredBoardings.length} of 87 boardings
               </p>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
