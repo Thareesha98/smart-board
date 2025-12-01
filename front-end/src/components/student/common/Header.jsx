@@ -1,16 +1,18 @@
 import React from 'react';
 import { FaBell } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 
 const Header = ({ title, subtitle, rightContent }) => {
-  const { currentUser } = useAuth(); // 🔥 GET USER FROM CONTEXT
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   const handleNotificationClick = () => {
     console.log('Notifications panel would open here'); 
   }
 
   const handleUserMenuClick = () => {
-    console.log('User menu would open here');
+    navigate('/profile');
   }
 
   return (
@@ -48,7 +50,7 @@ const Header = ({ title, subtitle, rightContent }) => {
           </span>
         </div>
         
-        {/* User Menu with Animated Hover */}
+        {/* User Menu with Animated Hover - ✅ NAVIGATES TO PROFILE */}
         <div 
           className="flex items-center gap-3 cursor-pointer p-2 pr-4 rounded-large bg-background-light text-text-dark transition-all duration-300 hover:bg-accent hover:text-white group"
           onClick={handleUserMenuClick}
