@@ -51,6 +51,7 @@ public class OwnerBoardingService {
         b.setDescription(dto.getDescription());
         b.setAddress(dto.getAddress());
         b.setPricePerMonth(dto.getPricePerMonth());
+        b.setKeyMoney(dto.getKeyMoney());
         b.setGenderType(dto.getGenderType());
         b.setAvailable_slots(dto.getAvailableSlots());
         b.setMaxOccupants(dto.getMaxOccupants());

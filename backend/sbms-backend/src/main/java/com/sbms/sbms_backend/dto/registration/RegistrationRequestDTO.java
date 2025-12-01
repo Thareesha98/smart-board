@@ -10,4 +10,6 @@ public class RegistrationRequestDTO {
     private int numberOfStudents;
 
     private String studentNote;
+    
+    private boolean keyMoneyPaid; 
 }

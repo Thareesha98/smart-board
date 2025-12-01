@@ -23,3 +23,4 @@ public class UserRegisterDTO {
     // STUDENT fields
     private String studentUniversity;
 }
+

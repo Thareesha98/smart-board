@@ -20,6 +20,7 @@ public class OwnerBoardingResponseDTO {
     private String address;
 
     private BigDecimal pricePerMonth;
+    private BigDecimal keyMoney;
 
     private Gender genderType;
     private BoardingType boardingType;

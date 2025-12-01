@@ -16,6 +16,7 @@ public class BoardingUpdateDTO {
     private String address;
 
     private BigDecimal pricePerMonth;
+    private BigDecimal keyMoney;
 
     private Gender genderType;
 

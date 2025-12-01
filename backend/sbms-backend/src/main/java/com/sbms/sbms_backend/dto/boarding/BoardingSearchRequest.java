@@ -18,7 +18,13 @@ public class BoardingSearchRequest {
     private BoardingType boardingType;    // optional
 
     private BigDecimal minPrice;          // optional
-    private BigDecimal maxPrice;          // optional
+    private BigDecimal maxPrice;  
+    
+    
+    private BigDecimal minKeyMoney;          // optional
+    private BigDecimal maxKeyMoney;  // optional
+    
+    
 
     // pagination
     private int page = 0;

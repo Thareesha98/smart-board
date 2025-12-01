@@ -3,9 +3,11 @@ package com.sbms.sbms_backend.mapper;
 import com.sbms.sbms_backend.dto.registration.RegistrationResponseDTO;
 import com.sbms.sbms_backend.model.Registration;
 
+
+
 public class RegistrationMapper {
 
-    public static RegistrationResponseDTO toDto(Registration r) {
+    public static RegistrationResponseDTO toDTO(Registration r) {
         RegistrationResponseDTO dto = new RegistrationResponseDTO();
 
         dto.setId(r.getId());
@@ -19,9 +21,12 @@ public class RegistrationMapper {
 
         dto.setNumberOfStudents(r.getNumberOfStudents());
         dto.setStatus(r.getStatus());
-
         dto.setStudentNote(r.getStudentNote());
         dto.setOwnerNote(r.getOwnerNote());
+
+        dto.setKeyMoney(r.getBoarding().getKeyMoney());
+        dto.setMonthlyPrice(r.getBoarding().getPricePerMonth());
+        dto.setKeyMoneyPaid(r.isKeyMoneyPaid());
 
         return dto;
     }

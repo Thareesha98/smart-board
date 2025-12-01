@@ -45,6 +45,8 @@ public class BoardingController {
             @RequestParam(required = false) String boardingType,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) BigDecimal minKeyMoney,
+            @RequestParam(required = false) BigDecimal maxKeyMoney,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
@@ -59,6 +61,8 @@ public class BoardingController {
 
         req.setMinPrice(minPrice);
         req.setMaxPrice(maxPrice);
+        req.setMinKeyMoney(minPrice);
+        req.setMaxKeyMoney(maxPrice);
         req.setPage(page);
         req.setSize(size);
 
@@ -75,6 +79,8 @@ public class BoardingController {
             @RequestParam(required = false) String boardingType,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) BigDecimal minKeyMoney,
+            @RequestParam(required = false) BigDecimal maxKeyMoney,
             @RequestParam(required = false) String addressKeyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -90,6 +96,8 @@ public class BoardingController {
 
         req.setMinPrice(minPrice);
         req.setMaxPrice(maxPrice);
+        req.setMinPrice(minKeyMoney);
+        req.setMaxPrice(maxKeyMoney);
         req.setAddressKeyword(addressKeyword);
         req.setPage(page);
         req.setSize(size);

@@ -38,6 +38,9 @@ public class Boarding extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal pricePerMonth;
     
+    @Column(nullable = true)
+    private BigDecimal keyMoney;
+    
     private List<String> imageUrls;
 
     @Column(nullable = false)

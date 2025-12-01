@@ -29,7 +29,12 @@ public class Registration extends BaseEntity{
 	@Column(nullable = false)
     private RegistrationStatus status = RegistrationStatus.PENDING;
 	
+	private boolean keyMoneyPaid = false;
+	
 	private String studentNote;
     private String ownerNote;
+    
+    
+    
 	
 }
