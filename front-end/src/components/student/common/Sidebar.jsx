@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import logo from "../../../assets/logo.png";
 import {
   FaHome,
   FaSearch,
@@ -103,9 +104,9 @@ const Sidebar = () => {
         <div className="pb-6 mb-4 border-b border-white/10">
           <Link to="/" className="flex items-center gap-3 text-white">
             <img
-              src="/logo.jpg"
+              src={logo}
               alt="SmartBoAD Logo"
-              className="w-10 h-10 rounded-lg object-cover border-2 border-white/20"
+              className="w-12 h-12 rounded-lg object-cover"
             />
             <div className="flex flex-col">
               <strong className="text-xl font-bold leading-tight">
