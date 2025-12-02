@@ -45,13 +45,13 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <>
             <button 
               className={`${BASE_BTN_CLASSES} text-info border-info hover:bg-info hover:text-white`} 
-              onClick={() => onAction('reschedule', id)}
+              onClick={() => onAction(id, 'reschedule')}
             >
               <FaCalendarAlt /> Reschedule
             </button>
             <button 
               className={`${BASE_BTN_CLASSES} text-error border-error hover:bg-error hover:text-white`} 
-              onClick={() => onAction('cancel', id)}
+              onClick={() => onAction(id, 'cancel')}
             >
               <FaTimes /> Cancel
             </button>
@@ -65,13 +65,13 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <>
             <button 
               className={`${BASE_BTN_CLASSES} text-success border-success hover:bg-success hover:text-white`} 
-              onClick={() => onAction('select', id)}
+              onClick={() => onAction(id, 'select')}
             >
               <FaCheck /> Select
             </button>
             <button 
               className={`${BASE_BTN_CLASSES} text-error border-error hover:bg-error hover:text-white`} 
-              onClick={() => onAction('reject', id)}
+              onClick={() => onAction(id, 'reject')}
             >
               <FaTimes /> Reject
             </button>
@@ -85,7 +85,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <>
             <button 
               className={`${BASE_BTN_CLASSES} text-accent border-accent hover:bg-accent hover:text-white`} 
-              onClick={() => onAction('view', id)}
+              onClick={() => onAction(id, 'view')}
             >
               <FaEye /> View
             </button>
@@ -97,7 +97,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <>
             <button 
               className={`bg-success text-white hover:bg-success/90 ${BASE_BTN_CLASSES} border-success`} 
-              onClick={() => onAction('register', id)}
+              onClick={() => onAction(id, 'register')}
             >
               <FaHome /> Add to My Boardings
             </button>
