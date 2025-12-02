@@ -33,14 +33,18 @@ const ActivityItem = ({ icon: Icon, content, time, index }) => (
     animate={{ opacity: 1, x: 0 }}
     transition={{ delay: 1.1 + index * 0.05 }}
     whileHover={{ x: 5 }}
-    className="flex items-center gap-4 p-4 md:p-5 border-b border-background-light transition-colors duration-300 last:border-b-0 hover:bg-background-light/50"
+    className="flex items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 md:p-5 border-b border-background-light transition-colors duration-300 last:border-b-0 hover:bg-background-light/50"
   >
-    <div className="bg-background-light p-3 rounded-btn text-accent text-xl flex-shrink-0 w-11 h-11 flex items-center justify-center">
+    <div className="bg-background-light p-2.5 sm:p-3 rounded-btn text-accent text-lg sm:text-xl flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center">
       <Icon />
     </div>
-    <div className="flex flex-col flex-1">
-      <p className="text-text-dark font-medium leading-tight">{content}</p>
-      <span className="text-text-muted text-sm mt-0.5">{time}</span>
+    <div className="flex flex-col flex-1 min-w-0">
+      <p className="text-text-dark font-medium leading-tight text-sm sm:text-base">
+        {content}
+      </p>
+      <span className="text-text-muted text-xs sm:text-sm mt-0.5">
+        {time}
+      </span>
     </div>
   </motion.div>
 );
@@ -51,9 +55,11 @@ const RecentActivitySection = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 1.1 }}
-      className="mb-8"
+      className="mb-6 sm:mb-8"
     >
-      <h2 className="text-primary text-2xl font-bold mb-4">Recent Activity</h2>
+      <h2 className="text-primary text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
+        Recent Activity
+      </h2>
       <div className="bg-card-bg rounded-large shadow-custom overflow-hidden">
         {activityFeedData.map((item, index) => (
           <ActivityItem 

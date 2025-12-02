@@ -26,9 +26,9 @@ const StudentDashboard = () => {
     <StudentLayout
       subtitle="Here's your boarding overview"
     >
-      {/* Stats Overview */}
-      <section className="mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Overview - Fully Responsive Grid */}
+      <section className="mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
