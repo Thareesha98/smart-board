@@ -24,7 +24,6 @@ const StudentDashboard = () => {
 
   return (
     <StudentLayout
-      title="Welcome back, Priya!"
       subtitle="Here's your boarding overview"
     >
       {/* Stats Overview */}

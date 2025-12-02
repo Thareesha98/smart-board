@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 import LoginForm from '../../../components/student/auth/LoginForm';
+import backgroundImage from '../../../assets/s5.jpg';
 import logo from '../../../assets/logo.png'
 
 const LoginPage = () => {
@@ -29,25 +30,63 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-orange-50 to-yellow-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: `url(${backgroundImage})`,
+          filter: 'blur(8px)',
+          transform: 'scale(1.1)',
+        }}
+      />
+      
+      {/* Overlay for opacity and color tint */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 backdrop-blur-sm" />
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-md">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-large shadow-2xl p-8 md:p-12"
+          className="bg-white/95 backdrop-blur-md rounded-large shadow-2xl p-8 md:p-12 border border-white/20"
         >
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <img
+              <motion.img
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.3 }}
                 src={logo}
                 alt="SmartBoAD Logo"
-                className="w-16 h-16 rounded-xl object-cover"
+                className="w-[80px] h-[80px]"
               />
-              <h1 className="text-4xl font-bold text-primary">SmartBoAD</h1>
+              <motion.h1 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+              >
+                SmartBoAD
+              </motion.h1>
             </div>
-            <h2 className="text-2xl font-bold text-text-dark mb-2">Welcome Back!</h2>
-            <p className="text-text-muted">Sign in to access your dashboard</p>
+            <motion.h2 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-2xl font-bold text-text-dark mb-2"
+            >
+              Welcome Back!
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-text-muted"
+            >
+              Sign in to access your dashboard
+            </motion.p>
           </div>
 
           {/* Login Form */}
@@ -68,9 +107,14 @@ const LoginPage = () => {
         </motion.div>
 
         {/* Footer */}
-        <p className="text-center text-text-muted text-sm mt-8">
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-center text-white text-sm mt-8 drop-shadow-lg"
+        >
           © 2024 SmartBoAD. All rights reserved.
-        </p>
+        </motion.p>
       </div>
     </div>
   );
