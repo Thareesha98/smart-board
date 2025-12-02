@@ -106,7 +106,7 @@ const Sidebar = () => {
             <img
               src={logo}
               alt="SmartBoAD Logo"
-              className="w-12 h-12 rounded-lg object-cover"
+              className="w-[70px] h-[70px] rounded-lg object-cover"
             />
             <div className="flex flex-col">
               <strong className="text-xl font-bold leading-tight">
@@ -120,7 +120,7 @@ const Sidebar = () => {
         </div>
 
         <nav className="flex-1">
-          <h3 className="px-6 pb-2 pt-1 uppercase text-xs tracking-wider text-accent border-b border-white/10 mb-2 font-semibold">
+          <h3 className="px-6 pb-2 pt-1 uppercase text-sm tracking-wider text-orange-200 border-b border-white/10 mb-2 font-semibold">
             MAIN NAVIGATION
           </h3>
           {navItems.map((item) => (
