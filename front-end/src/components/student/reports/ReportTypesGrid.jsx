@@ -50,7 +50,11 @@ const REPORT_TYPES = [
 
 const ReportTypesGrid = ({ onSelectType }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    // GRID LOGIC:
+    // 1 col on Mobile (<768)
+    // 2 cols on Tablet/Laptop (<1400)
+    // 3 cols on Large Desktop (>=1400)
+    <div className="grid grid-cols-1 md:grid-cols-2 min-[1400px]:grid-cols-3 gap-6">
       {REPORT_TYPES.map((reportType, index) => (
         <ReportTypeCard
           key={reportType.type}
@@ -73,7 +77,8 @@ const ReportTypeCard = ({ reportType, onSelect, index }) => {
       transition={{ delay: index * 0.1 }}
       whileHover={{ y: -5, borderColor: 'var(--accent)' }}
       onClick={onSelect}
-      className="bg-card-bg p-8 rounded-large shadow-custom text-center cursor-pointer transition-all duration-300 border-2 border-transparent hover:shadow-xl"
+      // Added h-full and flex flex-col to ensure uniform card height
+      className="bg-card-bg p-8 rounded-large shadow-custom text-center cursor-pointer transition-all duration-300 border-2 border-transparent hover:shadow-xl h-full flex flex-col items-center"
     >
       <motion.div
         whileHover={{ scale: 1.1, backgroundColor: 'var(--accent)', color: 'white' }}
@@ -82,7 +87,7 @@ const ReportTypeCard = ({ reportType, onSelect, index }) => {
         <Icon />
       </motion.div>
       <h3 className="text-xl font-bold text-text-dark mb-2">{reportType.title}</h3>
-      <p className="text-text-muted text-sm leading-relaxed">{reportType.description}</p>
+      <p className="text-text-muted text-sm leading-relaxed flex-1">{reportType.description}</p>
     </motion.div>
   );
 };

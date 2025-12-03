@@ -2,18 +2,19 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FaCalendar, FaHashtag } from 'react-icons/fa';
 
+// UPDATED COLORS: Consistent with ReportForm (Light bg, dark text, border)
 const STATUS_CONFIG = {
-  pending: { label: 'Pending Review', color: 'bg-warning/20 text-warning' },
-  'under-review': { label: 'Under Review', color: 'bg-info/20 text-info' },
-  resolved: { label: 'Resolved', color: 'bg-success/20 text-success' },
-  dismissed: { label: 'Dismissed', color: 'bg-gray-200 text-gray-600' },
+  pending: { label: 'Pending Review', color: 'bg-yellow-50 text-yellow-700 border border-yellow-200' },
+  'under-review': { label: 'Under Review', color: 'bg-blue-50 text-blue-700 border border-blue-200' },
+  resolved: { label: 'Resolved', color: 'bg-green-50 text-green-700 border border-green-200' },
+  dismissed: { label: 'Dismissed', color: 'bg-gray-50 text-gray-600 border border-gray-200' },
 };
 
 const SEVERITY_CONFIG = {
-  low: 'bg-success/20 text-success',
-  medium: 'bg-info/20 text-info',
-  high: 'bg-error/20 text-error',
-  critical: 'bg-critical text-white',
+  low: 'bg-green-50 text-green-700 border border-green-200',
+  medium: 'bg-blue-50 text-blue-700 border border-blue-200',
+  high: 'bg-orange-50 text-orange-700 border border-orange-200',
+  critical: 'bg-red-50 text-red-700 border border-red-200', // Fixed Critical visibility
 };
 
 const ReportsList = ({ reports, onViewDetails, onFilterChange }) => {
@@ -55,7 +56,10 @@ const ReportsList = ({ reports, onViewDetails, onFilterChange }) => {
           <p className="text-text-muted text-lg">No reports found</p>
         </motion.div>
       ) : (
-        <div className="space-y-4">
+        // GRID LOGIC:
+        // 1 Column for Tablet/Mobile (< 1400px)
+        // 2 Columns for Desktop (>= 1400px)
+        <div className="grid grid-cols-1 min-[1400px]:grid-cols-2 gap-4">
           {reports.map((report, index) => (
             <ReportItem
               key={report.id}
@@ -82,7 +86,8 @@ const ReportItem = ({ report, onViewDetails, formatDate, index }) => {
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -2 }}
       onClick={() => onViewDetails(report.id)}
-      className="bg-card-bg rounded-large shadow-custom p-6 cursor-pointer transition-all duration-300 hover:shadow-xl"
+      // Added h-full and flex-col for uniform height
+      className="bg-card-bg rounded-large shadow-custom p-6 cursor-pointer transition-all duration-300 hover:shadow-xl h-full flex flex-col"
     >
       <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
         <div className="flex-1">
@@ -91,7 +96,7 @@ const ReportItem = ({ report, onViewDetails, formatDate, index }) => {
             {statusConfig.label}
           </span>
         </div>
-        <div className="flex items-center gap-2 text-text-muted text-sm">
+        <div className="flex items-center gap-2 text-text-muted text-sm whitespace-nowrap">
           <FaCalendar />
           <span>{formatDate(report.date)}</span>
         </div>
@@ -104,9 +109,9 @@ const ReportItem = ({ report, onViewDetails, formatDate, index }) => {
         {report.boarding && <span className="text-sm text-text-muted">{report.boarding}</span>}
       </div>
 
-      <p className="text-text-muted mb-4 line-clamp-2">{report.description}</p>
+      <p className="text-text-muted mb-4 line-clamp-2 flex-1">{report.description}</p>
 
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2 text-text-muted text-sm">
           <FaHashtag size={12} />
           <span>{report.id}</span>

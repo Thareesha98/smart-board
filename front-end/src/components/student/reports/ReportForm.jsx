@@ -12,11 +12,12 @@ import {
   FaLock,
 } from 'react-icons/fa';
 
+// FIXED: 'critical' now uses red text on light red background for better visibility
 const SEVERITY_LEVELS = [
-  { value: 'low', label: 'Low', icon: FaInfoCircle, color: 'bg-success/20 text-success' },
-  { value: 'medium', label: 'Medium', icon: FaExclamationCircle, color: 'bg-info/20 text-info' },
-  { value: 'high', label: 'High', icon: FaTimesCircle, color: 'bg-error/20 text-error' },
-  { value: 'critical', label: 'Critical', icon: FaSkullCrossbones, color: 'bg-critical text-white' },
+  { value: 'low', label: 'Low', icon: FaInfoCircle, color: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' },
+  { value: 'medium', label: 'Medium', icon: FaExclamationCircle, color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' },
+  { value: 'high', label: 'High', icon: FaTimesCircle, color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100' },
+  { value: 'critical', label: 'Critical', icon: FaSkullCrossbones, color: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' },
 ];
 
 const BOARDING_OPTIONS = [
@@ -87,26 +88,26 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
 
   const charCount = formData.reportDescription.length;
   const charLimitColor =
-    charCount > 1000 ? 'text-error' : charCount > 800 ? 'text-warning' : 'text-text-muted';
+    charCount > 1000 ? 'text-red-500' : charCount > 800 ? 'text-orange-500' : 'text-gray-400';
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-card-bg rounded-large shadow-custom p-8"
+      className="bg-card-bg rounded-large shadow-custom p-6 md:p-8"
     >
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-primary">Submit Report</h2>
         <div className="flex items-center gap-4 px-4 py-2 bg-background-light rounded-large">
-          <span className="font-semibold text-text-dark">{reportType.typeName}</span>
+          <span className="font-semibold text-text-dark text-sm">{reportType.typeName}</span>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onCancel}
-            className="flex items-center gap-2 px-3 py-1 rounded-btn text-sm font-semibold bg-white text-text-dark hover:bg-accent hover:text-white transition-all duration-300"
+            className="flex items-center gap-2 px-3 py-1 rounded-btn text-xs font-semibold bg-white text-text-dark hover:bg-accent hover:text-white transition-all duration-300"
           >
             <FaSync />
-            Change Type
+            Change
           </motion.button>
         </div>
       </div>
@@ -119,7 +120,7 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
               name="boarding"
               value={formData.boarding}
               onChange={handleChange}
-              className="w-full p-3 border-2 border-gray-200 rounded-btn transition-colors focus:border-accent focus:outline-none"
+              className="w-full p-3 border-2 border-gray-200 rounded-btn transition-colors focus:border-accent focus:outline-none bg-white"
             >
               {BOARDING_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -144,7 +145,7 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
 
         <div>
           <label className="block font-semibold text-text-dark mb-2">
-            Report Title <span className="text-error">*</span>
+            Report Title <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -159,7 +160,7 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
 
         <div>
           <label className="block font-semibold text-text-dark mb-2">
-            Date of Incident (if applicable)
+            Date of Incident
           </label>
           <input
             type="date"
@@ -172,7 +173,7 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
 
         <div>
           <label className="block font-semibold text-text-dark mb-2">
-            Detailed Description <span className="text-error">*</span>
+            Detailed Description <span className="text-red-500">*</span>
           </label>
           <textarea
             name="reportDescription"
@@ -191,13 +192,13 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
 
         <div>
           <label className="block font-semibold text-text-dark mb-2">
-            Severity Level <span className="text-error">*</span>
+            Severity Level <span className="text-red-500">*</span>
           </label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {SEVERITY_LEVELS.map(level => {
               const Icon = level.icon;
               return (
-                <label key={level.value} className="cursor-pointer">
+                <label key={level.value} className="cursor-pointer group relative">
                   <input
                     type="radio"
                     name="severity"
@@ -207,13 +208,14 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
                     className="sr-only"
                   />
                   <div
-                    className={`p-3 rounded-btn font-semibold text-sm text-center transition-all duration-300 border-2 flex items-center justify-center gap-2 ${
-                      formData.severity === level.value
-                        ? 'border-current scale-105'
-                        : 'border-transparent'
-                    } ${level.color}`}
+                    className={`
+                      p-3 rounded-btn font-semibold text-sm text-center transition-all duration-300
+                      border-2 flex flex-col items-center justify-center gap-2
+                      ${formData.severity === level.value ? 'border-current scale-105' : 'border-transparent bg-gray-50 hover:bg-gray-100'}
+                      ${formData.severity === level.value ? level.color : 'text-text-muted'}
+                    `}
                   >
-                    <Icon />
+                    <Icon size={18} />
                     {level.label}
                   </div>
                 </label>
@@ -222,85 +224,30 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
           </div>
         </div>
 
+        {/* File Upload Section */}
         <div>
-          <label className="block font-semibold text-text-dark mb-2">Evidence (Optional)</label>
-          <p className="text-sm text-text-muted mb-2">
-            Upload photos, screenshots, or documents that support your report
-          </p>
-          <div className="relative">
-            <input
-              type="file"
-              id="evidence"
-              accept="image/*,.pdf,.doc,.docx"
-              multiple
-              onChange={handleFileChange}
-              className="sr-only"
-            />
-            <label
-              htmlFor="evidence"
-              className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-btn cursor-pointer transition-colors hover:border-accent"
-            >
-              <FaCloudUploadAlt className="text-4xl text-text-muted mb-2" />
-              <span className="text-text-dark font-medium">Choose files or drag and drop</span>
-              <small className="text-text-muted mt-1">Max 5 files, 10MB each</small>
-            </label>
-          </div>
-
-          {previews.length > 0 && (
-            <div className="flex gap-3 flex-wrap mt-4">
-              {previews.map((preview, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="relative w-20 h-20 rounded-lg overflow-hidden bg-background-light flex items-center justify-center group"
-                >
-                  {preview.url ? (
-                    <img src={preview.url} alt={`Evidence ${index + 1}`} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <FaTimes className="text-2xl text-text-muted" />
-                      <small className="text-xs text-text-muted mt-1">
-                        {preview.name.split('.').pop().toUpperCase()}
-                      </small>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => removeFile(index)}
-                    className="absolute top-1 right-1 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <FaTimes size={12} />
-                  </button>
-                </motion.div>
-              ))}
+            <label className="block font-semibold text-text-dark mb-2">Evidence (Optional)</label>
+            <div className="relative">
+                <input type="file" id="evidence" accept="image/*,.pdf,.doc,.docx" multiple onChange={handleFileChange} className="sr-only" />
+                <label htmlFor="evidence" className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-btn cursor-pointer transition-colors hover:border-accent bg-gray-50">
+                    <FaCloudUploadAlt className="text-4xl text-text-muted mb-2" />
+                    <span className="text-text-dark font-medium">Choose files</span>
+                </label>
             </div>
-          )}
+             {previews.length > 0 && (
+                <div className="flex gap-3 flex-wrap mt-4">
+                  {previews.map((preview, index) => (
+                    <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200">
+                        {preview.url ? <img src={preview.url} alt="prev" className="w-full h-full object-cover"/> : <FaTimes />}
+                        <button type="button" onClick={() => removeFile(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center"><FaTimes size={10}/></button>
+                    </div>
+                  ))}
+                </div>
+             )}
         </div>
 
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            name="allowContact"
-            checked={formData.allowContact}
-            onChange={handleChange}
-            className="mt-1 w-5 h-5 text-accent border-gray-300 rounded focus:ring-accent"
-          />
-          <span className="text-sm text-text-dark">
-            I allow SmartBoAD administrators to contact me for additional information about this report
-          </span>
-        </label>
-
-        <div className="flex gap-4 p-4 bg-info/10 border border-info/30 rounded-large">
-          <FaLock className="text-info text-xl flex-shrink-0 mt-1" />
-          <div className="text-sm text-text-muted">
-            <strong className="text-text-dark">Confidentiality Notice:</strong> Your report will be handled
-            confidentially. We will not disclose your identity to the reported party without your consent, except
-            where required by law or to prevent imminent harm.
-          </div>
-        </div>
-
-        <div className="flex gap-4 justify-end pt-4">
+        {/* Footer Actions */}
+        <div className="flex flex-col-reverse sm:flex-row gap-4 justify-end pt-4 border-t border-gray-100">
           <button
             type="button"
             onClick={onCancel}
@@ -309,10 +256,11 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
             Cancel
           </button>
           <motion.button
+            type="button"
+            onClick={handleSubmit}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={handleSubmit}
-            className="flex items-center gap-2 px-6 py-3 rounded-large font-semibold bg-accent text-white hover:bg-primary transition-all duration-300 shadow-lg"
+            className="flex items-center justify-center gap-2 px-6 py-3 rounded-large font-semibold bg-accent text-white shadow-md hover:bg-primary"
           >
             <FaPaperPlane />
             Submit Report
