@@ -26,12 +26,10 @@ const MyBoardingsPage = () => {
 
   const handleManage = () => {
     showNotification('Opening boarding management panel...');
-    // Open management modal or navigate
   };
 
   const handlePayRent = async () => {
     setIsPayingRent(true);
-    
     // Simulate payment processing
     setTimeout(() => {
       payRent();
@@ -46,12 +44,10 @@ const MyBoardingsPage = () => {
 
   const handleContactOwner = () => {
     showNotification('Opening contact form...');
-    // Open contact modal
   };
 
   const handleViewDocuments = () => {
     showNotification('Opening documents panel...');
-    // Open documents modal
   };
 
   return (
@@ -66,24 +62,32 @@ const MyBoardingsPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
+            // LAYOUT LOGIC:
+            // < 1400px: Stacked (Flex Col)
+            // >= 1400px: Grid (2 Cols Left, 1 Col Right)
+            className="flex flex-col min-[1400px]:grid min-[1400px]:grid-cols-3 gap-6 items-start"
           >
-            {/* Current Boarding Card */}
-            <BoardingCard
-              boarding={currentBoarding}
-              onViewDetails={handleViewDetails}
-              onManage={handleManage}
-              onPayRent={handlePayRent}
-              onRequestMaintenance={handleRequestMaintenance}
-              onContactOwner={handleContactOwner}
-              onViewDocuments={handleViewDocuments}
-              isPayingRent={isPayingRent}
-            />
+            {/* Main Content Area */}
+            <div className="w-full min-[1400px]:col-span-2">
+              <BoardingCard
+                boarding={currentBoarding}
+                onViewDetails={handleViewDetails}
+                onManage={handleManage}
+                onPayRent={handlePayRent}
+                onRequestMaintenance={handleRequestMaintenance}
+                onContactOwner={handleContactOwner}
+                onViewDocuments={handleViewDocuments}
+                isPayingRent={isPayingRent}
+              />
+            </div>
 
-            {/* Additional Info Cards */}
-            <InfoCards
-              boarding={currentBoarding}
-              onContactOwner={handleContactOwner}
-            />
+            {/* Sidebar / Bottom Area */}
+            <div className="w-full min-[1400px]:col-span-1">
+              <InfoCards
+                boarding={currentBoarding}
+                onContactOwner={handleContactOwner}
+              />
+            </div>
           </motion.div>
         ) : (
           <EmptyState key="empty-state" />
