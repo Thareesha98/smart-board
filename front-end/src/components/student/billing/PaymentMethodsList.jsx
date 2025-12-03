@@ -12,12 +12,9 @@ const PaymentMethodsList = ({
 }) => {
   const getMethodIcon = (type) => {
     switch (type) {
-      case 'visa':
-        return FaCcVisa;
-      case 'bank':
-        return FaUniversity;
-      default:
-        return FaCcVisa;
+      case 'visa': return FaCcVisa;
+      case 'bank': return FaUniversity;
+      default: return FaCcVisa;
     }
   };
 
@@ -53,25 +50,19 @@ const PaymentMethodsList = ({
               }`}
             >
               <Icon className="text-3xl text-accent flex-shrink-0" />
-              <div className="flex-1">
-                <h4 className="font-semibold text-text-dark">{method.name}</h4>
-                <span className="text-sm text-text-muted">{method.details}</span>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-text-dark truncate">{method.name}</h4>
+                <span className="text-sm text-text-muted truncate block">{method.details}</span>
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEditMethod(method.id);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); onEditMethod(method.id); }}
                   className="p-2 rounded-lg text-text-muted hover:bg-background-light hover:text-text-dark transition-colors duration-200"
                 >
                   <FaEdit />
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRemoveMethod(method.id);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); onRemoveMethod(method.id); }}
                   className="p-2 rounded-lg text-text-muted hover:bg-error/10 hover:text-error transition-colors duration-200"
                 >
                   <FaTrash />

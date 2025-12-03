@@ -36,7 +36,8 @@ const CARD_CONFIGS = [
 const OverviewCards = ({ overview }) => {
   return (
     <section className="mb-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Grid: 1 col (Mobile), 2 cols (Tablet < 1400px), 4 cols (Desktop >= 1400px) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 min-[1400px]:grid-cols-4 gap-6">
         {CARD_CONFIGS.map((config, index) => (
           <OverviewCard
             key={config.key}
@@ -59,17 +60,18 @@ const OverviewCard = ({ icon: Icon, title, amount, subtitle, colorClass, index }
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.1 }}
     whileHover={{ y: -5 }}
-    className="bg-card-bg rounded-large shadow-custom p-6 flex items-center gap-4 transition-shadow duration-300 hover:shadow-xl"
+    // h-full for equal height
+    className="bg-card-bg rounded-large shadow-custom p-6 flex items-center gap-4 transition-shadow duration-300 hover:shadow-xl h-full"
   >
     <div className="bg-background-light p-4 rounded-large text-accent text-2xl flex-shrink-0">
       <Icon />
     </div>
-    <div className="flex-1">
-      <h3 className="text-sm font-semibold text-text-muted mb-2">{title}</h3>
-      <div className={`text-3xl font-bold ${colorClass} mb-1`}>
+    <div className="flex-1 min-w-0">
+      <h3 className="text-sm font-semibold text-text-muted mb-2 truncate">{title}</h3>
+      <div className={`text-3xl font-bold ${colorClass} mb-1 truncate`}>
         {typeof amount === 'number' ? `$${amount}` : amount}
       </div>
-      <span className="text-sm text-text-muted">{subtitle}</span>
+      <span className="text-sm text-text-muted truncate block">{subtitle}</span>
     </div>
   </motion.div>
 );

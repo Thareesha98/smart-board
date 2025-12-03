@@ -81,8 +81,9 @@ const BillingPage = () => {
       <OverviewCards overview={overview} />
 
       {/* Main Billing Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-        {/* Left Column */}
+      <div className="grid grid-cols-1 min-[1400px]:grid-cols-2 gap-8 mt-8 items-start">
+        
+        {/* Left Column (Payment Methods & Quick Pay) */}
         <div className="space-y-6">
           <PaymentMethodsList
             paymentMethods={paymentMethods}
@@ -94,7 +95,8 @@ const BillingPage = () => {
           />
 
           <QuickPay
-            defaultAmount={overview.currentBalance}
+            // FIXED: Passing .amount ensures we pass a Number, not an Object
+            defaultAmount={overview.currentBalance?.amount || 0}
             paymentMethods={paymentMethods}
             activeMethodId={activePaymentMethod}
             onPayment={handleProcessPayment}
@@ -102,7 +104,7 @@ const BillingPage = () => {
           />
         </div>
 
-        {/* Right Column */}
+        {/* Right Column (History & Details) */}
         <div className="space-y-6">
           <BillingHistory
             history={billingHistory}
