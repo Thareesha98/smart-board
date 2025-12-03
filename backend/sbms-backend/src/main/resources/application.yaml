@@ -47,8 +47,8 @@ spring:
 
 
 aws:
-  #accessKeyId: AKIA2AUOOUX3O5UUUYBN      # replace after regenerating
-  #secretAccessKey: E+85hlGWYo8pT9ECKNY+2YGUkJ0hzf4jBqAJngpb  # replace after regenerating
+  accessKeyId: AKIA2AUOOUX3O5UUUYBN      # replace after regenerating
+  secretAccessKey: E+85hlGWYo8pT9ECKNY+2YGUkJ0hzf4jBqAJngpb  # replace after regenerating
   region: ap-south-1
   s3:
     bucketName: smart-board-project
