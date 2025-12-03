@@ -8,14 +8,14 @@ import RequestModal from '../../components/student/maintenance/RequestModal';
 import Notification from '../../components/student/maintenance/Notification';
 import { FaPlus, FaClipboardList } from 'react-icons/fa';
 
-// EmptyState component moved outside to prevent recreation on each render
+// EmptyState component
 const EmptyState = ({ type }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="text-center p-12 bg-card-bg rounded-large shadow-custom"
+    className="text-center p-12 bg-card-bg rounded-large shadow-custom border border-gray-100/50"
   >
-    <FaClipboardList className="text-5xl text-text-muted mb-4 mx-auto" />
+    <FaClipboardList className="text-5xl text-text-muted mb-4 mx-auto opacity-50" />
     <h3 className="text-xl font-bold text-text-dark mb-2">
       No {type} requests found
     </h3>
@@ -57,21 +57,25 @@ const MaintenancePage = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // --- HEADER BUTTON (Visible on Tablet/Desktop) ---
+  const headerRightContent = (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      // Fixed: Hidden on mobile (sm:hidden), Flex on larger screens
+      className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary whitespace-nowrap"
+      onClick={() => setShowForm(!showForm)}
+    >
+      <FaPlus />
+      {showForm ? 'Cancel' : 'New Request'}
+    </motion.button>
+  );
+
   return (
     <StudentLayout
       title="Maintenance Requests"
-      subtitle="Submit and track maintenance issues for your boarding"
-      headerRightContent={
-        <motion.button
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary"
-          onClick={() => setShowForm(!showForm)}
-        >
-          <FaPlus />
-          New Request
-        </motion.button>
-      }
+      subtitle="Submit and track maintenance issues"
+      headerRightContent={headerRightContent}
     >
       {/* Request Form Section */}
       <AnimatePresence>
@@ -93,17 +97,26 @@ const MaintenancePage = () => {
 
       {/* Active Requests Section */}
       <section className="mb-8">
-        <h2 className="text-primary text-2xl font-bold mb-4">Active Requests</h2>
+        <h2 className="text-primary text-2xl font-bold mb-4 flex items-center gap-2">
+          Active Requests
+          {activeRequests.length > 0 && (
+            <span className="text-sm bg-accent/10 text-accent px-2 py-0.5 rounded-full border border-accent/20">
+              {activeRequests.length}
+            </span>
+          )}
+        </h2>
         {activeRequests.length === 0 ? (
           <EmptyState type="active" />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          // GRID LOGIC: 1 Col < 1400px, 2 Cols >= 1400px
+          <div className="grid grid-cols-1 min-[1400px]:grid-cols-2 gap-6">
             {activeRequests.map((request, index) => (
               <motion.div
                 key={request.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
+                className="h-full" // Ensure card fills height
               >
                 <RequestCard
                   request={request}
@@ -121,13 +134,14 @@ const MaintenancePage = () => {
         {requestHistory.length === 0 ? (
           <EmptyState type="history" />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 min-[1400px]:grid-cols-2 gap-6">
             {requestHistory.map((request, index) => (
               <motion.div
                 key={request.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
+                className="h-full"
               >
                 <RequestCard
                   request={request}
@@ -149,6 +163,18 @@ const MaintenancePage = () => {
 
       {/* Notification Toast */}
       <Notification notification={notification} />
+
+      {/* --- MOBILE FLOATING BUTTON (Visible ONLY on Mobile) --- */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setShowForm(!showForm)}
+        className="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+        aria-label="New Request"
+      >
+        <FaPlus size={24} className={`transition-transform duration-300 ${showForm ? 'rotate-45' : ''}`} />
+      </motion.button>
+
     </StudentLayout>
   );
 };
