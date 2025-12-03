@@ -36,8 +36,8 @@ const AppointmentCard = ({ appointment, onAction }) => {
   const isRegistered = status === 'selected' && registered;
 
   const renderButtons = () => {
-    // Common base classes for action buttons
-    const BASE_BTN_CLASSES = "text-sm py-2 px-4 rounded-large font-semibold transition-all duration-300 border-2 flex items-center gap-2";
+    // RESTORED: Your exact button styling classes
+    const BASE_BTN_CLASSES = "text-sm py-2 px-4 rounded-large font-semibold transition-all duration-300 border-2 flex items-center justify-center gap-2 whitespace-nowrap flex-1";
 
     switch (status) {
       case 'upcoming':
@@ -55,7 +55,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
             >
               <FaTimes /> Cancel
             </button>
-            <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
               Upcoming
             </span>
           </>
@@ -75,7 +75,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
             >
               <FaTimes /> Reject
             </button>
-            <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
               Visited
             </span>
           </>
@@ -89,7 +89,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
             >
               <FaEye /> View
             </button>
-            <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
               Registered
             </span>
           </>
@@ -101,7 +101,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
             >
               <FaHome /> Add to My Boardings
             </button>
-            <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
               Selected
             </span>
           </>
@@ -119,54 +119,70 @@ const AppointmentCard = ({ appointment, onAction }) => {
 
   return (
     <div className="
-      bg-card-bg rounded-large shadow-custom p-6 
-      transition-transform-shadow duration-300 flex flex-col md:flex-row items-center gap-6 
-      hover:transform hover:-translate-y-0.5 hover:shadow-xl
+      bg-card-bg rounded-large shadow-custom p-6 border border-gray-100
+      transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-0.5
+      
+      /* RESPONSIVE LAYOUT (1400px Breakpoint) */
+      flex flex-col md:flex-row items-center gap-6
     ">
-      {/* Boarding Image */}
-      <img
-        src={image}
-        alt={boardingName}
-        className="w-16 h-16 rounded-full object-cover border-3 border-accent flex-shrink-0"
-        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=200&q=80' }}
-      />
+      
+      {/* 1. IMAGE: Left Side */}
+      <div className="relative">
+        <img
+          src={image}
+          alt={boardingName}
+          className="w-20 h-20 md:w-16 md:h-16 min-[1400px]:w-16 min-[1400px]:h-16 rounded-full object-cover border-3 border-accent flex-shrink-0"
+          onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=200&q=80' }}
+        />
+        {/* Status badge for Mobile/Tablet (< 1400px) */}
+        <div className={`min-[1400px]:hidden absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white border shadow-sm ${badge}`}>
+          {status}
+        </div>
+      </div>
 
-      {/* Appointment Details Grid */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full text-center md:text-left">
-        {/* Name & Meta */}
+      {/* 2. INFO GRID: Middle */}
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 min-[1400px]:grid-cols-3 gap-4 w-full text-center md:text-left items-center">
+        
+        {/* Name & Owner */}
         <div className="flex flex-col justify-center">
           <h4 className="text-lg font-bold text-text-dark mb-1">{boardingName}</h4>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-text-muted text-sm justify-center md:justify-start">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-text-muted text-sm">
             <div className="flex items-center gap-1.5">
-              <FaUser className="text-accent w-4" />
+              <FaUser className="text-accent w-3" />
               <span>{owner}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <FaMapMarkerAlt className="text-accent w-4" />
-              <span>{shortAddress}</span>
+              <FaMapMarkerAlt className="text-accent w-3" />
+              <span className="truncate max-w-[150px]">{shortAddress}</span>
             </div>
           </div>
         </div>
 
-        {/* Contact */}
+        {/* Contact info */}
         <div className="flex flex-col justify-center">
-          <span className="text-xs uppercase text-text-muted/70 tracking-wider">Contact</span>
-          <div className="flex items-center gap-2 font-semibold text-text-dark mt-1 justify-center md:justify-start">
-            <FaPhone className="text-success" />
-            <span>{contact}</span>
+          <span className="hidden md:block text-[10px] uppercase text-text-muted/60 font-bold tracking-wider mb-0.5">Contact</span>
+          <div className="flex items-center justify-center md:justify-start gap-2 font-semibold text-text-dark">
+             <FaPhone className="text-success" size={14} />
+             <span>{contact}</span>
           </div>
         </div>
 
         {/* Date & Time */}
-        <div className="flex flex-col items-center justify-center">
-          <span className="text-xs uppercase text-text-muted/70 tracking-wider">Visit Date</span>
-          <strong className="text-lg font-bold text-primary mt-1">{formatDate(date)}</strong>
-          <span className="text-sm text-text-muted">{formatTime(time)}</span>
+        <div className="flex flex-col items-center justify-center md:items-start">
+          <span className="hidden md:block text-[10px] uppercase text-text-muted/60 font-bold tracking-wider mb-0.5">Visit Date</span>
+          <div className="flex items-center gap-2">
+            <strong className="text-lg font-bold text-primary">{formatDate(date)}</strong>
+            <span className="text-sm text-text-muted">{formatTime(time)}</span>
+          </div>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-3 justify-center md:justify-end flex-wrap flex-shrink-0">
+      {/* 3. ACTIONS: Right Side */}
+      <div className="
+        flex flex-wrap md:flex-nowrap gap-3 justify-center md:justify-end flex-shrink-0 w-full md:w-auto
+        /* Tablet (768-1400): Stack buttons vertically to save horizontal space */
+        md:flex-col min-[1400px]:flex-row
+      ">
         {renderButtons()}
       </div>
     </div>

@@ -46,7 +46,7 @@ const AppointmentsPage = () => {
 
   const handleScheduleClose = () => {
     setIsScheduleModalOpen(false);
-    setCurrentAppointmentId(null); // Clear ID when modal closes
+    setCurrentAppointmentId(null); 
   };
 
   const handleRegistrationFlow = (id, action) => {
@@ -58,8 +58,8 @@ const AppointmentsPage = () => {
     } else if (action === "view") {
       alert(`Redirecting to My Boardings for ${appointment.boardingName}.`);
     } else if (action === "reschedule") {
-      setCurrentAppointmentId(id); // Set the ID of the appointment being rescheduled
-      setIsScheduleModalOpen(true); // Open the ScheduleModal
+      setCurrentAppointmentId(id); 
+      setIsScheduleModalOpen(true); 
     } else if (action === "cancel") {
       if (
         !window.confirm(`Confirm cancellation for ${appointment.boardingName}?`)
@@ -84,14 +84,8 @@ const AppointmentsPage = () => {
         message: `You have successfully registered for **${registeredAppointment.boardingName}**!`,
         details: [
           { label: "Move-in Date", value: registeredAppointment.moveInDate },
-          {
-            label: "Contract Duration",
-            value: registeredAppointment.contractDuration,
-          },
-          {
-            label: "Emergency Contact",
-            value: registeredAppointment.emergencyContact,
-          },
+          { label: "Contract Duration", value: registeredAppointment.contractDuration },
+          { label: "Emergency Contact", value: registeredAppointment.emergencyContact },
         ],
         actionLabel: "Done",
         action: () => setIsDecisionModalOpen(false),
@@ -111,20 +105,20 @@ const AppointmentsPage = () => {
 
     if (list.length === 0) {
       return (
-        <div className="text-center p-12 bg-card-bg rounded-large shadow-custom mt-8 animate-fadeIn">
-          <i className="fas fa-calendar-times text-5xl text-text-muted mb-4"></i>
+        <div className="text-center p-12 bg-card-bg rounded-large shadow-custom mt-8 animate-fadeIn border border-gray-100">
+          <i className="fas fa-calendar-times text-5xl text-text-muted mb-4 opacity-50"></i>
           <h3 className="text-xl font-bold text-text-dark mb-2">
             No {category} Appointments Found
           </h3>
           {category !== "cancelled" && (
             <button
-              className="flex items-center gap-2 py-3 px-6 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary hover:-translate-y-0.5"
+              className="flex items-center gap-2 py-3 px-6 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary hover:-translate-y-0.5 mx-auto mt-4"
               onClick={() => {
                 setCurrentAppointmentId(null);
                 setIsScheduleModalOpen(true);
               }}
             >
-              <i className="fas fa-plus"></i> Schedule Your First Visit
+              <FaPlus /> Schedule Your First Visit
             </button>
           )}
         </div>
@@ -132,7 +126,7 @@ const AppointmentsPage = () => {
     }
 
     return (
-      <div className="appointments-grid flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         {list.map((app) => (
           <AppointmentCard
             key={app.id}
@@ -150,9 +144,10 @@ const AppointmentsPage = () => {
       subtitle="Manage your boarding visits and selections"
       headerRightContent={
         <motion.button
-          whileHover={{ scale: 1.05, y: -2 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary"
+          // FIXED: "hidden sm:flex" ensures this ONLY shows on Tablet/Desktop where space exists
+          className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary whitespace-nowrap"
           onClick={() => {
             setCurrentAppointmentId(null);
             setIsScheduleModalOpen(true);
@@ -164,8 +159,8 @@ const AppointmentsPage = () => {
       }
     >
       {/* Categories (Tabs) */}
-      <section className="bg-card-bg p-6 rounded-large shadow-custom mb-8">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <section className="bg-card-bg p-4 sm:p-6 rounded-large shadow-custom mb-8 border border-gray-100">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.keys(counts).map((category) => (
             <AppointmentTab
               key={category}
@@ -189,7 +184,7 @@ const AppointmentsPage = () => {
       </section>
 
       {/* Appointments List */}
-      <section className="mb-8">
+      <section className="mb-8 min-h-[50vh]">
         <div className="appointments-container">
           {Object.keys(categorizedAppointments).map((category) => (
             <div
@@ -199,19 +194,14 @@ const AppointmentsPage = () => {
               }`}
             >
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-primary mb-1">
-                  {category.charAt(0).toUpperCase() + category.slice(1)}{" "}
-                  {category !== "selected" ? "Visits" : "Boardings"}
+                <h3 className="text-2xl font-bold text-primary mb-1 capitalize">
+                  {category} {category !== "selected" ? "Visits" : "Boardings"}
                 </h3>
-                <p className="text-text-muted">
-                  {category === "upcoming" &&
-                    "Your scheduled visits awaiting action."}
-                  {category === "visited" &&
-                    "Time to decide on the places you've seen!"}
-                  {category === "selected" &&
-                    "Boardings you've chosen to move forward with."}
-                  {category === "cancelled" &&
-                    "Records of previous cancellations."}
+                <p className="text-text-muted text-sm sm:text-base">
+                  {category === "upcoming" && "Your scheduled visits awaiting action."}
+                  {category === "visited" && "Time to decide on the places you've seen!"}
+                  {category === "selected" && "Boardings you've chosen to move forward with."}
+                  {category === "cancelled" && "Records of previous cancellations."}
                 </p>
               </div>
               {renderAppointmentList(category)}
@@ -220,13 +210,28 @@ const AppointmentsPage = () => {
         </div>
       </section>
 
+      {/* MOBILE FLOATING ACTION BUTTON (Visible ONLY on Mobile) */}
+      {/* This ensures the button is always accessible on small screens even if the header hides it */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => {
+          setCurrentAppointmentId(null);
+          setIsScheduleModalOpen(true);
+        }}
+        className="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+        aria-label="Schedule Visit"
+      >
+        <FaPlus size={24} />
+      </motion.button>
+
       {/* Modals */}
       <ScheduleModal
         isOpen={isScheduleModalOpen}
-        onClose={handleScheduleClose} // Use the new handler to clear ID
+        onClose={handleScheduleClose} 
         onSubmit={handleScheduleSubmit}
-        currentAppointmentId={currentAppointmentId} // Pass ID for rescheduling
-        getAppointmentById={getAppointmentById} // Pass fetcher for pre-filling
+        currentAppointmentId={currentAppointmentId} 
+        getAppointmentById={getAppointmentById} 
       />
 
       <DecisionModal
@@ -244,14 +249,8 @@ const AppointmentsPage = () => {
 
       <style jsx global>{`
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out;
