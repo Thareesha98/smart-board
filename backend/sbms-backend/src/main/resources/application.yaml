@@ -1,3 +1,6 @@
+server:
+  port: 8086
+
 spring:
   application:
     name: sbms-backend
@@ -8,9 +11,7 @@ spring:
     username: smartboard_admin
     password: "09090909"
     driver-class-name: org.postgresql.Driver
-    # The 'hikari' block and its properties must be properly indented under 'datasource'.
     hikari:
-      # THIS LINE MUST USE SPACES FOR INDENTATION
       max-lifetime: 300000
 
   # JPA / Hibernate Configuration
@@ -27,7 +28,8 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: thareesha01@gmail.com
-    password: foewigznsutmonhm
+    # Note: This is an App Password (not the actual Gmail password)
+    password: foewigznsutmonhm 
     properties:
       mail:
         smtp:
@@ -47,11 +49,20 @@ spring:
 
 
 aws:
-  accessKeyId: AKIA2AUOOUX3O5UUUYBN      # replace after regenerating
-  secretAccessKey: E+85hlGWYo8pT9ECKNY+2YGUkJ0hzf4jBqAJngpb  # replace after regenerating
+  # WARNING: Hardcoding credentials is a security risk. Use environment variables or AWS IAM roles instead.
+  accessKeyId: AKIA2AUOOUX3O5UUUYBN      
+  secretAccessKey: E+85hlGWYo8pT9ECKNY+2YGUkJ0hzf4jBqAJngpb  
   region: ap-south-1
   s3:
     bucketName: smart-board-project
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      # FIX: Corrected indentation here (removed Tab, used spaces)
+      defaultZone: http://localhost:8761/eureka/
 
 
 #url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board

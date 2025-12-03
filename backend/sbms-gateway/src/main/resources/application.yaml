@@ -14,16 +14,13 @@ spring:
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOriginPatterns: "*"
+            allowedOrigins: "*"
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
 
       routes:
 
-        # --------------------------
-        # AUTH SERVICE (LOGIN, REGISTER)
-        # --------------------------
         - id: auth-service
           uri: lb://auth-service
           predicates:
@@ -31,9 +28,6 @@ spring:
           filters:
             - StripPrefix=1
 
-        # --------------------------
-        # STUDENT SERVICE
-        # --------------------------
         - id: student-service
           uri: lb://student-service
           predicates:
@@ -41,9 +35,6 @@ spring:
           filters:
             - StripPrefix=1
 
-        # --------------------------
-        # OWNER SERVICE
-        # --------------------------
         - id: owner-service
           uri: lb://owner-service
           predicates:
@@ -51,9 +42,6 @@ spring:
           filters:
             - StripPrefix=1
 
-        # --------------------------
-        # ADMIN SERVICE
-        # --------------------------
         - id: admin-service
           uri: lb://admin-service
           predicates:
@@ -61,16 +49,12 @@ spring:
           filters:
             - StripPrefix=1
 
-        # --------------------------
-        # NOTIFICATION SERVICE
-        # --------------------------
         - id: notification-service
           uri: lb://sbms-notification-service
           predicates:
             - Path=/api/notifications/**
           filters:
             - StripPrefix=1
-
 
 eureka:
   client:
@@ -79,12 +63,10 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka/
 
-
 logging:
   level:
     root: INFO
     org.springframework.cloud.gateway: DEBUG
-
 
 jwt:
   secret: "MY_SUPER_SECRET_256BIT_STRING_CHANGE_THIS"
