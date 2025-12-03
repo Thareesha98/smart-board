@@ -1,0 +1,35 @@
+.sdl-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Overview cards row */
+.sdl-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Main grid */
+.sdl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.sdl-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .sdl-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sdl-grid {
+    grid-template-columns: 1fr;
+  }
+}

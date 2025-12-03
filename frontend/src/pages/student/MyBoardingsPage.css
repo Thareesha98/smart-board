@@ -1,0 +1,10 @@
+.myboardings-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.myboardings-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}

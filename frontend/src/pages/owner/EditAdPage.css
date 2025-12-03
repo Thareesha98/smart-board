@@ -1,0 +1,97 @@
+.editad-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.editad-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* Form grid */
+.editad-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+/* Cards */
+.editad-left,
+.editad-right {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editad-left label,
+.editad-right label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Inputs */
+.editad-left input,
+.editad-right input,
+.editad-left select,
+.editad-right textarea {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  font-size: 15px;
+}
+
+.editad-left input:focus,
+.editad-right input:focus,
+.editad-left select:focus,
+.editad-right textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.12);
+}
+
+.editad-right textarea {
+  height: 160px;
+  resize: none;
+}
+
+/* Current Image */
+.editad-current-image {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Submit button */
+.editad-submit {
+  margin-top: 22px;
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.editad-submit:hover {
+  background: #1d4ed8;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .editad-form {
+    grid-template-columns: 1fr;
+  }
+}

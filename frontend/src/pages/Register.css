@@ -1,0 +1,17 @@
+.register {
+  max-width: 450px;
+  margin: 20px auto;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.register-form input,
+.register-form select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}

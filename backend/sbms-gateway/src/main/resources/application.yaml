@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      default-filters:
+        - RemoveRequestHeader=Cookie
+        - RemoveRequestHeader=Set-Cookie
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+      routes:
+
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+
+        - id: student-service
+          uri: lb://student-service
+          predicates:
+            - Path=/api/student/**
+          filters:
+            - StripPrefix=1
+
+        - id: owner-service
+          uri: lb://owner-service
+          predicates:
+            - Path=/api/owner/**
+          filters:
+            - StripPrefix=1
+
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - StripPrefix=1
+
+        - id: notification-service
+          uri: lb://sbms-notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=1
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG
+
+jwt:
+  secret: "MY_SUPER_SECRET_256BIT_STRING_CHANGE_THIS"

@@ -1,0 +1,137 @@
+.manageusers-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.manageusers-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+/* Table container */
+.manageusers-table {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+/* Table row */
+.mu-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 1fr 1.5fr;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+}
+
+.mu-row:last-child {
+  border-bottom: none;
+}
+
+/* Header */
+.mu-header {
+  background: #f3f4f6;
+  font-weight: 700;
+}
+
+/* Role badge */
+.mu-role {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.mu-role.student {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.mu-role.owner {
+  background: #fde68a;
+  color: #92400e;
+}
+
+/* Status badge */
+.mu-status {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.mu-status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.mu-status.banned {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Actions */
+.mu-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mu-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+/* Ban btn */
+.mu-btn.ban {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.mu-btn.ban:hover {
+  background: #fecaca;
+}
+
+/* Unban btn */
+.mu-btn.unban {
+  background: #dcfce7;
+  color: #166534;
+}
+.mu-btn.unban:hover {
+  background: #bbf7d0;
+}
+
+/* View btn */
+.mu-btn.view {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+.mu-btn.view:hover {
+  background: #c7d2fe;
+}
+
+/* Responsive Table */
+@media (max-width: 900px) {
+  .mu-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .mu-header {
+    display: none;
+  }
+
+  .mu-row span {
+    font-size: 14px;
+  }
+
+  .mu-actions {
+    justify-content: flex-start;
+  }
+}

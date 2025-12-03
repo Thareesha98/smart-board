@@ -1,0 +1,28 @@
+/* ==== FOOTER WRAPPER ==== */
+.sbms-footer {
+  width: 100%;
+  background: #ffffff;
+  padding: 30px 0;
+  margin-top: 40px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+/* ==== FOOTER CONTENT ==== */
+.sbms-footer-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 18px;
+  text-align: center;
+}
+
+.sbms-footer-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 6px;
+}
+
+.sbms-footer-copy {
+  font-size: 14px;
+  color: #555;
+}

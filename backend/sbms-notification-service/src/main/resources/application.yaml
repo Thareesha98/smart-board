@@ -1,0 +1,35 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: sbms-notification-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sbms_notifications
+    username: sbms_user
+    password: sbms_password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  exchange: sbms.events
+  queue: sbms.notification.queue
+  routing-key: appointment.*
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+security:
+  jwt:
+    jwk-set-uri: http://localhost:8081/.well-known/jwks.json

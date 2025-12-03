@@ -1,0 +1,49 @@
+/* ==== MAIN CARD STYLE ==== */
+.sbms-overview-card {
+  background: #ffffff;
+  padding: 18px 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.sbms-overview-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+
+/* ==== ICON BOX ==== */
+.sbms-overview-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: #eef3ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* ==== TEXT CONTENT ==== */
+.sbms-overview-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.sbms-overview-title {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.sbms-overview-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 2px;
+}
