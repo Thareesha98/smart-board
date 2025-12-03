@@ -57,7 +57,7 @@ const Sidebar = () => {
 
   const isProfileActive = currentPath === "profile";
 
-  // FIX: Auto-scroll active item into view on mobile
+  // Auto-scroll active item into view on mobile
   useEffect(() => {
     if (mobileNavRef.current) {
       const activeLink = mobileNavRef.current.querySelector('.mobile-active');
@@ -120,14 +120,14 @@ const Sidebar = () => {
         </div>
       </aside>
 
-      {/* Mobile Navigation - FIXED */}
+      {/* Mobile/Tablet Navigation */}
       <nav
         ref={mobileNavRef}
         className="lg:hidden w-full bg-primary text-white shadow-lg sticky top-0 z-50 overflow-x-auto scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {/* Removed 'justify-center' to ensure scrolling starts from left */}
-        <div className="flex min-w-full px-2">
+        {/* FIX: md:justify-center centers items ONLY on tablet/larger screens */}
+        <div className="flex min-w-full px-2 md:justify-center">
           <div className="flex gap-2 p-2">
             {navItems.map((item) => {
               const isActive = currentPath === item.path.replace(/^\/|\/$/g, "").toLowerCase();
@@ -137,7 +137,6 @@ const Sidebar = () => {
                 <Link
                   key={`mobile-${item.key}`}
                   to={item.path}
-                  // Added 'mobile-active' class for auto-scroll targeting
                   className={`
                     flex flex-col items-center justify-center p-2 min-w-[75px] flex-shrink-0
                     text-center transition-all duration-300 rounded-lg whitespace-nowrap

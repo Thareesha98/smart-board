@@ -27,12 +27,18 @@ const StudentDashboard = () => {
 
       {/* Stats Overview */}
       <section className="mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+        {/* GRID LOGIC:
+            - Mobile (<768px): 1 Column
+            - Tablet (<1400px): 2 Columns
+            - Desktop (>=1400px): 4 Columns
+            - items-stretch ensures all cards in a row match the height of the tallest card (if text wraps)
+        */}
+        <div className="grid grid-cols-1 md:grid-cols-2 min-[1400px]:grid-cols-4 gap-4 md:gap-6 items-stretch">
           
-          {/* 1 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
+            className="h-full"
           >
             <StatWidget 
               icon={<FaCalendarCheck />}
@@ -42,10 +48,10 @@ const StudentDashboard = () => {
             />
           </motion.div>
 
-          {/* 2 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
+            className="h-full"
           >
             <StatWidget 
               icon={<FaFileInvoiceDollar />}
@@ -56,10 +62,10 @@ const StudentDashboard = () => {
             />
           </motion.div>
 
-          {/* 3 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
+            className="h-full"
           >
             <StatWidget 
               icon={<FaHome />}
@@ -69,10 +75,10 @@ const StudentDashboard = () => {
             />
           </motion.div>
 
-          {/* 4 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
+            className="h-full"
           >
             <StatWidget 
               icon={<FaStar />}
