@@ -1,5 +1,7 @@
 package com.sbms.sbms_backend.dto.registration;
 
+import java.math.BigDecimal;
+
 import com.sbms.sbms_backend.model.enums.RegistrationStatus;
 import lombok.Data;
 
@@ -21,4 +23,8 @@ public class RegistrationResponseDTO {
 
     private String studentNote;
     private String ownerNote;
+    private BigDecimal keyMoney;
+    private BigDecimal monthlyPrice;
+    private boolean keyMoneyPaid;
+
 }

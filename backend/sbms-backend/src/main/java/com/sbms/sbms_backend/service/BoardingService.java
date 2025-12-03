@@ -44,6 +44,14 @@ public class BoardingService {
                 .filter(b -> request.getMaxPrice() == null ||
                              b.getPricePerMonth().compareTo(request.getMaxPrice()) <= 0)
                 // Search keyword (title + address)
+                
+                .filter(b -> request.getMinKeyMoney() == null ||
+                b.getKeyMoney().compareTo(request.getMinKeyMoney()) <= 0)
+                
+                .filter(b -> request.getMaxKeyMoney() == null ||
+                b.getKeyMoney().compareTo(request.getMaxKeyMoney()) <= 0)
+   // Search keyword (title + address)
+                
                 .filter(b -> {
                     if (request.getAddressKeyword() == null ||
                         request.getAddressKeyword().isBlank()) {
@@ -76,6 +84,11 @@ public class BoardingService {
                              b.getPricePerMonth().compareTo(request.getMinPrice()) >= 0)
                 .filter(b -> request.getMaxPrice() == null ||
                              b.getPricePerMonth().compareTo(request.getMaxPrice()) <= 0)
+                .filter(b -> request.getMinKeyMoney() == null ||
+                b.getKeyMoney().compareTo(request.getMinKeyMoney()) <= 0)
+                
+                .filter(b -> request.getMaxKeyMoney() == null ||
+                b.getKeyMoney().compareTo(request.getMaxKeyMoney()) <= 0)
                 .collect(Collectors.toList());
 
         return toPagedResult(request, filtered);

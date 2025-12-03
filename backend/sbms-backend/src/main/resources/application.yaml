@@ -4,10 +4,14 @@ spring:
 
   # Database Configuration
   datasource:
-    url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board
+    url: jdbc:postgresql://localhost:5432/smart-board
     username: smartboard_admin
     password: "09090909"
     driver-class-name: org.postgresql.Driver
+    # The 'hikari' block and its properties must be properly indented under 'datasource'.
+    hikari:
+      # THIS LINE MUST USE SPACES FOR INDENTATION
+      max-lifetime: 300000
 
   # JPA / Hibernate Configuration
   jpa:
@@ -43,8 +47,11 @@ spring:
 
 
 aws:
-  accessKeyId: YOUR_NEW_ACCESS_KEY      # replace after regenerating
-  secretAccessKey: YOUR_NEW_SECRET_KEY  # replace after regenerating
+  accessKeyId: AKIA2AUOOUX3O5UUUYBN      # replace after regenerating
+  secretAccessKey: E+85hlGWYo8pT9ECKNY+2YGUkJ0hzf4jBqAJngpb  # replace after regenerating
   region: ap-south-1
   s3:
     bucketName: smart-board-project
+
+
+#url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board

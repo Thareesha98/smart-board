@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: sbms-notification-service
+server:
+  port: 8085
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sbms_notifications
+    username: sbms_user
+    password: sbms_password
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: guest
+  password: guest
+  exchange: sbms.events
+  queue: sbms.notification.queue
+  routing-key: appointment.*  # or notification.#
+
+security:
+  jwt:
+    jwk-set-uri: http://localhost:8081/.well-known/jwks.json  # point to Auth Service

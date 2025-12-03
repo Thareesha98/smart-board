@@ -22,38 +22,46 @@ import java.util.stream.Collectors;
 public class RegistrationService {
 
     @Autowired
-    private RegistrationRepository registrationRepository;
+    private RegistrationRepository registrationRepo;
 
     @Autowired
-    private BoardingRepository boardingRepository;
+    private BoardingRepository boardingRepo;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository userRepo;
+
+    @Autowired
+    private PaymentService paymentService;
+
 
     // ---------------------------------------------------------
-    // STUDENT: REGISTER FOR BOARDING (with x students)
+    // STUDENT REGISTRATION
     // ---------------------------------------------------------
     public RegistrationResponseDTO register(Long studentId, RegistrationRequestDTO dto) {
 
-        User student = userRepository.findById(studentId)
+        User student = userRepo.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
-        if (student.getRole() != UserRole.STUDENT) {
-            throw new RuntimeException("Only students can register for boardings");
-        }
 
-        Boarding boarding = boardingRepository.findById(dto.getBoardingId())
+        Boarding boarding = boardingRepo.findById(dto.getBoardingId())
                 .orElseThrow(() -> new RuntimeException("Boarding not found"));
 
-        if (boarding.getStatus() != Status.APPROVED) {
-            throw new RuntimeException("Boarding not approved yet");
-        }
-
-        if (dto.getNumberOfStudents() <= 0) {
-            throw new RuntimeException("Group size must be at least 1");
-        }
-
         if (boarding.getAvailable_slots() < dto.getNumberOfStudents()) {
-            throw new RuntimeException("Not enough available slots");
+            throw new RuntimeException("Not enough slots available");
+        }
+
+        // Student MUST confirm key money was paid
+        if (!dto.isKeyMoneyPaid()) {
+            throw new RuntimeException("Key money must be paid to register");
+        }
+
+        // Dummy payment (simulate)
+        boolean success = paymentService.processPayment(
+                studentId,
+                boarding.getKeyMoney()
+        );
+
+        if (!success) {
+            throw new RuntimeException("Payment failed");
         }
 
         Registration r = new Registration();
@@ -62,103 +70,80 @@ public class RegistrationService {
         r.setNumberOfStudents(dto.getNumberOfStudents());
         r.setStudentNote(dto.getStudentNote());
         r.setStatus(RegistrationStatus.PENDING);
+        r.setKeyMoneyPaid(true);
 
-        Registration saved = registrationRepository.save(r);
+        registrationRepo.save(r);
 
-        return RegistrationMapper.toDto(saved);
+        return RegistrationMapper.toDTO(r);
     }
 
+
     // ---------------------------------------------------------
-    // STUDENT: VIEW REGISTRATIONS
+    // STUDENT: GET ALL MY REGISTRATIONS
     // ---------------------------------------------------------
     public List<RegistrationResponseDTO> getStudentRegistrations(Long studentId) {
-
-        User student = userRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        return registrationRepository.findByStudent(student).stream()
-                .map(RegistrationMapper::toDto)
-                .collect(Collectors.toList());
+        return registrationRepo.findByStudentId(studentId)
+                .stream().map(RegistrationMapper::toDTO)
+                .toList();
     }
 
     // ---------------------------------------------------------
-    // OWNER: VIEW ALL REGISTRATIONS (with optional status)
-    // ---------------------------------------------------------
-    public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
-
-        User owner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new RuntimeException("Owner not found"));
-
-        List<Registration> regs;
-
-        if (status != null) {
-            regs = registrationRepository.findByBoarding_OwnerAndStatus(owner, status);
-        } else {
-            regs = registrationRepository.findByBoarding_Owner(owner);
-        }
-
-        return regs.stream()
-                .map(RegistrationMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    // ---------------------------------------------------------
-    // OWNER: APPROVE / DECLINE REGISTRATION
-    // ---------------------------------------------------------
-    public RegistrationResponseDTO decide(Long ownerId,
-                                          Long registrationId,
-                                          RegistrationDecisionDTO dto) {
-
-        Registration reg = registrationRepository.findById(registrationId)
-                .orElseThrow(() -> new RuntimeException("Registration not found"));
-
-        Boarding boarding = reg.getBoarding();
-
-        if (!boarding.getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Not authorized to approve this registration");
-        }
-
-        if (dto.getStatus() == RegistrationStatus.APPROVED) {
-
-            if (boarding.getAvailable_slots() < reg.getNumberOfStudents()) {
-                throw new RuntimeException("Not enough slots to approve");
-            }
-
-            boarding.setAvailable_slots(
-                    boarding.getAvailable_slots() - reg.getNumberOfStudents()
-            );
-            reg.setStatus(RegistrationStatus.APPROVED);
-        }
-        else if (dto.getStatus() == RegistrationStatus.DECLINED) {
-            reg.setStatus(RegistrationStatus.DECLINED);
-        }
-        else {
-            throw new RuntimeException("Invalid status. Only APPROVED or DECLINED allowed");
-        }
-
-        reg.setOwnerNote(dto.getOwnerNote());
-
-        registrationRepository.save(reg);
-        boardingRepository.save(boarding);
-
-        return RegistrationMapper.toDto(reg);
-    }
-
-    // ---------------------------------------------------------
-    // STUDENT: CANCEL REGISTRATION
+    // STUDENT: CANCEL
     // ---------------------------------------------------------
     public RegistrationResponseDTO cancel(Long studentId, Long regId) {
 
-        Registration reg = registrationRepository.findById(regId)
+        Registration r = registrationRepo.findById(regId)
                 .orElseThrow(() -> new RuntimeException("Registration not found"));
 
-        if (!reg.getStudent().getId().equals(studentId)) {
-            throw new RuntimeException("Not your registration");
+        if (!r.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("Unauthorized");
         }
 
-        reg.setStatus(RegistrationStatus.CANCELLED);
-        registrationRepository.save(reg);
+        if (r.getStatus() == RegistrationStatus.APPROVED) {
+            throw new RuntimeException("Cannot cancel approved registration");
+        }
 
-        return RegistrationMapper.toDto(reg);
+        r.setStatus(RegistrationStatus.CANCELLED);
+        registrationRepo.save(r);
+
+        return RegistrationMapper.toDTO(r);
+    }
+
+    // ---------------------------------------------------------
+    // OWNER: VIEW REGISTRATIONS
+    // ---------------------------------------------------------
+    public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
+
+        return registrationRepo.findByBoardingOwnerId(ownerId, status)
+                .stream()
+                .map(RegistrationMapper::toDTO)
+                .toList();
+    }
+
+    // ---------------------------------------------------------
+    // OWNER: APPROVE / DECLINE
+    // ---------------------------------------------------------
+    public RegistrationResponseDTO decide(Long ownerId, Long regId, RegistrationDecisionDTO dto) {
+
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!r.getBoarding().getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        r.setStatus(dto.getStatus());
+        r.setOwnerNote(dto.getOwnerNote());
+
+        // If approved → reduce available slots
+        if (dto.getStatus() == RegistrationStatus.APPROVED) {
+            Boarding b = r.getBoarding();
+            b.setAvailable_slots(b.getAvailable_slots() - r.getNumberOfStudents());
+            boardingRepo.save(b);
+        }
+
+        registrationRepo.save(r);
+
+        return RegistrationMapper.toDTO(r);
     }
 }

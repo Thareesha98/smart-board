@@ -1,16 +1,17 @@
 package com.sbms.sbms_backend.service;
 
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-
-
 
 @Service
 public class S3Service {
@@ -24,37 +25,61 @@ public class S3Service {
         this.s3Client = s3Client;
     }
 
-    /**
-     * Upload file to AWS S3 with folder prefix
-     * @param file the file to upload
-     * @param folderPrefix optional folder name (e.g. "user-profile-pics/")
-     * @return public URL of uploaded file
-     */
+    // ---------------------------------------------------------
+    // UPLOAD SINGLE FILE
+    // ---------------------------------------------------------
     public String uploadFile(MultipartFile file, String folderPrefix) {
-        String uniqueFileName = folderPrefix + UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        String key = folderPrefix + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         try {
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucketName)
-                            .key(uniqueFileName)
+                            .key(key)
                             .contentType(file.getContentType())
+                            .acl(ObjectCannedACL.PUBLIC_READ)  // PUBLIC READ
                             .build(),
-                    software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes())
+                    RequestBody.fromBytes(file.getBytes())
             );
 
-            // Return the public file URL
-            return "https://" + bucketName + ".s3.amazonaws.com/" + uniqueFileName;
+            return "https://" + bucketName + ".s3.amazonaws.com/" + key;
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to upload file to S3", e);
+            throw new RuntimeException("Failed to upload file", e);
         }
     }
 
-    /**
-     * Overloaded version (default to root folder)
-     */
     public String uploadFile(MultipartFile file) {
         return uploadFile(file, "");
+    }
+
+    // ---------------------------------------------------------
+    // MULTI FILE UPLOAD
+    // ---------------------------------------------------------
+    public List<String> uploadFiles(List<MultipartFile> files, String folderPrefix) {
+
+        List<String> uploadedUrls = new ArrayList<>();
+
+        for (MultipartFile f : files) {
+            uploadedUrls.add(uploadFile(f, folderPrefix));
+        }
+
+        return uploadedUrls;
+    }
+
+    // ---------------------------------------------------------
+    // DELETE FILE
+    // ---------------------------------------------------------
+    public void deleteFile(String fileUrl) {
+
+        // Extract S3 key from full URL
+        String key = fileUrl.substring(fileUrl.indexOf(".com/") + 5);
+
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build()
+        );
     }
 }

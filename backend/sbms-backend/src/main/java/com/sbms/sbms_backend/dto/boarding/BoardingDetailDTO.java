@@ -28,7 +28,8 @@ public class BoardingDetailDTO {
     private String address;
 
     private BigDecimal pricePerMonth;
-
+    private BigDecimal keyMoney;
+    
     private Gender genderType;
     private BoardingType boardingType;
     private Status status;
