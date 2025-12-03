@@ -4,38 +4,46 @@ import { motion } from 'framer-motion';
 const StatWidget = ({ icon, title, mainDetail, subDetail, actionButton }) => {
   return (
     <motion.div
-      whileHover={{ y: -5 }}
-      className="bg-card-bg p-4 sm:p-6 rounded-large shadow-custom flex flex-col sm:flex-row gap-3 sm:gap-4 items-start transition-shadow duration-300 hover:shadow-xl h-full"
+      whileHover={{ y: -4 }}
+      className="bg-card-bg p-4 md:p-5 xl:p-6 rounded-large shadow-custom 
+      flex flex-col md:flex-row gap-4 items-start transition-all duration-300 
+      hover:shadow-xl h-full"
     >
-      {/* Widget Icon - Responsive sizing */}
-      <div className="bg-background-light p-3 sm:p-4 rounded-card text-accent text-xl sm:text-2xl flex items-center justify-center flex-shrink-0 w-12 h-12 sm:w-auto sm:h-auto">
+
+      {/* ICON */}
+      <div className="bg-background-light p-3 md:p-4 rounded-card text-accent 
+      text-xl md:text-2xl flex items-center justify-center flex-shrink-0">
         {icon}
       </div>
 
-      {/* Widget Content */}
+      {/* CONTENT */}
       <div className="flex flex-col flex-1 w-full">
-        <h3 className="text-text-muted text-sm sm:text-base lg:text-lg font-semibold mb-1 sm:mb-2">
+        <h3 className="text-text-muted text-sm md:text-base xl:text-lg font-semibold mb-1">
           {title}
         </h3>
-        <div className="flex flex-col gap-1">
-          <strong className="text-text-dark text-base sm:text-lg lg:text-xl font-bold break-words">
-            {mainDetail}
-          </strong>
-          <span className="text-text-muted text-xs sm:text-sm">
-            {subDetail}
-          </span>
-          {actionButton && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="mt-2 sm:mt-3 py-2 px-3 sm:px-4 text-xs sm:text-sm font-semibold rounded-large bg-accent text-white transition-all duration-300 hover:bg-primary hover:shadow-lg focus:outline-none w-full sm:w-auto"
-              onClick={actionButton.onClick}
-            >
-              {actionButton.label}
-            </motion.button>
-          )}
-        </div>
+
+        <strong className="text-text-dark text-base md:text-lg xl:text-xl font-bold">
+          {mainDetail}
+        </strong>
+
+        <span className="text-text-muted text-xs md:text-sm">
+          {subDetail}
+        </span>
+
+        {actionButton && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={actionButton.onClick}
+            className="mt-3 py-2 px-3 md:px-4 
+            text-xs md:text-sm font-semibold rounded-large 
+            bg-accent text-white transition-all w-full md:w-auto hover:bg-primary"
+          >
+            {actionButton.label}
+          </motion.button>
+        )}
       </div>
+
     </motion.div>
   );
 };

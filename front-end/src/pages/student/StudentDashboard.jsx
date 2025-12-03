@@ -23,16 +23,16 @@ const StudentDashboard = () => {
   };
 
   return (
-    <StudentLayout
-      subtitle="Here's your boarding overview"
-    >
-      {/* Stats Overview - Fully Responsive Grid */}
-      <section className="mb-6 sm:mb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+    <StudentLayout subtitle="Here's your boarding overview">
+
+      {/* Stats Overview */}
+      <section className="mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+          
+          {/* 1 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
-            transition={{ delay: 0 }}
           >
             <StatWidget 
               icon={<FaCalendarCheck />}
@@ -42,10 +42,10 @@ const StudentDashboard = () => {
             />
           </motion.div>
 
+          {/* 2 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
-            transition={{ delay: 0.1 }}
           >
             <StatWidget 
               icon={<FaFileInvoiceDollar />}
@@ -56,10 +56,10 @@ const StudentDashboard = () => {
             />
           </motion.div>
 
+          {/* 3 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
-            transition={{ delay: 0.2 }}
           >
             <StatWidget 
               icon={<FaHome />}
@@ -69,10 +69,10 @@ const StudentDashboard = () => {
             />
           </motion.div>
 
+          {/* 4 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
-            transition={{ delay: 0.3 }}
           >
             <StatWidget 
               icon={<FaStar />}
@@ -81,6 +81,7 @@ const StudentDashboard = () => {
               subDetail="4.8⭐ Average" 
             />
           </motion.div>
+
         </div>
       </section>
 
