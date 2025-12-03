@@ -27,7 +27,10 @@ public class NotificationEventListener {
         try {
             EventMessageDto event = mapper.readValue(rawPayload, EventMessageDto.class);
             // decide how to convert event to notification
-            String userId = event.userId();
+            String userId = (event.userId() != null)
+                    ? event.userId()
+                    : (String) event.data().get("email"); // fallback
+
             String title = buildTitle(event.eventType());
             String message = buildMessage(event.eventType(), event.data());
             NotificationType type = mapType(event.eventType());
