@@ -1,87 +1,126 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FaMapMarkerAlt, FaBed, FaRulerCombined, FaUsers, FaHeart, FaShareAlt, FaCalendarCheck } from 'react-icons/fa';
+import React from "react";
+import { motion } from "framer-motion";
+import {
+  FaMapMarkerAlt,
+  FaBed,
+  FaRulerCombined,
+  FaUsers,
+  FaHeart,
+  FaShareAlt,
+  FaCalendarCheck,
+} from "react-icons/fa";
 
 const QuickInfoCard = ({ boarding, onBookVisit }) => {
   const iconMap = {
     bed: FaBed,
     ruler: FaRulerCombined,
-    users: FaUsers
+    users: FaUsers,
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-white rounded-large p-6 shadow-custom sticky top-32 space-y-6"
+      className="bg-white rounded-2xl p-6 shadow-custom border border-gray-100 w-full space-y-6"
     >
-      {/* Header */}
+      {/* 1. Header Section */}
       <div>
-        <h1 className="text-3xl font-bold text-text-dark mb-2">{boarding.name}</h1>
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-yellow-500 text-lg">{'★'.repeat(5)}</span>
-          <span className="font-semibold text-text-dark">{boarding.rating}</span>
-          <span className="text-text-muted">({boarding.reviewCount} reviews)</span>
+        <h1 className="text-2xl sm:text-3xl font-bold text-text-dark mb-2 leading-tight">
+          {boarding.name}
+        </h1>
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-md border border-yellow-100">
+            <span className="text-yellow-500 text-base">★</span>
+            <span className="font-bold text-text-dark">{boarding.rating}</span>
+          </div>
+          <span className="text-text-muted text-sm">
+            ({boarding.reviewCount} reviews)
+          </span>
         </div>
       </div>
 
-      {/* Location */}
-      <div className="flex items-start gap-2 text-text-muted">
-        <FaMapMarkerAlt className="text-accent mt-1 flex-shrink-0" />
+      {/* 2. Location Section */}
+      <div className="flex items-start gap-3 text-text-muted bg-gray-50 p-3 rounded-xl">
+        <FaMapMarkerAlt className="text-accent mt-1 flex-shrink-0 text-lg" />
         <div>
-          <p>{boarding.location.address}</p>
-          <p className="text-sm">• {boarding.location.distance}</p>
+          <p className="text-text-dark font-medium text-sm sm:text-base leading-snug">
+            {boarding.location.address}
+          </p>
+          <p className="text-xs sm:text-sm text-text-muted mt-1">
+            {boarding.location.distance}
+          </p>
         </div>
       </div>
 
-      {/* Price */}
-      <div className="border-t border-b border-background-light py-4">
-        <div className="text-4xl font-bold text-accent">
-          ${boarding.price} <span className="text-base font-normal text-text-muted">/month</span>
+      {/* 3. Price Section */}
+      <div className="border-t border-b border-gray-100 py-4">
+        <div className="flex flex-wrap items-baseline gap-1">
+          <span className="text-3xl sm:text-4xl font-bold text-accent">
+            ${boarding.price}
+          </span>
+          <span className="text-text-muted font-medium">/month</span>
         </div>
-        <p className="text-sm text-text-muted mt-1">{boarding.priceNote}</p>
+        {boarding.priceNote && (
+          <p className="text-xs sm:text-sm text-green-600 font-medium mt-1 bg-green-50 inline-block px-2 py-0.5 rounded-full">
+            {boarding.priceNote}
+          </p>
+        )}
       </div>
 
-      {/* Quick Stats */}
+      {/* 4. Stats Section */}
       <div className="grid grid-cols-3 gap-3">
         {boarding.quickStats.map((stat, idx) => {
           const Icon = iconMap[stat.icon];
           return (
-            <div key={idx} className="text-center bg-background-light rounded-xl p-3">
-              <Icon className="text-2xl text-accent mx-auto mb-2" />
-              <p className="text-xs text-text-dark">{stat.label}</p>
+            <div
+              key={idx}
+              className="flex flex-col items-center justify-center bg-background-light rounded-xl p-3 hover:bg-gray-100 transition-colors"
+            >
+              <Icon className="text-2xl text-accent mb-2" />
+              <p className="text-xs font-bold text-text-dark text-center">
+                {stat.label}
+              </p>
             </div>
           );
         })}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
+      {/* 5. Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onBookVisit}
-          className="flex-[2] bg-accent text-white py-3 rounded-large font-semibold flex items-center justify-center gap-2 hover:bg-primary transition-colors"
+          // CHANGED: Reduced flex from flex-[2] to flex-[1.3] to give Save/Share more width on desktop
+          className="flex-[1.3] bg-accent text-white py-3.5 rounded-xl font-bold text-sm sm:text-base shadow-lg shadow-accent/25 hover:shadow-accent/40 hover:bg-primary transition-all flex items-center justify-center gap-2"
         >
           <FaCalendarCheck />
           Book Visit
         </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex-1 border-2 border-accent text-accent py-3 rounded-large font-semibold hover:bg-accent hover:text-white transition-all"
-        >
-          <FaHeart />
-          Save
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="flex-1 border-2 border-accent text-accent py-3 rounded-large font-semibold hover:bg-accent hover:text-white transition-all"
-        >
-          <FaShareAlt />
-          Shear
-        </motion.button>
+
+        <div className="flex flex-1 gap-3">
+          {/* Save Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            // ADDED: min-w-[80px] to ensure it doesn't get too small
+            className="flex-1 min-w-[80px] border-2 border-gray-100 bg-white text-gray-600 py-3.5 rounded-xl font-semibold shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-500 hover:shadow-md transition-all flex items-center justify-center gap-2"
+          >
+            <FaHeart />
+            <span className="sm:hidden lg:inline text-xs">Save</span>
+          </motion.button>
+
+          {/* Share Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            // ADDED: min-w-[80px] to ensure it doesn't get too small
+            className="flex-1 min-w-[80px] border-2 border-gray-100 bg-white text-gray-600 py-3.5 rounded-xl font-semibold shadow-sm hover:border-orange-200 hover:bg-orange-50 hover:text-accent hover:shadow-md transition-all flex items-center justify-center gap-2"
+          >
+            <FaShareAlt />
+            <span className="sm:hidden lg:inline text-xs">Share</span>
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );

@@ -7,53 +7,55 @@ const OwnerCard = ({ owner, onContact }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-large p-6 shadow-custom"
+      className="bg-white rounded-2xl p-6 shadow-custom border border-gray-100"
     >
-      {/* Header */}
-      <div className="flex gap-4 mb-6">
-        <img
-          src={owner.avatar}
-          alt={owner.name}
-          className="w-20 h-20 rounded-full object-cover border-3 border-accent"
-        />
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-text-dark mb-1">{owner.name}</h3>
-          {owner.verified && (
-            <div className="flex items-center gap-2 text-green-600 text-sm mb-2">
-              <FaCheckCircle />
-              <span>Verified Owner</span>
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-yellow-500">{'★'.repeat(5)}</span>
-            <span className="text-text-muted">{owner.rating} ({owner.reviewCount} reviews)</span>
+      {/* 1. Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="relative flex-shrink-0">
+            <img 
+            src={owner.avatar} 
+            alt={owner.name} 
+            className="w-20 h-20 rounded-full object-cover border-4 border-background-light shadow-sm"
+            />
+            {owner.verified && (
+                <div className="absolute bottom-0 right-0 bg-white rounded-full p-0.5">
+                    <FaCheckCircle className="text-green-500 text-lg" />
+                </div>
+            )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xl font-bold text-text-dark truncate">{owner.name}</h3>
+          <p className="text-sm text-text-muted mb-1">Property Owner</p>
+          <div className="inline-flex items-center gap-1 text-xs font-medium bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-md">
+             <span>★ {owner.rating}</span>
+             <span className="text-yellow-700/60">({owner.reviewCount} reviews)</span>
           </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 py-4 border-t border-b border-background-light mb-6">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-accent">{owner.stats.properties}</div>
-          <div className="text-xs text-text-muted">Properties</div>
+      {/* 2. Stats Grid */}
+      <div className="grid grid-cols-3 gap-2 py-4 border-t border-b border-gray-100 mb-6 divide-x divide-gray-100">
+        <div className="text-center px-1">
+          <div className="text-xl font-bold text-text-dark">{owner.stats.properties}</div>
+          <div className="text-xs font-bold text-text-muted uppercase">Properties</div>
         </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-accent">{owner.stats.years}</div>
-          <div className="text-xs text-text-muted">Years</div>
+        <div className="text-center px-1">
+          <div className="text-xl font-bold text-text-dark">{owner.stats.years}</div>
+          <div className="text-xs font-bold text-text-muted uppercase">Years Exp.</div>
         </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-accent">{owner.stats.responseRate}%</div>
-          <div className="text-xs text-text-muted">Response Rate</div>
+        <div className="text-center px-1">
+          <div className="text-xl font-bold text-green-600">{owner.stats.responseRate}%</div>
+          <div className="text-xs font-bold text-text-muted uppercase">Response</div>
         </div>
       </div>
 
-      {/* Contact Buttons */}
+      {/* 3. Buttons */}
       <div className="space-y-3 mb-6">
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => onContact('message')}
-          className="w-full border-2 border-accent text-accent py-3 rounded-large font-semibold hover:bg-accent hover:text-white transition-all flex items-center justify-center gap-2"
+          className="w-full border-2 border-accent text-accent py-3 rounded-xl font-bold hover:bg-accent hover:text-white transition-all flex items-center justify-center gap-2"
         >
           <FaEnvelope />
           Send Message
@@ -62,15 +64,17 @@ const OwnerCard = ({ owner, onContact }) => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => onContact('call')}
-          className="w-full border-2 border-accent text-accent py-3 rounded-large font-semibold hover:bg-accent hover:text-white transition-all flex items-center justify-center gap-2"
+          className="w-full border-2 border-gray-200 text-text-dark py-3 rounded-xl font-bold hover:border-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
         >
           <FaPhone />
-          Call Owner
+          Show Number
         </motion.button>
       </div>
-
-      {/* Description */}
-      <p className="text-sm text-text-muted leading-relaxed">{owner.description}</p>
+      
+      {/* 4. Description */}
+      <p className="text-sm text-text-muted leading-relaxed italic bg-background-light p-4 rounded-xl">
+        "{owner.description}"
+      </p>
     </motion.div>
   );
 };

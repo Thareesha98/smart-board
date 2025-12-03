@@ -3,84 +3,52 @@ import { motion } from 'framer-motion';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { FaArrowLeft, FaWifi, FaSnowflake, FaTshirt, FaShieldAlt, FaUtensils, FaTv, FaDumbbell, FaBicycle, FaClock, FaUserFriends, FaSmokingBan, FaPaw, FaMapMarkedAlt } from 'react-icons/fa';
 
-// Layout
 import StudentLayout from '../../components/student/common/StudentLayout';
-
-// Components
 import ImageGallery from '../../components/student/boarding-details/ImageGallery';
 import QuickInfoCard from '../../components/student/boarding-details/QuickInfoCard';
 import OwnerCard from '../../components/student/boarding-details/OwnerCard';
 import AppointmentForm from '../../components/student/boarding-details/AppointmentForm';
 
-// Data & Hooks
 import { boardingDetails as defaultBoardingDetails, timeSlots, safetyTips } from '../../data/boardingDetailsData';
 import { useImageGallery } from '../../hooks/useImageGallery';
 import { useAppointmentForm } from '../../hooks/useAppointmentForm';
 
 const amenityIcons = {
-  wifi: FaWifi, 
-  snowflake: FaSnowflake, 
-  tshirt: FaTshirt, 
-  'shield-alt': FaShieldAlt,
-  utensils: FaUtensils, 
-  tv: FaTv, 
-  dumbbell: FaDumbbell, 
-  bicycle: FaBicycle
+  wifi: FaWifi, snowflake: FaSnowflake, tshirt: FaTshirt, 'shield-alt': FaShieldAlt,
+  utensils: FaUtensils, tv: FaTv, dumbbell: FaDumbbell, bicycle: FaBicycle
 };
 
 const ruleIcons = {
-  clock: FaClock, 
-  'user-friends': FaUserFriends, 
-  'smoking-ban': FaSmokingBan, 
-  paw: FaPaw
+  clock: FaClock, 'user-friends': FaUserFriends, 'smoking-ban': FaSmokingBan, paw: FaPaw
 };
 
-// Function to map amenity strings to icon objects
 const mapAmenitiesWithIcons = (amenities) => {
-  const amenityIconMap = {
-    'wifi': 'wifi',
-    'ac': 'snowflake',
-    'laundry': 'tshirt',
-    'security': 'shield-alt',
-    'furnished': 'utensils',
-    'parking': 'bicycle'
-  };
-
-  return amenities.map(amenity => {
-    const amenityLower = amenity.toLowerCase();
-    const iconKey = amenityIconMap[amenityLower] || 'wifi';
-    return {
-      icon: iconKey,
-      label: amenity
+    const amenityIconMap = {
+      'wifi': 'wifi', 'ac': 'snowflake', 'laundry': 'tshirt',
+      'security': 'shield-alt', 'furnished': 'utensils', 'parking': 'bicycle'
     };
-  });
+    return amenities.map(amenity => {
+      const amenityLower = amenity.toLowerCase();
+      const iconKey = amenityIconMap[amenityLower] || 'wifi';
+      return { icon: iconKey, label: amenity };
+    });
 };
 
 const BoardingDetailsPage = () => {
   const location = useLocation();
   const { id } = useParams();
-  
-  // Get boarding data from navigation state
   const passedBoarding = location.state?.boarding;
-  
-  // Set initial boarding data
-  const [currentBoarding, setCurrentBoarding] = useState(
-    passedBoarding || defaultBoardingDetails
-  );
+  const [currentBoarding, setCurrentBoarding] = useState(passedBoarding || defaultBoardingDetails);
 
   useEffect(() => {
     if (passedBoarding) {
-      // Use the passed boarding data with all its complete details
       setCurrentBoarding({
         ...passedBoarding,
         location: {
           address: passedBoarding.location,
           distance: `${passedBoarding.distance} km from University of Ruhuna`
         },
-        // Map string amenities to objects with icons if needed
-        amenities: passedBoarding.amenities[0]?.icon 
-          ? passedBoarding.amenities 
-          : mapAmenitiesWithIcons(passedBoarding.amenities)
+        amenities: passedBoarding.amenities[0]?.icon ? passedBoarding.amenities : mapAmenitiesWithIcons(passedBoarding.amenities)
       });
     }
   }, [passedBoarding]);
@@ -93,14 +61,12 @@ const BoardingDetailsPage = () => {
   };
 
   const handleContact = (type) => {
-    console.log(`Contacting owner via ${type}`);
     alert(type === 'message' ? 'Message feature coming soon!' : 'Call feature coming soon!');
   };
 
   const headerRightContent = (
-    <Link to="/search-boardings" className="flex items-center gap-2 text-text-dark font-semibold hover:text-accent transition-colors">
-      <FaArrowLeft />
-      Back to Search
+    <Link to="/search-boardings" className="flex items-center gap-2 text-text-dark font-semibold hover:text-accent transition-colors text-sm sm:text-base">
+      <FaArrowLeft /> <span className="hidden sm:inline">Back to Search</span>
     </Link>
   );
 
@@ -110,9 +76,16 @@ const BoardingDetailsPage = () => {
       subtitle="Boarding Details" 
       headerRightContent={headerRightContent}
     >
-      {/* Gallery & Quick Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2">
+      {/* LAYOUT LOGIC using 1400px breakpoint:
+         - Width <= 1400px: Flex Column (Cards stack below content)
+         - Width > 1400px: Grid (Cards move to Right Sidebar)
+      */}
+      
+      <div className="flex flex-col min-[1400px]:grid min-[1400px]:grid-cols-3 gap-6 mb-8 items-start">
+        
+        {/* --- LEFT COLUMN: CONTENT --- */}
+        <div className="min-[1400px]:col-span-2 w-full space-y-6">
+          
           <ImageGallery
             images={currentBoarding.images}
             currentIndex={currentIndex}
@@ -121,185 +94,140 @@ const BoardingDetailsPage = () => {
             onSelect={selectImage}
             badge={currentBoarding.badge}
           />
-        </div>
-        <div>
-          <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Description */}
+          {/* TABLET/MOBILE VIEW: Cards appear here immediately after images (< 1400px) */}
+          <div className="flex flex-col gap-4 min-[1400px]:hidden">
+            <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
+            <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
+          </div>
+
           <motion.section 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
-            className="bg-white rounded-large p-6 shadow-custom"
+            className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
-            <h2 className="text-2xl font-bold text-primary mb-4">Description</h2>
+            <h2 className="text-xl font-bold text-primary mb-3">Description</h2>
             {currentBoarding.description.map((para, idx) => (
-              <p key={idx} className="text-text-muted mb-3 leading-relaxed">{para}</p>
+              <p key={idx} className="text-text-muted mb-3 leading-relaxed text-sm sm:text-base last:mb-0">
+                {para}
+              </p>
             ))}
           </motion.section>
 
-          {/* Amenities */}
           <motion.section 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.1 }} 
-            className="bg-white rounded-large p-6 shadow-custom"
+            className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
-            <h2 className="text-2xl font-bold text-primary mb-4">Amenities</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <h2 className="text-xl font-bold text-primary mb-4">Amenities</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {currentBoarding.amenities.map((amenity, idx) => {
                 const Icon = amenityIcons[amenity.icon] || FaWifi;
                 return (
-                  <motion.div 
-                    key={idx} 
-                    whileHover={{ scale: 1.05 }} 
-                    className="flex items-center gap-3 bg-background-light p-3 rounded-xl"
-                  >
-                    <Icon className="text-accent text-xl flex-shrink-0" />
-                    <span className="text-sm text-text-dark">{amenity.label}</span>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.section>
-
-          {/* House Rules */}
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.2 }} 
-            className="bg-white rounded-large p-6 shadow-custom"
-          >
-            <h2 className="text-2xl font-bold text-primary mb-4">House Rules</h2>
-            <div className="space-y-3">
-              {currentBoarding.houseRules.map((rule, idx) => {
-                const Icon = ruleIcons[rule.icon] || FaClock;
-                return (
-                  <div key={idx} className="flex items-center gap-4 bg-background-light p-4 rounded-xl">
-                    <Icon className="text-accent text-xl flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="font-semibold text-text-dark">{rule.title}</div>
-                      <div className="text-sm text-text-muted">{rule.description}</div>
-                    </div>
+                  <div key={idx} className="flex flex-col items-center justify-center p-3 bg-background-light rounded-xl hover:bg-gray-100 transition-colors text-center gap-2">
+                    <Icon className="text-2xl text-accent" />
+                    <span className="text-sm font-medium text-text-dark">{amenity.label}</span>
                   </div>
                 );
               })}
             </div>
           </motion.section>
 
-          {/* Location */}
           <motion.section 
             initial={{ opacity: 0, y: 20 }} 
             animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.3 }} 
-            className="bg-white rounded-large p-6 shadow-custom"
+            className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
-            <h2 className="text-2xl font-bold text-primary mb-4">Location</h2>
-            <div className="bg-background-light rounded-xl h-48 flex flex-col items-center justify-center mb-4">
-              <FaMapMarkedAlt className="text-6xl text-accent mb-3" />
-              <p className="text-text-muted font-semibold">Interactive Map</p>
-              <p className="text-sm text-text-muted">
-                {typeof currentBoarding.location === 'string' 
-                  ? currentBoarding.location 
-                  : currentBoarding.location.address}
-              </p>
+            <h2 className="text-xl font-bold text-primary mb-4">Location</h2>
+            <div className="bg-background-light rounded-xl h-48 md:h-64 flex flex-col items-center justify-center mb-6 relative group overflow-hidden cursor-pointer">
+              <div className="absolute inset-0 bg-accent/5 group-hover:bg-accent/10 transition-colors"></div>
+              <FaMapMarkedAlt className="text-5xl text-accent mb-2 transform group-hover:scale-110 transition-transform" />
+              <p className="text-text-dark font-bold z-10">View on Map</p>
+              <p className="text-sm text-text-muted z-10 text-center px-4 mt-1">{currentBoarding.location.address}</p>
             </div>
-            <div>
-              <h4 className="font-semibold text-text-dark mb-3">Nearby Places</h4>
-              <ul className="space-y-2">
-                {currentBoarding.nearbyPlaces.map((place, idx) => (
-                  <li 
-                    key={idx} 
-                    className="text-text-muted text-sm pl-4 relative before:content-['•'] before:absolute before:left-0 before:text-accent before:font-bold"
-                  >
-                    {place}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </motion.section>
-
-          {/* Reviews Summary */}
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.4 }} 
-            className="bg-white rounded-large p-6 shadow-custom"
-          >
-            <h2 className="text-2xl font-bold text-primary mb-4">
-              Reviews <span className="text-text-muted font-normal text-base">({currentBoarding.reviewCount})</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center bg-background-light rounded-xl p-6">
-                <div className="text-5xl font-bold text-accent mb-2">
-                  {currentBoarding.reviewsSummary?.overall || currentBoarding.rating}
-                </div>
-                <div className="text-yellow-500 text-xl mb-2">{'★'.repeat(5)}</div>
-                <div className="text-sm text-text-muted">Overall Rating</div>
-              </div>
-              <div className="md:col-span-2 space-y-2">
-                {currentBoarding.reviewsSummary?.breakdown.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <span className="text-sm text-text-muted w-12">{item.stars} stars</span>
-                    <div className="flex-1 h-2 bg-background-light rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-accent rounded-full" 
-                        style={{ width: `${item.percentage}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm text-text-muted w-8 text-right">{item.percentage}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.section>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Owner Card */}
-          <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
-
-          {/* Appointment Form */}
-          <div id="appointment-form">
-            <AppointmentForm
-              formData={formData}
-              updateField={updateField}
-              onSubmit={submitAppointment}
-              isSubmitting={isSubmitting}
-              isSuccess={isSuccess}
-              timeSlots={timeSlots}
-            />
-          </div>
-
-          {/* Safety Tips */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-large p-6 shadow-custom"
-          >
-            <h4 className="font-bold text-primary mb-4 flex items-center gap-2">
-              <FaShieldAlt />
-              Safety Tips
-            </h4>
-            <ul className="space-y-2">
-              {safetyTips.map((tip, idx) => (
-                <li 
-                  key={idx} 
-                  className="text-sm text-text-muted pl-6 relative before:content-['✓'] before:absolute before:left-0 before:text-accent before:font-bold"
-                >
-                  {tip}
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {currentBoarding.nearbyPlaces.map((place, idx) => (
+                <li key={idx} className="text-sm text-text-muted flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> {place}
                 </li>
               ))}
             </ul>
-          </motion.div>
+          </motion.section>
+
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+          >
+            <h2 className="text-xl font-bold text-primary mb-6">Reviews ({currentBoarding.reviewCount})</h2>
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="flex flex-col items-center justify-center bg-background-light rounded-2xl p-6 sm:w-40 text-center flex-shrink-0">
+                <div className="text-4xl font-bold text-text-dark">{currentBoarding.reviewsSummary?.overall || currentBoarding.rating}</div>
+                <div className="text-yellow-400 text-sm my-1">{'★'.repeat(5)}</div>
+                <div className="text-xs font-bold text-text-muted uppercase">Overall</div>
+              </div>
+              <div className="flex-1 space-y-2">
+                {currentBoarding.reviewsSummary?.breakdown.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-text-muted w-10">{item.stars} ★</span>
+                    <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-accent rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                    </div>
+                    <span className="text-xs font-bold text-text-dark w-8 text-right">{item.percentage}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
         </div>
+
+        {/* --- RIGHT COLUMN: SIDEBAR (Only visible > 1400px) --- */}
+        <div className="hidden min-[1400px]:block w-full space-y-6">
+          <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
+          <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
+          <div id="appointment-form">
+            <AppointmentForm 
+              formData={formData} updateField={updateField} 
+              onSubmit={submitAppointment} isSubmitting={isSubmitting} isSuccess={isSuccess} timeSlots={timeSlots}
+            />
+          </div>
+          <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
+            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase">
+              <FaShieldAlt /> Safety Tips
+            </h4>
+            <ul className="space-y-2">
+              {safetyTips.map((tip, idx) => (
+                <li key={idx} className="text-xs text-text-dark/80 pl-4 relative">
+                   <span className="absolute left-0 top-0.5 text-red-500 font-bold">•</span> {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* --- BOTTOM SECTION: FORM/TIPS (< 1400px) --- */}
+        {/* Form stays at bottom on tablet/mobile */}
+        <div className="block min-[1400px]:hidden w-full space-y-6">
+           <div id="appointment-form">
+            <AppointmentForm 
+              formData={formData} updateField={updateField} 
+              onSubmit={submitAppointment} isSubmitting={isSubmitting} isSuccess={isSuccess} timeSlots={timeSlots}
+            />
+          </div>
+          <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
+            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase">
+              <FaShieldAlt /> Safety Tips
+            </h4>
+            <ul className="space-y-2">
+              {safetyTips.map((tip, idx) => (
+                <li key={idx} className="text-xs text-text-dark/80 pl-4 relative">
+                   <span className="absolute left-0 top-0.5 text-red-500 font-bold">•</span> {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
       </div>
     </StudentLayout>
   );
