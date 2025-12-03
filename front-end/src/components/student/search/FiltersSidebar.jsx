@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react'; // Removed useState as it's controlled by parent
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaFilter, FaWifi, FaSnowflake, FaParking, FaTshirt, 
@@ -227,11 +227,11 @@ const CheckboxOption = ({ checked, onChange, label, icon: Icon }) => (
   </label>
 );
 
-// ✅ Filter Content Component (Reusable for Desktop & Mobile)
-const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose, isMobile = false }) => (
-  <div className={isMobile ? "flex flex-col h-full" : ""}>
+// ✅ Filter Content Component (Reused the mobile version logic)
+const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose }) => (
+  <div className="flex flex-col h-full">
     {/* Header */}
-    <div className={`flex justify-between items-center pb-4 border-b-2 border-background-light ${isMobile ? 'mb-4' : 'mb-6'}`}>
+    <div className="flex justify-between items-center pb-4 border-b-2 border-background-light mb-4">
       <h3 className="text-primary font-bold text-lg sm:text-xl flex items-center gap-2">
         <FaFilter className="text-accent text-base sm:text-lg" /> Filters
       </h3>
@@ -242,16 +242,14 @@ const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose, 
         >
           Clear All
         </button>
-        {isMobile && (
-          <button onClick={onClose} className="text-text-muted hover:text-text-dark">
-            <FaTimes size={20} />
-          </button>
-        )}
+        <button onClick={onClose} className="text-text-muted hover:text-text-dark">
+          <FaTimes size={20} />
+        </button>
       </div>
     </div>
 
     {/* Scrollable Content */}
-    <div className={isMobile ? "flex-1 overflow-y-auto pb-4" : ""}>
+    <div className="flex-1 overflow-y-auto pb-4 px-1">
       {/* Price Range */}
       <div className="mb-6 sm:mb-8">
         <h4 className="font-bold text-text-dark mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
@@ -372,13 +370,13 @@ const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose, 
     </div>
 
     {/* Apply Button */}
-    <div className={isMobile ? "pt-4 border-t border-gray-200" : ""}>
+    <div className="pt-4 border-t border-gray-200">
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => {
           onApply();
-          if (isMobile) onClose();
+          onClose();
         }}
         className="w-full bg-gradient-to-r from-primary to-accent text-white py-3 sm:py-4 rounded-large font-bold text-sm sm:text-base flex items-center justify-center gap-2 sm:gap-3 hover:shadow-xl transition-all duration-300"
       >
@@ -389,75 +387,45 @@ const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose, 
   </div>
 );
 
-// ✅ Main FiltersSidebar Component
-const FiltersSidebar = ({ filters, onFilterChange, onClearAll, onApply }) => {
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-
+// ✅ Main FiltersSidebar Component - NOW ONLY THE MODAL VERSION
+const FiltersSidebar = ({ isOpen, onClose, filters, onFilterChange, onClearAll, onApply }) => {
   return (
-    <>
-      {/* Mobile Filter Button */}
-      <div className="lg:hidden mb-4">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setIsMobileFilterOpen(true)}
-          className="w-full bg-white rounded-large shadow-custom p-3 sm:p-4 flex items-center justify-center gap-2 sm:gap-3 text-primary font-bold text-sm sm:text-base"
-        >
-          <FaFilter className="text-accent" />
-          Show Filters
-        </motion.button>
-      </div>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            // Removed lg:hidden, this is now universal
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
+          />
 
-      {/* Desktop Sidebar */}
-      <motion.aside
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="hidden lg:block bg-white rounded-large shadow-custom p-6 sticky top-24 h-fit max-h-[calc(100vh-7rem)] overflow-y-auto"
-      >
-        <FilterContent 
-          filters={filters}
-          onFilterChange={onFilterChange}
-          onClearAll={onClearAll}
-          onApply={onApply}
-        />
-      </motion.aside>
-
-      {/* Mobile Filter Modal */}
-      <AnimatePresence>
-        {isMobileFilterOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMobileFilterOpen(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] lg:hidden"
-            />
-
-            {/* Modal */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 h-full w-full sm:w-96 bg-white shadow-2xl z-[101] lg:hidden flex flex-col"
-            >
-              <div className="p-4 sm:p-6 flex-1 flex flex-col overflow-hidden">
-                <FilterContent 
-                  filters={filters}
-                  onFilterChange={onFilterChange}
-                  onClearAll={onClearAll}
-                  onApply={onApply}
-                  onClose={() => setIsMobileFilterOpen(false)}
-                  isMobile={true}
-                />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </>
+          {/* Modal Container */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            // Removed lg:hidden. Added max-width constraint for larger screens so it doesn't stretch too wide.
+            className="fixed right-0 top-0 h-full w-full sm:w-96 md:w-[450px] bg-white shadow-2xl z-[101] flex flex-col"
+          >
+            <div className="p-4 sm:p-6 flex-1 flex flex-col overflow-hidden">
+              <FilterContent 
+                filters={filters}
+                onFilterChange={onFilterChange}
+                onClearAll={onClearAll}
+                onApply={onApply}
+                onClose={onClose}
+                // It's always acting as a modal now
+              />
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 

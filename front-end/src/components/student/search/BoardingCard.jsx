@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaCalendarCheck, FaEye } from 'react-icons/fa';
 
-const BoardingCard = ({ boarding, onBook }) => {
+const BoardingCard = ({ boarding, onBook, viewMode }) => {
   const navigate = useNavigate();
 
   const handleViewDetails = () => {
@@ -13,6 +13,8 @@ const BoardingCard = ({ boarding, onBook }) => {
     });
   };
 
+  const isListView = viewMode === 'list';
+
   return (
     <motion.div
       layout
@@ -20,10 +22,11 @@ const BoardingCard = ({ boarding, onBook }) => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       whileHover={{ y: -8 }}
-      className="bg-white rounded-large overflow-hidden shadow-custom transition-shadow duration-300 hover:shadow-xl cursor-pointer"
+      // Added h-full and flex flex-col to make cards uniform height
+      className={`bg-white rounded-large overflow-hidden shadow-custom transition-shadow duration-300 hover:shadow-xl cursor-pointer h-full flex ${isListView ? 'flex-row' : 'flex-col'}`}
     >
       {/* Card Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className={`relative overflow-hidden flex-shrink-0 ${isListView ? 'w-48 h-auto' : 'h-48'}`}>
         <img 
           src={boarding.image} 
           alt={boarding.name}
@@ -35,8 +38,8 @@ const BoardingCard = ({ boarding, onBook }) => {
         </div>
       </div>
 
-      {/* Card Content */}
-      <div className="p-5">
+      {/* Card Content - Added flex-1 and flex-col to stretch content */}
+      <div className="p-5 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-3">
           <div className="flex-1">
             <h3 className="text-lg font-bold text-text-dark mb-1">{boarding.name}</h3>
@@ -57,19 +60,23 @@ const BoardingCard = ({ boarding, onBook }) => {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {boarding.amenities.map((amenity, idx) => (
+          {boarding.amenities.slice(0, 3).map((amenity, idx) => (
             <span key={idx} className="bg-background-light text-text-dark px-3 py-1 rounded-full text-xs font-medium">
               {amenity}
             </span>
           ))}
+           {boarding.amenities.length > 3 && (
+             <span className="text-text-muted text-xs self-center">+{boarding.amenities.length - 3} more</span>
+           )}
         </div>
 
-        <div className="flex gap-3">
+        {/* Push buttons to the bottom using mt-auto */}
+        <div className="flex gap-3 mt-auto">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onBook(boarding.id)}
-            className="flex-1 bg-accent text-white py-2.5 rounded-large font-semibold transition-all hover:bg-primary flex items-center justify-center gap-2"
+            onClick={(e) => { e.stopPropagation(); onBook(boarding.id); }}
+            className="flex-1 bg-accent text-white py-2.5 rounded-large font-semibold transition-all hover:bg-primary flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <FaCalendarCheck />
             Book Visit
@@ -77,8 +84,8 @@ const BoardingCard = ({ boarding, onBook }) => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={handleViewDetails}
-            className="flex-1 border-2 border-accent text-accent py-2.5 rounded-large font-semibold transition-all hover:bg-accent hover:text-white flex items-center justify-center gap-2"
+            onClick={(e) => { e.stopPropagation(); handleViewDetails(); }}
+            className="flex-1 border-2 border-accent text-accent py-2.5 rounded-large font-semibold transition-all hover:bg-accent hover:text-white flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <FaEye />
             Details
