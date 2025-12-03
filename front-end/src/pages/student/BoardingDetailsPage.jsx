@@ -64,9 +64,18 @@ const BoardingDetailsPage = () => {
     alert(type === 'message' ? 'Message feature coming soon!' : 'Call feature coming soon!');
   };
 
+  // --- 1. HEADER BUTTON (Desktop/Tablet Only) ---
+  // Uses "hidden sm:flex" so it disappears on mobile to avoid header conflicts
   const headerRightContent = (
-    <Link to="/search-boardings" className="flex items-center gap-2 text-text-dark font-semibold hover:text-accent transition-colors text-sm sm:text-base">
-      <FaArrowLeft /> <span className="hidden sm:inline">Back to Search</span>
+    <Link to="/search-boardings">
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300  hover:text-primary whitespace-nowrap"
+      >
+        <FaArrowLeft />
+        Back to Search
+      </motion.button>
     </Link>
   );
 
@@ -76,11 +85,7 @@ const BoardingDetailsPage = () => {
       subtitle="Boarding Details" 
       headerRightContent={headerRightContent}
     >
-      {/* LAYOUT LOGIC using 1400px breakpoint:
-         - Width <= 1400px: Flex Column (Cards stack below content)
-         - Width > 1400px: Grid (Cards move to Right Sidebar)
-      */}
-      
+      {/* LAYOUT LOGIC using 1400px breakpoint */}
       <div className="flex flex-col min-[1400px]:grid min-[1400px]:grid-cols-3 gap-6 mb-8 items-start">
         
         {/* --- LEFT COLUMN: CONTENT --- */}
@@ -205,8 +210,7 @@ const BoardingDetailsPage = () => {
           </div>
         </div>
 
-        {/* --- BOTTOM SECTION: FORM/TIPS (< 1400px) --- */}
-        {/* Form stays at bottom on tablet/mobile */}
+        {/* --- BOTTOM SECTION (< 1400px) --- */}
         <div className="block min-[1400px]:hidden w-full space-y-6">
            <div id="appointment-form">
             <AppointmentForm 
@@ -229,6 +233,20 @@ const BoardingDetailsPage = () => {
         </div>
 
       </div>
+
+      {/* --- 2. MOBILE FLOATING BACK BUTTON --- */}
+      {/* Fixed to bottom right, visible ONLY on mobile (sm:hidden) */}
+      <Link to="/search-boardings">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="fixed bottom-8 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+          aria-label="Back to Search"
+        >
+          <FaArrowLeft size={24} />
+        </motion.button>
+      </Link>
+
     </StudentLayout>
   );
 };
