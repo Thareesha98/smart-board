@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../../context/AuthContext';
 import LoginForm from '../../../components/student/auth/LoginForm';
 import backgroundImage from '../../../assets/s5.jpg';
-import logo from '../../../assets/logo.png'
+import logo from '../../../assets/logo.png';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleLogin = async (formData) => {
     setIsLoading(true);
@@ -21,13 +28,25 @@ const LoginPage = () => {
       const result = login(formData.email, formData.password);
       if (result.success) {
         setIsLoading(false);
-        navigate('/');
+        navigate('/', { replace: true });
       } else {
         setIsLoading(false);
         setError(result.message);
       }
     }, 1500);
   };
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-muted">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">

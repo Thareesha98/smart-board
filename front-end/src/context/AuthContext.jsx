@@ -9,18 +9,32 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('smartboad_user');
-    if (storedUser) {
+    const checkAuth = () => {
       try {
-        const userData = JSON.parse(storedUser);
-        setCurrentUser(userData);
-        setIsAuthenticated(true);
+        const storedUser = localStorage.getItem('smartboad_user');
+        const storedCredentials = localStorage.getItem('smartboad_credentials');
+        
+        if (storedUser && storedCredentials) {
+          const userData = JSON.parse(storedUser);
+          setCurrentUser(userData);
+          setIsAuthenticated(true);
+        } else {
+          setCurrentUser(null);
+          setIsAuthenticated(false);
+        }
       } catch (error) {
         console.error('Error loading user data:', error);
         localStorage.removeItem('smartboad_user');
+        localStorage.removeItem('smartboad_credentials');
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        // Ensure loading completes
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   // Signup function
@@ -82,6 +96,7 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('smartboad_user');
+    localStorage.removeItem('smartboad_credentials');
   };
 
   // Update profile function
