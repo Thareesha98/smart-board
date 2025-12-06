@@ -7,12 +7,15 @@ spring:
 
   # Database Configuration
   datasource:
-    url: jdbc:postgresql://localhost:5432/smart-board
+    url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board
     username: smartboard_admin
     password: "09090909"
     driver-class-name: org.postgresql.Driver
     hikari:
-      max-lifetime: 300000
+      max-lifetime: 250000
+      idleTimeout: 200000
+      connectionTimeout: 30000
+      validation-timeout: 5000
 
   # JPA / Hibernate Configuration
   jpa:
