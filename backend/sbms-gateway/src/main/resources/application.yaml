@@ -3,63 +3,43 @@ server:
 
 spring:
   application:
-    name: api-gateway
+    name: sbms-gateway
 
   cloud:
     gateway:
+
+      # Remove unnecessary cookies before routing
       default-filters:
         - RemoveRequestHeader=Cookie
         - RemoveRequestHeader=Set-Cookie
 
+      # Global CORS configuration
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "*"
+            allowedOrigins: "*"             # You can restrict this later
             allowedMethods: "*"
             allowedHeaders: "*"
             allowCredentials: true
 
+      # -----------------------------------------
+      #              ROUTE DEFINITIONS
+      # -----------------------------------------
       routes:
 
-        - id: auth-service
-          uri: lb://auth-service
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - StripPrefix=1
-
-        - id: student-service
-          uri: lb://student-service
-          predicates:
-            - Path=/api/student/**
-          filters:
-            - StripPrefix=1
-
-        - id: owner-service
-          uri: lb://owner-service
-          predicates:
-            - Path=/api/owner/**
-          filters:
-            - StripPrefix=1
-
-        - id: admin-service
-          uri: lb://admin-service
-          predicates:
-            - Path=/api/admin/**
-          filters:
-            - StripPrefix=1
-
+        # Notification Service Route
         - id: notification-service
           uri: lb://sbms-notification-service
           predicates:
             - Path=/api/notifications/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=1   # removes /api
 
 logging:
   level:
     root: INFO
     org.springframework.cloud.gateway: DEBUG
 
+# JWT configuration (will be replaced by Kubernetes Secret)
 jwt:
-  secret: "MY_SUPER_SECRET_256BIT_STRING_CHANGE_THIS"
+  secret: ${JWT_SECRET}
