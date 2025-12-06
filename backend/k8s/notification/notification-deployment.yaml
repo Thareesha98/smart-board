@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sbms-notification-service
+  namespace: sbms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sbms-notification-service
+  template:
+    metadata:
+      labels:
+        app: sbms-notification-service
+    spec:
+      containers:
+        - name: sbms-notification-service
+          image: sbms-notification-service:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+

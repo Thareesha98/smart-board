@@ -7,12 +7,15 @@ spring:
 
   # Database Configuration
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board
+    username: smartboard_admin
+    password: "09090909"
     driver-class-name: org.postgresql.Driver
     hikari:
-      max-lifetime: 300000
+      max-lifetime: 250000
+      idleTimeout: 200000
+      connectionTimeout: 30000
+      validation-timeout: 5000
 
   # JPA / Hibernate Configuration
   jpa:
@@ -55,5 +58,14 @@ aws:
   region: ap-south-1
   s3:
     bucketName: smart-board-project
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      # FIX: Corrected indentation here (removed Tab, used spaces)
+      defaultZone: http://localhost:8761/eureka/
+
 
 #url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board
