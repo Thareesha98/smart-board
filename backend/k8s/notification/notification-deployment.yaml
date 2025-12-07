@@ -18,5 +18,58 @@ spec:
           image: sbms-notification-service:1.0
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8082
+            - containerPort: 8085   # Use the same port as your app
+
+          env:
+            # --------------------------------------
+            # 🌐 Activate kubernetes profile
+            # --------------------------------------
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+
+            # --------------------------------------
+            # 🗄️ Database configs
+            # --------------------------------------
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-notification-db-config
+                  key: DB_URL
+
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sbms-notification-db-secret
+                  key: username
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sbms-notification-db-secret
+                  key: password
+
+            # --------------------------------------
+            # 🐇 RabbitMQ configs (from ConfigMap)
+            # --------------------------------------
+            - name: RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-notification-db-config
+                  key: RABBITMQ_HOST
+
+            - name: RABBITMQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-notification-db-config
+                  key: RABBITMQ_PORT
+
+            # --------------------------------------
+            # 🐇 RabbitMQ credentials
+            # (you can later move these to a Secret)
+            # --------------------------------------
+            - name: RABBITMQ_USERNAME
+              value: "guest"
+
+            - name: RABBITMQ_PASSWORD
+              value: "guest"
 

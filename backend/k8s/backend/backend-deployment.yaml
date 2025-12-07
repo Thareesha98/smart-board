@@ -11,27 +11,36 @@ spec:
   template:
     metadata:
       labels:
-        app: sbms-backend # 👈 IMPORTANT LABEL
+        app: sbms-backend
     spec:
       containers:
         - name: sbms-backend
-          image: sbms-backend:2.0 # from your Docker build
+          image: sbms-backend:2.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+
           env:
+            # 🔥 Activate Kubernetes profile in Spring Boot
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+
+            # 🔥 Database ENV variables
             - name: DB_URL
               valueFrom:
                 configMapKeyRef:
                   name: sbms-db-config
                   key: DB_URL
+
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: sbms-db-secret
                   key: username
+
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: sbms-db-secret
                   key: password
+
