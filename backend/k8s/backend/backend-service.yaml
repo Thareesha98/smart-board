@@ -4,10 +4,12 @@ metadata:
   name: sbms-backend
   namespace: sbms
 spec:
+  type: NodePort     # ← YOU MISSED THIS LINE
   selector:
-    app: sbms-backend      # 👈 MUST MATCH Deployment label
+    app: sbms-backend
   ports:
-    - port: 8080           # service port (inside cluster)
-      targetPort: 8080     # containerPort from Deployment
-  type: ClusterIP
+    - name: http
+      port: 8086
+      targetPort: 8086
+      nodePort: 30086   # valid only when type = NodePort
 

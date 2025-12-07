@@ -1,0 +1,32 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: sbms-notification-service
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}     # 🔥 Now loaded dynamically from Kubernetes (not localhost!)
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
+sbms:
+  rabbitmq:
+    exchange: sbms.events
+    queue: sbms.notification.queue
+    routing-key: appointment.*
+
+security:
+  jwt:
+    # Must point to API Gateway or Auth service (inside cluster, not localhost)
+    jwk-set-uri: http://sbms-backend:8080/.well-known/jwks.json

@@ -6,9 +6,9 @@ spring:
     name: sbms-notification-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/sbms_notifications
-    username: sbms_user
-    password: sbms_password
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
