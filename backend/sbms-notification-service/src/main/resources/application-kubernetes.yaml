@@ -13,9 +13,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
 
   rabbitmq:
-    host: ${RABBITMQ_HOST}     # 🔥 Now loaded dynamically from Kubernetes (not localhost!)
+    host: ${RABBITMQ_HOST}
     port: ${RABBITMQ_PORT}
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
@@ -28,5 +29,4 @@ sbms:
 
 security:
   jwt:
-    # Must point to API Gateway or Auth service (inside cluster, not localhost)
     jwk-set-uri: http://sbms-backend:8080/.well-known/jwks.json
