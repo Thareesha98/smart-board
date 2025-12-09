@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 public class RegistrationService {
@@ -33,6 +33,8 @@ public class RegistrationService {
     @Autowired
     private PaymentService paymentService;
 
+    @Autowired
+    private NotificationPublisher notificationPublisher;
 
     // ---------------------------------------------------------
     // STUDENT REGISTRATION
@@ -49,12 +51,10 @@ public class RegistrationService {
             throw new RuntimeException("Not enough slots available");
         }
 
-        // Student MUST confirm key money was paid
         if (!dto.isKeyMoneyPaid()) {
             throw new RuntimeException("Key money must be paid to register");
         }
 
-        // Dummy payment (simulate)
         boolean success = paymentService.processPayment(
                 studentId,
                 boarding.getKeyMoney()
@@ -74,16 +74,30 @@ public class RegistrationService {
 
         registrationRepo.save(r);
 
+        // 🔔 Notify OWNER: registration.submitted
+        notificationPublisher.publish(
+                "registration.submitted",
+                boarding.getOwner().getId(),
+                String.valueOf(r.getId()),
+                Map.of(
+                        "registrationId", r.getId(),
+                        "studentId", student.getId(),
+                        "studentName", student.getFullName(),
+                        "boardingId", boarding.getId(),
+                        "boardingTitle", boarding.getTitle()
+                )
+        );
+
         return RegistrationMapper.toDTO(r);
     }
-
 
     // ---------------------------------------------------------
     // STUDENT: GET ALL MY REGISTRATIONS
     // ---------------------------------------------------------
     public List<RegistrationResponseDTO> getStudentRegistrations(Long studentId) {
         return registrationRepo.findByStudentId(studentId)
-                .stream().map(RegistrationMapper::toDTO)
+                .stream()
+                .map(RegistrationMapper::toDTO)
                 .toList();
     }
 
@@ -106,6 +120,20 @@ public class RegistrationService {
         r.setStatus(RegistrationStatus.CANCELLED);
         registrationRepo.save(r);
 
+        // 🔔 Notify OWNER: registration.cancelled
+        notificationPublisher.publish(
+                "registration.cancelled",
+                r.getBoarding().getOwner().getId(),
+                String.valueOf(r.getId()),
+                Map.of(
+                        "registrationId", r.getId(),
+                        "studentId", r.getStudent().getId(),
+                        "studentName", r.getStudent().getFullName(),
+                        "boardingId", r.getBoarding().getId(),
+                        "boardingTitle", r.getBoarding().getTitle()
+                )
+        );
+
         return RegistrationMapper.toDTO(r);
     }
 
@@ -113,7 +141,6 @@ public class RegistrationService {
     // OWNER: VIEW REGISTRATIONS
     // ---------------------------------------------------------
     public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
-
         return registrationRepo.findByBoardingOwnerId(ownerId, status)
                 .stream()
                 .map(RegistrationMapper::toDTO)
@@ -132,14 +159,46 @@ public class RegistrationService {
             throw new RuntimeException("Unauthorized");
         }
 
+        Boarding boarding = r.getBoarding();
+        User student = r.getStudent();
+
         r.setStatus(dto.getStatus());
         r.setOwnerNote(dto.getOwnerNote());
 
-        // If approved → reduce available slots
         if (dto.getStatus() == RegistrationStatus.APPROVED) {
-            Boarding b = r.getBoarding();
-            b.setAvailable_slots(b.getAvailable_slots() - r.getNumberOfStudents());
-            boardingRepo.save(b);
+            boarding.setAvailable_slots(boarding.getAvailable_slots() - r.getNumberOfStudents());
+            boardingRepo.save(boarding);
+
+            // 🔔 Notify STUDENT: registration.approved
+            notificationPublisher.publish(
+                    "registration.approved",
+                    student.getId(),
+                    String.valueOf(r.getId()),
+                    Map.of(
+                            "registrationId", r.getId(),
+                            "studentId", student.getId(),
+                            "studentName", student.getFullName(),
+                            "boardingId", boarding.getId(),
+                            "boardingTitle", boarding.getTitle()
+                    )
+            );
+
+        } else if (dto.getStatus() == RegistrationStatus.DECLINED) {
+
+            // 🔔 Notify STUDENT: registration.declined
+            notificationPublisher.publish(
+                    "registration.declined",
+                    student.getId(),
+                    String.valueOf(r.getId()),
+                    Map.of(
+                            "registrationId", r.getId(),
+                            "studentId", student.getId(),
+                            "studentName", student.getFullName(),
+                            "boardingId", boarding.getId(),
+                            "boardingTitle", boarding.getTitle(),
+                            "reason", dto.getOwnerNote()
+                    )
+            );
         }
 
         registrationRepo.save(r);

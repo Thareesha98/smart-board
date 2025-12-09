@@ -13,9 +13,10 @@ spec:
       labels:
         app: sbms-notification-service
     spec:
+      serviceAccountName: sbms-notification-service-sa
       containers:
         - name: sbms-notification-service
-          image: sbms-notification-service:1.1
+          image: sbms-notification-service:2.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8085   # Use the same port as your app

@@ -7,6 +7,9 @@ import lombok.*;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 @Entity
 @Table(name = "notifications", indexes = {
         @Index(name = "idx_user_read", columnList = "user_id, read_flag")
@@ -40,6 +43,8 @@ public class Notification {
     private boolean read;
 
     // optional: payload JSON
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "meta", columnDefinition = "jsonb")
     private String meta;
+
 }

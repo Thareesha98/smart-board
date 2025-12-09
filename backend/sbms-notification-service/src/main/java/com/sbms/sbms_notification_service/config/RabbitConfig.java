@@ -15,7 +15,7 @@ public class RabbitConfig {
     @Value("${rabbitmq.queue:sbms.notification.queue}")
     private String queueName;
 
-    @Value("${rabbitmq.routing-key:notification.#}")
+    @Value("${rabbitmq.routing-key:#}")
     private String routingKey;
 
     @Bean

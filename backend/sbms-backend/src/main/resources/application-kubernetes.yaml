@@ -29,7 +29,7 @@ spring:
     port: 587
     username: thareesha01@gmail.com
     # Note: This is an App Password (not the actual Gmail password)
-    password: foewigznsutmonhm 
+    password: foewigznsutmonhm
     properties:
       mail:
         smtp:
@@ -47,13 +47,26 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
 
 aws:
   # WARNING: Hardcoding credentials is a security risk. Use environment variables or AWS IAM roles instead.
-  accessKeyId: AKIA2AUOOUX3O5UUUYBN      
-  secretAccessKey: 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  
+  accessKeyId: AKIA2AUOOUX3O5UUUYBN
+  secretAccessKey: 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
   region: ap-south-1
   s3:
     bucketName: smart-board-project
+
+sbms:
+  rabbitmq:
+    exchange: sbms.events
+
 
 #url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board
