@@ -1,22 +1,28 @@
-import { Routes, Route } from "react-router-dom";
-import { Navbar } from "./components/Navbar";
-import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import AdminLayout from './components/Layout/AdminLayout.jsx'; // Changed from .tsx
+import DashboardPage from './pages/DashboardPage.jsx'; // Changed from .tsx
+import UserManagementPage from './pages/UserManagementPage.jsx'; // Changed from .tsx
 
-function App() {
+// Placeholder pages for other modules
+const AdsPage = () => <div className="text-text-dark">Advertisements Management</div>;
+const ReportsPage = () => <div className="text-text-dark">Reports & Moderation</div>;
+
+const App = () => {
   return (
-    <>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="grow">
-          <Routes>
-            <Route index element={<HomePage />}/>
-            <Route path="login" element={<LoginPage />}/>
-          </Routes>
-        </div>
-      </div>
-    </>
+    <Router>
+      <AdminLayout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/users" element={<UserManagementPage />} />
+          <Route path="/ads" element={<AdsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          {/* Add more routes here */}
+          <Route path="*" element={<h1 className="text-text-dark">404 Not Found</h1>} />
+        </Routes>
+      </AdminLayout>
+    </Router>
   );
-}
+};
 
 export default App;
