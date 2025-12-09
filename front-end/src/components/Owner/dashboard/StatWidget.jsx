@@ -6,9 +6,7 @@ const StatWidget = ({
   title,
   mainValue,
   subValue,
-  subLabel,
-  hasButton = false,
-  to = "#", // Default link target
+  
 }) => (
   <div
     className="stat-widget flex p-6 rounded-[25px] shadow-lg transition duration-300 hover:translate-y-[-5px] relative"
@@ -35,15 +33,7 @@ const StatWidget = ({
           {subValue}
         </span>
       </div>
-      {hasButton && (
-        <Link
-          to={to}
-          className="btn btn-primary view-earnings p-2 px-4 text-sm font-semibold rounded-[25px] mt-3 inline-block no-underline"
-          style={{ backgroundColor: 'var(--accent)', color: 'var(--card-bg)' }}
-        >
-          {subLabel}
-        </Link>
-      )}
+      
     </div>
   </div>
 );

@@ -142,9 +142,7 @@ export default function Dashboard() {
             title="Monthly Revenue"
             mainValue={`$${dashboardData.monthlyRevenue.toLocaleString()}`}
             subValue={`${dashboardData.revenueGrowth} from last month`}
-            hasButton
-            subLabel="View Details"
-            to="/ownerLayout/billing" // Assuming a billing route
+            
           />
           <StatWidget
             icon="fas fa-star"
@@ -189,7 +187,7 @@ export default function Dashboard() {
               </div>
               <div className="action-column flex flex-col grow min-w-[250px] gap-3">
                 <DashButton
-                  to="/ownerLayout/subscriptions"
+                  to="/ownerLayout/myAds"
                   icon="fas fa-crown"
                   label="Boost Ads"
                 />
