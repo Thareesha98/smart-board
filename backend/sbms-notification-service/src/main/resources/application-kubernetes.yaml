@@ -21,11 +21,10 @@ spring:
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
 
-sbms:
-  rabbitmq:
-    exchange: sbms.events
-    queue: sbms.notification.queue
-    routing-key: appointment.*
+rabbitmq:
+  exchange: sbms.events
+  queue: sbms.notification.queue
+  routing-key: "#"
 
 security:
   jwt:

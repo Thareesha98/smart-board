@@ -6,9 +6,9 @@ spring:
     name: sbms-notification-service
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/sbms_notification_db
+    username: notification_user
+    password: notification09090909
 
   jpa:
     hibernate:
@@ -21,7 +21,7 @@ rabbitmq:
   password: guest
   exchange: sbms.events
   queue: sbms.notification.queue
-  routing-key: appointment.*
+  routing-key: notification.#
 
   
 security:

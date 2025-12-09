@@ -1,6 +1,7 @@
 package com.sbms.sbms_notification_service.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sbms.sbms_notification_service.dto.EventMessageDto;
 import com.sbms.sbms_notification_service.model.Notification;
 import com.sbms.sbms_notification_service.model.NotificationType;
@@ -16,7 +17,10 @@ import java.util.Map;
 public class NotificationEventListener {
 
     private final NotificationService notificationService;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
 
     public NotificationEventListener(NotificationService notificationService) {
         this.notificationService = notificationService;
@@ -41,13 +45,14 @@ public class NotificationEventListener {
             }
 
             Notification n = Notification.builder()
-                    .notificationId(null) // let service create UUID
+                    .notificationId(null)
                     .userId(userId)
                     .title(title)
                     .message(message)
                     .type(type)
-                    .meta(mapper.writeValueAsString(event.data()))
+                    .meta(mapper.writeValueAsString(event.data()))  // ✔ store json string
                     .build();
+
 
             notificationService.create(n);
         } catch (Exception e) {

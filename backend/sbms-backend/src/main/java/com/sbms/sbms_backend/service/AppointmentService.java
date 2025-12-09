@@ -13,8 +13,9 @@ import com.sbms.sbms_backend.repository.BoardingRepository;
 import com.sbms.sbms_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +29,9 @@ public class AppointmentService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationPublisher notificationPublisher;
 
     // ---------------------------------------------------------
     // STUDENT: CREATE APPOINTMENT REQUEST
@@ -43,23 +47,12 @@ public class AppointmentService {
         Boarding boarding = boardingRepository.findById(dto.getBoardingId())
                 .orElseThrow(() -> new RuntimeException("Boarding not found"));
 
-        // Only approved boardings can accept appointments
         if (boarding.getStatus() != Status.APPROVED) {
-            throw new RuntimeException("Boarding is not approved for appointments");
+            throw new RuntimeException("Boarding is not approved");
         }
 
-        if (dto.getNumberOfStudents() <= 0) {
-            throw new RuntimeException("Number of students must be at least 1");
-        }
-
-        // available slots >= numberOfStudents
         if (boarding.getAvailable_slots() < dto.getNumberOfStudents()) {
-            throw new RuntimeException("Not enough available slots for requested number of students");
-        }
-
-        if (dto.getRequestedStartTime() == null || dto.getRequestedEndTime() == null ||
-                !dto.getRequestedEndTime().isAfter(dto.getRequestedStartTime())) {
-            throw new RuntimeException("Invalid requested time range");
+            throw new RuntimeException("Not enough slots");
         }
 
         Appointment appointment = new Appointment();
@@ -72,6 +65,20 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.PENDING);
 
         Appointment saved = appointmentRepository.save(appointment);
+
+        // 🔔 Notify OWNER: appointment.created
+        notificationPublisher.publish(
+                "appointment.created",
+                boarding.getOwner().getId(),
+                String.valueOf(saved.getId()),
+                Map.of(
+                        "appointmentId", saved.getId(),
+                        "studentId", student.getId(),
+                        "studentName", student.getFullName(),
+                        "boardingId", boarding.getId(),
+                        "boardingTitle", boarding.getTitle()
+                )
+        );
 
         return AppointmentMapper.toDto(saved);
     }
@@ -121,43 +128,50 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        // verify owner
         if (!appointment.getBoarding().getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("You are not the owner of this boarding");
+            throw new RuntimeException("Unauthorized");
         }
 
+        User student = appointment.getStudent();
+
         if (dto.getStatus() == AppointmentStatus.DECLINED) {
+
             appointment.setStatus(AppointmentStatus.DECLINED);
-            appointment.setOwnerStartTime(null);
-            appointment.setOwnerEndTime(null);
             appointment.setOwnerNote(dto.getOwnerNote());
 
+            // 🔔 Notify STUDENT: appointment.declined
+            notificationPublisher.publish(
+                    "appointment.declined",
+                    student.getId(),
+                    String.valueOf(appointment.getId()),
+                    Map.of(
+                            "appointmentId", appointment.getId(),
+                            "boardingId", appointment.getBoarding().getId(),
+                            "boardingTitle", appointment.getBoarding().getTitle(),
+                            "reason", dto.getOwnerNote()
+                    )
+            );
+
         } else if (dto.getStatus() == AppointmentStatus.ACCEPTED) {
-
-            if (dto.getOwnerStartTime() == null || dto.getOwnerEndTime() == null) {
-                throw new RuntimeException("Owner must provide a time slot when accepting");
-            }
-
-            if (!dto.getOwnerEndTime().isAfter(dto.getOwnerStartTime())) {
-                throw new RuntimeException("Invalid owner time range");
-            }
-
-            // Must be within student requested range
-            LocalDateTime reqStart = appointment.getRequestedStartTime();
-            LocalDateTime reqEnd = appointment.getRequestedEndTime();
-
-            if (dto.getOwnerStartTime().isBefore(reqStart) ||
-                dto.getOwnerEndTime().isAfter(reqEnd)) {
-                throw new RuntimeException("Owner time slot must be within student's requested time range");
-            }
 
             appointment.setOwnerStartTime(dto.getOwnerStartTime());
             appointment.setOwnerEndTime(dto.getOwnerEndTime());
             appointment.setOwnerNote(dto.getOwnerNote());
             appointment.setStatus(AppointmentStatus.ACCEPTED);
 
-        } else {
-            throw new RuntimeException("Invalid status. Only ACCEPTED or DECLINED allowed");
+            // 🔔 Notify STUDENT: appointment.accepted
+            notificationPublisher.publish(
+                    "appointment.accepted",
+                    student.getId(),
+                    String.valueOf(appointment.getId()),
+                    Map.of(
+                            "appointmentId", appointment.getId(),
+                            "boardingId", appointment.getBoarding().getId(),
+                            "boardingTitle", appointment.getBoarding().getTitle(),
+                            "ownerStartTime", dto.getOwnerStartTime(),
+                            "ownerEndTime", dto.getOwnerEndTime()
+                    )
+            );
         }
 
         Appointment saved = appointmentRepository.save(appointment);
@@ -165,7 +179,7 @@ public class AppointmentService {
     }
 
     // ---------------------------------------------------------
-    // STUDENT: OPTIONALLY CANCEL APPOINTMENT
+    // STUDENT: CANCEL APPOINTMENT
     // ---------------------------------------------------------
     public AppointmentResponseDTO cancelAppointment(Long studentId, Long appointmentId) {
 
@@ -173,14 +187,24 @@ public class AppointmentService {
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
         if (!appointment.getStudent().getId().equals(studentId)) {
-            throw new RuntimeException("You are not allowed to cancel this appointment");
-        }
-
-        if (appointment.getStatus() == AppointmentStatus.ACCEPTED) {
-            // optional rule: allow or disallow cancelling accepted appointments
+            throw new RuntimeException("Unauthorized");
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
+
+        // 🔔 Notify OWNER: appointment.cancelled
+        notificationPublisher.publish(
+                "appointment.cancelled",
+                appointment.getBoarding().getOwner().getId(),
+                String.valueOf(appointment.getId()),
+                Map.of(
+                        "appointmentId", appointment.getId(),
+                        "studentId", appointment.getStudent().getId(),
+                        "studentName", appointment.getStudent().getFullName(),
+                        "boardingId", appointment.getBoarding().getId(),
+                        "boardingTitle", appointment.getBoarding().getTitle()
+                )
+        );
 
         Appointment saved = appointmentRepository.save(appointment);
         return AppointmentMapper.toDto(saved);

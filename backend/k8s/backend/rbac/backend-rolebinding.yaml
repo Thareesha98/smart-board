@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sbms-backend-k8s-reader-binding
+  namespace: sbms
+subjects:
+  - kind: ServiceAccount
+    name: sbms-backend-sa
+    namespace: sbms
+roleRef:
+  kind: Role
+  name: sbms-backend-k8s-reader
+  apiGroup: rbac.authorization.k8s.io
+
