@@ -220,7 +220,7 @@ export default function ReportsPage() {
   const navigate = useNavigate();
 
   const handleReportAdd = () => {
-    navigate("/ownerLayout/addReport");
+    navigate("/ownerLayout/reports/add");
   };
 
   // Use the mock reports (or context reports in a real app)
