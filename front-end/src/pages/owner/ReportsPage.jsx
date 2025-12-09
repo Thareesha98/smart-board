@@ -2,14 +2,9 @@ import React, { useState } from "react";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import { useNavigate } from "react-router-dom";
 import ReportDetailModal from "../../components/Owner/report/ReportDetailModal";
+import { ownerData } from "../../data/mockData.js";
 
 
-// --- Mock Data & Constants (These should be imported from mockData.js) ---
-const ownerData = {
-  firstName: "Mr.",
-  lastName: "Silva",
-  avatar: "https://randomuser.me/api/portraits/men/57.jpg",
-};
 
 const mockReports = [
   {

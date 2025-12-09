@@ -301,7 +301,7 @@ export const INITIAL_BOARDINGS_DATA = [
 ];
 
 export const ownerData = {
-  firstName: 'Mr.',
+  firstName: 'Mr.Rajesh',
   lastName: 'Silva',
   businessName: 'Sunshine Hostels & Rooms',
   email: 'sunshinehostels@gmail.com',
