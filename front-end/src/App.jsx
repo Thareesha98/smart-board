@@ -10,6 +10,7 @@ import MyBoardingsPage from "./pages/owner/MyBoardingsPage";
 import UtilityPage from "./pages/owner/UtilityPage";
 import ReportsPage from "./pages/owner/ReportsPage";
 import ReportStudentPage from "./pages/owner/AddReportPage";
+import SubscriptionPlanPage from "./pages/owner/SubscriptionPlanPage";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
                   
               <Route path="createAd" element={<CreateAdPage />} /> 
               <Route path="editAd/:adId" element={<EditAdPage />} />
+              <Route path="subscriptions/:adId" element={<SubscriptionPlanPage />} /> 
               
               {/* Reports Management */}
               <Route path="reports" element={<ReportsPage />} />

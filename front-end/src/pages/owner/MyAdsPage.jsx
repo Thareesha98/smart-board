@@ -21,7 +21,6 @@ const getStatusBadgeStyle = (status) => {
   }
 };
 
-
 const StatusTab = ({ status, count, currentFilter, setFilter }) => {
   const isActive = currentFilter === status;
   const color = getStatusBadgeStyle(status).backgroundColor;
@@ -82,20 +81,24 @@ const MyAdsPage = () => {
   const [filter, setFilter] = useState("All");
   const navigate = useNavigate();
 
-  // Note: mockAds now includes all 7 ads (original 5 + 123 + 456)
   const filteredAds = mockAds.filter((ad) =>
     filter === "All" ? true : ad.status === filter
   );
 
   const handleEditClick = (adId) => {
-    alert(`Redirecting to EditAdPage for ID: ${adId}`);
-    // The mock Ad IDs '123' and '456' will now work in EditAdPage
-    navigate(`../editAd/${adId}`);
+    // Navigate to the nested route: /ownerLayout/myAds/editAd/:adId
+    navigate(`/ownerLayout/editAd/${adId}`);
+  };
+
+  // 🌟 NEW HANDLER FOR REDIRECTION to Subscription Plans
+  const handleBoostRedirect = (adId) => {
+    // Navigate to the dedicated subscription path, passing the ad ID
+    navigate(`/ownerLayout/subscriptions/${adId}`);
   };
 
   const handleCreateNewAd = () => {
-    alert("Redirecting to CreateAdPage");
-    navigate("../createAd");
+    // Navigate to the nested route: /ownerLayout/myAds/createAd
+    navigate("/ownerLayout/createAd");
   };
 
   const getStatusCounts = () => {
@@ -107,89 +110,98 @@ const MyAdsPage = () => {
   };
 
   const counts = getStatusCounts();
-  // Assuming the notification count comes from ownerData or a separate API call
   const notificationCount = ownerData?.notifications || 3;
 
   return (
     <div className="pt-4 space-y-6" style={{ backgroundColor: "var(--light)" }}>
-      {/* 🌟 Standardized HeaderBar with Action Button in children prop */}
-      <HeaderBar
-        title="My Boarding Ads"
-        subtitle="Manage, track performance, and edit your listings"
-        notificationCount={notificationCount}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
-      >
-        <button
-          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-          style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
-          onClick={handleCreateNewAd}
-        >
-          <i className="fas fa-plus mr-2"></i>
-          Create New Ad
-        </button>
-      </HeaderBar>
 
-      {/* Status Filter Tabs */}
-      <section
-        className="mb-8 p-6 rounded-3xl shadow-lg grid grid-cols-2 md:grid-cols-5 gap-4"
-        style={{ backgroundColor: "var(--card-bg)" }}
-      >
-        <StatusTab
-          status="All"
-          count={counts["All"] || 0}
-          currentFilter={filter}
-          setFilter={setFilter}
-        />
-        <StatusTab
-          status="Active"
-          count={counts["Active"] || 0}
-          currentFilter={filter}
-          setFilter={setFilter}
-        />
-        <StatusTab
-          status="Pending"
-          count={counts["Pending"] || 0}
-          currentFilter={filter}
-          setFilter={setFilter}
-        />
-        <StatusTab
-          status="Draft"
-          count={counts["Draft"] || 0}
-          currentFilter={filter}
-          setFilter={setFilter}
-        />
-        <StatusTab
-          status="Inactive"
-          count={counts["Inactive"] || 0}
-          currentFilter={filter}
-          setFilter={setFilter}
-        />
-      </section>
+        <>
+          <HeaderBar
+            title="My Boarding Ads"
+            subtitle="Manage, track performance, and edit your listings"
+            notificationCount={notificationCount}
+            userAvatar={ownerData.avatar}
+            userName={ownerData.firstName}
+          >
+            <button
+              className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+              style={{
+                backgroundColor: "var(--accent)",
+                color: "var(--card-bg)",
+              }}
+              onClick={handleCreateNewAd}
+            >
+              <i className="fas fa-plus mr-2"></i>
+              Create New Ad
+            </button>
+          </HeaderBar>
 
-      {/* Ads List */}
-      <section>
-        <h2
-          className="text-2xl font-bold mb-4"
-          style={{ color: "var(--primary)" }}
-        >
-          {filter} Listings ({filteredAds.length})
-        </h2>
-        <div className="space-y-6">
-          {filteredAds.length > 0 ? (
-            filteredAds.map((ad) => (
-              <AdCard
-                key={ad.id}
-                ad={ad}
-                onEdit={handleEditClick}
-                getStatusBadgeStyle={getStatusBadgeStyle}
-              />
-            ))
-          ) : (
-            <EmptyState filter={filter} handleCreateNewAd={handleCreateNewAd} />
-          )}
-        </div>
-      </section>
+          {/* Status Filter Tabs */}
+          <section
+            className="mb-8 p-6 rounded-3xl shadow-lg grid grid-cols-2 md:grid-cols-5 gap-4"
+            style={{ backgroundColor: "var(--card-bg)" }}
+          >
+            <StatusTab
+              status="All"
+              count={counts["All"] || 0}
+              currentFilter={filter}
+              setFilter={setFilter}
+            />
+            <StatusTab
+              status="Active"
+              count={counts["Active"] || 0}
+              currentFilter={filter}
+              setFilter={setFilter}
+            />
+            <StatusTab
+              status="Pending"
+              count={counts["Pending"] || 0}
+              currentFilter={filter}
+              setFilter={setFilter}
+            />
+            <StatusTab
+              status="Draft"
+              count={counts["Draft"] || 0}
+              currentFilter={filter}
+              setFilter={setFilter}
+            />
+            <StatusTab
+              status="Inactive"
+              count={counts["Inactive"] || 0}
+              currentFilter={filter}
+              setFilter={setFilter}
+            />
+          </section>
+
+          {/* Ads List */}
+          <section>
+            <h2
+              className="text-2xl font-bold mb-4"
+              style={{ color: "var(--primary)" }}
+            >
+              {filter} Listings ({filteredAds.length})
+            </h2>
+            <div className="space-y-6">
+              {filteredAds.length > 0 ? (
+                filteredAds.map((ad) => (
+                  <AdCard
+                    key={ad.id}
+                    ad={ad}
+                    onEdit={handleEditClick}
+                    onBoostRedirect={handleBoostRedirect} // 🌟 Pass redirect handler
+                    getStatusBadgeStyle={getStatusBadgeStyle}
+                  />
+                ))
+              ) : (
+                <EmptyState
+                  filter={filter}
+                  handleCreateNewAd={handleCreateNewAd}
+                />
+              )}
+            </div>
+          </section>
+        </>
+      
     </div>
   );
 };
