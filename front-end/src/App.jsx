@@ -1,21 +1,17 @@
-import { Routes, Route } from "react-router-dom";
-import { Navbar } from "./components/Navbar";
-import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ScrollToTop from './ScrollToTop';
+import AppRoutes from './routes/AppRoutes'; // Import the new routes file
 
 function App() {
   return (
-    <>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="grow">
-          <Routes>
-            <Route index element={<HomePage />}/>
-            <Route path="login" element={<LoginPage />}/>
-          </Routes>
-        </div>
-      </div>
-    </>
+    <AuthProvider>
+      <Router>
+        <ScrollToTop />
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
   );
 }
 
