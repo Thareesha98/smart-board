@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet } from "react-router-dom";
 import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
 import AdCard from "../../components/Owner/ads/AdCard.jsx";
 
-import { mockAds, ownerData } from "../../data/mockData.js";
+import { mockAds, ownerData } from '../../data/mockData';
 
-// Helper function moved outside the main component
+
+
 const getStatusBadgeStyle = (status) => {
   switch (status) {
     case "Active":
@@ -77,32 +78,48 @@ const EmptyState = ({ filter, handleCreateNewAd }) => (
   </div>
 );
 
+
+const getLiveAds = () => {
+  const boostedIds = JSON.parse(sessionStorage.getItem("boostedAds") || "[]");
+
+  
+  return mockAds.map((ad) => ({
+    ...ad,
+    isBoosted: boostedIds.includes(ad.id) || ad.isBoosted || false,
+  }));
+};
+
 const MyAdsPage = () => {
   const [filter, setFilter] = useState("All");
   const navigate = useNavigate();
 
-  const filteredAds = mockAds.filter((ad) =>
+  
+  const liveAds = getLiveAds();
+
+  const filteredAds = liveAds.filter((ad) =>
     filter === "All" ? true : ad.status === filter
   );
 
+  
+  const isNestedRoute =
+    window.location.pathname.startsWith("/ownerLayout/myAds/") &&
+    window.location.pathname !== "/ownerLayout/myAds";
+
   const handleEditClick = (adId) => {
-    // Navigate to the nested route: /ownerLayout/myAds/editAd/:adId
-    navigate(`/ownerLayout/editAd/${adId}`);
+    navigate(`editAd/${adId}`);
   };
 
-  // 🌟 NEW HANDLER FOR REDIRECTION to Subscription Plans
+ 
   const handleBoostRedirect = (adId) => {
-    // Navigate to the dedicated subscription path, passing the ad ID
     navigate(`/ownerLayout/subscriptions/${adId}`);
   };
 
   const handleCreateNewAd = () => {
-    // Navigate to the nested route: /ownerLayout/myAds/createAd
-    navigate("/ownerLayout/createAd");
+    navigate(`createAd`);
   };
 
   const getStatusCounts = () => {
-    return mockAds.reduce((acc, ad) => {
+    return liveAds.reduce((acc, ad) => {
       acc[ad.status] = (acc[ad.status] || 0) + 1;
       acc["All"] = (acc["All"] || 0) + 1;
       return acc;
@@ -115,6 +132,10 @@ const MyAdsPage = () => {
   return (
     <div className="pt-4 space-y-6" style={{ backgroundColor: "var(--light)" }}>
 
+      {isNestedRoute && <Outlet />}
+
+
+      {!isNestedRoute && (
         <>
           <HeaderBar
             title="My Boarding Ads"
@@ -188,7 +209,7 @@ const MyAdsPage = () => {
                     key={ad.id}
                     ad={ad}
                     onEdit={handleEditClick}
-                    onBoostRedirect={handleBoostRedirect} // 🌟 Pass redirect handler
+                    onBoostRedirect={handleBoostRedirect} 
                     getStatusBadgeStyle={getStatusBadgeStyle}
                   />
                 ))
@@ -201,7 +222,7 @@ const MyAdsPage = () => {
             </div>
           </section>
         </>
-      
+      )}
     </div>
   );
 };

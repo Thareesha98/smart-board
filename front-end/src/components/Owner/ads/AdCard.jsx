@@ -1,21 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-// import axios from 'axios'; // For production
-const axios = {
-  post: (url, data) =>
-    new Promise((resolve) =>
-      setTimeout(
-        () => resolve({ data: { success: true, message: "Boost initiated." } }),
-        500
-      )
-    ),
-  get: (url) =>
-    new Promise((resolve) =>
-      setTimeout(() => resolve({ data: { isBoosted: false } }), 300)
-    ),
-};
+import React, { useState } from "react";
 
-// --- Helper Component (Used only by AdCard) ---
+
 const StatBox = ({ icon, label, value, color }) => (
   <div className="flex flex-col items-center">
     <i className={`${icon} text-xl mb-1`} style={{ color }}></i>
@@ -28,50 +13,17 @@ const StatBox = ({ icon, label, value, color }) => (
   </div>
 );
 
-// --- FULL AdCard Component ---
+
+
 const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
-  const [isBoosted, setIsBoosted] = useState(ad.isBoosted || false);
-  const [isBoosting, setIsBoosting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // 1. useEffect for Initial Status Check (Simulating API GET)
-  useEffect(() => {
-    const fetchAdStatus = async () => {
-      setIsLoading(true);
-      try {
-        // SIMULATED AXIOS GET: Check if this ad is already boosted
-        const response = await axios.get(`/api/ads/status/${ad.id}`);
-        if (response.data && response.data.isBoosted) {
-          setIsBoosted(response.data.isBoosted);
-        }
-      } catch (error) {
-        console.error(`Failed to fetch status for ad ${ad.id}`, error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchAdStatus();
-  }, [ad.id]);
-
-  // 2. Event Handler for the Boost Action (Redirects to Subscription Plans)
+  const [isBoosted] = useState(ad.isBoosted || false); 
+ 
   const handleBoostClick = () => {
-    // Redirect to the parent component's handler which navigates to the plans page
     onBoostRedirect(ad.id);
   };
 
-  // 3. Dynamic Boost Button Logic
+ 
   const BoostButton = () => {
-    if (isLoading) {
-      return (
-        <button
-          disabled
-          className="px-4 py-2 text-sm font-semibold rounded-2xl"
-          style={{ backgroundColor: "var(--light)", color: "var(--muted)" }}
-        >
-          <i className="fas fa-spinner fa-spin mr-2"></i> Loading...
-        </button>
-      );
-    }
     if (isBoosted) {
       return (
         <button
@@ -86,7 +38,8 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
         </button>
       );
     }
-    // If not boosted and not loading, show the button to trigger redirect
+    
+   
     return (
       <button
         className="px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-300 shadow-md hover:scale-[1.05]"
@@ -98,7 +51,7 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
     );
   };
 
-  // 4. Render Method (JSX)
+  
   return (
     <div
       className="flex flex-col md:flex-row p-4 md:p-6 rounded-3xl shadow-xl transition-all duration-300 hover:scale-[1.01]"
@@ -108,7 +61,7 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
         boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
       }}
     >
-      {/* Image & Status */}
+      
       <div className="shrink-0 w-full md:w-48 h-40 md:h-auto relative mb-4 md:mb-0">
         <img
           src={
@@ -139,31 +92,22 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
         <h3 className="text-xl font-bold mb-1" style={{ color: "var(--text)" }}>
           {ad.title}
         </h3>
-        {/* ... (Address and Rent details) ... */}
+        
+        <p className="flex items-center text-sm mb-3" style={{ color: "var(--muted)" }}>
+          <i className="fas fa-map-marker-alt mr-2" style={{ color: "var(--accent)" }}></i>
+          {ad.address}
+        </p>
+        <div className="text-3xl font-extrabold mb-4" style={{ color: "var(--accent)" }}>
+          LKR {ad.rent.toLocaleString()}
+          <span className="text-base font-medium ml-1" style={{ color: "var(--muted)" }}>/ month</span>
+        </div>
+
 
         {/* Performance Stats */}
-        <div
-          className="grid grid-cols-3 gap-4 mb-4 border-t pt-4"
-          style={{ borderColor: "var(--light)" }}
-        >
-          <StatBox
-            icon="fas fa-eye"
-            label="Views"
-            value={ad.views.toLocaleString()}
-            color={"var(--info)"}
-          />
-          <StatBox
-            icon="fas fa-calendar-alt"
-            label="Appts"
-            value={ad.appointments}
-            color={"var(--accent)"}
-          />
-          <StatBox
-            icon="fas fa-check-circle"
-            label="Selected"
-            value={ad.selected}
-            color={"var(--success)"}
-          />
+        <div className="grid grid-cols-3 gap-4 mb-4 border-t pt-4" style={{ borderColor: "var(--light)" }}>
+          <StatBox icon="fas fa-eye" label="Views" value={ad.views.toLocaleString()} color={"var(--info)"} />
+          <StatBox icon="fas fa-calendar-alt" label="Appts" value={ad.appointments} color={"var(--accent)"} />
+          <StatBox icon="fas fa-check-circle" label="Selected" value={ad.selected} color={"var(--success)"} />
         </div>
 
         {/* Actions */}

@@ -64,13 +64,23 @@ const PlanCard = ({ plan, adId }) => {
       alert(`Simulating payment for ${plan.name}...`);
 
       try {
-        // In a real app: await axios.post('/api/ads/boost', { adId: adId, plan: plan.id });
+        // --- START PERSISTENCE SIMULATION ---
+        // 1. Get current list of boosted IDs from storage, or initialize an empty array
+        const boostedAds = JSON.parse(sessionStorage.getItem('boostedAds') || '[]');
+        
+        // 2. Add the new adId if it's not already there
+        if (!boostedAds.includes(adId)) {
+            boostedAds.push(adId);
+            // 3. Save the updated list back to session storage
+            sessionStorage.setItem('boostedAds', JSON.stringify(boostedAds));
+        }
+        // --- END PERSISTENCE SIMULATION ---
 
         alert(
           `SUCCESS: Ad ID ${adId} has been successfully boosted with the ${plan.name} plan!`
         );
 
-        // 🌟 REDIRECT: Go back to My Ads Page. The AdCard's useEffect will detect the change.
+        // REDIRECT: Go back to My Ads Page
         navigate("/ownerLayout/myAds");
       } catch (error) {
         alert("Payment failed. Please try again.");
@@ -148,7 +158,6 @@ export default function SubscriptionPlanPage() {
 
   // Safety Check: If adId is missing, redirect
   if (!adId) {
-    // Use navigate hook logic from outside the return block
     setTimeout(() => navigate("/ownerLayout/myAds"), 0);
     return null;
   }
