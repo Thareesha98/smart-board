@@ -34,8 +34,8 @@ function App() {
               <Route path="myAds" element={<MyAdsPage />} />
                  
                   
-              <Route path="createAd" element={<CreateAdPage />} /> 
-              <Route path="editAd/:adId" element={<EditAdPage />} />
+              <Route path="myAds/createAd" element={<CreateAdPage />} /> 
+              <Route path="myAds/editAd/:adId" element={<EditAdPage />} />
               <Route path="subscriptions/:adId" element={<SubscriptionPlanPage />} /> 
               
               {/* Reports Management */}

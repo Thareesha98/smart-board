@@ -115,17 +115,7 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
           <BoostButton />
 
           <div className="flex space-x-3">
-            <button
-              className="px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-300"
-              style={{
-                border: `1px solid ${"var(--primary)"}`,
-                color: "var(--primary)",
-                backgroundColor: "transparent",
-              }}
-              onClick={() => console.log(`View Analytics for ${ad.id}`)}
-            >
-              <i className="fas fa-chart-bar mr-2"></i> Analytics
-            </button>
+            
             <button
               className="px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-300 shadow-md hover:scale-[1.05]"
               style={{
