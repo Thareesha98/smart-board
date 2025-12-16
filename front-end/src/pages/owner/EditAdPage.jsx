@@ -96,16 +96,33 @@ const EditAdPage = () => {
         }
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        setTimeout(() => {
-            alert(`Ad ID ${adId} Updated Successfully!`);
-            setIsSubmitting(false);
-            setNewImages([]);
-            navigate('/ownerLayout/myAds'); // Redirect back to My Ads list
-        }, 1500);
+    // --- Inside EditAdPage Component ---
+
+const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Prepare the "New" data based on the edited form
+    const newPendingAd = {
+        ...formData,
+        id: `NEW-${Date.now()}`, // Generate a mock new ID
+        status: 'Pending',       // Force the status to Pending
+        dateSubmitted: new Date().toISOString().substring(0, 10),
     };
+
+    setTimeout(() => {
+        // Log the new object to console to verify the status is 'Pending'
+        console.log("New Ad Submitted for Review:", newPendingAd);
+
+        alert(`Changes submitted! A new version of this ad is now 'Pending' for admin approval.`);
+        
+        setIsSubmitting(false);
+        setNewImages([]);
+        
+        // Redirect back to My Ads list where the user will see the Pending ad
+        navigate('/ownerLayout/myAds'); 
+    }, 1500);
+};
     
     if (isLoading || !formData) {
         return (
