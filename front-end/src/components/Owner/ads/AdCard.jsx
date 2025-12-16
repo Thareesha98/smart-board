@@ -74,7 +74,11 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
         {/* Actions Section */}
         <div className="flex justify-between space-x-3 mt-4">
           {/* Use the separated component here */}
+          {ad.status === "Active" ? (
           <BoostButton isBoosted={isBoosted} onBoostClick={handleBoostClick} />
+        ) : (
+          <div className="flex-1"></div> // Spacer to keep layout consistent
+        )}
 
           <div className="flex space-x-3">
             <button
