@@ -4,11 +4,11 @@ import FormGroup from "../../components/Owner/forms/FormGroup";
 import HeaderBar from '../../components/Owner/common/HeaderBar';
 import { ownerData, mockAds } from '../../data/mockData';
 
-// Import our new sub-components
 import { 
     AdStatusBadge, 
     AmenityItem, 
     ImagePreview, 
+    ImageUploader,
     LoadingSpinner 
 } from '../../components/Owner/ads/EditAdSubComponents';
 
@@ -37,6 +37,8 @@ const EditAdPage = () => {
     const [formData, setFormData] = useState(null); 
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [newImages, setNewImages] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
 
     useEffect(() => {
         setIsLoading(true);
@@ -69,13 +71,30 @@ const EditAdPage = () => {
         }
     };
 
+    const handleImageSelect = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            setNewImages(prev => [...prev, ...files]);
+            const newPreviews = files.map(file => URL.createObjectURL(file));
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+        }
+    };
+
+    const handleRemoveNewImage = (index) => {
+        setNewImages(prev => prev.filter((_, i) => i !== index));
+        setImagePreviews(prev => {
+            URL.revokeObjectURL(prev[index]);
+            return prev.filter((_, i) => i !== index);
+        });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         
-        // Simulation: Creating new pending version
         setTimeout(() => {
-            alert(`New version of "${formData.title}" submitted as 'Pending'.`);
+            alert(`Success! A new version of "${formData.title}" has been submitted as 'Pending' for review.`);
+            imagePreviews.forEach(url => URL.revokeObjectURL(url));
             setIsSubmitting(false);
             navigate('/ownerLayout/myAds'); 
         }, 1500);
@@ -87,14 +106,13 @@ const EditAdPage = () => {
         <div className="pt-4 space-y-6" style={{ backgroundColor: 'var(--light)' }}>
             <HeaderBar 
                 title={`Edit Ad: ${adId}`} 
-                subtitle={`Submitting pending revision for **${formData.title}**`}
+                subtitle={`Creating a pending revision for **${formData.title}**`}
                 notificationCount={1}
                 userAvatar={ownerData.avatar} 
                 userName={ownerData.firstName}
             />
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Ad Details Section */}
                 <div className="bg-white p-8 rounded-3xl shadow-xl">
                     <div className="flex justify-between items-center mb-6 pb-3 border-b" style={{ borderColor: 'var(--light)' }}>
                         <h2 className="text-xl font-semibold" style={{ color: 'var(--primary)' }}>Ad Information</h2>
@@ -109,7 +127,6 @@ const EditAdPage = () => {
                     </div>
                 </div>
 
-                {/* Features & Media Section */}
                 <div className="bg-white p-8 rounded-3xl shadow-xl">
                     <h2 className="text-xl font-semibold mb-6 pb-3 border-b" style={{ color: 'var(--primary)', borderColor: 'var(--light)' }}>Features & Media</h2>
 
@@ -128,31 +145,24 @@ const EditAdPage = () => {
                     </div>
                     
                     <div>
-                        <h4 className="font-semibold mb-3">Current Photos</h4>
+                        <h4 className="font-semibold mb-3">Photos</h4>
                         <div className="flex flex-wrap gap-4">
                             {formData.currentImages.map((src, idx) => (
-                                <ImagePreview key={idx} src={src} onRemove={() => {/* Delete logic */}} />
+                                <ImagePreview key={`curr-${idx}`} src={src} onRemove={() => {}} />
                             ))}
+                            {imagePreviews.map((src, idx) => (
+                                <ImagePreview key={`new-${idx}`} src={src} isNew={true} onRemove={() => handleRemoveNewImage(idx)} />
+                            ))}
+                            <ImageUploader onImageSelect={handleImageSelect} />
                         </div>
                     </div>
                 </div>
 
-                {/* Submit Actions */}
                 <div className="flex justify-end pt-4 space-x-4">
-                    <button 
-                        type="button" 
-                        onClick={() => navigate('/ownerLayout/myAds')} 
-                        className="px-6 py-3 font-bold rounded-3xl border-2" 
-                        style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
-                    >
+                    <button type="button" onClick={() => navigate('/ownerLayout/myAds')} className="px-6 py-3 font-bold rounded-3xl border-2" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>
                         Cancel
                     </button>
-                    <button 
-                        type="submit" 
-                        disabled={isSubmitting} 
-                        className="px-8 py-3 text-lg font-bold rounded-3xl shadow-lg hover:scale-[1.02] bg-orange-500 text-white disabled:opacity-50"
-                        style={{ backgroundColor: 'var(--accent)' }}
-                    >
+                    <button type="submit" disabled={isSubmitting} className="px-8 py-3 text-lg font-bold rounded-3xl shadow-lg hover:scale-[1.02] bg-orange-500 text-white disabled:opacity-50" style={{ backgroundColor: 'var(--accent)' }}>
                         {isSubmitting ? "Submitting..." : "Submit for Approval"}
                     </button>
                 </div>

@@ -41,6 +41,22 @@ export const ImagePreview = ({ src, onRemove }) => (
     </div>
 );
 
+// --- Sub-Component: Image Uploader ---
+export const ImageUploader = ({ onImageSelect }) => (
+    <label className="w-24 h-24 flex flex-col items-center justify-center border-2 border-dashed rounded-lg cursor-pointer transition-all hover:bg-gray-50 hover:border-orange-400"
+        style={{ borderColor: 'var(--light)' }}>
+        <input 
+            type="file" 
+            className="hidden" 
+            accept="image/*" 
+            multiple 
+            onChange={onImageSelect} 
+        />
+        <i className="fas fa-camera text-2xl mb-1" style={{ color: 'var(--muted)' }}></i>
+        <span className="text-[10px] font-bold" style={{ color: 'var(--muted)' }}>ADD PHOTO</span>
+    </label>
+);
+
 // --- Sub-Component: Loading State ---
 export const LoadingSpinner = ({ id }) => (
     <div className="min-h-screen p-8 flex justify-center items-center" style={{ backgroundColor: 'var(--light)' }}>
