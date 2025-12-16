@@ -81,6 +81,7 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
         )}
 
           <div className="flex space-x-3">
+            {ad.status !== "Pending" && (
             <button
               className="px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-300 shadow-md hover:scale-[1.05]"
               style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
@@ -88,6 +89,7 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
             >
               <i className="fas fa-edit mr-2"></i> Edit Ad
             </button>
+          )}
           </div>
         </div>
       </div>
