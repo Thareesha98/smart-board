@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import BoostButton from "./BoostButton"; // Import the new component
 
 const StatBox = ({ icon, label, value, color }) => (
   <div className="flex flex-col items-center">
@@ -13,45 +13,13 @@ const StatBox = ({ icon, label, value, color }) => (
   </div>
 );
 
-
-
 const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
-  const [isBoosted] = useState(ad.isBoosted || false); 
- 
+  const [isBoosted] = useState(ad.isBoosted || false);
+
   const handleBoostClick = () => {
     onBoostRedirect(ad.id);
   };
 
- 
-  const BoostButton = () => {
-    if (isBoosted) {
-      return (
-        <button
-          className="px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-300"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "var(--card-bg)",
-            pointerEvents: "none",
-          }}
-        >
-          <i className="fas fa-bolt mr-2"></i> Boosted
-        </button>
-      );
-    }
-    
-   
-    return (
-      <button
-        className="px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-300 shadow-md hover:scale-[1.05]"
-        style={{ backgroundColor: "var(--success)", color: "var(--card-bg)" }}
-        onClick={handleBoostClick}
-      >
-        <i className="fas fa-bolt mr-2"></i> Boost Ad
-      </button>
-    );
-  };
-
-  
   return (
     <div
       className="flex flex-col md:flex-row p-4 md:p-6 rounded-3xl shadow-xl transition-all duration-300 hover:scale-[1.01]"
@@ -61,13 +29,10 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
         boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
       }}
     >
-      
+      {/* Image & Status Section */}
       <div className="shrink-0 w-full md:w-48 h-40 md:h-auto relative mb-4 md:mb-0">
         <img
-          src={
-            ad.image ||
-            "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=200&q=80"
-          }
+          src={ad.image || "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=200&q=80"}
           alt={ad.title}
           className="w-full h-full object-cover rounded-2xl"
         />
@@ -87,12 +52,9 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
         )}
       </div>
 
-      {/* Details */}
+      {/* Details Section */}
       <div className="grow p-0 md:pl-6">
-        <h3 className="text-xl font-bold mb-1" style={{ color: "var(--text)" }}>
-          {ad.title}
-        </h3>
-        
+        <h3 className="text-xl font-bold mb-1" style={{ color: "var(--text)" }}>{ad.title}</h3>
         <p className="flex items-center text-sm mb-3" style={{ color: "var(--muted)" }}>
           <i className="fas fa-map-marker-alt mr-2" style={{ color: "var(--accent)" }}></i>
           {ad.address}
@@ -102,7 +64,6 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
           <span className="text-base font-medium ml-1" style={{ color: "var(--muted)" }}>/ month</span>
         </div>
 
-
         {/* Performance Stats */}
         <div className="grid grid-cols-3 gap-4 mb-4 border-t pt-4" style={{ borderColor: "var(--light)" }}>
           <StatBox icon="fas fa-eye" label="Views" value={ad.views.toLocaleString()} color={"var(--info)"} />
@@ -110,18 +71,15 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
           <StatBox icon="fas fa-check-circle" label="Selected" value={ad.selected} color={"var(--success)"} />
         </div>
 
-        {/* Actions */}
+        {/* Actions Section */}
         <div className="flex justify-between space-x-3 mt-4">
-          <BoostButton />
+          {/* Use the separated component here */}
+          <BoostButton isBoosted={isBoosted} onBoostClick={handleBoostClick} />
 
           <div className="flex space-x-3">
-            
             <button
               className="px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-300 shadow-md hover:scale-[1.05]"
-              style={{
-                backgroundColor: "var(--accent)",
-                color: "var(--card-bg)",
-              }}
+              style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
               onClick={() => onEdit(ad.id)}
             >
               <i className="fas fa-edit mr-2"></i> Edit Ad

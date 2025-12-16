@@ -124,7 +124,7 @@ export const mockAds = [
       title: 'Budget Friendly Room, 10 min to Campus',
       address: '777 Suburb Rd, Matara',
       rent: 10000,
-      status: 'Draft',
+      status: 'Active',
       views: 5,
       appointments: 0,
       selected: 0,

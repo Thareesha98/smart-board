@@ -182,8 +182,6 @@ const EditAdPage = () => {
                                 onBlur={(e) => e.target.style.borderColor = 'var(--light)'}
                             >
                                 <option value="Active">Active (Visible to Students)</option>
-                                <option value="Draft">Draft (Hidden)</option>
-                                <option value="Pending">Pending Review</option>
                                 <option value="Deactivated">Deactivated</option>
                             </select>
                         </div>
