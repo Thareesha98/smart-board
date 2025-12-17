@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
 import BoardingCard from "../../components/Owner/myboardings/BoardingCard"; 
 import ViewToggle from "../../components/Owner/myboardings/ViewToggle";
 import TenantModal from "../../components/Owner/myboardings/TenantModal"; 
 import ManageModal from "../../components/Owner/myboardings/ManageModal"; 
+import CreateBoardingModal from "../../components/Owner/myboardings/CreateBoardingModal.jsx";
 
 import { boardingsData as initialData, ownerData } from "../../data/mockData.js";
 
@@ -12,9 +12,10 @@ export default function MyBoardingsPage() {
   const [boardings, setBoardings] = useState(initialData); // Local state for dummy data updates
   const [viewMode, setViewMode] = useState("grid");
   const [selectedProperty, setSelectedProperty] = useState(null); 
-  const [activeModal, setActiveModal] = useState(null); // 'tenants' | 'manage' | null
+  const [activeModal, setActiveModal] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   
-  const navigate = useNavigate();
+
 
   // --- Handlers ---
   const handleOpenTenants = (prop) => { setSelectedProperty(prop); setActiveModal('tenants'); };
@@ -30,6 +31,11 @@ export default function MyBoardingsPage() {
     setActiveModal(null);
   };
 
+  const handleCreateNew = (newProperty) => {
+    setBoardings([newProperty, ...boardings]);
+    setIsCreateModalOpen(false);
+  };
+
   return (
     <div className="pt-4 space-y-6 min-h-screen pb-10">
       <HeaderBar
@@ -40,7 +46,7 @@ export default function MyBoardingsPage() {
         userName={ownerData.firstName}
       >
         <button className="bg-(--accent) text-white px-6 py-2.5 rounded-full font-bold shadow-md hover:scale-105 transition" 
-                onClick={() => navigate('../createAd')}>
+                onClick={() => setIsCreateModalOpen(true)}>
           <i className="fas fa-plus mr-2"></i> Post New Boarding
         </button>
       </HeaderBar>
@@ -63,6 +69,13 @@ export default function MyBoardingsPage() {
           ))}
         </div>
       </section>
+
+      {/* Create Boarding Modal */}
+      <CreateBoardingModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+        onCreate={handleCreateNew} 
+      />
 
       {/* Tenant Management Modal */}
       <TenantModal 
