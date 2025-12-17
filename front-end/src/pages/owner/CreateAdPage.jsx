@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import FormGroup from "../../components/Owner/forms/FormGroup";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import { ownerData } from "../../data/mockData.js";
+import {
+  AmenityCheckbox,
+  PhotoUploader,
+} from "../../components/Owner/ads/CreateAdSubComponents";
 
 const availableAmenities = [
   { label: "Attached Bathroom", icon: "fa-bath" },
@@ -22,29 +26,46 @@ const CreateAdPage = () => {
     deposit: "",
     description: "",
     amenities: [],
-    image: null,
   });
-
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
 
-  const handleBack = () => {
-    navigate("../myAds");
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+
+    // Store actual files for the form submission
+    setSelectedFiles((prev) => [...prev, ...files]);
+
+    // Generate temporary URLs for immediate display
+    const newPreviews = files.map((file) => URL.createObjectURL(file));
+    setPreviews((prev) => [...prev, ...newPreviews]);
+  };
+
+  const handleRemoveImage = (index) => {
+    // Remove the file
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+
+    // Remove the preview and revoke the URL to save memory
+    setPreviews((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
-    if (type === "checkbox") {
-      setFormData((prev) => ({
-        ...prev,
-        amenities: checked
-          ? [...prev.amenities, value]
-          : prev.amenities.filter((item) => item !== value),
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox"
+          ? checked
+            ? [...prev.amenities, value]
+            : prev.amenities.filter((i) => i !== value)
+          : value,
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -52,220 +73,123 @@ const CreateAdPage = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       alert("Boarding Ad Created Successfully!");
-      setIsSubmitting(false);
-      navigate("../myAds"); // Redirect after successful creation
+      navigate("../myAds");
     }, 2000);
   };
 
-  const primaryBtnClass =
-    "btn btn-primary p-[0.6rem] px-4 rounded-[25px] font-semibold shadow-md transition duration-300 flex items-center gap-1";
-
   return (
     <div className="space-y-6">
-      {/* Horizontal Header */}
       <HeaderBar
         title="Create New Ad"
-        subtitle="List a new boarding space for students (Owner View)"
-        notificationCount={notificationCount}
+        subtitle="List a new boarding space"
         userAvatar={ownerData.avatar}
+        notificationCount={notificationCount}
         userName={ownerData.firstName}
       >
-        {/* Action Button for Delete Ad */}
         <button
-          className="px-6 py-2 font-semibold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-          style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
-          onClick={handleBack}
+          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
+          style={{
+            backgroundColor: "var(--accent)",
+            color: "var(--card-bg)",
+          }}
+          onClick={() => navigate("../myAds")}
         >
-          <i className="fas fa-arrow-left mr-2"></i>
-          Back to Ads
+          <i className="fas fa-arrow-left mr-2"></i> Back to Ads
         </button>
       </HeaderBar>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Main Form Card */}
-        <div
-          className="bg-white p-8 mt-12 rounded-[25px] shadow-xl"
-          style={{ boxShadow: "var(--shadow )" }}
-        >
-          <h2
-            className="text-[1.3rem] font-bold mb-6 pb-3 border-b"
-            style={{ color: "var(--primary)", borderColor: "var(--light)" }}
-          >
+        {/* Section 1: Details */}
+        <div className="bg-white p-8 mt-12 rounded-[25px] shadow-xl">
+          <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b border-(--light) text-(--primary)">
             Boarding Details
           </h2>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormGroup
               label="Ad Title"
               name="title"
-              placeholder="e.g., Spacious Room near Campus"
               value={formData.title}
               onChange={handleChange}
             />
             <FormGroup
               label="Full Address"
               name="address"
-              placeholder="e.g., 456 Main St, Matara"
               value={formData.address}
               onChange={handleChange}
             />
             <FormGroup
-              label="Monthly Rent (LKR)"
+              label="Monthly Rent"
               name="rent"
-              placeholder="e.g., 15000"
               type="number"
               value={formData.rent}
               onChange={handleChange}
             />
             <FormGroup
-              label="Key Money/Deposit (LKR)"
+              label="Deposit"
               name="deposit"
-              placeholder="e.g., 30000"
               type="number"
               value={formData.deposit}
               onChange={handleChange}
             />
           </div>
-
           <div className="mt-6">
-            <label
-              className="block font-semibold mb-2"
-              style={{ color: "var(--primary)" }}
-            >
+            <label className="block font-semibold mb-2 text-(--primary)">
               Description
             </label>
             <textarea
               name="description"
               rows="4"
-              placeholder="Describe your boarding space in detail."
               value={formData.description}
               onChange={handleChange}
-              className="w-full p-3 px-4 border rounded-xl text-[1rem] transition duration-300 bg-white focus:outline-none"
-              style={{ borderColor: "var(--light)", color: "var(--text)" }}
-              onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
-              onBlur={(e) => (e.target.style.borderColor = "var(--light)")}
+              className="w-full p-3 border rounded-xl focus:outline-none border-[var(--light)]"
               required
-            ></textarea>
+            />
           </div>
         </div>
 
-        {/* Amenities & Photos Card */}
-        <div
-          className="bg-white p-8 rounded-[25px] shadow-xl"
-          style={{ boxShadow: "var(--shadow )" }}
-        >
-          <h2
-            className="text-[1.3rem] font-bold mb-6 pb-3 border-b"
-            style={{ color: "var(--primary)", borderColor: "var(--light)" }}
-          >
+        {/* Section 2: Amenities & Media */}
+        <div className="bg-white p-8 rounded-[25px] shadow-xl">
+          <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b border-(--light) text-(--primary)">
             Features & Media
           </h2>
-
-          {/* Amenities */}
-          <div className="mb-8">
-            <h4
-              className="font-semibold text-lg mb-3"
-              style={{ color: "var(--primary)" }}
-            >
-              Select Amenities
-            </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {availableAmenities.map((item) => (
-                <label
-                  key={item.label}
-                  className="flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition duration-200 hover:bg-opacity-80"
-                  style={{ backgroundColor: "var(--light)" }}
-                >
-                  <input
-                    type="checkbox"
-                    name="amenities"
-                    value={item.label}
-                    onChange={handleChange}
-                    className="h-5 w-5 rounded transition duration-200 checked:bg-orange-500 checked:border-transparent"
-                    style={{
-                      borderColor: "var(--muted)",
-                      color: "var(--accent)",
-                    }}
-                  />
-                  <i
-                    className={`fas ${item.icon}`}
-                    style={{ color: "var(--accent)" }}
-                  ></i>
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: "var(--text)" }}
-                  >
-                    {item.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Photos Upload */}
-          <div className="mt-6">
-            <label
-              className="block font-semibold mb-2"
-              style={{ color: "var(--primary)" }}
-            >
-              Upload Boarding Photos (Min 3)
-            </label>
-            <div
-              className="border-2 border-dashed p-6 rounded-xl text-center cursor-pointer transition duration-300"
-              style={{
-                borderColor: "var(--light)",
-                backgroundColor: "var(--cardBg)",
-              }}
-              onClick={() => document.getElementById("imageUpload").click()}
-            >
-              <i
-                className="fas fa-upload text-3xl mb-2"
-                style={{ color: "var(--accent)" }}
-              ></i>
-              <p className="text-sm" style={{ color: "var(--muted)" }}>
-                Drag and drop your images here, or{" "}
-                <span
-                  className="font-semibold"
-                  style={{ color: "var(--accent)" }}
-                >
-                  browse
-                </span>
-                .
-              </p>
-              <input
-                type="file"
-                id="imageUpload"
-                name="image"
-                accept="image/*"
-                multiple
-                className="hidden"
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {availableAmenities.map((item) => (
+              <AmenityCheckbox
+                key={item.label}
+                item={item}
+                isChecked={formData.amenities.includes(item.label)}
+                onChange={handleChange}
               />
-            </div>
+            ))}
           </div>
+          <div className="bg-white p-8 rounded-[25px] shadow-xl">
+        <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b border-(--light) text-(--primary)">
+          Media Gallery
+        </h2>
+        
+        <PhotoUploader 
+          onImageSelect={handleImageSelect} 
+          previews={previews} 
+          onRemove={handleRemoveImage} 
+        />
+      </div>
         </div>
 
-        {/* Submission Button */}
+        {/* Submit */}
         <div className="flex justify-end pt-4">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={primaryBtnClass}
-            style={{
-              backgroundColor: "var(--accent)",
-              color: "var(--cardBg)",
-              boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-              transform: isSubmitting ? "none" : "translateY(-2px)",
-            }}
+            className="px-6 py-3 rounded-[25px] font-bold bg-(--accent) text-(--card-bg) shadow-lg transition hover:translate-y-[-2px]"
           >
             {isSubmitting ? (
               <>
-                <i className="fas fa-circle-notch fa-spin"></i>
+                <i className="fas fa-circle-notch fa-spin mr-2"></i>{" "}
                 Publishing...
               </>
             ) : (
               <>
-                <i className="fas fa-bullhorn"></i>
-                Publish Ad
+                <i className="fas fa-bullhorn mr-2"></i> Publish Ad
               </>
             )}
           </button>
