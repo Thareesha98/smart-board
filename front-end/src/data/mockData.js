@@ -188,49 +188,58 @@ export const mockAds = [
   },
 ];
 
+// src/data/mockData.js
+
 export const boardingsData = [
   {
-    id: "sunshine-hostel",
-    name: "Sunshine Hostel",
-    address: "123 University Road, Colombo 03",
-    image:
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop",
-    rent: "$200 - $300",
+    id: "B001",
+    name: "Sunshine Hostels - Boys",
+    address: "No 45, Suburb Road, Matara",
+    rent: "LKR 12,000",
     availableRooms: 2,
-    totalRooms: 4,
-    totalTenants: 6,
-    rating: 4.5,
+    totalTenants: 3,
     status: "active",
-    features: ["4 Rooms", "6 Tenants"],
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+    features: ["Single", "Attached Bath"],
+    // 🌟 Dummy Data for Tenant Modal
+    tenantsList: [
+      { id: "T1", name: "Kasun Perera", phone: "0771234567", joinedDate: "2024-01-15", university: "University of Ruhuna" },
+      { id: "T2", name: "Nuwan Silva", phone: "0719876543", joinedDate: "2024-02-10", university: "University of Ruhuna" },
+      { id: "T3", name: "Dasun Shanaka", phone: "0765554443", joinedDate: "2024-03-01", university: "SLIIT" }
+    ]
   },
   {
-    id: "city-view",
-    name: "City View Apartments",
-    address: "45 Galle Road, Colombo 04",
-    image:
-      "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=400&h=250&fit=crop",
-    rent: "$350 - $500",
-    availableRooms: 2,
-    totalRooms: 6,
+    id: "B002",
+    name: "Green View Villa",
+    address: "12/A, Beach Road, Matara",
+    rent: "LKR 15,000",
+    availableRooms: 0,
     totalTenants: 4,
-    rating: 4.2,
     status: "active",
-    features: ["6 Rooms", "4 Tenants"],
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80",
+    features: ["Shared", "Wi-Fi"],
+    tenantsList: [
+      { id: "T4", name: "Amila Jay", phone: "0701112223", joinedDate: "2023-11-20" },
+      { id: "T5", name: "Sahan V", phone: "0774445556", joinedDate: "2023-12-05" },
+      { id: "T6", name: "Maneesha R", phone: "0712223334", joinedDate: "2024-01-08" },
+      { id: "T7", name: "Isuru K", phone: "0758889990", joinedDate: "2024-02-25" }
+    ]
   },
   {
-    id: "green-valley",
-    name: "Green Valley Hostel",
-    address: "78 Kandy Road, Kadawatha",
-    image:
-      "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400&h=250&fit=crop",
-    rent: "$150 - $250",
-    availableRooms: 3,
-    totalRooms: 3,
+    id: "B003",
+    name: "Suburban Guest House",
+    address: "Matara Bypass, Matara",
+    rent: "LKR 8,500",
+    availableRooms: 5,
     totalTenants: 0,
+    status: "Inactive",
     rating: 0.0,
-    status: "pending",
-    features: ["3 Rooms", "0 Tenants"],
-  },
+    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80",
+    features: ["Attached Bath"],
+    tenantsList: [] // Empty state for testing
+  }
 ];
 
 export const statData = {
