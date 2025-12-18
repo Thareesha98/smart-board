@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { mockAppointments, ownerData } from "../../data/mockData";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
-import StatusTab from "../../components/Owner/appointments/StatusTab";
+import StatusTab from "../../components/Owner/common/StatusTab";
 import AppointmentRow from "../../components/Owner/appointments/AppointmentRow";
 
 const UTILS = {
@@ -43,7 +43,7 @@ const AppointmentsPage = () => {
         userName={ownerData.firstName} 
       />
 
-      <section className="p-6 rounded-[25px] shadow-lg bg-[var(--card-bg)]">
+      <section className="p-6 rounded-[25px] shadow-lg bg-(--card-bg)">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Object.keys(counts).map(status => (
             <StatusTab 

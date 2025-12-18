@@ -5,38 +5,6 @@ const Badge = ({ text, style }) => (
   </span>
 );
 
-// --- Sub-Component: Category Tab ---
-export const StatusTab = ({
-  status,
-  count,
-  currentFilter,
-  setFilter,
-  style,
-}) => {
-  const isActive = currentFilter === status;
-  return (
-    <button
-      className="relative w-full flex flex-col items-center gap-2 p-6 rounded-[25px] font-semibold transition duration-300"
-      style={{
-        backgroundColor: isActive ? style.color : "var(--light)",
-        color: isActive ? "white" : "var(--muted)",
-        boxShadow: isActive ? `0 8px 20px ${style.color}40` : "none",
-      }}
-      onClick={() => setFilter(status)}
-    >
-      <i className={`${style.icon} text-2xl`}></i>
-      <span className="text-sm uppercase tracking-wide">{status}</span>
-      <span
-        className={`absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full border-2 ${
-          isActive ? "bg-white text-gray-800" : "bg-gray-800 text-white"
-        }`}
-      >
-        {count}
-      </span>
-    </button>
-  );
-};
-
 // --- Sub-Component: Report Row ---
 export const ReportRow = ({ report, onViewDetails, getStatusStyle }) => {
   const status = getStatusStyle(report.status);
