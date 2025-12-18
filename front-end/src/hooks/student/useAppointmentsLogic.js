@@ -5,7 +5,7 @@ import {
   getRandomContact, 
   getRandomOwner, 
   getRandomAddress,
-} from '../data/appointmentsData'; // Adjust path as needed
+} from '../../data/student/appointmentsData.js'; // Adjust path as needed
 
 // Helper to simulate unique ID generation
 const generateId = () => Date.now() + Math.floor(Math.random() * 1000);

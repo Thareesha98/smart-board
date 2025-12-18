@@ -13,9 +13,9 @@ import ResultsHeader from '../../components/student/search/ResultsHeader';
 import EmptyResults from '../../components/student/search/EmptyResults';
 
 // Data & Hooks
-import { sampleBoardings } from '../../data/searchBoardingsData';
-import { useSearchFilters } from '../../hooks/useSearchFilters';
-import { useSortBoardings } from '../../hooks/useSortBoardings';
+import { sampleBoardings } from '../../data/student/searchBoardingsData.js';
+import { useSearchFilters } from '../../hooks/student/useSearchFilters.js';
+import { useSortBoardings } from '../../hooks/student/useSortBoardings.js';
 
 const SearchBoardingsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');

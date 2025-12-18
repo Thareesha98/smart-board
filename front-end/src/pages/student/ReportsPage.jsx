@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StudentLayout from '../../components/student/common/StudentLayout';
-import useReportsLogic from '../../hooks/useReportsLogic';
+import useReportsLogic from '../../hooks/student/useReportsLogic.js';
 import ReportTypesGrid from '../../components/student/reports/ReportTypesGrid';
 import ReportForm from '../../components/student/reports/ReportForm';
 import ReportsList from '../../components/student/reports/ReportsList';

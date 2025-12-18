@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { sampleBillingData } from '../data/billingData';
+import { sampleBillingData } from '../../data/student/billingData.js';
 
 const useBillingLogic = () => {
   const [overview, setOverview] = useState(sampleBillingData.overview);

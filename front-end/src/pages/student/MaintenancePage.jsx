@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StudentLayout from '../../components/student/common/StudentLayout';
-import useMaintenanceLogic from '../../hooks/useMaintenanceLogic';
+import useMaintenanceLogic from '../../hooks/student/useMaintenanceLogic.js';
 import RequestForm from '../../components/student/maintenance/RequestForm';
 import RequestCard from '../../components/student/maintenance/RequestCard';
 import RequestModal from '../../components/student/maintenance/RequestModal';

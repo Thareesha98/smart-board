@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { sampleReportsData } from '../data/reportsData';
+import { sampleReportsData } from '../../data/student/reportsData.js';
 
 const useReportsLogic = () => {
   const [userReports, setUserReports] = useState(sampleReportsData);

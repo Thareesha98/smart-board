@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../context/student/AuthContext.jsx";
 import SignupForm from "../../../components/student/auth/SignupForm";
 import { FaArrowLeft } from "react-icons/fa";
 import backgroundImage from "../../../assets/s5.jpg";

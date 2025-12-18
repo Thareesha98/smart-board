@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StudentLayout from '../../components/student/common/StudentLayout';
-import useProfileLogic from '../../hooks/useProfileLogic';
+import useProfileLogic from '../../hooks/student/useProfileLogic.js';
 import ProfileHeader from '../../components/student/profile/ProfileHeader';
 import PersonalInfoSection from '../../components/student/profile/PersonalInfoSection';
 import AccountInfoSection from '../../components/student/profile/AccountInfoSection';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './context/student/AuthContext.jsx';
 import ScrollToTop from './ScrollToTop';
 import AppRoutes from './routes/AppRoutes'; // Import the new routes file
 

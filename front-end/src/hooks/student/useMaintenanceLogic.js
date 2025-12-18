@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { sampleMaintenanceRequests } from '../data/maintenanceData';
+import { sampleMaintenanceRequests } from '../../data/student/maintenanceData.js';
 
 const useMaintenanceLogic = () => {
   const [requests, setRequests] = useState(sampleMaintenanceRequests);

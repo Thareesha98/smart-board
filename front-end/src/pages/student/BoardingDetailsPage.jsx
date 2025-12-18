@@ -9,9 +9,9 @@ import QuickInfoCard from '../../components/student/boarding-details/QuickInfoCa
 import OwnerCard from '../../components/student/boarding-details/OwnerCard';
 import AppointmentForm from '../../components/student/boarding-details/AppointmentForm';
 
-import { boardingDetails as defaultBoardingDetails, timeSlots, safetyTips } from '../../data/boardingDetailsData';
-import { useImageGallery } from '../../hooks/useImageGallery';
-import { useAppointmentForm } from '../../hooks/useAppointmentForm';
+import { boardingDetails as defaultBoardingDetails, timeSlots, safetyTips } from '../../data/student/boardingDetailsData.js';
+import { useImageGallery } from '../../hooks/student/useImageGallery.js';
+import { useAppointmentForm } from '../../hooks/student/useAppointmentForm.js';
 
 const amenityIcons = {
   wifi: FaWifi, snowflake: FaSnowflake, tshirt: FaTshirt, 'shield-alt': FaShieldAlt,
