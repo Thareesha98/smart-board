@@ -7,60 +7,7 @@ import { StatusTab, ReportRow } from "../../components/Owner/report/ReportUIComp
 
 
 
-const mockReports = [
-  {
-    id: 1001,
-    date: "2025-11-25",
-    property: "Sunshine Hostel",
-    student: "Priya Sharma",
-    type: "Non-Payment / Late Rent",
-    description:
-      "Priya Sharma has failed to submit the rent for November 2025 despite multiple verbal and written reminders. The payment was due on the 1st.",
-    status: "New",
-    severity: "High",
-    evidenceCount: 2, // Mock evidence count
-    submittedBy: "Rajesh K.",
-  },
-  {
-    id: 1002,
-    date: "2025-11-20",
-    property: "City View Apartments",
-    student: "Kamal D.",
-    type: "Misconduct / Noise Complaint",
-    description:
-      "Received complaints from neighboring tenants regarding loud music and disturbances late at night (past 11 PM) on Nov 18th and 19th.",
-    status: "In Progress",
-    severity: "Medium",
-    evidenceCount: 0,
-    submittedBy: "Rajesh K.",
-  },
-  {
-    id: 1003,
-    date: "2025-11-10",
-    property: "Green Valley Hostel",
-    student: "Anusha K.",
-    type: "Property Damage / Vandalism",
-    description:
-      "A large hole was found punched into the drywall of Room 3. Estimated repair cost provided to the student is LKR 15,000.",
-    status: "Resolved",
-    severity: "High",
-    evidenceCount: 1,
-    submittedBy: "Rajesh K.",
-  },
-  {
-    id: 1004,
-    date: "2025-11-01",
-    property: "Sunshine Hostel",
-    student: "Rohan Mehta",
-    type: "Lease Violation",
-    description:
-      "Rohan has been keeping a pet dog in his room, which is strictly against the lease agreement for the property.",
-    status: "New",
-    severity: "Medium",
-    evidenceCount: 0,
-    submittedBy: "Rajesh K.",
-  },
-];
+
 
 // Utility styles moved outside
 const STATUS_STYLES = {
