@@ -408,3 +408,32 @@ export const mockAppointments = [
     createdAt: "2025-11-01",
   },
 ];
+
+// src/data/mockData.js
+
+export const reportTypes = [
+  // Financial Issues
+  "Non-Payment of Rent",
+  "Late Rent Payment",
+  "Utility Bill Arrears",
+
+  // Property & Maintenance
+  "Property Damage (Intentional)",
+  "Accidental Damage / Vandalism",
+  "Unauthorized Alterations to Room",
+
+  // Conduct & Community
+  "Noise Complaint / Disturbance",
+  "Unauthorized Guests / Overnight Stays",
+  "Smoking or Illegal Substance Use",
+  "Physical or Verbal Altercation",
+
+  // Legal & Safety
+  "Lease Agreement Violation",
+  "Theft / Misuse of Common Property",
+  "Safety Hazard Creation",
+  
+  // Other
+  "General Misconduct",
+  "Other"
+];
