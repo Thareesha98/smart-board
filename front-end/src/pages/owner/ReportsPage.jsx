@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import { useNavigate } from "react-router-dom";
 import ReportDetailModal from "../../components/Owner/report/ReportDetailModal";
-import { ownerData } from "../../data/mockData.js";
+import { ownerData ,mockReports } from "../../data/mockData.js";
+import { StatusTab, ReportRow } from "../../components/Owner/report/ReportUIComponents";
 
 
 
@@ -61,255 +62,86 @@ const mockReports = [
   },
 ];
 
-// --- Helper Functions ---
-const getStatusBadgeStyle = (status) => {
-  switch (status) {
-    case "New":
-      return {
-        background: "rgba(255, 122, 0, 0.1)",
-        color: "var(--accent)",
-        icon: "fas fa-flag",
-      };
-    case "In Progress":
-      return {
-        background: "rgba(59, 130, 246, 0.1)",
-        color: "var(--info)",
-        icon: "fas fa-sync-alt",
-      };
-    case "Resolved":
-      return {
-        background: "rgba(16, 185, 129, 0.1)",
-        color: "var(--success)",
-        icon: "fas fa-check-circle",
-      };
-    default:
-      return {};
-  }
+// Utility styles moved outside
+const STATUS_STYLES = {
+  New: { background: "rgba(255, 122, 0, 0.1)", color: "#FF7A00", icon: "fas fa-flag" },
+  "In Progress": { background: "rgba(59, 130, 246, 0.1)", color: "#3B82F6", icon: "fas fa-sync-alt" },
+  Resolved: { background: "rgba(16, 185, 129, 0.1)", color: "#10B981", icon: "fas fa-check-circle" },
 };
 
-const getSeverityStyle = (severity) => {
-  switch (severity) {
-    case "High":
-      return { color: "var(--error)", background: "rgba(239, 68, 68, 0.1)" };
-    case "Medium":
-      return { color: "var(--warning)", background: "rgba(245, 158, 11, 0.1)" };
-    default:
-      return { color: "var(--muted)", background: "var(--light)" };
-  }
+const SEVERITY_STYLES = {
+  High: { color: "#EF4444" },
+  Medium: { color: "#F59E0B" },
+  Low: { color: "#6B7280" }
 };
 
-
-
-
-// --- Report Components (Kept local) ---
-
-const StatusTab = ({ status, count, currentFilter, setFilter }) => {
-  const isActive = currentFilter === status;
-  const statusStyle = getStatusBadgeStyle(status);
-
-  return (
-    <button
-      className={`category-tab flex flex-col items-center gap-1.5 p-6 rounded-[25px] font-semibold cursor-pointer transition duration-300 relative w-full`}
-      style={{
-        backgroundColor: isActive ? statusStyle.color : "var(--light)",
-        color: isActive ? "var(--card-bg)" : "var(--muted)",
-        boxShadow: isActive
-          ? `0 4px 12px ${statusStyle.color}80`
-          : "var(--shadow)",
-      }}
-      onClick={() => setFilter(status)}
-    >
-      <i className={`${statusStyle.icon} text-2xl`}></i>
-      <span className="text-base">{status}</span>
-      <span
-        className="tab-count absolute -top-2 -right-2 w-6 h-6 text-xs flex items-center justify-center font-bold rounded-full"
-        style={{
-          backgroundColor: isActive ? "var(--card-bg)" : "var(--primary)",
-          color: isActive ? statusStyle.color : "var(--card-bg)",
-        }}
-      >
-        {count}
-      </span>
-    </button>
-  );
-};
-
-// --- Report Row Component ---
-const ReportRow = ({ report, onViewDetails }) => {
-  const statusStyle = getStatusBadgeStyle(report.status);
-  const severityColor = getSeverityStyle(report.severity).color;
-
-  return (
-    <div
-      className="report-row flex items-center gap-[1.5rem] p-[1.5rem] rounded-[25px] shadow-sm transition duration-300"
-      style={{ backgroundColor: "var(--card-bg)", boxShadow: "var(--shadow)" }}
-    >
-      {/* 1. Date and ID */}
-      <div className="flex flex-col flex-shrink-0 w-24 text-center">
-        <span className="text-xs uppercase" style={{ color: "var(--muted)" }}>
-          Report ID
-        </span>
-        <span className="text-lg font-bold" style={{ color: "var(--primary)" }}>
-          #{report.id}
-        </span>
-        <span className="text-xs" style={{ color: "var(--muted)" }}>
-          {report.date}
-        </span>
-      </div>
-
-      {/* 2. Property & Student */}
-      <div className="flex flex-col flex-1 gap-1">
-        <h4 className="font-bold text-lg" style={{ color: "var(--text)" }}>
-          {report.student}
-        </h4>
-        <div
-          className="flex items-center gap-2 text-sm"
-          style={{ color: "var(--muted)" }}
-        >
-          <i className="fas fa-building" style={{ color: "var(--info)" }}></i>
-          <span>{report.property}</span>
-        </div>
-      </div>
-
-      {/* 3. Type and Status */}
-      <div className="flex flex-col flex-1 gap-1 text-sm">
-        <span className="font-semibold" style={{ color: "var(--text)" }}>
-          {report.type}
-        </span>
-        <span
-          className="text-xs font-semibold px-3 py-1 rounded-xl"
-          style={{
-            backgroundColor: statusStyle.background,
-            color: statusStyle.color,
-          }}
-        >
-          {report.status}
-        </span>
-      </div>
-
-      {/* 4. Severity and Actions */}
-      <div className="flex items-center gap-4 ml-auto">
-        <span
-          className="text-xs font-semibold px-3 py-1 rounded-xl"
-          style={{ border: `1px solid ${severityColor}`, color: severityColor }}
-        >
-          Severity: {report.severity}
-        </span>
-        <button
-          className="btn btn-sm p-[0.5rem] px-4 rounded-[25px] font-semibold text-sm transition duration-300"
-          style={{ backgroundColor: "var(--primary)", color: "var(--card-bg)" }}
-          onClick={() => onViewDetails(report)} // <-- Call the handler to open modal
-        >
-          <i className="fas fa-eye"></i> View Details
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// --- Main Component ---
 export default function ReportsPage() {
   const [filter, setFilter] = useState("New");
-  const [selectedReport, setSelectedReport] = useState(null); // State for the modal
-
+  const [selectedReport, setSelectedReport] = useState(null);
   const navigate = useNavigate();
 
-  const handleReportAdd = () => {
-    navigate("/ownerLayout/reports/add");
-  };
+  // Memoized counts and filtering
+  const counts = useMemo(() => mockReports.reduce((acc, rep) => {
+    acc[rep.status] = (acc[rep.status] || 0) + 1;
+    return acc;
+  }, { New: 0, "In Progress": 0, Resolved: 0 }), []);
 
-  // Use the mock reports (or context reports in a real app)
-  const allReports = mockReports;
-
-  const counts = allReports.reduce(
-    (acc, rep) => {
-      acc[rep.status] = (acc[rep.status] || 0) + 1;
-      return acc;
-    },
-    { New: 0, "In Progress": 0, Resolved: 0 }
-  );
-
-  const filteredReports = allReports.filter((rep) => rep.status === filter);
-
-  const handleViewDetails = (report) => {
-    setSelectedReport(report);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedReport(null);
-  };
+  const filteredReports = mockReports.filter((rep) => rep.status === filter);
 
   return (
-    <div className="pt-4 space-y-6">
-      {/* 🌟 HeaderBar */}
+    <div className="pt-4 space-y-8 min-h-screen bg-[#FDFBF9]">
       <HeaderBar
         title="Student Reports Log"
-        subtitle="Track and manage formal misconduct and payment reports."
+        subtitle="Manage formal misconduct and payment reports."
         notificationCount={counts["New"]}
         userAvatar={ownerData.avatar}
         userName={ownerData.firstName}
       >
-        <button
-          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-          style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
-          onClick={handleReportAdd}
+        <button 
+          className="bg-orange-500 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition"
+          onClick={() => navigate("/ownerLayout/reports/add")}
         >
-          <i className="fas fa-plus mr-2"></i>
-          Add New Report
+          <i className="fas fa-plus mr-2"></i> Add New Report
         </button>
       </HeaderBar>
 
-      {/* Report Categories */}
-      <section
-        className="report-categories p-6 rounded-[25px] shadow-lg"
-        style={{ backgroundColor: "var(--card-bg)" }}
-      >
-        <div className="category-tabs grid grid-cols-3 gap-4">
+      {/* Tabs Section */}
+      <section className="bg-white p-6 rounded-[32px] shadow-sm grid grid-cols-3 gap-6">
+        {Object.keys(STATUS_STYLES).map(status => (
           <StatusTab
-            status="New"
-            count={counts["New"]}
+            key={status}
+            status={status}
+            count={counts[status]}
             currentFilter={filter}
             setFilter={setFilter}
+            style={STATUS_STYLES[status]}
           />
-          <StatusTab
-            status="In Progress"
-            count={counts["In Progress"]}
-            currentFilter={filter}
-            setFilter={setFilter}
-          />
-          <StatusTab
-            status="Resolved"
-            count={counts["Resolved"]}
-            currentFilter={filter}
-            setFilter={setFilter}
-          />
-        </div>
+        ))}
       </section>
 
-      {/* Reports List */}
-      <section className="reports-section">
-        <h3 className="text-[1.5rem] font-bold mb-4 capitalize" style={{ color: "var(--primary)" }}>
-            {filter} Reports ({filteredReports.length})
-        </h3>
+      {/* List Section */}
+      <section className="space-y-4 px-2">
+        <h3 className="text-xl font-black text-gray-800 ml-2">{filter} Reports</h3>
         
-        <div className="reports-grid flex flex-col gap-4">
-          {filteredReports.length > 0 ? (
-            filteredReports.map((rep) => (
-              <ReportRow key={rep.id} report={rep} onViewDetails={handleViewDetails} /> // Pass handler down
-            ))
-          ) : (
-            // ... (Empty state logic) ...
-            <div className="empty-state text-center p-12 rounded-[25px] shadow-lg" style={{ backgroundColor: "var(--card-bg)" }}>
-              <i className="fas fa-file-alt text-6xl mb-4" style={{ color: "var(--muted)" }}></i>
-              <h3 className="text-2xl font-bold mb-2" style={{ color: "var(--text)" }}>No {filter} Reports</h3>
-              <p className="text-base" style={{ color: "var(--muted)" }}>No reports are currently marked as **{filter}**.</p>
-            </div>
-          )}
-        </div>
+        {filteredReports.length > 0 ? (
+          filteredReports.map((rep) => (
+            <ReportRow 
+              key={rep.id} 
+              report={rep} 
+              onViewDetails={setSelectedReport} 
+              getStatusStyle={(s) => STATUS_STYLES[s]}
+              getSeverityStyle={(sv) => SEVERITY_STYLES[sv] || SEVERITY_STYLES.Low}
+            />
+          ))
+        ) : (
+          <div className="text-center py-20 bg-white rounded-[32px] border-2 border-dashed border-gray-100">
+            <i className="fas fa-inbox text-5xl text-gray-200 mb-4"></i>
+            <p className="text-gray-400 font-medium">No {filter} reports found.</p>
+          </div>
+        )}
       </section>
 
-      {/* 🌟 Report Detail Modal (Renders if selectedReport is set) */}
-      <ReportDetailModal report={selectedReport} onClose={handleCloseModal} />
+      <ReportDetailModal report={selectedReport} onClose={() => setSelectedReport(null)} />
     </div>
   );
 }
