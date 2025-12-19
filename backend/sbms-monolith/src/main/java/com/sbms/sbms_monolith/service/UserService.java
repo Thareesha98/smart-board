@@ -23,7 +23,6 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // NOTE: bcrypt will be added during JWT implementation
     @Autowired
     private PasswordEncoder passwordEncoder;
     
@@ -37,9 +36,6 @@ public class UserService {
     private EmailService emailService;
 
 
-    // ---------------------------------------------------------
-    // REGISTER NEW USER (Student or Owner)
-    // ---------------------------------------------------------
     public UserResponseDTO register(UserRegisterDTO dto) {
 
         if (userRepository.existsByEmail(dto.getEmail())) {
@@ -59,9 +55,6 @@ public class UserService {
     }
 
 
-    // ---------------------------------------------------------
-    // LOGIN (Simple version — JWT will replace this later)
-    // ---------------------------------------------------------
     public UserResponseDTO login(UserLoginDTO dto) {
 
         User user = userRepository.findByEmail(dto.getEmail())
@@ -82,9 +75,6 @@ public class UserService {
     }
 
 
-    // ---------------------------------------------------------
-    // GET PROFILE
-    // ---------------------------------------------------------
     public UserResponseDTO getUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -92,10 +82,6 @@ public class UserService {
         return UserMapper.toUserResponse(user);
     }
 
-
-    // ---------------------------------------------------------
-    // UPDATE PROFILE (basic fields only)
-    // ---------------------------------------------------------
     public UserResponseDTO updateUser(Long id, UserRegisterDTO dto) {
 
         User user = userRepository.findById(id)
@@ -116,9 +102,6 @@ public class UserService {
     }
 
 
-    // ---------------------------------------------------------
-    // OWNER PROFILE (role-specific)
-    // ---------------------------------------------------------
     public OwnerProfileDTO getOwnerProfile(Long ownerId) {
         User user = userRepository.findById(ownerId)
                 .orElseThrow(() -> new RuntimeException("Owner not found"));
@@ -131,9 +114,6 @@ public class UserService {
     }
 
 
-    // ---------------------------------------------------------
-    // ADMIN: GET ALL USERS
-    // ---------------------------------------------------------
     public List<AdminUserDTO> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserMapper::toAdminUser)
@@ -171,10 +151,8 @@ public class UserService {
 
         pendingRepo.save(pending);
 
-        // Generate OTP
         Otp otp = otpService.createOtp(dto.getEmail());
 
-        // Send Email
         emailService.sendOtpEmail(dto.getEmail(), otp.getOtpCode());
 
         return "OTP sent to email!";
@@ -212,10 +190,7 @@ public class UserService {
     }
     
     
-    
-    
-    
- // Send OTP to email
+
     public String forgotPassword(String email) {
 
         User user = userRepository.findByEmail(email)
@@ -228,7 +203,6 @@ public class UserService {
         return "Reset OTP sent to email";
     }
 
-    // Reset password using OTP
     public String resetPassword(String email, String otpCode, String newPassword) {
 
         boolean valid = otpService.validateOtp(email, otpCode);
@@ -246,13 +220,5 @@ public class UserService {
         return "Password reset successful";
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
     
 }
