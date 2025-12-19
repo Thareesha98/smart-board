@@ -33,7 +33,7 @@ public class OwnerBoardingResponseDTO {
 
     private Map<String, Double> nearbyPlaces;
 
-    private Status status; // PENDING / APPROVED
+    private Status status;
 
     private boolean isBoosted;
     private LocalDateTime boostEndDate;
