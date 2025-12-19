@@ -1,49 +1,57 @@
-// src/components/UserManagement/Pagination.jsx
+import React from 'react';
 import Button from '../UI/Button.jsx';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  const isFirstPage = currentPage === 1;
-  const isLastPage = currentPage === totalPages;
-  
+  if (totalPages <= 1) return null;
+
   return (
-    <div className="mt-6 flex flex-col md:flex-row items-center justify-between">
-      <div className="text-sm text-text-muted mb-4 md:mb-0">
-        Page {currentPage} of {totalPages}
+    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+      {/* "Page 1 of 20" text from your HTML */}
+      <div className="text-sm font-medium text-text-muted">
+        Page <span className="text-text-dark">{currentPage}</span> of {totalPages}
       </div>
       
-      <div className="flex space-x-2">
+      <div className="flex items-center gap-2">
         <Button 
-          onClick={() => onPageChange(currentPage - 1)} 
-          disabled={isFirstPage} 
-          variant="outline"
+          variant="outline" 
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="flex items-center gap-2"
         >
-          <i className="fas fa-chevron-left mr-2" />
-          Previous
+          <i className="fas fa-chevron-left text-xs" /> Previous
         </Button>
-        
-        {/* Simplified page number display */}
-        <div className="flex items-center space-x-1">
-          {Array.from({ length: totalPages > 5 ? 5 : totalPages }, (_, i) => i + 1).map(page => (
-            <button
-              key={page}
-              onClick={() => onPageChange(page)}
-              className={`px-3 py-1 rounded-btn text-sm font-medium transition-colors 
-                ${page === currentPage ? 'bg-primary text-white' : 'text-text-dark hover:bg-background-light'}`
-              }
-            >
-              {page}
-            </button>
-          ))}
-          {totalPages > 5 && <span className="text-text-muted">...</span>}
+
+        <div className="hidden sm:flex items-center gap-1">
+          {[...Array(totalPages)].map((_, i) => {
+            const pageNum = i + 1;
+            // Only show 5 pages around the current page to avoid overflow
+            if (pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)) {
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => onPageChange(pageNum)}
+                  className={`w-10 h-10 rounded-btn text-sm font-bold transition-all ${
+                    currentPage === pageNum 
+                    ? 'bg-primary text-white shadow-md' 
+                    : 'hover:bg-background-light/50 text-text-muted'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            }
+            if (pageNum === currentPage - 2 || pageNum === currentPage + 2) return <span key={pageNum}>...</span>;
+            return null;
+          })}
         </div>
 
         <Button 
-          onClick={() => onPageChange(currentPage + 1)} 
-          disabled={isLastPage} 
-          variant="outline"
+          variant="outline" 
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="flex items-center gap-2"
         >
-          Next
-          <i className="fas fa-chevron-right ml-2" />
+          Next <i className="fas fa-chevron-right text-xs" />
         </Button>
       </div>
     </div>
