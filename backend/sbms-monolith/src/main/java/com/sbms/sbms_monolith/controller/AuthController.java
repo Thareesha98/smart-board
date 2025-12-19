@@ -39,9 +39,7 @@ public class AuthController {
     private RefreshTokenService refreshTokenService;
 
 
-    // ---------------------------------------------------------
-    // REGISTER + return accessToken + refreshToken
-    // ---------------------------------------------------------
+   
 //    @PostMapping("/register")
 //    public JwtAuthResponse register(@RequestBody UserRegisterDTO dto) {
 //
@@ -68,9 +66,6 @@ public class AuthController {
 //    }
 
 
-    // ---------------------------------------------------------
-    // LOGIN + return accessToken + refreshToken
-    // ---------------------------------------------------------
     @PostMapping("/login")
     public JwtAuthResponse login(@RequestBody UserLoginDTO dto) {
 
@@ -102,11 +97,7 @@ public class AuthController {
     }
 
 
-    // ---------------------------------------------------------
-    // REFRESH ACCESS TOKEN
-    // POST /api/auth/refresh
-    // body: { "refreshToken": "..." }
-    // ---------------------------------------------------------
+  
     @PostMapping("/refresh")
     public JwtAuthResponse refresh(@RequestBody RefreshTokenRequest request) {
 
@@ -137,13 +128,11 @@ public class AuthController {
     
     
 
-    // STEP 1: Register request → sends OTP
     @PostMapping("/register/request")
     public String registerRequest(@RequestBody UserRegisterDTO dto) {
         return userService.registerRequest(dto);
     }
 
-    // STEP 2: Verify OTP & complete registration
     @PostMapping("/register/verify")
     public JwtAuthResponse verifyOtp(@RequestBody OtpVerifyRequest req) {
 
@@ -169,13 +158,11 @@ public class AuthController {
         return response;
     }
 
-    // FORGOT PASSWORD
     @PostMapping("/forgot-password")
     public String forgotPassword(@RequestBody ResetPasswordRequest req) {
         return userService.forgotPassword(req.getEmail());
     }
 
-    // RESET PASSWORD
     @PostMapping("/reset-password")
     public String resetPassword(@RequestBody ResetPasswordRequest req) {
         return userService.resetPassword(
