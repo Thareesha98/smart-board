@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import StudentLayout from "../../components/student/common/StudentLayout";
-import useAppointmentsLogic from "../../hooks/useAppointmentsLogic";
+import useAppointmentsLogic from "../../hooks/student/useAppointmentsLogic.js";
 import AppointmentTab from "../../components/student/appointments/AppointmentTab";
 import AppointmentCard from "../../components/student/appointments/AppointmentCard";
 import ScheduleModal from "../../components/student/appointments/ScheduleModal";

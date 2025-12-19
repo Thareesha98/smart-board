@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import StudentLayout from '../../components/student/common/StudentLayout';
-import useBoardingsLogic from '../../hooks/useBoardingsLogic';
+import useBoardingsLogic from '../../hooks/student/useBoardingsLogic.js';
 import BoardingCard from '../../components/student/boardings/BoardingCard';
 import InfoCards from '../../components/student/boardings/InfoCards';
 import EmptyState from '../../components/student/boardings/EmptyState';

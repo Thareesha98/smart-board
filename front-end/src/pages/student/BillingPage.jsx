@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StudentLayout from '../../components/student/common/StudentLayout';
-import useBillingLogic from '../../hooks/useBillingLogic';
+import useBillingLogic from '../../hooks/student/useBillingLogic.js';
 import OverviewCards from '../../components/student/billing/OverviewCards';
 import PaymentMethodsList from '../../components/student/billing/PaymentMethodsList';
 import QuickPay from '../../components/student/billing/QuickPay';

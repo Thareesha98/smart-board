@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { sampleBoardingData } from '../data/boardingsData';
+import { sampleBoardingData } from '../../data/student/boardingsData.js';
 
 const useBoardingsLogic = () => {
   const [currentBoarding, setCurrentBoarding] = useState(sampleBoardingData);
