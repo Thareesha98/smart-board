@@ -32,11 +32,6 @@ public class RegistrationService {
 
     @Autowired
     private PaymentService paymentService;
-
-
-    // ---------------------------------------------------------
-    // STUDENT REGISTRATION
-    // ---------------------------------------------------------
     public RegistrationResponseDTO register(Long studentId, RegistrationRequestDTO dto) {
 
         User student = userRepo.findById(studentId)
@@ -49,12 +44,10 @@ public class RegistrationService {
             throw new RuntimeException("Not enough slots available");
         }
 
-        // Student MUST confirm key money was paid
         if (!dto.isKeyMoneyPaid()) {
             throw new RuntimeException("Key money must be paid to register");
         }
 
-        // Dummy payment (simulate)
         boolean success = paymentService.processPayment(
                 studentId,
                 boarding.getKeyMoney()
@@ -78,18 +71,12 @@ public class RegistrationService {
     }
 
 
-    // ---------------------------------------------------------
-    // STUDENT: GET ALL MY REGISTRATIONS
-    // ---------------------------------------------------------
     public List<RegistrationResponseDTO> getStudentRegistrations(Long studentId) {
         return registrationRepo.findByStudentId(studentId)
                 .stream().map(RegistrationMapper::toDTO)
                 .toList();
     }
 
-    // ---------------------------------------------------------
-    // STUDENT: CANCEL
-    // ---------------------------------------------------------
     public RegistrationResponseDTO cancel(Long studentId, Long regId) {
 
         Registration r = registrationRepo.findById(regId)
@@ -109,9 +96,6 @@ public class RegistrationService {
         return RegistrationMapper.toDTO(r);
     }
 
-    // ---------------------------------------------------------
-    // OWNER: VIEW REGISTRATIONS
-    // ---------------------------------------------------------
     public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
 
         return registrationRepo.findByBoardingOwnerId(ownerId, status)
@@ -120,9 +104,6 @@ public class RegistrationService {
                 .toList();
     }
 
-    // ---------------------------------------------------------
-    // OWNER: APPROVE / DECLINE
-    // ---------------------------------------------------------
     public RegistrationResponseDTO decide(Long ownerId, Long regId, RegistrationDecisionDTO dto) {
 
         Registration r = registrationRepo.findById(regId)
@@ -135,7 +116,6 @@ public class RegistrationService {
         r.setStatus(dto.getStatus());
         r.setOwnerNote(dto.getOwnerNote());
 
-        // If approved → reduce available slots
         if (dto.getStatus() == RegistrationStatus.APPROVED) {
             Boarding b = r.getBoarding();
             b.setAvailable_slots(b.getAvailable_slots() - r.getNumberOfStudents());
