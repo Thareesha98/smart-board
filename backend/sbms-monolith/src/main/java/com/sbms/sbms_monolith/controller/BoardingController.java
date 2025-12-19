@@ -35,10 +35,6 @@ public class BoardingController {
         return boardingService.getAll(req);
     }
 
-    // -------------------------------------------------------
-    // 2) FILTER ONLY – gender / type / price (NO keyword)
-    // GET /api/boardings/filter?genderType=MALE&boardingType=ROOM&minPrice=5000&maxPrice=15000&page=0&size=10
-    // -------------------------------------------------------
     @GetMapping("/filter")
     public Page<BoardingSummaryDTO> getAllFiltered(
             @RequestParam(required = false) String genderType,
@@ -69,10 +65,7 @@ public class BoardingController {
         return boardingService.getAllFiltered(req);
     }
 
-    // -------------------------------------------------------
-    // 3) SEARCH with filters + keyword
-    // GET /api/boardings/search?genderType=MALE&boardingType=ROOM&addressKeyword=uni&page=0&size=10
-    // -------------------------------------------------------
+  
     @GetMapping("/search")
     public Page<BoardingSummaryDTO> search(
             @RequestParam(required = false) String genderType,
@@ -105,10 +98,7 @@ public class BoardingController {
         return boardingService.searchBoardings(req);
     }
 
-    // -------------------------------------------------------
-    // 4) GET ONE BOARDING BY ID
-    // GET /api/boardings/{id}
-    // -------------------------------------------------------
+   
     @GetMapping("/{id}")
     public BoardingDetailDTO getOne(@PathVariable Long id) {
         return boardingService.getById(id);
