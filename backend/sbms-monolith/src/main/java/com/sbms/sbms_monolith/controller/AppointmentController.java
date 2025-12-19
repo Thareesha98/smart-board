@@ -17,7 +17,6 @@ public class AppointmentController {
     @Autowired
     private AppointmentService appointmentService;
 
-    // STUDENT: CREATE APPOINTMENT REQUEST
     // POST /api/appointments/student/{studentId}
     @PostMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
