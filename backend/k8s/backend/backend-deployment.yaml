@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sbms-backend
+  namespace: sbms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sbms-backend
+  template:
+    metadata:
+      labels:
+        app: sbms-backend
+    spec:
+      serviceAccountName: sbms-backend-sa
+      containers:
+        - name: sbms-backend
+          image: sbms-backend:4.7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+
+          env:
+            # 🔥 Activate Kubernetes profile in Spring Boot
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+
+            # 🔥 Database ENV variables
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-db-config
+                  key: DB_URL
+
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sbms-db-secret
+                  key: username
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sbms-db-secret
+                  key: password
+

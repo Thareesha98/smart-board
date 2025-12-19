@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sbms-gateway
+  namespace: sbms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sbms-gateway
+  template:
+    metadata:
+      labels:
+        app: sbms-gateway
+    spec:
+      containers:
+        - name: sbms-gateway
+          image: sbms-gateway:3.6 # replace with your image (or use imagePullPolicy: IfNotPresent)
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SBMS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sbms-gateway-secret
+                  key: SBMS_JWT_SECRET
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/config/application-kubernetes.yaml"
+          volumeMounts:
+            - name: gateway-config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: gateway-config
+          configMap:
+            name: sbms-gateway-config
+

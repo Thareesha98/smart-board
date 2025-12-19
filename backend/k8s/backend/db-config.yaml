@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sbms-db-config
+  namespace: sbms
+data:
+  DB_URL: "jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board"
+  DB_NAME: "smart-board"

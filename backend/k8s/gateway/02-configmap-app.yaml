@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sbms-gateway-config
+  namespace: sbms
+data:
+  application-kubernetes.yaml: |
+    spring:
+      application:
+        name: sbms-gateway
+
+      main:
+        allow-bean-definition-overriding: true
+
+      cloud:
+        gateway:
+          discovery:
+            locator:
+              enabled: false
+
+          default-filters:
+            - RemoveResponseHeader=X-Powered-By
+
+          routes:
+            # -------------------------------
+            # Notification-service route FIRST
+            # -------------------------------
+            - id: sbms-notification
+              uri: http://sbms-notification-service:8085
+              predicates:
+                - Path=/api/notifications/**
+              filters:
+                - StripPrefix=1
+                - PreserveHostHeader
+
+            - id: appointment-service
+              uri: http://appointment-service:8080
+              predicates:
+                - Path=/api/appointments/**
+              filters:
+                - StripPrefix=0
+
+            # -------------------------------
+            # Backend route SECOND
+            # -------------------------------
+            - id: sbms-backend
+              uri: http://sbms-backend:8080
+              predicates:
+                - Path=/api/**
+              filters:
+                - StripPrefix=0
+
+    server:
+      port: 8080
+
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+      allowed-headers: "Authorization,Content-Type,Accept"
+      allow-credentials: true
+
+    sbms:
+      jwt:
+        secret: ${SBMS_JWT_SECRET:}
+        algorithm: HS256
+        header: Authorization
+        prefix: Bearer
+
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+
