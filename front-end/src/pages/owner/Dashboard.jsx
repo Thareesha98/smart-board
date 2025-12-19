@@ -5,7 +5,7 @@ import StatWidget from "../../components/Owner/dashboard/StatWidget";
 import DashButton from "../../components/Owner/dashboard/DashButton";
 // Import other Dashboard-specific components as needed (ActivityItem, AppointmentItem)
 
-// Import centralized data
+
 import {
   dashboardData,
   recentAppointments,
