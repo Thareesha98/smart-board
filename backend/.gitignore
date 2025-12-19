@@ -1,0 +1,11 @@
+# Build output
+**/target/
+**/bin/
+
+# IDE files
+**/.classpath
+**/.project
+**/.settings/
+
+# Logs
+*.log
