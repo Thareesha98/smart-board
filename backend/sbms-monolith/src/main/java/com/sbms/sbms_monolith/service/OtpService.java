@@ -14,12 +14,10 @@ public class OtpService {
     @Autowired
     private OtpRepository otpRepository;
 
-    // Generate 6-digit OTP
     public String generateOtp() {
         return String.format("%06d", new Random().nextInt(999999));
     }
 
-    // Save new OTP
     public Otp createOtp(String email) {
         Otp otp = new Otp();
         otp.setEmail(email);
@@ -30,7 +28,6 @@ public class OtpService {
         return otpRepository.save(otp);
     }
 
-    // Validate OTP
     public boolean validateOtp(String email, String otpCode) {
         Otp otp = otpRepository.findByEmailAndOtpCode(email, otpCode)
                 .orElse(null);
