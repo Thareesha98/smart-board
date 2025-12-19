@@ -54,51 +54,70 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* 2. Quick Actions */}
+        {/* 🌟 Restored Quick Actions Bar */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-[var(--primary)]">
+          <h2 className="text-2xl font-bold text-(--primary) flex items-center gap-2">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white p-6 rounded-[25px] shadow-lg border border-[var(--light)]">
-            <DashButton
-              to="/ownerLayout/createAd"
-              icon="fas fa-plus"
-              label="Add New Boarding"
-            />
-            <DashButton
-              to="/ownerLayout/appointments"
-              icon="fas fa-calendar-check"
-              label="Manage Appointments"
-            />
-            <DashButton
-              to="/ownerLayout/utility"
-              icon="fas fa-bolt"
-              label="Add Utility Costs"
-            />
-            <DashButton
-              to="/ownerLayout/payments"
-              icon="fas fa-credit-card"
-              label="View Payments"
-            />
+          <div
+            className="quick-actions bg-white p-6 rounded-[25px] shadow-lg flex flex-wrap gap-4"
+            style={{ boxShadow: "var(--shadow)" }}
+          >
+            <div className="action-column flex flex-col grow min-w-[250px] gap-3">
+              <DashButton
+                to="/ownerLayout/createAd"
+                icon="fas fa-plus"
+                label="Add New Boarding"
+              />
+              <DashButton
+                to="/ownerLayout/appointments"
+                icon="fas fa-calendar-check"
+                label="Manage Appointments"
+              />
+              <DashButton
+                to="/ownerLayout/utility"
+                icon="fas fa-bolt"
+                label="Add Utility Costs"
+              />
+              <DashButton
+                to="/ownerLayout/myAds"
+                icon="fas fa-crown"
+                label="Boost Ads"
+              />
+              <DashButton
+                to="/ownerLayout/myAds"
+                icon="fas fa-eye"
+                label="View Ads"
+              />
+              <DashButton
+                to="/ownerLayout/payments"
+                icon="fas fa-credit-card"
+                label="View Payments"
+              />
+            </div>
           </div>
         </section>
 
-        {/* 3. Recent Appointments */}
+        {/* 2. Recent Appointments Column */}
         <DashboardSection
           title="Recent Appointments"
           badge={`${dashboardData.newAppointmentsCount} New`}
         >
-          {recentAppointments.map((app) => (
-            <AppointmentItem key={app.id} appointment={app} />
-          ))}
+          <div className="max-h-[380px] overflow-y-auto">
+            {recentAppointments.map((app) => (
+              <AppointmentItem key={app.id} appointment={app} />
+            ))}
+          </div>
         </DashboardSection>
       </div>
 
-      {/* 4. Recent Activity */}
+      {/* 3. Recent Activity */}
       <DashboardSection title="Recent Activity">
-        {recentActivity.map((activity, index) => (
-          <ActivityItem key={index} data={activity} />
-        ))}
+        <div className="max-h-[400px] overflow-y-auto">
+          {recentActivity.map((activity, index) => (
+            <ActivityItem key={index} data={activity} />
+          ))}
+        </div>
       </DashboardSection>
     </div>
   );

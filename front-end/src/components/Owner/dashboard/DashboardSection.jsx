@@ -1,4 +1,4 @@
-export const DashboardSection = ({ title, badge, children, className = "" }) => (
+const DashboardSection = ({ title, badge, children, className = "" }) => (
   <section className={`space-y-4 ${className}`}>
     <h2 className="text-2xl font-bold flex items-center gap-2 text-(--primary)">
       {title}
@@ -13,3 +13,5 @@ export const DashboardSection = ({ title, badge, children, className = "" }) => 
     </div>
   </section>
 );
+
+export default DashboardSection;

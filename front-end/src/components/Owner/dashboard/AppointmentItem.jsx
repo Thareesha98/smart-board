@@ -1,4 +1,4 @@
-export const AppointmentItem = ({ appointment }) => {
+const AppointmentItem = ({ appointment }) => {
   const themes = {
     pending: { color: "#D97706", bg: "#FEF3C7" },
     confirmed: { color: "#065F46", bg: "#D1FAE5" },
@@ -26,3 +26,5 @@ export const AppointmentItem = ({ appointment }) => {
     </div>
   );
 };
+
+export default AppointmentItem;
