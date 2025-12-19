@@ -14,11 +14,11 @@ public class Otp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;            // email for which OTP was generated
+    private String email;           
 
-    private String otpCode;          // 6-digit OTP
+    private String otpCode;         
 
-    private LocalDateTime expiresAt; // now + 10 minutes
+    private LocalDateTime expiresAt; 
 
-    private boolean used = false;    // mark as used once verified
+    private boolean used = false;   
 }
