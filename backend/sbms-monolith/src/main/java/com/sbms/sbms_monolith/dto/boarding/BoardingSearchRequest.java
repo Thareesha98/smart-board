@@ -11,22 +11,19 @@ import lombok.Data;
 @Data
 public class BoardingSearchRequest {
 
-    // for simple search – student experience
-    private String addressKeyword;        // optional: part of address/title
+    private String addressKeyword;        
+    private Gender genderType;            
+    private BoardingType boardingType;   
 
-    private Gender genderType;            // optional
-    private BoardingType boardingType;    // optional
-
-    private BigDecimal minPrice;          // optional
+    private BigDecimal minPrice;         
     private BigDecimal maxPrice;  
     
     
-    private BigDecimal minKeyMoney;          // optional
-    private BigDecimal maxKeyMoney;  // optional
+    private BigDecimal minKeyMoney;          
+    private BigDecimal maxKeyMoney;  
     
     
 
-    // pagination
     private int page = 0;
     private int size = 10;
 }
