@@ -25,9 +25,6 @@ public class S3Service {
         this.s3Client = s3Client;
     }
 
-    // ---------------------------------------------------------
-    // UPLOAD SINGLE FILE
-    // ---------------------------------------------------------
     public String uploadFile(MultipartFile file, String folderPrefix) {
 
         String key = folderPrefix + UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -54,9 +51,6 @@ public class S3Service {
         return uploadFile(file, "");
     }
 
-    // ---------------------------------------------------------
-    // MULTI FILE UPLOAD
-    // ---------------------------------------------------------
     public List<String> uploadFiles(List<MultipartFile> files, String folderPrefix) {
 
         List<String> uploadedUrls = new ArrayList<>();
@@ -68,9 +62,6 @@ public class S3Service {
         return uploadedUrls;
     }
 
-    // ---------------------------------------------------------
-    // DELETE FILE
-    // ---------------------------------------------------------
     public void deleteFile(String fileUrl) {
 
         // Extract S3 key from full URL
