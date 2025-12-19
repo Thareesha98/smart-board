@@ -16,7 +16,9 @@ const ownerNavigation = [
     path: "/ownerLayout/myboardings",
     icon: "fas fa-dog",
   },
+  
   { name: "Utility", path: "/ownerLayout/utility", icon: "fas fa-cogs" },
+  {name: "Payment", path: "/ownerLayout/payment", icon: "fas fa-credit-card" },
   { name: "Reports", path: "/ownerLayout/reports", icon: "fas fa-file-alt" },
 ];
 

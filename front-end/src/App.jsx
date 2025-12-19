@@ -11,6 +11,7 @@ import UtilityPage from "./pages/owner/UtilityPage";
 import ReportsPage from "./pages/owner/ReportsPage";
 import ReportStudentPage from "./pages/owner/AddReportPage";
 import SubscriptionPlanPage from "./pages/owner/SubscriptionPlanPage";
+import PaymentPage from "./pages/owner/PaymentPage";
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
               <Route path="myAds/createAd" element={<CreateAdPage />} /> 
               <Route path="myAds/editAd/:adId" element={<EditAdPage />} />
               <Route path="subscriptions/:adId" element={<SubscriptionPlanPage />} /> 
+
+              <Route path="payment" element={<PaymentPage />} />
               
               {/* Reports Management */}
               <Route path="reports" element={<ReportsPage />} />
