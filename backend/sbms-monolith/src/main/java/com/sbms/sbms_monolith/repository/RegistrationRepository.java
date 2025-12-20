@@ -19,6 +19,8 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     List<Registration> findByBoarding(Boarding boarding);
 
     List<Registration> findByBoarding_Owner(User owner);
+    
+    List<Registration> findByBoarding_IdAndStatus(Long boardingId, RegistrationStatus status);
 
     List<Registration> findByBoarding_OwnerAndStatus(User owner, RegistrationStatus status);
     
