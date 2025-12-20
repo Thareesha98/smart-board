@@ -11,6 +11,10 @@ import lombok.Data;
 @Entity
 @Table(name = "maintenance_requests")
 public class Maintenance extends BaseEntity {
+	
+	@ManyToOne
+    @JoinColumn(name = "registration_id", nullable = false)
+    private Registration registration;
 
     @ManyToOne
     @JoinColumn(name = "boarding_id", nullable = false)
