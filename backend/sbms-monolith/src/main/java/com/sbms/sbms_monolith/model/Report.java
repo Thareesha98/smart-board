@@ -21,19 +21,16 @@ public class Report {
     @Column(name = "report_id")
     private Long reportId;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
     private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "type")
     private String type; // boarding, owner, safety, fraud, other
 
-    @Column(name = "severity")
     private String severity; // low, medium, high, critical
 
-    @Column(name = "status")
     private String status; // pending, under-review, resolved, dismissed
 
     @Column(name = "submission_date")

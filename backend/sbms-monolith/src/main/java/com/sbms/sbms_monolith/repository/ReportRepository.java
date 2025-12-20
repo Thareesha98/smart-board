@@ -2,9 +2,11 @@ package com.sbms.sbms_monolith.repository;
 
 import com.sbms.sbms_monolith.model.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
     // Find reports submitted by a specific student
