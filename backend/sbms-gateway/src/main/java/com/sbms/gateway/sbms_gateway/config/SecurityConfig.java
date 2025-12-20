@@ -16,7 +16,6 @@ public class SecurityConfig {
                 .cors(ServerHttpSecurity.CorsSpec::disable)
 
                 .authorizeExchange(auth -> auth
-                        // 🔓 OPEN ENDPOINTS (NO JWT REQUIRED)
                         .pathMatchers(
                                 "/api/auth/**",
                                 "/auth/**",
@@ -24,11 +23,9 @@ public class SecurityConfig {
                                 "/internal-debug/**"
                         ).permitAll()
 
-                        // 🔐 EVERYTHING ELSE MUST HAVE JWT
                         .anyExchange().authenticated()
                 )
 
-                // ✔️ Correct, safe, modern JWT handling (reactive)
                 .oauth2ResourceServer(oauth -> oauth.jwt())
 
                 .build();
