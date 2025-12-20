@@ -155,9 +155,7 @@ public class RegistrationService {
         int resolvedIssues = 0;
         LocalDate lastIssueDate = null;
 
-        // ----------------------------
-        // REVIEWS (safe defaults)
-        // ----------------------------
+       
         Double avgRating = 0.0;
         boolean reviewSubmitted = false;
 
