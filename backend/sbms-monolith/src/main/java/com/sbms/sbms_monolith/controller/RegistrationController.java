@@ -1,11 +1,15 @@
 package com.sbms.sbms_monolith.controller;
 
+import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
 import com.sbms.sbms_monolith.dto.registration.*;
+import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
 import com.sbms.sbms_monolith.service.RegistrationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +22,6 @@ public class RegistrationController {
     @Autowired
     private RegistrationService registrationService;
     
-    @GetMapping("/registrations/{regId}")
     
 
     @PostMapping("/student/{studentId}")
@@ -63,4 +66,20 @@ public class RegistrationController {
     ) {
         return registrationService.decide(ownerId, regId, dto);
     }
+    
+    
+    @GetMapping("/{regId}/dashboard")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
+            @PathVariable Long regId,
+            Authentication authentication
+    ) {
+        User user = (User) authentication.getPrincipal();
+
+        StudentBoardingDashboardDTO dto =
+                registrationService.getDashboard(regId, user.getId());
+
+        return ResponseEntity.ok(dto);
+    }
+
 }
