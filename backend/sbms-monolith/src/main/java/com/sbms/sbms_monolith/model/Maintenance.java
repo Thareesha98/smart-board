@@ -22,10 +22,10 @@ public class Maintenance extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
-    private User student;   // representative student
+    private User student;  
 
     @Column(nullable = false, length = 150)
-    private String title;   // e.g. "Water leakage"
+    private String title; 
 
     @Column(nullable = false, length = 1000)
     private String description;
