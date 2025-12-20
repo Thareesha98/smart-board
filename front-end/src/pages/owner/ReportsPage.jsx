@@ -8,18 +8,21 @@ import { ownerData, mockReports } from "../../data/mockData.js";
 
 const REPORT_STATUS_CONFIG = {
   New: { 
-    color: "#FF7A00", 
-    background: "rgba(255, 122, 0, 0.1)", // Added background for the row badge
+    colorClass: "bg-accent", // Map to your orange #FF7A00
+    textClass: "text-accent",
+    bgClass: "bg-accent/10",
     icon: "fas fa-flag" 
   },
   "In Progress": { 
-    color: "#3B82F6", 
-    background: "rgba(59, 130, 246, 0.1)",
+    colorClass: "bg-info",   // Map to your info #3B82F6
+    textClass: "text-info",
+    bgClass: "bg-info/10",
     icon: "fas fa-sync-alt" 
   },
   Resolved: { 
-    color: "#10B981", 
-    background: "rgba(16, 185, 129, 0.1)",
+    colorClass: "bg-success", // Map to your success #10B981
+    textClass: "text-success",
+    bgClass: "bg-success/10",
     icon: "fas fa-check-circle" 
   }
 };
@@ -29,6 +32,7 @@ export default function ReportsPage() {
   const [selectedReport, setSelectedReport] = useState(null);
   const navigate = useNavigate();
 
+  // 1. Memoized report counting
   const counts = useMemo(() => {
     return mockReports.reduce((acc, report) => {
       acc[report.status] = (acc[report.status] || 0) + 1;
@@ -39,7 +43,7 @@ export default function ReportsPage() {
   const filteredReports = mockReports.filter((rep) => rep.status === filter);
 
   return (
-    <div className="pt-4 space-y-8 min-h-screen pb-10">
+    <div className="pt-4 space-y-8 min-h-screen pb-10 bg-light">
       <HeaderBar
         title="Student Reports Log"
         subtitle="Track and manage formal misconduct and payment issues."
@@ -48,7 +52,7 @@ export default function ReportsPage() {
         userName={ownerData.firstName}
       >
         <button
-          className="bg-(--accent) text-white px-6 py-3 rounded-full font-bold shadow-md hover:scale-105 transition"
+          className="bg-accent text-card-bg px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest shadow-md hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95"
           onClick={() => navigate("/ownerLayout/reports/add")}
         >
           <i className="fas fa-plus mr-2"></i>
@@ -57,7 +61,7 @@ export default function ReportsPage() {
       </HeaderBar>
 
       {/* --- Status Tabs Section --- */}
-      <section className="p-6 rounded-[25px] shadow-lg bg-white mx-2">
+      <section className="p-6 rounded-report shadow-custom bg-card-bg mx-2 border border-light">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {Object.keys(REPORT_STATUS_CONFIG).map((status) => (
             <StatusTab
@@ -66,7 +70,7 @@ export default function ReportsPage() {
               count={counts[status]}
               currentFilter={filter}
               setFilter={setFilter}
-              style={REPORT_STATUS_CONFIG[status]}
+              config={REPORT_STATUS_CONFIG[status]} // Passing the v3 config object
             />
           ))}
         </div>
@@ -75,7 +79,7 @@ export default function ReportsPage() {
       {/* --- Reports List Section --- */}
       <section className="space-y-4 px-2">
         <div className="flex justify-between items-center ml-2">
-          <h3 className="text-xl font-bold text-(--primary) uppercase tracking-tight">
+          <h3 className="text-2xl font-black text-primary uppercase tracking-tight">
             {filter} Reports ({filteredReports.length})
           </h3>
         </div>
@@ -86,14 +90,16 @@ export default function ReportsPage() {
               <ReportRow 
                 key={report.id} 
                 report={report} 
-                style={REPORT_STATUS_CONFIG[report.status]} // Pass status-specific colors
+                config={REPORT_STATUS_CONFIG[report.status]} // v3 Class-based config
                 onViewDetails={() => setSelectedReport(report)}
               />
             ))
           ) : (
-            <div className="text-center py-20 bg-white rounded-[40px] border-2 border-dashed border-gray-100">
-              <i className="fas fa-file-invoice text-5xl text-gray-200 mb-4"></i>
-              <p className="text-gray-400 font-bold">No {filter} reports to display.</p>
+            <div className="text-center py-20 bg-card-bg rounded-boarding border-2 border-dashed border-light">
+              <i className="fas fa-file-invoice text-5xl text-muted/30 mb-4"></i>
+              <p className="text-muted font-black uppercase tracking-widest text-xs">
+                No {filter} reports to display.
+              </p>
             </div>
           )}
         </div>

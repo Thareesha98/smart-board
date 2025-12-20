@@ -14,8 +14,7 @@ export const SelectGroup = ({
   <div className="form-group">
     <label
       htmlFor={id}
-      className="block font-semibold mb-2"
-      style={{ color: "var(--primary)" }}
+      className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-primary"
     >
       {label} *
     </label>
@@ -26,8 +25,12 @@ export const SelectGroup = ({
       onChange={onChange}
       required
       disabled={disabled}
-      className="w-full p-3 px-4 border rounded-xl text-[1rem] transition duration-300 bg-white focus:outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
-      style={{ borderColor: "var(--light)", color: "var(--text)" }}
+      className="
+        w-full p-3.5 px-4 rounded-xl text-sm transition-all duration-300
+        bg-white text-text border border-light appearance-none
+        focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20
+        disabled:bg-light/30 disabled:cursor-not-allowed disabled:text-muted
+      "
     >
       <option value="" disabled>
         {placeholder}
@@ -44,33 +47,25 @@ export const SelectGroup = ({
 // --- Sub-Component: Evidence Uploader ---
 export const EvidenceUpload = ({ onFileChange, files, onRemoveFile }) => {
   return (
-    <div className="mt-6">
-      <label
-        className="block font-semibold mb-2"
-        style={{ color: "var(--primary)" }}
-      >
+    <div className="mt-8">
+      <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-primary">
         Attach Photos or Documents
       </label>
 
       {/* 1. The Dropzone/Upload Area */}
       <div
-        className="border-2 border-dashed p-6 rounded-xl text-center cursor-pointer transition duration-300 hover:bg-gray-50 group"
-        style={{
-          borderColor: "var(--light)",
-          backgroundColor: "var(--cardBg)",
-        }}
+        className="
+          border-2 border-dashed p-8 rounded-report text-center cursor-pointer transition-all duration-300 
+          bg-card-bg border-light hover:border-accent hover:bg-white group
+        "
         onClick={() => document.getElementById("fileUpload").click()}
       >
-        <i
-          className="fas fa-file-upload text-3xl mb-2 group-hover:scale-110 transition-transform"
-          style={{ color: "var(--accent)" }}
-        ></i>
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
+        <i className="fas fa-file-upload text-3xl mb-3 text-accent transition-transform group-hover:scale-110 group-hover:-translate-y-1"></i>
+        <p className="text-xs font-medium text-muted">
           Drag and drop evidence files here, or{" "}
-          <span className="font-semibold" style={{ color: "var(--accent)" }}>
+          <span className="font-bold text-accent group-hover:underline">
             browse
           </span>
-          .
         </p>
         <input
           type="file"
@@ -87,27 +82,23 @@ export const EvidenceUpload = ({ onFileChange, files, onRemoveFile }) => {
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {files.map((file, index) => {
             const isImage = file.type.startsWith("image/");
-            // Create a temporary URL for image previews
             const previewUrl = isImage ? URL.createObjectURL(file) : null;
 
             return (
               <div
                 key={index}
-                className="relative group rounded-xl border border-gray-100 bg-white overflow-hidden shadow-sm h-32"
+                className="relative group rounded-card border border-light bg-card-bg overflow-hidden shadow-custom h-32"
               >
                 {isImage ? (
                   <img
                     src={previewUrl}
                     alt="preview"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-2 bg-gray-50">
-                    <i className="fas fa-file-pdf text-red-500 text-2xl mb-1"></i>
-                    <span
-                      className="text-[10px] text-center truncate w-full px-2"
-                      style={{ color: "var(--text)" }}
-                    >
+                  <div className="w-full h-full flex flex-col items-center justify-center p-2 bg-light/20">
+                    <i className="fas fa-file-pdf text-error text-2xl mb-2"></i>
+                    <span className="text-[9px] font-black text-text uppercase tracking-tighter text-center truncate w-full px-2">
                       {file.name}
                     </span>
                   </div>
@@ -117,10 +108,14 @@ export const EvidenceUpload = ({ onFileChange, files, onRemoveFile }) => {
                 <button
                   type="button"
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the file input click
+                    e.stopPropagation();
                     onRemoveFile(index);
                   }}
-                  className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="
+                    absolute top-1.5 right-1.5 bg-error text-white w-7 h-7 rounded-full 
+                    flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 
+                    transition-opacity shadow-lg hover:bg-red-600
+                  "
                 >
                   <i className="fas fa-times"></i>
                 </button>

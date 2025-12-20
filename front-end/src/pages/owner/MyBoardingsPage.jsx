@@ -1,33 +1,42 @@
 import React, { useState } from "react";
 import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
-import BoardingCard from "../../components/Owner/myboardings/BoardingCard"; 
+import BoardingCard from "../../components/Owner/myboardings/BoardingCard";
 import ViewToggle from "../../components/Owner/myboardings/ViewToggle";
-import TenantModal from "../../components/Owner/myboardings/TenantModal"; 
-import ManageModal from "../../components/Owner/myboardings/ManageModal"; 
+import TenantModal from "../../components/Owner/myboardings/TenantModal";
+import ManageModal from "../../components/Owner/myboardings/ManageModal";
 import CreateBoardingModal from "../../components/Owner/myboardings/CreateBoardingModal.jsx";
 
-import { boardingsData as initialData, ownerData } from "../../data/mockData.js";
+import {
+  boardingsData as initialData,
+  ownerData,
+} from "../../data/mockData.js";
 
 export default function MyBoardingsPage() {
-  const [boardings, setBoardings] = useState(initialData); // Local state for dummy data updates
+  const [boardings, setBoardings] = useState(initialData);
   const [viewMode, setViewMode] = useState("grid");
-  const [selectedProperty, setSelectedProperty] = useState(null); 
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  
-
 
   // --- Handlers ---
-  const handleOpenTenants = (prop) => { setSelectedProperty(prop); setActiveModal('tenants'); };
-  const handleOpenManage = (prop) => { setSelectedProperty(prop); setActiveModal('manage'); };
+  const handleOpenTenants = (prop) => {
+    setSelectedProperty(prop);
+    setActiveModal("tenants");
+  };
+  const handleOpenManage = (prop) => {
+    setSelectedProperty(prop);
+    setActiveModal("manage");
+  };
 
   const handleUpdateProperty = (updatedData) => {
-    setBoardings(prev => prev.map(p => p.id === updatedData.id ? updatedData : p));
+    setBoardings((prev) =>
+      prev.map((p) => (p.id === updatedData.id ? updatedData : p))
+    );
     setActiveModal(null);
   };
 
   const handleDeleteProperty = (id) => {
-    setBoardings(prev => prev.filter(p => p.id !== id));
+    setBoardings((prev) => prev.filter((p) => p.id !== id));
     setActiveModal(null);
   };
 
@@ -37,7 +46,7 @@ export default function MyBoardingsPage() {
   };
 
   return (
-    <div className="pt-4 space-y-6 min-h-screen pb-10">
+    <div className="pt-4 space-y-8 min-h-screen pb-12 bg-light">
       <HeaderBar
         title="My Boardings"
         subtitle="Manage your properties and track tenant details"
@@ -45,50 +54,72 @@ export default function MyBoardingsPage() {
         userAvatar={ownerData.avatar}
         userName={ownerData.firstName}
       >
-        <button className="bg-(--accent) text-white px-6 py-2.5 rounded-full font-bold shadow-md hover:scale-105 transition" 
-                onClick={() => setIsCreateModalOpen(true)}>
+        <button
+          className="bg-accent text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest shadow-md hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
           <i className="fas fa-plus mr-2"></i> Post New Boarding
         </button>
       </HeaderBar>
 
-      <section className="space-y-6">
-        <div className="flex justify-between items-center px-2">
-          <h2 className="text-2xl font-bold text-(--primary)">Property Inventory</h2>
+      <section className="space-y-6 px-4 max-w-[1600px] mx-auto">
+        {/* Header Actions */}
+        <div className="flex justify-between items-center border-b border-light pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-8 bg-primary"></div>
+            <h2 className="text-2xl font-black text-primary uppercase tracking-tight">
+              Property Inventory
+            </h2>
+          </div>
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
         </div>
 
-        <div className={`grid gap-8 ${viewMode === "list" ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3"}`}>
-          {boardings.map((property) => (
-            <BoardingCard
-              key={property.id}
-              property={property}
-              viewMode={viewMode}
-              onManage={() => handleOpenManage(property)}
-              onViewTenants={() => handleOpenTenants(property)} 
-            />
-          ))}
+        {/* Dynamic Grid/List Container */}
+        <div
+          className={`grid gap-8 transition-all duration-500 ${
+            viewMode === "list"
+              ? "grid-cols-1"
+              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
+          }`}
+        >
+          {boardings.length > 0 ? (
+            boardings.map((property) => (
+              <BoardingCard
+                key={property.id}
+                property={property}
+                viewMode={viewMode}
+                onManage={() => handleOpenManage(property)}
+                onViewTenants={() => handleOpenTenants(property)}
+              />
+            ))
+          ) : (
+            <div className="col-span-full py-32 bg-card-bg rounded-boarding border-2 border-dashed border-light flex flex-col items-center justify-center text-muted">
+              <i className="fas fa-home text-5xl mb-4 opacity-20"></i>
+              <p className="font-black uppercase tracking-widest text-xs">
+                Your inventory is empty.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Create Boarding Modal */}
-      <CreateBoardingModal 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
-        onCreate={handleCreateNew} 
+      {/* Modals remain clean and centralized */}
+      <CreateBoardingModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreate={handleCreateNew}
       />
 
-      {/* Tenant Management Modal */}
-      <TenantModal 
-        isOpen={activeModal === 'tenants'} 
+      <TenantModal
+        isOpen={activeModal === "tenants"}
         onClose={() => setActiveModal(null)}
         propertyName={selectedProperty?.name}
         tenants={selectedProperty?.tenantsList}
         onRemoveTenant={(id, name) => alert(`Simulating removal of ${name}...`)}
       />
 
-      {/* Quick Manage Modal */}
-      <ManageModal 
-        isOpen={activeModal === 'manage'}
+      <ManageModal
+        isOpen={activeModal === "manage"}
         onClose={() => setActiveModal(null)}
         property={selectedProperty}
         onUpdate={handleUpdateProperty}

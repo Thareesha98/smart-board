@@ -1,6 +1,6 @@
 import React from "react";
 
-const ReportRow = ({ report, style, onViewDetails }) => {
+const ReportRow = ({ report, config, onViewDetails }) => {
   // Mapping status to specific icons (matches your report logic)
   const statusIcons = {
     New: "fa-flag",
@@ -10,77 +10,57 @@ const ReportRow = ({ report, style, onViewDetails }) => {
 
   return (
     <div
-      className="report-row flex items-center gap-[1.5rem] p-[1.5rem] rounded-[25px] shadow-sm transition duration-300 hover:shadow-md"
-      style={{ backgroundColor: "var(--card-bg)", boxShadow: "var(--shadow)" }}
+      className="flex items-center gap-6 p-6 rounded-report shadow-custom bg-card-bg border border-light transition-all duration-300 hover:shadow-md group"
     >
-      {/* 1. Student & Property Details (Matches Identity Style) */}
+      {/* 1. Student & Property Details */}
       <div className="flex flex-col flex-1 gap-1">
-        <h4 className="font-bold text-lg" style={{ color: "var(--text)" }}>
+        <h4 className="font-black text-lg text-text tracking-tight">
           {report.student}
         </h4>
-        <div
-          className="flex items-center gap-2 text-sm"
-          style={{ color: "var(--muted)" }}
-        >
-          <i className="fas fa-building" style={{ color: "var(--accent)" }}></i>
+        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted">
+          <i className="fas fa-building text-accent"></i>
           <span>{report.property}</span>
         </div>
       </div>
 
       {/* 2. Incident Summary (Middle Column) */}
-      <div className="flex flex-col flex-[1.5] gap-1 text-sm border-l pl-6 border-gray-100">
-        <div
-          className="font-semibold truncate max-w-[250px]"
-          style={{ color: "var(--text)" }}
-        >
+      <div className="flex flex-col flex-[1.5] gap-1 text-sm border-l pl-6 border-light">
+        <div className="font-bold text-text truncate max-w-[250px]">
           {report.type}
         </div>
-        <span
-          className="text-xs italic line-clamp-1"
-          style={{ color: "var(--muted)" }}
-        >
+        <span className="text-xs italic text-muted line-clamp-1">
           {report.description.slice(0, 60)}...
         </span>
       </div>
 
       {/* 3. Date & ID (MetaData) */}
-      <div className="text-center flex-shrink-0 w-28">
-        <div
-          className="text-[10px] uppercase font-bold tracking-wider"
-          style={{ color: "var(--muted)" }}
-        >
+      <div className="text-center shrink-0 w-28 border-x border-light px-4">
+        <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted mb-1">
           Report ID
         </div>
-        <div
-          className="text-base font-bold"
-          style={{ color: "var(--primary)" }}
-        >
+        <div className="text-base font-black text-primary leading-none">
           #{report.id}
         </div>
-        <div className="text-xs" style={{ color: "var(--muted)" }}>
+        <div className="text-[11px] font-bold text-muted mt-1">
           {report.date}
         </div>
       </div>
 
       {/* 4. Actions & Status Badge */}
       <div className="flex items-center gap-4 ml-auto">
-        {/* Action Button (Matches Appointment Button Style) */}
+        {/* View Details Button */}
         <button
-          className="btn btn-sm p-[0.5rem] px-5 rounded-[25px] font-semibold text-xs transition duration-300 hover:scale-105"
-          style={{ backgroundColor: "var(--primary)", color: "var(--card-bg)" }}
+          className="flex items-center px-5 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest bg-primary text-card-bg shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
           onClick={() => onViewDetails(report)}
         >
-          <i className="fas fa-eye mr-1"></i> View Details
+          <i className="fas fa-eye mr-2"></i> View Details
         </button>
 
-        {/* Status Badge (Using the passed style object) */}
+        {/* Status Badge (Using the passed config classes) */}
         <div
-          className="px-4 py-2 text-[10px] font-black uppercase rounded-[20px] flex items-center gap-2"
-          style={{ backgroundColor: style.background, color: style.color }}
+          className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-full flex items-center gap-2 shadow-inner ${config.bgClass} ${config.textClass}`}
         >
-          <i
-            className={`fas ${statusIcons[report.status] || "fa-file-alt"}`}
-          ></i>
+          <i className={`fas ${statusIcons[report.status] || "fa-file-alt"}`}></i>
           {report.status}
         </div>
       </div>

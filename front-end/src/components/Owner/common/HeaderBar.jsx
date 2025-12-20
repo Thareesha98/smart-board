@@ -8,63 +8,40 @@ const HeaderBar = ({
   userAvatar,
   userName,
   userProfilePath = "/ownerLayout/profile",
-  children, // NEW PROP for injecting custom content (like buttons)
+  children,
 }) => {
   return (
-    <header
-      className="content-header flex justify-between items-center p-6 rounded-[25px] shadow-lg sticky top-6 z-10" // Adjusted top-6 for consistency
-      style={{
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
-        backdropFilter: "blur(5px)",
-        WebkitBackdropFilter: "blur(5px)",
-        boxShadow: "var(--shadow)",
-      }}
-    >
-      <div className="header-left flex flex-col">
-        <h1
-          className="text-[1.8rem] font-bold leading-tight"
-          style={{ color: "var(--primary)" }}
-        >
+    <header className="flex justify-between items-center p-6 rounded-report shadow-custom sticky top-6 z-10 bg-white/95 backdrop-blur-md">
+      <div className="flex flex-col">
+        <h1 className="text-[1.8rem] font-black leading-tight text-primary tracking-tight">
           {title}
         </h1>
-        <p className="text-base" style={{ color: "var(--muted)" }}>
-          {subtitle}
-        </p>
+        <p className="text-base font-medium text-muted">{subtitle}</p>
       </div>
 
-      <div className="header-right flex items-center gap-6">
-        {/* Custom Content Area (e.g., Create Ad button) */}
+      <div className="flex items-center gap-6">
+        {/* Custom Content Area (e.g., Action Buttons) */}
         {children}
 
         {/* Notification Bell */}
-        <div
-          className="notification-bell relative cursor-pointer p-3 rounded-full"
-          style={{ backgroundColor: "var(--light)", color: "var(--text)" }}
-        >
+        <div className="relative cursor-pointer p-3 rounded-full bg-light text-text hover:bg-gray-200 transition-colors">
           <i className="fas fa-bell"></i>
           {notificationCount > 0 && (
-            <span
-              className="notification-count absolute top-[-5px] right-[-5px] w-5 h-5 text-[0.75rem] flex items-center justify-center font-bold rounded-full"
-              style={{ backgroundColor: "var(--error)", color: "white" }}
-            >
+            <span className="absolute -top-1 -right-1 w-5 h-5 text-[0.75rem] flex items-center justify-center font-black rounded-full bg-error text-white shadow-sm">
               {notificationCount}
             </span>
           )}
         </div>
 
         {/* User Menu */}
-        <Link to={userProfilePath}>
-          <div
-            className="user-menu flex items-center gap-3 cursor-pointer p-2 px-4 rounded-[25px] transition duration-300"
-            style={{ backgroundColor: "var(--light)", color: "var(--text)" }}
-          >
+        <Link to={userProfilePath} className="no-underline">
+          <div className="flex items-center gap-3 cursor-pointer p-2 px-4 rounded-report transition-all duration-300 bg-light text-text hover:shadow-md border border-transparent hover:border-accent/20">
             <img
               src={userAvatar}
               alt={userName}
-              className="user-avatar w-10 h-10 rounded-full object-cover"
-              style={{ border: `2px solid ${"var(--accent)"}` }}
+              className="w-10 h-10 rounded-full object-cover border-2 border-accent shadow-sm"
             />
-            <span>{userName}</span>
+            <span className="font-bold tracking-tight">{userName}</span>
           </div>
         </Link>
       </div>

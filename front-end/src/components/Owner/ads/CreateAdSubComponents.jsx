@@ -1,35 +1,36 @@
 import React from "react";
 
-// --- Sub-Component: Amenity Checkbox ---
+/**
+ * Sub-component: Amenity Checkbox
+ * Refined with group-hover effects and config-based colors
+ */
 export const AmenityCheckbox = ({ item, isChecked, onChange }) => (
-  <label
-    className="flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition duration-200 hover:bg-opacity-80"
-    style={{ backgroundColor: "var(--light)" }}
-  >
+  <label className="flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-all duration-200 bg-light hover:bg-gray-200 group">
     <input
       type="checkbox"
       name="amenities"
       value={item.label}
       checked={isChecked}
       onChange={onChange}
-      className="h-5 w-5 rounded transition duration-200"
-      style={{ color: "var(--accent)" }}
+      className="h-5 w-5 rounded border-gray-300 text-accent focus:ring-accent transition duration-200"
     />
-    <i className={`fas ${item.icon}`} style={{ color: "var(--accent)" }}></i>
-    <span className="text-sm font-medium" style={{ color: "var(--text)" }}>
+    <i
+      className={`fas ${item.icon} text-accent transition-transform group-hover:scale-110`}
+    ></i>
+    <span className="text-sm font-bold text-text uppercase tracking-tight">
       {item.label}
     </span>
   </label>
 );
 
-// --- Sub-Component: Photo Uploader ---
+/**
+ * Sub-component: Photo Uploader
+ * Featuring shadow-custom and rounded-report for consistency
+ */
 export const PhotoUploader = ({ onImageSelect, previews, onRemove }) => {
   return (
     <div className="mt-6">
-      <label
-        className="block font-semibold mb-2"
-        style={{ color: "var(--primary)" }}
-      >
+      <label className="block text-xs font-black uppercase tracking-[0.2em] mb-3 text-primary">
         Upload Boarding Photos (Min 3)
       </label>
 
@@ -38,17 +39,17 @@ export const PhotoUploader = ({ onImageSelect, previews, onRemove }) => {
         {previews.map((src, index) => (
           <div
             key={index}
-            className="relative w-24 h-24 rounded-xl overflow-hidden shadow-md group"
+            className="relative w-24 h-24 rounded-card overflow-hidden shadow-custom group border border-light"
           >
             <img
               src={src}
               alt={`Preview ${index}`}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
             <button
               type="button"
               onClick={() => onRemove(index)}
-              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-1 right-1 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
             >
               <i className="fas fa-times"></i>
             </button>
@@ -56,24 +57,13 @@ export const PhotoUploader = ({ onImageSelect, previews, onRemove }) => {
         ))}
 
         {/* The Upload Trigger Box */}
-        <label
-          className="w-24 h-24 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition duration-300 hover:bg-gray-50"
-          style={{
-            borderColor: "var(--light)",
-            backgroundColor: "var(--card-bg)",
-          }}
-        >
-          <i
-            className="fas fa-camera text-2xl mb-1"
-            style={{ color: "var(--accent)" }}
-          ></i>
-          <span
-            className="text-[10px] font-bold"
-            style={{ color: "var(--muted)" }}
-          >
+        <label className="w-24 h-24 border-2 border-dashed rounded-card flex flex-col items-center justify-center cursor-pointer transition-all duration-300 bg-card-bg border-light hover:border-accent hover:bg-white group">
+          <i className="fas fa-camera text-2xl mb-1 text-accent transition-transform group-hover:-rotate-12"></i>
+          <span className="text-[9px] font-black text-muted tracking-widest group-hover:text-accent">
             ADD PHOTO
           </span>
           <input
+            type="file"
             type="file"
             accept="image/*"
             multiple
@@ -83,7 +73,7 @@ export const PhotoUploader = ({ onImageSelect, previews, onRemove }) => {
         </label>
       </div>
 
-      <p className="text-xs" style={{ color: "var(--muted)" }}>
+      <p className="text-[10px] font-medium italic text-muted">
         * High-quality images increase your booking chances by 40%.
       </p>
     </div>

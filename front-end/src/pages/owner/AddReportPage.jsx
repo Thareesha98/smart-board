@@ -49,13 +49,13 @@ export default function AddReportPage() {
     setTimeout(() => {
       alert(`Formal report submitted successfully.`);
       setIsSubmitting(false);
-      navigate("/ownerLayout/reports"); // Navigates to the reports history page
+      navigate("/ownerLayout/reports");
     }, 1500);
   };
 
   return (
     <div className="pt-4 space-y-6">
-      {/* 🌟 HeaderBar with Back Button */}
+      {/* HeaderBar with Back Button */}
       <HeaderBar
         title="Report Student Issue"
         subtitle="Submit a formal report regarding student conduct or payment issues."
@@ -65,24 +65,17 @@ export default function AddReportPage() {
       >
         <button
           onClick={() => navigate("/ownerLayout/reports")}
-          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-          style={{
-            backgroundColor: "var(--accent)",
-            color: "var(--card-bg)",
-          }}
+          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02] bg-accent text-card-bg"
         >
           <i className="fas fa-arrow-left mr-2"></i>
-           Back to Reports
+          Back to Reports
         </button>
       </HeaderBar>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Incident Details Card */}
-        <div
-          className="bg-white p-8 rounded-[25px] shadow-xl"
-          style={{ boxShadow: "var(--shadow)" }}
-        >
-          <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b text-(--primary) border-(--light)">
+        <div className="bg-white p-8 rounded-report shadow-custom">
+          <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b text-primary border-light">
             Incident Details
           </h2>
 
@@ -124,7 +117,7 @@ export default function AddReportPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block font-semibold mb-2 text-(--primary)">
+              <label className="block font-semibold mb-2 text-primary">
                 Detailed Description *
               </label>
               <textarea
@@ -134,18 +127,15 @@ export default function AddReportPage() {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Describe the incident in detail..."
-                className="w-full p-3 px-4 border rounded-xl focus:outline-none border-(--light)"
+                className="w-full p-3 px-4 border rounded-xl focus:outline-none border-light"
               />
             </div>
           </div>
         </div>
 
         {/* Evidence Card */}
-        <div
-          className="bg-white p-8 rounded-[25px] shadow-xl"
-          style={{ boxShadow: "var(--shadow)" }}
-        >
-          <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b text-(--primary) border-(--light)">
+        <div className="bg-white p-8 rounded-report shadow-custom">
+          <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b text-primary border-light">
             Evidence (Optional)
           </h2>
           <EvidenceUpload
@@ -159,9 +149,8 @@ export default function AddReportPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-8 py-3 rounded-[25px] font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 bg-[var(--error)]"
+            className="px-8 py-3 rounded-3xl font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 bg-error"
             style={{
-              backgroundColor: "var(--error)",
               boxShadow: "0 8px 16px rgba(239, 68, 68, 0.4)",
             }}
           >

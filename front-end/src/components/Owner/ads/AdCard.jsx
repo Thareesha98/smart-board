@@ -1,20 +1,22 @@
 import React, { useState } from "react";
-import BoostButton from "./BoostButton"; // Import the new component
+import BoostButton from "./BoostButton";
 
-const StatBox = ({ icon, label, value, color }) => (
-  <div className="flex flex-col items-center">
-    <i className={`${icon} text-xl mb-1`} style={{ color }}></i>
-    <strong className="text-xl font-bold" style={{ color: "var(--text)" }}>
-      {value}
-    </strong>
-    <span className="text-xs" style={{ color: "var(--muted)" }}>
+/**
+ * Sub-component for performance metrics
+ */
+const StatBox = ({ icon, label, value, textColorClass }) => (
+  <div className="flex flex-col items-center text-center">
+    <i className={`${icon} text-xl mb-1 ${textColorClass}`}></i>
+    <strong className="text-xl font-bold text-text">{value}</strong>
+    <span className="text-[10px] font-black uppercase tracking-widest text-muted">
       {label}
     </span>
   </div>
 );
 
 const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
-  const [isBoosted] = useState(ad.isBoosted || false);
+  // Check if ad is boosted (local state or from prop)
+  const isBoosted = ad.isBoosted || false;
 
   const handleBoostClick = () => {
     onBoostRedirect(ad.id);
@@ -22,74 +24,96 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
 
   return (
     <div
-      className="flex flex-col md:flex-row p-4 md:p-6 rounded-3xl shadow-xl transition-all duration-300 hover:scale-[1.01]"
-      style={{
-        backgroundColor: "var(--card-bg)",
-        border: isBoosted ? "2px solid var(--primary)" : "none",
-        boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
-      }}
+      className={`flex flex-col md:flex-row p-4 md:p-6 rounded-boarding transition-all duration-300 hover:scale-[1.01] bg-card-bg shadow-custom border-2 ${
+        isBoosted ? "border-primary" : "border-transparent"
+      }`}
     >
       {/* Image & Status Section */}
-      <div className="shrink-0 w-full md:w-48 h-40 md:h-auto relative mb-4 md:mb-0">
+      <div className="shrink-0 w-full md:w-48 h-40 md:h-48 relative mb-4 md:mb-0">
         <img
-          src={ad.image || "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=200&q=80"}
+          src={
+            ad.image ||
+            "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=200&q=80"
+          }
           alt={ad.title}
           className="w-full h-full object-cover rounded-2xl"
         />
+
+        {/* Dynamic Status Badge */}
         <span
-          className="absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full"
-          style={getStatusBadgeStyle(ad.status)}
+          className="absolute top-2 right-2 px-3 py-1 text-[10px] font-black uppercase tracking-tighter rounded-full shadow-sm"
+          style={getStatusBadgeStyle(ad.status)} // Retaining for dynamic status color logic
         >
           {ad.status}
         </span>
+
         {isBoosted && (
-          <span
-            className="absolute bottom-2 left-2 px-3 py-1 text-xs font-semibold rounded-full"
-            style={{ backgroundColor: "var(--primary)", color: "white" }}
-          >
+          <span className="absolute bottom-2 left-2 px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-primary text-white shadow-lg animate-pulse-slow">
             <i className="fas fa-arrow-up mr-1"></i> BOOSTED
           </span>
         )}
       </div>
 
       {/* Details Section */}
-      <div className="grow p-0 md:pl-6">
-        <h3 className="text-xl font-bold mb-1" style={{ color: "var(--text)" }}>{ad.title}</h3>
-        <p className="flex items-center text-sm mb-3" style={{ color: "var(--muted)" }}>
-          <i className="fas fa-map-marker-alt mr-2" style={{ color: "var(--accent)" }}></i>
-          {ad.address}
-        </p>
-        <div className="text-3xl font-extrabold mb-4" style={{ color: "var(--accent)" }}>
-          LKR {ad.rent.toLocaleString()}
-          <span className="text-base font-medium ml-1" style={{ color: "var(--muted)" }}>/ month</span>
+      <div className="grow p-0 md:pl-8 flex flex-col justify-between">
+        <div>
+          <h3 className="text-2xl font-black text-primary tracking-tight mb-1">
+            {ad.title}
+          </h3>
+          <p className="flex items-center text-sm mb-4 text-muted font-medium italic">
+            <i className="fas fa-map-marker-alt mr-2 text-accent"></i>
+            {ad.address}
+          </p>
+          <div className="text-3xl font-black text-accent mb-6">
+            LKR {ad.rent.toLocaleString()}
+            <span className="text-sm font-bold ml-1 text-muted tracking-normal">
+              / month
+            </span>
+          </div>
         </div>
 
-        {/* Performance Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-4 border-t pt-4" style={{ borderColor: "var(--light)" }}>
-          <StatBox icon="fas fa-eye" label="Views" value={ad.views.toLocaleString()} color={"var(--info)"} />
-          <StatBox icon="fas fa-calendar-alt" label="Appts" value={ad.appointments} color={"var(--accent)"} />
-          <StatBox icon="fas fa-check-circle" label="Selected" value={ad.selected} color={"var(--success)"} />
+        {/* Performance Stats - Architectural Layout */}
+        <div className="grid grid-cols-3 gap-4 py-4 border-y border-light">
+          <StatBox
+            icon="fas fa-eye"
+            label="Views"
+            value={ad.views.toLocaleString()}
+            textColorClass="text-info"
+          />
+          <StatBox
+            icon="fas fa-calendar-alt"
+            label="Appts"
+            value={ad.appointments}
+            textColorClass="text-accent"
+          />
+          <StatBox
+            icon="fas fa-check-circle"
+            label="Selected"
+            value={ad.selected}
+            textColorClass="text-success"
+          />
         </div>
 
         {/* Actions Section */}
-        <div className="flex justify-between space-x-3 mt-4">
-          {/* Use the separated component here */}
-          {ad.status === "Active" ? (
-          <BoostButton isBoosted={isBoosted} onBoostClick={handleBoostClick} />
-        ) : (
-          <div className="flex-1"></div> // Spacer to keep layout consistent
-        )}
+        <div className="flex justify-between items-center mt-6">
+          <div className="flex-1">
+            {ad.status === "Active" && (
+              <BoostButton
+                isBoosted={isBoosted}
+                onBoostClick={handleBoostClick}
+              />
+            )}
+          </div>
 
-          <div className="flex space-x-3">
+          <div className="flex gap-3">
             {ad.status !== "Pending" && (
-            <button
-              className="px-4 py-2 text-sm font-semibold rounded-2xl transition-all duration-300 shadow-md hover:scale-[1.05]"
-              style={{ backgroundColor: "var(--accent)", color: "var(--card-bg)" }}
-              onClick={() => onEdit(ad.id)}
-            >
-              <i className="fas fa-edit mr-2"></i> Edit Ad
-            </button>
-          )}
+              <button
+                className="px-6 py-2.5 text-xs font-black uppercase tracking-[0.2em] rounded-full transition-all duration-300 bg-accent text-card-bg shadow-md hover:shadow-xl hover:-translate-y-1 active:scale-95"
+                onClick={() => onEdit(ad.id)}
+              >
+                <i className="fas fa-edit mr-2"></i> Edit Listing
+              </button>
+            )}
           </div>
         </div>
       </div>

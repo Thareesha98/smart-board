@@ -1,0 +1,34 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Renamed to match your component classes
+        'primary': '#D84C38',
+        'accent': '#FF7A00',
+        'light': '#E8DBC7', // Changed from background-light
+        'card-bg': '#FFFFFF',
+        'text': '#332720',   // Changed from text-dark
+        'muted': '#665345',  // Changed from text-muted
+        'error': '#EF4444',
+        'success': '#10B981', 
+        'info': '#3B82F6',
+        'warning': '#F59E0B'
+      },
+      borderRadius: {
+        'report': '25px', // Standardized for your modals/cards
+        'boarding': '35px',
+        'large': '25px',
+      },
+      boxShadow: {
+        'custom': '0 6px 20px rgba(0,0,0,0.08)',
+        'accent-hover': '0 4px 12px rgba(255, 122, 0, 0.3)',
+      },
+    },
+  },
+  plugins: [],
+}

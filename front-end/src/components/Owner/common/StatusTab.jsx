@@ -1,26 +1,38 @@
 import React from "react";
 
-const StatusTab = ({ status, count, currentFilter, setFilter, style }) => {
+/**
+ * StatusTab component refactored for Tailwind CSS v3.
+ * Uses config-based utility classes for dynamic styling.
+ */
+const StatusTab = ({ status, count, currentFilter, setFilter, config }) => {
   const isActive = currentFilter === status;
 
   return (
     <button
-      className="category-tab flex flex-col items-center gap-1.5 p-6 rounded-[25px] font-semibold cursor-pointer transition duration-300 relative w-full"
-      style={{
-        backgroundColor: isActive ? style.color : "var(--light)",
-        color: isActive ? "var(--card-bg)" : "var(--muted)",
-        boxShadow: isActive ? `0 4px 12px ${style.color}80` : "var(--shadow)",
-      }}
+      className={`
+        relative flex flex-col items-center gap-2 p-6 rounded-report transition-all duration-300 w-full
+        ${
+          isActive
+            ? `${config.colorClass} text-card-bg shadow-lg scale-105`
+            : "bg-light text-muted hover:bg-gray-200 shadow-custom"
+        }
+      `}
       onClick={() => setFilter(status)}
     >
-      <i className={`${style.icon} text-2xl`}></i>
-      <span className="text-base capitalize">{status}</span>
+      {/* Icon - Inherits color from parent text class or specific config */}
+      <i className={`${config.icon} text-2xl mb-1`}></i>
+
+      {/* Label - Architectural Ledger Typography */}
+      <span className="text-[11px] font-black uppercase tracking-[0.2em]">
+        {status}
+      </span>
+
+      {/* Tab Count Badge */}
       <span
-        className="tab-count absolute top-[-8px] right-[-8px] w-6 h-6 text-xs flex items-center justify-center font-bold rounded-full"
-        style={{
-          backgroundColor: isActive ? "var(--card-bg)" : "var(--primary)",
-          color: isActive ? style.color : "var(--card-bg)",
-        }}
+        className={`
+          absolute -top-2 -right-2 w-6 h-6 text-[10px] flex items-center justify-center font-black rounded-full shadow-sm transition-colors
+          ${isActive ? "bg-card-bg text-text" : "bg-primary text-card-bg"}
+        `}
       >
         {count}
       </span>

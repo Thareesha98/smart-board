@@ -1,39 +1,23 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
 
-const StatWidget = ({
-  icon,
-  title,
-  mainValue,
-  subValue,
-  
-}) => (
-  <div
-    className="stat-widget flex p-6 rounded-[25px] shadow-lg transition duration-300 hover:translate-y-[-5px] relative"
-    style={{ backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow)' }}
-  >
-    <div
-      className="widget-icon p-4 rounded-[15px] text-2xl shrink-0"
-      style={{ backgroundColor: 'var(--light)', color: 'var(--accent)' }}
-    >
+const StatWidget = ({ icon, title, mainValue, subValue }) => (
+  <div className="flex p-6 rounded-report shadow-custom transition-all duration-300 hover:-translate-y-1 relative bg-card-bg border border-light">
+    {/* Icon Container */}
+    <div className="p-4 rounded-card text-2xl shrink-0 bg-light text-accent flex items-center justify-center">
       <i className={icon}></i>
     </div>
-    <div className="widget-content ml-4 flex-1">
-      <h3
-        className="text-sm font-semibold mb-3"
-        style={{ color: 'var(--muted)' }}
-      >
+
+    {/* Content Area */}
+    <div className="ml-4 flex-1">
+      <h3 className="text-[10px] font-black uppercase tracking-widest text-muted mb-2">
         {title}
       </h3>
-      <div className="widget-details flex flex-col gap-1">
-        <strong className="text-xl font-bold" style={{ color: 'var(--text)' }}>
+      <div className="flex flex-col gap-0.5">
+        <strong className="text-xl font-black text-text tracking-tight">
           {mainValue}
         </strong>
-        <span className="text-sm" style={{ color: 'var(--muted)' }}>
-          {subValue}
-        </span>
+        <span className="text-xs font-medium text-muted">{subValue}</span>
       </div>
-      
     </div>
   </div>
 );

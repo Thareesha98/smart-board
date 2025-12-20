@@ -1,25 +1,52 @@
+import React from "react";
+
 const AppointmentItem = ({ appointment }) => {
-  const themes = {
-    pending: { color: "#D97706", bg: "#FEF3C7" },
-    confirmed: { color: "#065F46", bg: "#D1FAE5" },
-    visited: { color: "#3730A3", bg: "#E0E7FF" },
+  // Mapping statuses to Tailwind utility classes instead of hex codes
+  const statusStyles = {
+    pending: "bg-orange-100 text-orange-700",
+    confirmed: "bg-green-100 text-green-700",
+    visited: "bg-indigo-100 text-indigo-700",
   };
-  const theme = themes[appointment.status] || themes.pending;
+
+  const currentStatusStyle =
+    statusStyles[appointment.status] || statusStyles.pending;
 
   return (
-    <div 
-      className={`flex items-center gap-4 p-5 border-b border-(--light) relative transition ${appointment.isNew ? "bg-orange-50/30" : "bg-[var(--card-bg)]"}`}
+    <div
+      className={`flex items-center gap-4 p-5 border-b border-light relative transition-colors duration-300 ${
+        appointment.isNew ? "bg-accent/5" : "bg-card-bg"
+      }`}
     >
-      {appointment.isNew && <div className="absolute left-0 top-0 bottom-0 w-1 bg-(--accent)" />}
-      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0">
-        <img src={appointment.avatar} alt={appointment.student} className="w-full h-full object-cover" />
+      {/* New Appointment Indicator */}
+      {appointment.isNew && (
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent" />
+      )}
+
+      {/* Student Avatar */}
+      <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border border-light">
+        <img
+          src={appointment.avatar}
+          alt={appointment.student}
+          className="w-full h-full object-cover"
+        />
       </div>
+
+      {/* Appointment Info */}
       <div className="flex-1">
-        <p className="font-semibold mb-0.5 text-(--text)">
-          <strong className="text-(--primary)">{appointment.student}</strong> - {appointment.property}
+        <p className="font-bold text-sm text-text mb-0.5">
+          <strong className="text-primary font-black">
+            {appointment.student}
+          </strong>{" "}
+          — {appointment.property}
         </p>
-        <span className="text-sm block text-(--muted) mb-1">{appointment.time}</span>
-        <span className="text-xs px-2 py-1 rounded-xl font-semibold uppercase" style={{ backgroundColor: theme.bg, color: theme.color }}>
+        <span className="text-[11px] block text-muted mb-1 font-bold uppercase tracking-wider">
+          {appointment.time}
+        </span>
+
+        {/* Status Badge */}
+        <span
+          className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${currentStatusStyle}`}
+        >
           {appointment.status}
         </span>
       </div>

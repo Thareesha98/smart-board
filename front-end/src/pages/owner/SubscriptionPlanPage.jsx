@@ -1,9 +1,8 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
-import { ownerData } from '../../data/mockData'; // Centralized owner data
+import { ownerData } from "../../data/mockData";
 
-// --- Mock Data for Subscription Plans ---
 const subscriptionPlans = [
   {
     id: 1,
@@ -15,7 +14,9 @@ const subscriptionPlans = [
       "2x view impressions",
       "Email summary report",
     ],
-    color: "var(--info)",
+    colorClass: "text-info",
+    bgClass: "bg-info",
+    borderClass: "border-info",
     icon: "fas fa-star",
   },
   {
@@ -26,10 +27,12 @@ const subscriptionPlans = [
     benefits: [
       "Highest placement for 1 month",
       "5x view impressions",
-      "Detailed performance dashboard",
-      "Featured on homepage (weekly rotation)",
+      "Detailed dashboard",
+      "Homepage rotation",
     ],
-    color: "var(--accent)",
+    colorClass: "text-accent",
+    bgClass: "bg-accent",
+    borderClass: "border-accent",
     icon: "fas fa-rocket",
   },
   {
@@ -39,100 +42,73 @@ const subscriptionPlans = [
     duration: "90 Days",
     benefits: [
       "Guaranteed top placement",
-      "Unlimited view impressions",
-      "Dedicated marketing email blast",
+      "Unlimited impressions",
+      "Email blast",
       "Priority support",
     ],
-    color: "var(--primary)",
+    colorClass: "text-primary",
+    bgClass: "bg-primary",
+    borderClass: "border-primary",
     icon: "fas fa-crown",
   },
 ];
 
-// --- Helper Component: Plan Card ---
 const PlanCard = ({ plan, adId }) => {
   const navigate = useNavigate();
 
-  const handleSelectPlan = async () => {
+  const handleSelectPlan = () => {
     const confirmation = window.confirm(
       `Confirm purchase of the ${
         plan.name
-      } plan for LKR ${plan.price.toLocaleString()}? This will boost Ad ID: ${adId}`
+      } for LKR ${plan.price.toLocaleString()}?`
     );
 
     if (confirmation) {
-      // 🌟 MOCK API CALL: Simulate payment and boosting the ad
-      alert(`Simulating payment for ${plan.name}...`);
-
-      try {
-        // --- START PERSISTENCE SIMULATION ---
-        // 1. Get current list of boosted IDs from storage, or initialize an empty array
-        const boostedAds = JSON.parse(sessionStorage.getItem('boostedAds') || '[]');
-        
-        // 2. Add the new adId if it's not already there
-        if (!boostedAds.includes(adId)) {
-            boostedAds.push(adId);
-            // 3. Save the updated list back to session storage
-            sessionStorage.setItem('boostedAds', JSON.stringify(boostedAds));
-        }
-        // --- END PERSISTENCE SIMULATION ---
-
-        alert(
-          `SUCCESS: Ad ID ${adId} has been successfully boosted with the ${plan.name} plan!`
-        );
-
-        // REDIRECT: Go back to My Ads Page
-        navigate("/ownerLayout/myAds");
-      } catch (error) {
-        alert("Payment failed. Please try again.");
-        navigate("/ownerLayout/myAds");
+      const boostedAds = JSON.parse(
+        sessionStorage.getItem("boostedAds") || "[]"
+      );
+      if (!boostedAds.includes(adId)) {
+        boostedAds.push(adId);
+        sessionStorage.setItem("boostedAds", JSON.stringify(boostedAds));
       }
+      alert(`SUCCESS: Ad #${adId} is now boosted!`);
+      navigate("/ownerLayout/myAds");
     }
   };
 
   return (
     <div
-      className="plan-card flex flex-col p-8 rounded-[25px] shadow-xl transition duration-300 hover:scale-[1.02] relative"
-      style={{
-        backgroundColor: "var(--card-bg)",
-        boxShadow: "var(--shadow)",
-        borderTop: `8px solid ${plan.color}`,
-      }}
+      className={`
+      relative flex flex-col p-8 rounded-report bg-card-bg shadow-custom border-t-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl
+      ${plan.borderClass}
+    `}
     >
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-2xl font-bold" style={{ color: "var(--text)" }}>
+      <div className="flex justify-between items-start mb-6">
+        <h3 className="text-xl font-black text-text uppercase tracking-tight">
           {plan.name}
         </h3>
-        <i
-          className={`${plan.icon} text-3xl p-3 rounded-full`}
-          style={{ color: plan.color, backgroundColor: "var(--light)" }}
-        ></i>
+        <div className={`p-3 rounded-2xl bg-light ${plan.colorClass}`}>
+          <i className={`${plan.icon} text-2xl`}></i>
+        </div>
       </div>
 
-      <div className="mb-6">
-        <div
-          className="text-5xl font-extrabold mb-1"
-          style={{ color: "var(--primary)" }}
-        >
+      <div className="mb-8">
+        <div className="text-4xl font-black text-primary tracking-tighter">
           LKR {plan.price.toLocaleString()}
         </div>
-        <span
-          className="text-sm font-medium uppercase"
-          style={{ color: "var(--muted)" }}
-        >
-          for {plan.duration}
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted">
+          per {plan.duration}
         </span>
       </div>
 
-      <ul className="flex-1 list-none p-0 space-y-3 mb-6">
+      <ul className="flex-1 space-y-4 mb-8">
         {plan.benefits.map((benefit, index) => (
           <li
             key={index}
-            className="flex items-start gap-3 text-base"
-            style={{ color: "var(--text)" }}
+            className="flex items-start gap-3 text-sm font-medium text-text"
           >
             <i
-              className="fas fa-check-circle mt-1 shrink-0"
-              style={{ color: plan.color }}
+              className={`fas fa-check-circle mt-1 shrink-0 ${plan.colorClass}`}
             ></i>
             <span>{benefit}</span>
           </li>
@@ -140,9 +116,11 @@ const PlanCard = ({ plan, adId }) => {
       </ul>
 
       <button
-        className="btn btn-full py-3 mt-auto text-lg font-bold rounded-[25px] transition duration-300 hover:shadow-lg"
-        style={{ backgroundColor: plan.color, color: "var(--card-bg)" }}
         onClick={handleSelectPlan}
+        className={`
+          w-full py-4 text-xs font-black uppercase tracking-widest rounded-full text-white shadow-lg transition-all active:scale-95
+          ${plan.bgClass} hover:brightness-110
+        `}
       >
         Activate {plan.name}
       </button>
@@ -150,51 +128,38 @@ const PlanCard = ({ plan, adId }) => {
   );
 };
 
-// --- Main Component ---
 export default function SubscriptionPlanPage() {
-  const { adId } = useParams(); // Read the adId from the URL
+  const { adId } = useParams();
   const navigate = useNavigate();
-  const notificationCount = 0;
 
-  // Safety Check: If adId is missing, redirect
   if (!adId) {
     setTimeout(() => navigate("/ownerLayout/myAds"), 0);
     return null;
   }
 
   return (
-    <div className="pt-4 space-y-8">
-      {/* 🌟 HeaderBar */}
+    <div className="pt-4 space-y-8 min-h-screen bg-light pb-12">
       <HeaderBar
-        title="Boost & Subscription Plans"
+        title="Boost & Subscription"
         subtitle={`Select a plan to boost Ad ID: #${adId}`}
-        notificationCount={notificationCount}
+        notificationCount={0}
         userAvatar={ownerData.avatar}
         userName={ownerData.firstName}
       />
 
-      {/* Plan Explanation */}
-      <section
-        className="text-center p-6 rounded-[25px]"
-        style={{
-          backgroundColor: "var(--card-bg)",
-          boxShadow: "var(--shadow)",
-        }}
-      >
-        <h2
-          className="text-2xl font-bold mb-2"
-          style={{ color: "var(--accent)" }}
-        >
+      {/* Why Boost Section */}
+      <section className="mx-4 p-8 rounded-report bg-card-bg shadow-custom border border-light text-center max-w-4xl lg:mx-auto">
+        <h2 className="text-xl font-black text-accent uppercase tracking-widest mb-3">
           Why Boost Your Ads?
         </h2>
-        <p className="text-base" style={{ color: "var(--muted)" }}>
+        <p className="text-muted font-medium italic">
           Boosted ads appear higher in search results, reach more students, and
           convert appointments faster than standard listings.
         </p>
       </section>
 
       {/* Subscription Grid */}
-      <section className="plans-grid">
+      <section className="px-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {subscriptionPlans.map((plan) => (
             <PlanCard key={plan.id} plan={plan} adId={adId} />

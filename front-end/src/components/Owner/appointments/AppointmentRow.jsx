@@ -1,78 +1,83 @@
 import React from "react";
 
-const AppointmentRow = ({ appointment, style, onAction, formatDate, formatTime }) => {
+const AppointmentRow = ({
+  appointment,
+  config,
+  onAction,
+  formatDate,
+  formatTime,
+}) => {
   const isPending = appointment.status === "pending";
   const isConfirmed = appointment.status === "confirmed";
 
   return (
-    <div
-      className="appointment-row flex items-center gap-[1.5rem] p-[1.5rem] rounded-[25px] shadow-sm transition duration-300"
-      style={{ backgroundColor: "var(--card-bg)", boxShadow: "var(--shadow)" }}
-    >
+    <div className="flex items-center gap-6 p-6 rounded-report shadow-custom bg-card-bg border border-light transition-all duration-300 hover:shadow-md">
       {/* 1. Student Details */}
       <div className="flex flex-col flex-1 gap-1">
-        <h4 className="font-bold text-lg" style={{ color: "var(--text)" }}>{appointment.student}</h4>
-        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted)" }}>
-          <i className="fas fa-building" style={{ color: "var(--accent)" }}></i>
+        <h4 className="font-black text-lg text-text tracking-tight">
+          {appointment.student}
+        </h4>
+        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-muted">
+          <i className="fas fa-building text-accent"></i>
           <span>{appointment.boardingName}</span>
         </div>
       </div>
 
-      {/* 2. Contact */}
-      <div className="flex flex-col flex-1 gap-1 text-sm">
-        <div className="flex items-center gap-1 font-semibold" style={{ color: "var(--text)" }}>
-          <i className="fas fa-phone" style={{ color: "var(--info)" }}></i>
-          <span>{appointment.contact}</span>
+      {/* 2. Contact & Notes */}
+      <div className="flex flex-col flex-1 gap-1">
+        <div className="flex items-center gap-2 font-bold text-text">
+          <i className="fas fa-phone text-info text-xs"></i>
+          <span className="text-sm">{appointment.contact}</span>
         </div>
-        <span className="text-xs italic" style={{ color: "var(--muted)" }}>
-          Note: {appointment.notes.slice(0, 30)}...
+        <span className="text-xs italic text-muted">
+          Note: {appointment.notes?.slice(0, 30)}...
         </span>
       </div>
 
       {/* 3. Date & Time */}
-      <div className="text-center flex-shrink-0 w-32">
-        <div className="text-xs uppercase" style={{ color: "var(--muted)" }}>Visit Date</div>
-        <div className="text-lg font-bold" style={{ color: "var(--text)" }}>{formatDate(appointment.date)}</div>
-        <div className="text-sm" style={{ color: "var(--muted)" }}>{formatTime(appointment.time)}</div>
+      <div className="text-center shrink-0 w-32 border-x border-light px-4">
+        <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted mb-1">
+          Visit Date
+        </div>
+        <div className="text-base font-black text-primary leading-none">
+          {formatDate(appointment.date)}
+        </div>
+        <div className="text-xs font-bold text-muted mt-1">
+          {formatTime(appointment.time)}
+        </div>
       </div>
 
-      {/* 4. Actions */}
-      <div className="flex items-center gap-3 ml-auto">
-        {/* Actions for Pending Status */}
+      {/* 4. Actions & Status Badge */}
+      <div className="flex items-center gap-4 ml-auto">
         {isPending && (
           <>
             <button
-              className="btn btn-sm p-[0.5rem] px-4 rounded-[25px] font-semibold text-sm transition duration-300 hover:scale-105"
-              style={{ backgroundColor: "var(--success)", color: "var(--card-bg)" }}
+              className="px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-success text-white shadow-sm hover:scale-105"
               onClick={() => onAction(appointment.id, "confirmed")}
             >
-              <i className="fas fa-check mr-1"></i> Confirm
+              Confirm
             </button>
             <button
-              className="btn btn-sm p-[0.5rem] px-4 rounded-[25px] font-semibold text-sm border transition duration-300 hover:scale-105"
-              style={{ color: "var(--error)", borderColor: "var(--error)" }}
+              className="px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest border-2 transition-all border-error text-error hover:bg-error hover:text-white hover:scale-105"
               onClick={() => onAction(appointment.id, "cancelled")}
             >
-              <i className="fas fa-times mr-1"></i> Reject
+              Reject
             </button>
           </>
         )}
 
-        {/* 🌟 New Action for Confirmed Status */}
         {isConfirmed && (
           <button
-            className="btn btn-sm p-[0.5rem] px-4 rounded-[25px] font-semibold text-sm transition duration-300 hover:scale-105"
-            style={{ backgroundColor: "var(--info)", color: "white" }}
+            className="px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest transition-all bg-info text-white shadow-sm hover:scale-105"
             onClick={() => onAction(appointment.id, "visited")}
           >
-            <i className="fas fa-walking mr-1"></i> Mark as Visited
+            Mark Visited
           </button>
         )}
 
-        {/* Status Badge */}
+        {/* --- FIXED STATUS BADGE --- */}
         <span
-          className="px-4 py-2 text-xs font-semibold uppercase rounded-[20px]"
-          style={{ backgroundColor: style.background, color: style.color }}
+          className={`px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] rounded-full shadow-inner ${config.bgClass} ${config.textClass}`}
         >
           {appointment.status}
         </span>

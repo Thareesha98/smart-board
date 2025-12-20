@@ -2,8 +2,12 @@ import React, { useState, useMemo } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import AdCard from "../../components/Owner/ads/AdCard";
-import { StatusTab, EmptyState, STATUS_CONFIG } from "../../components/Owner/ads/MyAdsComponents";
-import { mockAds, ownerData } from '../../data/mockData';
+import {
+  StatusTab,
+  EmptyState,
+  STATUS_CONFIG,
+} from "../../components/Owner/ads/MyAdsComponents";
+import { mockAds, ownerData } from "../../data/mockData";
 
 export default function MyAdsPage() {
   const [filter, setFilter] = useState("All");
@@ -13,7 +17,7 @@ export default function MyAdsPage() {
   // 1. Data Processing
   const liveAds = useMemo(() => {
     const boostedIds = JSON.parse(sessionStorage.getItem("boostedAds") || "[]");
-    return mockAds.map(ad => ({
+    return mockAds.map((ad) => ({
       ...ad,
       isBoosted: boostedIds.includes(ad.id) || ad.isBoosted || false,
     }));
@@ -28,7 +32,9 @@ export default function MyAdsPage() {
     return acc;
   }, [liveAds]);
 
-  const filteredAds = liveAds.filter(ad => filter === "All" || ad.status === filter);
+  const filteredAds = liveAds.filter(
+    (ad) => filter === "All" || ad.status === filter
+  );
 
   // 2. Navigation Helpers
   const isNestedRoute = location.pathname !== "/ownerLayout/myAds";
@@ -37,7 +43,7 @@ export default function MyAdsPage() {
   if (isNestedRoute) return <Outlet />;
 
   return (
-    <div className="pt-4 space-y-6 bg-(--light) min-h-screen">
+    <div className="pt-4 space-y-6 bg-light min-h-screen">
       <HeaderBar
         title="My Boarding Ads"
         subtitle="Manage, track performance, and edit your listings"
@@ -46,7 +52,7 @@ export default function MyAdsPage() {
         userName={ownerData.firstName}
       >
         <button
-          className="px-6 py-3 font-bold rounded-3xl bg-(--accent) text-(--card-bg) shadow-md hover:scale-[1.02] transition-all"
+          className="px-6 py-3 font-black rounded-full bg-accent text-card-bg shadow-md hover:scale-[1.02] transition-all uppercase tracking-widest text-xs"
           onClick={handleCreate}
         >
           <i className="fas fa-plus mr-2" /> Create New Ad
@@ -54,8 +60,8 @@ export default function MyAdsPage() {
       </HeaderBar>
 
       {/* Filter Section */}
-      <section className="p-6 rounded-3xl shadow-lg grid grid-cols-2 md:grid-cols-5 gap-4 bg-(--card-bg)">
-        {Object.keys(STATUS_CONFIG).map(status => (
+      <section className="p-6 rounded-report shadow-custom grid grid-cols-2 md:grid-cols-5 gap-4 bg-card-bg border border-light">
+        {Object.keys(STATUS_CONFIG).map((status) => (
           <StatusTab
             key={status}
             status={status}
@@ -68,19 +74,25 @@ export default function MyAdsPage() {
 
       {/* Ads Section */}
       <section className="pb-10">
-        <h2 className="text-2xl font-bold mb-4 text-(--primary)">
+        <h2 className="text-2xl font-black mb-4 text-primary tracking-tight">
           {filter} Listings ({filteredAds.length})
         </h2>
-        
+
         <div className="space-y-6">
           {filteredAds.length > 0 ? (
-            filteredAds.map(ad => (
+            filteredAds.map((ad) => (
               <AdCard
                 key={ad.id}
                 ad={ad}
                 onEdit={(id) => navigate(`editAd/${id}`)}
-                onBoostRedirect={(id) => navigate(`/ownerLayout/subscriptions/${id}`)}
-                getStatusBadgeStyle={(s) => ({ backgroundColor: STATUS_CONFIG[s]?.color })}
+                onBoostRedirect={(id) =>
+                  navigate(`/ownerLayout/subscriptions/${id}`)
+                }
+                // Updated to use the hex color values if needed,
+                // or you can update AdCard to accept a class name instead.
+                getStatusBadgeStyle={(s) => ({
+                  backgroundColor: `var(--${s.toLowerCase()})`,
+                })}
               />
             ))
           ) : (

@@ -16,8 +16,6 @@ const availableAmenities = [
   { label: "Laundry", icon: "fa-washing-machine" },
 ];
 
-const notificationCount = 3;
-
 const CreateAdPage = () => {
   const [formData, setFormData] = useState({
     title: "",
@@ -35,20 +33,13 @@ const CreateAdPage = () => {
 
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files);
-
-    // Store actual files for the form submission
     setSelectedFiles((prev) => [...prev, ...files]);
-
-    // Generate temporary URLs for immediate display
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviews((prev) => [...prev, ...newPreviews]);
   };
 
   const handleRemoveImage = (index) => {
-    // Remove the file
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-
-    // Remove the preview and revoke the URL to save memory
     setPreviews((prev) => {
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
@@ -78,33 +69,32 @@ const CreateAdPage = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-12 bg-light min-h-screen">
       <HeaderBar
         title="Create New Ad"
         subtitle="List a new boarding space"
         userAvatar={ownerData.avatar}
-        notificationCount={notificationCount}
+        notificationCount={3}
         userName={ownerData.firstName}
       >
         <button
-          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02]"
-          style={{
-            backgroundColor: "var(--accent)",
-            color: "var(--card-bg)",
-          }}
+          className="px-6 py-3 bg-accent text-white rounded-full font-black text-[10px] uppercase tracking-widest shadow-md hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95"
           onClick={() => navigate("../myAds")}
         >
           <i className="fas fa-arrow-left mr-2"></i> Back to Ads
         </button>
       </HeaderBar>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-8 px-4 max-w-6xl mx-auto"
+      >
         {/* Section 1: Details */}
-        <div className="bg-white p-8 mt-12 rounded-[25px] shadow-xl">
-          <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b border-(--light) text-(--primary)">
+        <section className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+          <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
             Boarding Details
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <FormGroup
               label="Ad Title"
               name="title"
@@ -118,22 +108,22 @@ const CreateAdPage = () => {
               onChange={handleChange}
             />
             <FormGroup
-              label="Monthly Rent"
+              label="Monthly Rent (LKR)"
               name="rent"
               type="number"
               value={formData.rent}
               onChange={handleChange}
             />
             <FormGroup
-              label="Deposit"
+              label="Security Deposit (LKR)"
               name="deposit"
               type="number"
               value={formData.deposit}
               onChange={handleChange}
             />
           </div>
-          <div className="mt-6">
-            <label className="block font-semibold mb-2 text-(--primary)">
+          <div className="mt-8">
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-muted">
               Description
             </label>
             <textarea
@@ -141,56 +131,66 @@ const CreateAdPage = () => {
               rows="4"
               value={formData.description}
               onChange={handleChange}
-              className="w-full p-3 border rounded-xl focus:outline-none border-[var(--light)]"
+              placeholder="Describe the atmosphere, rules, and nearby landmarks..."
+              className="w-full p-4 border border-light rounded-xl focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 bg-white/50 transition-all text-text font-medium"
               required
             />
           </div>
-        </div>
+        </section>
 
         {/* Section 2: Amenities & Media */}
-        <div className="bg-white p-8 rounded-[25px] shadow-xl">
-          <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b border-(--light) text-(--primary)">
-            Features & Media
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {availableAmenities.map((item) => (
-              <AmenityCheckbox
-                key={item.label}
-                item={item}
-                isChecked={formData.amenities.includes(item.label)}
-                onChange={handleChange}
-              />
-            ))}
-          </div>
-          <div className="bg-white p-8 rounded-[25px] shadow-xl">
-        <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b border-(--light) text-(--primary)">
-          Media Gallery
-        </h2>
-        
-        <PhotoUploader 
-          onImageSelect={handleImageSelect} 
-          previews={previews} 
-          onRemove={handleRemoveImage} 
-        />
-      </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <section className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+            <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
+              Features & Amenities
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {availableAmenities.map((item) => (
+                <AmenityCheckbox
+                  key={item.label}
+                  item={item}
+                  isChecked={formData.amenities.includes(item.label)}
+                  onChange={handleChange}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+            <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
+              Media Gallery
+            </h2>
+            <PhotoUploader
+              onImageSelect={handleImageSelect}
+              previews={previews}
+              onRemove={handleRemoveImage}
+            />
+          </section>
         </div>
 
-        {/* Submit */}
-        <div className="flex justify-end pt-4">
+        {/* Submit Action */}
+        <div className="flex justify-end pt-6">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-3 rounded-[25px] font-bold bg-(--accent) text-(--card-bg) shadow-lg transition hover:translate-y-[-2px]"
+            className={`
+              px-12 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all
+              ${
+                isSubmitting
+                  ? "bg-muted text-white cursor-not-allowed"
+                  : "bg-accent text-white hover:shadow-xl hover:-translate-y-1 active:scale-95"
+              }
+            `}
           >
             {isSubmitting ? (
-              <>
-                <i className="fas fa-circle-notch fa-spin mr-2"></i>{" "}
+              <span className="flex items-center">
+                <i className="fas fa-circle-notch fa-spin mr-3"></i>{" "}
                 Publishing...
-              </>
+              </span>
             ) : (
-              <>
-                <i className="fas fa-bullhorn mr-2"></i> Publish Ad
-              </>
+              <span className="flex items-center">
+                <i className="fas fa-bullhorn mr-3"></i> Publish Ad
+              </span>
             )}
           </button>
         </div>
