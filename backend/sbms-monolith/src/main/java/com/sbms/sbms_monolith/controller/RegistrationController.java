@@ -17,6 +17,9 @@ public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
+    
+    @GetMapping("/registrations/{regId}")
+    
 
     @PostMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
