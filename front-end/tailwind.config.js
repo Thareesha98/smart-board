@@ -10,17 +10,18 @@ export default {
         'primary': '#D84C38',
         'accent': '#FF7A00',
         'secondary-accent': '#FF7A00',
-        'background-light': '#E8DBC7', // Your original --light
+        'background-light': '#E8DBC7',
         'card-bg': '#FFFFFF',
-        'text-dark': '#332720', // Your original --text
-        'text-muted': '#665345', // Your original --muted
+        'text-dark': '#332720',
+        'text-muted': '#665345',
         'red-alert': '#EF4444',
         'success': '#10B981', 
         'info': '#3B82F6',
-        'error': '#EF4444'
+        'error': '#EF4444',
+        'warning': '#F59E0B'
       },
       borderRadius: {
-        'large': '25px', // Your original --radius
+        'large': '25px',
         'card': '15px',
         'btn': '12px',
       },
@@ -30,9 +31,6 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-      },
-      transitionProperty: {
-        'transform-shadow': 'transform, box-shadow',
       },
     },
   },
