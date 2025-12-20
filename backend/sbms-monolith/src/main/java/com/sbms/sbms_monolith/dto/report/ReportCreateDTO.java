@@ -1,6 +1,5 @@
 package com.sbms.sbms_monolith.dto.report;
 
-import com.sbms.sbms_monolith.model.Report;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class ReportRequest {
+public class ReportCreateDTO {
 
     private String reportTitle;
     private String reportDescription;

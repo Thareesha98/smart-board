@@ -1,14 +1,13 @@
 package com.sbms.sbms_monolith.dto.report;
 
 import lombok.Data;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class ReportResponse {
+public class ReportResponseDTO {
     private Long id;
     private String title;
     private String description;

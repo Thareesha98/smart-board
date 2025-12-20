@@ -52,10 +52,10 @@ public class Report {
     private String adminResponse;
 
     // Stores image/file URLs
-//    @ElementCollection
-//    @CollectionTable(name = "report_evidence", joinColumns = @JoinColumn(name = "report_id"))
-//    @Column(name = "file_url")
-//    private List<String> evidence;
+    @ElementCollection
+    @CollectionTable(name = "report_evidence", joinColumns = @JoinColumn(name = "report_id"))
+    @Column(name = "file_url")
+    private List<String> evidence;
 
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
