@@ -1,8 +1,8 @@
 package com.sbms.sbms_monolith.service;
 
 import com.sbms.sbms_monolith.model.Otp;
+import com.sbms.sbms_monolith.model.enums.OtpPurpose;
 import com.sbms.sbms_monolith.repository.OtpRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,16 +11,41 @@ import java.util.Random;
 @Service
 public class OtpService {
 
-    @Autowired
-    private OtpRepository otpRepository;
+    private final OtpRepository otpRepository;
 
-    public String generateOtp() {
+    public OtpService(OtpRepository otpRepository) {
+        this.otpRepository = otpRepository;
+    }
+
+    private String generateOtp() {
         return String.format("%06d", new Random().nextInt(999999));
     }
 
-    public Otp createOtp(String email) {
-        Otp otp = new Otp();
+    // -------------------------------
+    // CREATE OTPs
+    // -------------------------------
+    public Otp createRegistrationOtp(String email) {
+        return createOtp(email, OtpPurpose.REGISTRATION);
+    }
+
+    public Otp createPasswordResetOtp(String email) {
+        return createOtp(email, OtpPurpose.PASSWORD_RESET);
+    }
+
+    private Otp createOtp(String email, OtpPurpose purpose) {
+
+        Otp otp = otpRepository
+                .findByEmailAndPurpose(email, purpose)
+                .orElse(new Otp());
+
+        if (otp.getId() != null &&
+            otp.getExpiresAt().isAfter(LocalDateTime.now()) &&
+            !otp.isUsed()) {
+            return otp; // reuse valid OTP
+        }
+
         otp.setEmail(email);
+        otp.setPurpose(purpose);
         otp.setOtpCode(generateOtp());
         otp.setExpiresAt(LocalDateTime.now().plusMinutes(5));
         otp.setUsed(false);
@@ -28,14 +53,21 @@ public class OtpService {
         return otpRepository.save(otp);
     }
 
-    public boolean validateOtp(String email, String otpCode) {
-        Otp otp = otpRepository.findByEmailAndOtpCode(email, otpCode)
+    // -------------------------------
+    // VALIDATE OTP
+    // -------------------------------
+    public boolean validateOtp(String email, String otpCode, OtpPurpose purpose) {
+
+        Otp otp = otpRepository
+                .findByEmailAndOtpCodeAndPurpose(
+                        email.trim(),
+                        otpCode.trim(),
+                        purpose
+                )
                 .orElse(null);
 
         if (otp == null) return false;
-
         if (otp.isUsed()) return false;
-
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) return false;
 
         otp.setUsed(true);
