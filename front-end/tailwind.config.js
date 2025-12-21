@@ -7,20 +7,27 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Renamed to match your component classes
         'primary': '#D84C38',
         'accent': '#FF7A00',
         'secondary-accent': '#FF7A00',
         'background-light': '#E8DBC7', // Your original --light
+        'light': '#E8DBC7', // Changed from background-light
         'card-bg': '#FFFFFF',
+        'text': '#332720',   // Changed from text-dark
+        'muted': '#665345',  // Changed from text-muted
         'text-dark': '#332720', // Your original --text
         'text-muted': '#665345', // Your original --muted
+        'error': '#EF4444',
         'red-alert': '#EF4444',
         'success': '#10B981', 
         'info': '#3B82F6',
-        'error': '#EF4444'
+        'warning': '#F59E0B'
       },
       borderRadius: {
-        'large': '25px', // Your original --radius
+        'report': '25px', // Standardized for your modals/cards
+        'boarding': '35px',
+        'large': '25px',
         'card': '15px',
         'btn': '12px',
       },
