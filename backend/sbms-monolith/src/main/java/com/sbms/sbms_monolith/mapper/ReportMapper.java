@@ -1,6 +1,7 @@
 package com.sbms.sbms_monolith.mapper;
 
 
+import com.sbms.sbms_monolith.dto.report.ReportCreateDTO;
 import com.sbms.sbms_monolith.dto.report.ReportResponseDTO;
 import com.sbms.sbms_monolith.model.Report;
 import com.sbms.sbms_monolith.model.User;
@@ -29,11 +30,11 @@ public class ReportMapper {
         return dto;
     }
 
-    public static Report toEntity(ReportResponseDTO dto, User user) {
+    public static Report toEntity(ReportCreateDTO dto, User user) {
         Report r = new Report();
 
-        r.setTitle(dto.getTitle());
-        r.setDescription(dto.getDescription());
+        r.setTitle(dto.getReportTitle());
+        r.setDescription(dto.getReportDescription());
         r.setType(dto.getType());
         r.setSeverity(dto.getSeverity());
         r.setBoardingName(dto.getBoarding());
