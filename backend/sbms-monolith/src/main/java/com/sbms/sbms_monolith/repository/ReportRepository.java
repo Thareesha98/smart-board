@@ -10,9 +10,9 @@ import java.util.List;
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
     // Find reports submitted by a specific student
-    List<Report> findByStudent_StudentId(Long studentId);
+    List<Report> findByStudent(Long studentId);
 
     // Find reports by status (for filtering)
-    List <Report> findByStudent_StudentIdAndStatus(Long studentId, String status);
+//    List <Report> findByStudent_StudentIdAndStatus(Long studentId, String status);
 
 }

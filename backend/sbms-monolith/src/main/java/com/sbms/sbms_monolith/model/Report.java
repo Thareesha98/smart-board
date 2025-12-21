@@ -39,11 +39,12 @@ public class Report {
     @Column(name = "incident_date")
     private LocalDate incidentDate;
 
-    @Column(name = "boarding_name")
-    private String boardingName;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "boarding_id")
+    private Boarding boarding;
 
-    @Column(name = "reported_person")
-    private String reportedPerson;
+//    @Column(name = "reported_person")
+//    private String reportedPerson;
 
     @Column(name = "allow_contact")
     private boolean allowContact;
@@ -58,7 +59,7 @@ public class Report {
     private List<String> evidence;
 
     // Relationships
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 

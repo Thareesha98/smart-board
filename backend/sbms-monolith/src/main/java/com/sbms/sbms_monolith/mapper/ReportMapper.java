@@ -16,8 +16,8 @@ public class ReportMapper {
         dto.setDescription(r.getDescription());
         dto.setType(r.getType());
         dto.setSeverity(r.getSeverity());
-        dto.setBoarding(r.getBoardingName());
-        dto.setReportedPerson(r.getReportedPerson());
+        dto.setBoarding(r.getBoarding());
+//        dto.setReportedPerson(r.getReportedPerson());
         dto.setAllowContact(r.isAllowContact());
         dto.setIncidentDate(r.getIncidentDate());
 
@@ -37,8 +37,8 @@ public class ReportMapper {
         r.setDescription(dto.getReportDescription());
         r.setType(dto.getType());
         r.setSeverity(dto.getSeverity());
-        r.setBoardingName(dto.getBoarding());
-        r.setReportedPerson(dto.getReportedPerson());
+        r.setBoarding(dto.getBoarding());
+//        r.setReportedPerson(dto.getReportedPerson());
 
         if (dto.getAllowContact() != null) {
             r.setAllowContact(dto.getAllowContact());

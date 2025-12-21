@@ -53,7 +53,7 @@ public class ReportService {
     }
 
     public List<ReportResponseDTO> getReportsByStudent(Long studentId) {
-        return reportRepo.findByStudent_StudentId(studentId)
+        return reportRepo.findByStudent(studentId)
                 .stream()
                 .map(ReportMapper::toDTO)
                 .toList();

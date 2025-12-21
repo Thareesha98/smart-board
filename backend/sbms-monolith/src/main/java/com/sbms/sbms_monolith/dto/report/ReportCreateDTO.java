@@ -1,5 +1,6 @@
 package com.sbms.sbms_monolith.dto.report;
 
+import com.sbms.sbms_monolith.model.Boarding;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,8 +14,8 @@ public class ReportCreateDTO {
     private String reportDescription;
     private String type;
     private String severity;
-    private String boarding;             // Name of the boarding
-    private String reportedPerson;
+    private Boarding boarding;             // Name of the boarding
+//    private String reportedPerson;
     private Boolean allowContact;
     private LocalDate incidentDate;
     private Long studentId;              // ID of the student sending it

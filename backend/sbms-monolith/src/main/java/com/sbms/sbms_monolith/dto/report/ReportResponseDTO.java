@@ -1,5 +1,6 @@
 package com.sbms.sbms_monolith.dto.report;
 
+import com.sbms.sbms_monolith.model.Boarding;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -13,8 +14,8 @@ public class ReportResponseDTO {
     private String description;
     private String type;
     private String severity;
-    private String boarding;
-    private String reportedPerson;
+    private Boarding boarding;
+//    private String reportedPerson;
     private Boolean allowContact;
     private LocalDate incidentDate;
 
