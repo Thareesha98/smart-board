@@ -36,7 +36,6 @@ export default function MyAdsPage() {
     (ad) => filter === "All" || ad.status === filter
   );
 
-  // 2. Navigation Helpers
   const isNestedRoute = location.pathname !== "/ownerLayout/myAds";
   const handleCreate = () => navigate("createAd");
 
@@ -46,39 +45,46 @@ export default function MyAdsPage() {
     <div className="pt-4 space-y-6 bg-light min-h-screen">
       <HeaderBar
         title="My Boarding Ads"
-        subtitle="Manage, track performance, and edit your listings"
+        subtitle="Manage and track your listings"
         notificationCount={ownerData?.notifications || 3}
         userAvatar={ownerData.avatar}
         userName={ownerData.firstName}
       >
+        {/* Responsive Button: Text hidden on mobile, full on tablet/desktop */}
         <button
-          className="px-6 py-3 font-black rounded-full bg-accent text-card-bg shadow-md hover:scale-[1.02] transition-all uppercase tracking-widest text-xs"
+          className="px-4 md:px-6 py-3 font-black rounded-full bg-accent text-card-bg shadow-md hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-[10px] md:text-xs"
           onClick={handleCreate}
         >
-          <i className="fas fa-plus mr-2" /> Create New Ad
+          <i className="fas fa-plus md:mr-2" /> 
+          <span className="hidden md:inline">Create New Ad</span>
         </button>
       </HeaderBar>
 
-      {/* Filter Section */}
-      <section className="p-6 rounded-report shadow-custom grid grid-cols-2 md:grid-cols-5 gap-4 bg-card-bg border border-light">
-        {Object.keys(STATUS_CONFIG).map((status) => (
-          <StatusTab
-            key={status}
-            status={status}
-            count={counts[status] || 0}
-            currentFilter={filter}
-            setFilter={setFilter}
-          />
-        ))}
+      {/* Filter Section: 
+          Uses horizontal scrolling on mobile (overflow-x-auto) 
+          and a 5-column grid on desktop (md:grid-cols-5) */}
+      <section className="px-4 md:px-0">
+        <div className="flex overflow-x-auto md:grid md:grid-cols-5 gap-4 p-4 md:p-6 rounded-report shadow-custom bg-card-bg border border-light custom-scrollbar">
+          {Object.keys(STATUS_CONFIG).map((status) => (
+            <div key={status} className="min-w-[140px] md:min-w-0 flex-shrink-0">
+              <StatusTab
+                status={status}
+                count={counts[status] || 0}
+                currentFilter={filter}
+                setFilter={setFilter}
+              />
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* Ads Section */}
-      <section className="pb-10">
-        <h2 className="text-2xl font-black mb-4 text-primary tracking-tight">
+      {/* Ads Section: Padding added for mobile screens */}
+      <section className="px-4 md:px-0 pb-10">
+        <h2 className="text-xl md:text-2xl font-black mb-4 text-primary tracking-tight">
           {filter} Listings ({filteredAds.length})
         </h2>
 
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {filteredAds.length > 0 ? (
             filteredAds.map((ad) => (
               <AdCard
@@ -88,10 +94,9 @@ export default function MyAdsPage() {
                 onBoostRedirect={(id) =>
                   navigate(`/ownerLayout/subscriptions/${id}`)
                 }
-                // Updated to use the hex color values if needed,
-                // or you can update AdCard to accept a class name instead.
                 getStatusBadgeStyle={(s) => ({
                   backgroundColor: `var(--${s.toLowerCase()})`,
+                  color: 'white'
                 })}
               />
             ))
