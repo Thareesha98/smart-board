@@ -58,4 +58,11 @@ public class ReportService {
                 .map(ReportMapper::toDTO)
                 .toList();
     }
+
+    public ReportResponseDTO getReportsById(Long reportId) {
+        Report report = reportRepo.findById(reportId)
+                .orElseThrow(() -> new RuntimeException("Report not found with id " + reportId));
+
+        return ReportMapper.toDTO(report);
+    }
 }
