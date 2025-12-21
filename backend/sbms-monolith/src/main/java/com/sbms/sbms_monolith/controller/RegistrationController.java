@@ -4,7 +4,9 @@ import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
 import com.sbms.sbms_monolith.dto.registration.*;
 import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
+import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.RegistrationService;
+import com.sbms.sbms_monolith.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +18,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/registrations")
-@CrossOrigin
 public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
+    
+    @Autowired UserRepository userRepository;
     
     
 
@@ -74,12 +77,16 @@ public class RegistrationController {
             @PathVariable Long regId,
             Authentication authentication
     ) {
-        User user = (User) authentication.getPrincipal();
+        String email = authentication.getName(); // 👈 from JWT
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         StudentBoardingDashboardDTO dto =
                 registrationService.getDashboard(regId, user.getId());
 
         return ResponseEntity.ok(dto);
     }
+
 
 }
