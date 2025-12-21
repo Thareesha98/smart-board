@@ -16,7 +16,8 @@ export default function Dashboard() {
   const { firstName: userName, avatar: userAvatar } = ownerData;
 
   return (
-    <div className="space-y-8 pt-4 pb-10 bg-light min-h-screen">
+    <div className="space-y-6 md:space-y-8 pt-4 pb-10 bg-light min-h-screen">
+      {/* HeaderBar usually handles internal responsiveness, but ensure it has room */}
       <HeaderBar
         title={`Welcome back, ${userName}!`}
         subtitle="Manage your boarding properties efficiently"
@@ -25,8 +26,9 @@ export default function Dashboard() {
         userName={userName}
       />
 
-      {/* 1. Stats Overview - 4 Column Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2">
+      {/* 1. Stats Overview - Responsive Grid 
+          Mobile: 1 col | Tablet: 2 cols | Desktop: 4 cols */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 px-4 md:px-6">
         <StatWidget
           icon="fas fa-building"
           title="Total Ads"
@@ -53,13 +55,14 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-2">
-        {/* 2. Quick Actions Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 px-4 md:px-6">
+        {/* 2. Quick Actions Section 
+            Uses a tighter grid on mobile to save vertical space */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
+          <h2 className="text-xl md:text-2xl font-black text-primary flex items-center gap-2 uppercase tracking-tight">
             Quick Actions
           </h2>
-          <div className="bg-card-bg p-6 rounded-report shadow-custom border border-light">
+          <div className="bg-card-bg p-4 md:p-6 rounded-report shadow-custom border border-light">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <DashButton
                 to="/ownerLayout/myAds/createAd"
@@ -95,12 +98,13 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* 3. Recent Appointments Section */}
+        {/* 3. Recent Appointments Section 
+            Reduced max-height on mobile for better scrolling behavior */}
         <DashboardSection
           title="Recent Appointments"
           badge={`${dashboardData.newAppointmentsCount} New`}
         >
-          <div className="max-h-[380px] overflow-y-auto custom-scrollbar">
+          <div className="max-h-[300px] md:max-h-[380px] overflow-y-auto custom-scrollbar pr-2">
             {recentAppointments.map((app) => (
               <AppointmentItem key={app.id} appointment={app} />
             ))}
@@ -109,9 +113,9 @@ export default function Dashboard() {
       </div>
 
       {/* 4. Recent Activity - Full Width */}
-      <div className="px-2">
+      <div className="px-4 md:px-6">
         <DashboardSection title="Recent Activity">
-          <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+          <div className="max-h-[350px] md:max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
             {recentActivity.map((activity, index) => (
               <ActivityItem key={index} data={activity} />
             ))}
