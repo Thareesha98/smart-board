@@ -1,4 +1,4 @@
-package com.sbms.sbms_monolith.service;
+ package com.sbms.sbms_monolith.service;
 
 import com.sbms.sbms_monolith.model.Otp;
 import com.sbms.sbms_monolith.model.enums.OtpPurpose;
