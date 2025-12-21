@@ -1,6 +1,8 @@
 package com.sbms.sbms_monolith.service;
 
 import com.sbms.sbms_monolith.mapper.RegistrationMapper;
+import com.sbms.sbms_monolith.mapper.StudentBoardingDashboardMapper;
+import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
 import com.sbms.sbms_monolith.dto.registration.*;
 import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.Registration;
@@ -15,6 +17,8 @@ import com.sbms.sbms_monolith.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,11 +36,6 @@ public class RegistrationService {
 
     @Autowired
     private PaymentService paymentService;
-
-
-    // ---------------------------------------------------------
-    // STUDENT REGISTRATION
-    // ---------------------------------------------------------
     public RegistrationResponseDTO register(Long studentId, RegistrationRequestDTO dto) {
 
         User student = userRepo.findById(studentId)
@@ -49,12 +48,10 @@ public class RegistrationService {
             throw new RuntimeException("Not enough slots available");
         }
 
-        // Student MUST confirm key money was paid
         if (!dto.isKeyMoneyPaid()) {
             throw new RuntimeException("Key money must be paid to register");
         }
 
-        // Dummy payment (simulate)
         boolean success = paymentService.processPayment(
                 studentId,
                 boarding.getKeyMoney()
@@ -78,18 +75,12 @@ public class RegistrationService {
     }
 
 
-    // ---------------------------------------------------------
-    // STUDENT: GET ALL MY REGISTRATIONS
-    // ---------------------------------------------------------
     public List<RegistrationResponseDTO> getStudentRegistrations(Long studentId) {
         return registrationRepo.findByStudentId(studentId)
                 .stream().map(RegistrationMapper::toDTO)
                 .toList();
     }
 
-    // ---------------------------------------------------------
-    // STUDENT: CANCEL
-    // ---------------------------------------------------------
     public RegistrationResponseDTO cancel(Long studentId, Long regId) {
 
         Registration r = registrationRepo.findById(regId)
@@ -109,9 +100,6 @@ public class RegistrationService {
         return RegistrationMapper.toDTO(r);
     }
 
-    // ---------------------------------------------------------
-    // OWNER: VIEW REGISTRATIONS
-    // ---------------------------------------------------------
     public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
 
         return registrationRepo.findByBoardingOwnerId(ownerId, status)
@@ -120,9 +108,6 @@ public class RegistrationService {
                 .toList();
     }
 
-    // ---------------------------------------------------------
-    // OWNER: APPROVE / DECLINE
-    // ---------------------------------------------------------
     public RegistrationResponseDTO decide(Long ownerId, Long regId, RegistrationDecisionDTO dto) {
 
         Registration r = registrationRepo.findById(regId)
@@ -135,7 +120,6 @@ public class RegistrationService {
         r.setStatus(dto.getStatus());
         r.setOwnerNote(dto.getOwnerNote());
 
-        // If approved → reduce available slots
         if (dto.getStatus() == RegistrationStatus.APPROVED) {
             Boarding b = r.getBoarding();
             b.setAvailable_slots(b.getAvailable_slots() - r.getNumberOfStudents());
@@ -146,4 +130,47 @@ public class RegistrationService {
 
         return RegistrationMapper.toDTO(r);
     }
+    
+    public StudentBoardingDashboardDTO getDashboard(Long regId, Long loggedStudentId) {
+
+        Registration reg = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        // 🔒 Security check
+        if (!reg.getStudent().getId().equals(loggedStudentId)) {
+            throw new RuntimeException("Forbidden");
+        }
+
+        // ----------------------------
+        // PAYMENT (mock / safe)
+        // ----------------------------
+        BigDecimal currentMonthDue = reg.getBoarding().getPricePerMonth();
+        String paymentStatus = "PENDING";
+        LocalDate lastPaymentDate = null;
+
+        // ----------------------------
+        // MAINTENANCE (safe defaults)
+        // ----------------------------
+        int openIssues = 0;
+        int resolvedIssues = 0;
+        LocalDate lastIssueDate = null;
+
+       
+        Double avgRating = 0.0;
+        boolean reviewSubmitted = false;
+
+        return StudentBoardingDashboardMapper.toDTO(
+                reg,
+                currentMonthDue,
+                paymentStatus,
+                lastPaymentDate,
+                openIssues,
+                resolvedIssues,
+                lastIssueDate,
+                avgRating,
+                reviewSubmitted
+        );
+    }
+
+    
 }
