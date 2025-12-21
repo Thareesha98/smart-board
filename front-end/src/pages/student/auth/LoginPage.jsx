@@ -15,7 +15,7 @@ const LoginPage = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      navigate('/', { replace: true });
+      navigate('', { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -28,7 +28,7 @@ const LoginPage = () => {
       const result = login(formData.email, formData.password);
       if (result.success) {
         setIsLoading(false);
-        navigate('/', { replace: true });
+        navigate('/student/', { replace: true });
       } else {
         setIsLoading(false);
         setError(result.message);
@@ -116,7 +116,7 @@ const LoginPage = () => {
             <p className="text-text-muted">
               Don't have an account?{' '}
               <Link
-                to="/signup"
+                to="/student/signup"
                 className="text-accent hover:text-primary font-semibold transition-colors"
               >
                 Sign Up

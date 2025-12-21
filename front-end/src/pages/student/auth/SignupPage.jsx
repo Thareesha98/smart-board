@@ -15,7 +15,7 @@ const SignupPage = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      navigate('/', { replace: true });
+      navigate('', { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -27,7 +27,7 @@ const SignupPage = () => {
       const result = signup(formData);
       if (result.success) {
         setIsLoading(false);
-        navigate('/', { replace: true });
+        navigate('/student/login/', { replace: true });
       }
     }, 2000);
   };
@@ -67,7 +67,7 @@ const SignupPage = () => {
           animate={{ x: 0, opacity: 1 }}
         >
           <Link
-            to="/login"
+            to="/student/login"
             className="inline-flex items-center gap-2 text-white hover:text-gray-200 transition-colors mb-6 font-semibold drop-shadow-lg bg-white/10 backdrop-blur-sm px-4 py-2 rounded-large hover:bg-white/20"
           >
             <FaArrowLeft />

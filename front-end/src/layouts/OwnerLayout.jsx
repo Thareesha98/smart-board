@@ -3,21 +3,21 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import Logo from "../assets/logo.jpg";
 
 const ownerNavigation = [
-  { name: "Dashboard", path: "/ownerLayout/dashboard", icon: "fas fa-home" },
-  { name: "My Ads", path: "/ownerLayout/myAds", icon: "fas fa-bullhorn" },
+  { name: "Dashboard", path: "/owner/dashboard", icon: "fas fa-home" },
+  { name: "My Ads", path: "/owner/myAds", icon: "fas fa-bullhorn" },
   {
     name: "Appointments",
-    path: "/ownerLayout/appointments",
+    path: "/owner/appointments",
     icon: "fas fa-calendar-alt",
   },
   {
     name: "My Boardings",
-    path: "/ownerLayout/myboardings",
+    path: "/owner/myboardings",
     icon: "fas fa-dog",
   },
-  { name: "Utility", path: "/ownerLayout/utility", icon: "fas fa-cogs" },
-  { name: "Payment", path: "/ownerLayout/payment", icon: "fas fa-credit-card" },
-  { name: "Reports", path: "/ownerLayout/reports", icon: "fas fa-file-alt" },
+  { name: "Utility", path: "/owner/utility", icon: "fas fa-cogs" },
+  { name: "Payment", path: "/owner/payment", icon: "fas fa-credit-card" },
+  { name: "Reports", path: "/owner/reports", icon: "fas fa-file-alt" },
 ];
 
 const BASE_LINK_CLASSES =
@@ -34,12 +34,12 @@ export default function OwnerLayout() {
   }, [currentPath]);
 
   const activePath = (() => {
-    if (currentPath.includes("/ownerLayout/myAds")) return "/ownerLayout/myAds";
-    if (currentPath.includes("/ownerLayout/profile"))
-      return "/ownerLayout/profile";
+    if (currentPath.includes("/owner/myAds")) return "/owner/myAds";
+    if (currentPath.includes("/owner/profile"))
+      return "/owner/profile";
     return (
       ownerNavigation.find((item) => currentPath.startsWith(item.path))?.path ||
-      "/ownerLayout/dashboard"
+      "/owner/dashboard"
     );
   })();
 
@@ -125,8 +125,8 @@ export default function OwnerLayout() {
 
         <div className="pt-4 mt-auto border-t border-white/10">
           <Link
-            to="/ownerLayout/profile"
-            className={getLinkClasses("/ownerLayout/profile")}
+            to="/owner/profile"
+            className={getLinkClasses("/owner/profile")}
           >
             <i className="fas fa-user w-5 text-center"></i>
             <span>{userName}</span>

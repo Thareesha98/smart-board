@@ -53,7 +53,7 @@ export default function ReportsPage() {
       >
         <button
           className="bg-accent text-card-bg px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest shadow-md hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95"
-          onClick={() => navigate("/ownerLayout/reports/add")}
+          onClick={() => navigate("/owner/reports/add")}
         >
           <i className="fas fa-plus mr-2"></i>
           Add New Report

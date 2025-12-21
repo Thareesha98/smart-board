@@ -12,7 +12,7 @@ const Header = ({ title, subtitle, rightContent }) => {
   }
 
   const handleUserMenuClick = () => {
-    navigate('/profile');
+    navigate('/student/profile');
   }
 
   return (

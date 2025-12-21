@@ -36,7 +36,7 @@ export default function MyAdsPage() {
     (ad) => filter === "All" || ad.status === filter
   );
 
-  const isNestedRoute = location.pathname !== "/ownerLayout/myAds";
+  const isNestedRoute = location.pathname !== "/owner/myAds";
   const handleCreate = () => navigate("createAd");
 
   if (isNestedRoute) return <Outlet />;
@@ -92,7 +92,7 @@ export default function MyAdsPage() {
                 ad={ad}
                 onEdit={(id) => navigate(`editAd/${id}`)}
                 onBoostRedirect={(id) =>
-                  navigate(`/ownerLayout/subscriptions/${id}`)
+                  navigate(`/owner/subscriptions/${id}`)
                 }
                 getStatusBadgeStyle={(s) => ({
                   backgroundColor: `var(--${s.toLowerCase()})`,
