@@ -1,3 +1,10 @@
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { AuthProvider } from './context/student/AuthContext.jsx';
+import ScrollToTop from './ScrollToTop';
+import AppRoutes from './routes/AppRoutes'; // Import the new routes file
+
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import CreateAdPage from "./pages/owner/CreateAdPage";
 import EditAdPage from "./pages/owner/EditAdPage";
@@ -16,7 +23,14 @@ import PaymentPage from "./pages/owner/PaymentPage";
 function App() {
   return (
     <>
-      <div className="min-h-screen flex flex-col">
+    <AuthProvider>
+      <Router>
+        <ScrollToTop />
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
+    
+    <div className="min-h-screen flex flex-col">
         <div className="grow">
           <Routes>
             {/* 0. Redirect root path '/' to the default dashboard view */}

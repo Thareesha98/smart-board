@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+body {
+  @apply font-sans text-text-dark bg-background-light leading-relaxed min-h-screen;
+}
+
 :root {
   --primary: #D84C38;
   --accent: #FF7A00;
