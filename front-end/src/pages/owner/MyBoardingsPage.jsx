@@ -48,19 +48,12 @@ export default function MyBoardingsPage() {
   return (
     <div className="pt-4 space-y-8 min-h-screen pb-12 bg-light">
       <HeaderBar
-        title="My Boardings"
-        subtitle="Manage your properties and track tenant details"
-        notificationCount={3}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
-      >
-        <button
-          className="bg-accent text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest shadow-md hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          <i className="fas fa-plus mr-2"></i> Post New Boarding
-        </button>
-      </HeaderBar>
+        title="My Boarding Properties"
+        subtitle="Manage your property inventory and tenant details"
+        navBtnText="Add New Property"
+        navBtnPath="#"
+        onNavBtnClick={() => setIsCreateModalOpen(true)}
+      />
 
       <section className="space-y-6 px-4 max-w-[1600px] mx-auto">
         {/* Header Actions */}

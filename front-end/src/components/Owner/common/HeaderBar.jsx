@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useOwnerAuth } from "../../../context/owner/OwnerAuthContext.jsx";
 
 // Added navBtnText and navBtnPath props
-const Header = ({ title, subtitle, rightContent, navBtnText, navBtnPath }) => {
+const Header = ({ title, subtitle, rightContent, navBtnText, navBtnPath,onNavBtnClick }) => {
   const { currentUser } = useOwnerAuth();
   const navigate = useNavigate();
 
@@ -23,6 +23,14 @@ const Header = ({ title, subtitle, rightContent, navBtnText, navBtnPath }) => {
     : "";
   const userAvatar =
     currentUser?.avatar || "https://randomuser.me/api/portraits/men/32.jpg";
+
+    const handlePrimaryAction = () => {
+    if (onNavBtnClick) {
+      onNavBtnClick(); // Open the modal
+    } else if (navBtnPath) {
+      navigate(navBtnPath); // Navigate to page
+    }
+  };
 
   return (
     <header
@@ -45,9 +53,9 @@ const Header = ({ title, subtitle, rightContent, navBtnText, navBtnPath }) => {
       <div className="flex items-center gap-6">
         {/* 🔥 NEW: Dynamic Navigation Button */}
         {/* Only renders if both text and path are provided */}
-        {navBtnText && navBtnPath && (
+        {navBtnText && (navBtnPath || onNavBtnClick) && (
           <button
-            onClick={() => navigate(navBtnPath)}
+            onClick={handlePrimaryAction}
             className="
               hidden sm:flex items-center gap-2 
               bg-accent text-white px-5 py-2.5 rounded-3xl 

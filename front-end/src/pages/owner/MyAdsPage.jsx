@@ -44,21 +44,11 @@ export default function MyAdsPage() {
   return (
     <div className="pt-4 space-y-6 bg-light min-h-screen">
       <HeaderBar
-        title="My Boarding Ads"
-        subtitle="Manage and track your listings"
-        notificationCount={ownerData?.notifications || 3}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
-      >
-        {/* Responsive Button: Text hidden on mobile, full on tablet/desktop */}
-        <button
-          className="px-4 md:px-6 py-3 font-black rounded-full bg-accent text-card-bg shadow-md hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-[10px] md:text-xs"
-          onClick={handleCreate}
-        >
-          <i className="fas fa-plus md:mr-2" /> 
-          <span className="hidden md:inline">Create New Ad</span>
-        </button>
-      </HeaderBar>
+        title="My Listings"
+        subtitle="Manage your boarding house advertisements"
+        navBtnText="Create New Listing"
+        navBtnPath="/owner/myAds/createAd"
+      />
 
       {/* Filter Section: 
           Uses horizontal scrolling on mobile (overflow-x-auto) 
