@@ -1,44 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import { FaArrowLeft, FaWifi, FaSnowflake, FaTshirt, FaShieldAlt, FaUtensils, FaTv, FaDumbbell, FaBicycle, FaClock, FaUserFriends, FaSmokingBan, FaPaw, FaMapMarkedAlt } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Link, useLocation, useParams } from "react-router-dom";
+import {
+  FaArrowLeft,
+  FaWifi,
+  FaSnowflake,
+  FaTshirt,
+  FaShieldAlt,
+  FaUtensils,
+  FaTv,
+  FaDumbbell,
+  FaBicycle,
+  FaMapMarkedAlt,
+} from "react-icons/fa";
 
-import StudentLayout from '../../components/student/common/StudentLayout';
-import ImageGallery from '../../components/student/boarding-details/ImageGallery';
-import QuickInfoCard from '../../components/student/boarding-details/QuickInfoCard';
-import OwnerCard from '../../components/student/boarding-details/OwnerCard';
-import AppointmentForm from '../../components/student/boarding-details/AppointmentForm';
+import StudentLayout from "../../components/student/common/StudentLayout";
+import ImageGallery from "../../components/student/boarding-details/ImageGallery";
+import QuickInfoCard from "../../components/student/boarding-details/QuickInfoCard";
+import OwnerCard from "../../components/student/boarding-details/OwnerCard";
+import AppointmentForm from "../../components/student/boarding-details/AppointmentForm";
+import ReviewsList from "../../components/student/boarding-details/ReviewsList";
 
-import { boardingDetails as defaultBoardingDetails, timeSlots, safetyTips } from '../../data/student/boardingDetailsData.js';
-import { useImageGallery } from '../../hooks/student/useImageGallery.js';
-import { useAppointmentForm } from '../../hooks/student/useAppointmentForm.js';
+import {
+  boardingDetails as defaultBoardingDetails,
+  timeSlots,
+  safetyTips,
+} from "../../data/student/boardingDetailsData.js";
+import { useImageGallery } from "../../hooks/student/useImageGallery.js";
+import { useAppointmentForm } from "../../hooks/student/useAppointmentForm.js";
 
 const amenityIcons = {
-  wifi: FaWifi, snowflake: FaSnowflake, tshirt: FaTshirt, 'shield-alt': FaShieldAlt,
-  utensils: FaUtensils, tv: FaTv, dumbbell: FaDumbbell, bicycle: FaBicycle
-};
-
-const ruleIcons = {
-  clock: FaClock, 'user-friends': FaUserFriends, 'smoking-ban': FaSmokingBan, paw: FaPaw
+  wifi: FaWifi,
+  snowflake: FaSnowflake,
+  tshirt: FaTshirt,
+  "shield-alt": FaShieldAlt,
+  utensils: FaUtensils,
+  tv: FaTv,
+  dumbbell: FaDumbbell,
+  bicycle: FaBicycle,
 };
 
 const mapAmenitiesWithIcons = (amenities) => {
-    const amenityIconMap = {
-      'wifi': 'wifi', 'ac': 'snowflake', 'laundry': 'tshirt',
-      'security': 'shield-alt', 'furnished': 'utensils', 'parking': 'bicycle'
-    };
-    return amenities.map(amenity => {
-      const amenityLower = amenity.toLowerCase();
-      const iconKey = amenityIconMap[amenityLower] || 'wifi';
-      return { icon: iconKey, label: amenity };
-    });
+  const amenityIconMap = {
+    wifi: "wifi",
+    ac: "snowflake",
+    laundry: "tshirt",
+    security: "shield-alt",
+    furnished: "utensils",
+    parking: "bicycle",
+  };
+  return amenities.map((amenity) => {
+    const amenityLower = amenity.toLowerCase();
+    const iconKey = amenityIconMap[amenityLower] || "wifi";
+    return { icon: iconKey, label: amenity };
+  });
 };
 
 const BoardingDetailsPage = () => {
   const location = useLocation();
   const { id } = useParams();
   const passedBoarding = location.state?.boarding;
-  const [currentBoarding, setCurrentBoarding] = useState(passedBoarding || defaultBoardingDetails);
+  const [currentBoarding, setCurrentBoarding] = useState(
+    passedBoarding || defaultBoardingDetails
+  );
 
   useEffect(() => {
     if (passedBoarding) {
@@ -46,26 +70,74 @@ const BoardingDetailsPage = () => {
         ...passedBoarding,
         location: {
           address: passedBoarding.location,
-          distance: `${passedBoarding.distance} km from University of Ruhuna`
+          distance: `${passedBoarding.distance} km from University of Ruhuna`,
         },
-        amenities: passedBoarding.amenities[0]?.icon ? passedBoarding.amenities : mapAmenitiesWithIcons(passedBoarding.amenities)
+        amenities: passedBoarding.amenities[0]?.icon
+          ? passedBoarding.amenities
+          : mapAmenitiesWithIcons(passedBoarding.amenities),
       });
     }
   }, [passedBoarding]);
 
-  const { currentImage, currentIndex, nextImage, prevImage, selectImage } = useImageGallery(currentBoarding.images);
-  const { formData, updateField, submitAppointment, isSubmitting, isSuccess } = useAppointmentForm();
+  const { currentImage, currentIndex, nextImage, prevImage, selectImage } =
+    useImageGallery(currentBoarding.images);
+    
+  // Get form logic from hook
+  const { formData, updateField, submitAppointment, isSubmitting, isSuccess } =
+    useAppointmentForm();
+
+  // ✅ UPDATED: Submit handler without redirect
+  const handleScheduleSubmit = async () => {
+    // 1. Run validation
+    const result = await submitAppointment();
+
+    if (result.success) {
+      // 2. Prepare Data (with updated owner info)
+      const ownerPhone = currentBoarding.owner.contact || "+94 77 123 4567";
+      const ownerEmail = currentBoarding.owner.email || "owner@example.com"; 
+
+      // 3. Create the appointment object
+      const newAppointment = {
+        id: Date.now(),
+        boardingId: currentBoarding.id,
+        boardingName: currentBoarding.name,
+        image: currentBoarding.images[0],
+        
+        // Save Owner details for the Appointments Page
+        owner: currentBoarding.owner.name,
+        contact: ownerPhone,
+        email: ownerEmail,
+
+        address: currentBoarding.location.address,
+        date: formData.date,
+        time: formData.time,
+        notes: formData.notes,
+        status: 'upcoming', 
+        registered: false
+      };
+
+      // 4. Save to localStorage
+      const existingAppointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      localStorage.setItem('appointments', JSON.stringify([...existingAppointments, newAppointment]));
+      
+      // 5. No redirect - user stays on page, button shows success state
+    }
+    return result;
+  };
 
   const handleBookVisit = () => {
-    document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' });
+    document
+      .getElementById("appointment-form")
+      ?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleContact = (type) => {
-    alert(type === 'message' ? 'Message feature coming soon!' : 'Call feature coming soon!');
+    // Optional: You can implement specific actions here or leave as placeholder alert
+    if (type === 'message') {
+        alert(`Message feature for ${currentBoarding.owner.email} coming soon!`);
+    }
   };
 
-  // --- 1. HEADER BUTTON (Desktop/Tablet Only) ---
-  // Uses "hidden sm:flex" so it disappears on mobile to avoid header conflicts
   const headerRightContent = (
     <Link to="/student/search-boardings">
       <motion.button
@@ -80,17 +152,14 @@ const BoardingDetailsPage = () => {
   );
 
   return (
-    <StudentLayout 
-      title={currentBoarding.name} 
-      subtitle="Boarding Details" 
+    <StudentLayout
+      title={currentBoarding.name}
+      subtitle="Boarding Details"
       headerRightContent={headerRightContent}
     >
-      {/* LAYOUT LOGIC using 1400px breakpoint */}
       <div className="flex flex-col min-[1400px]:grid min-[1400px]:grid-cols-3 gap-6 mb-8 items-start">
-        
         {/* --- LEFT COLUMN: CONTENT --- */}
         <div className="min-[1400px]:col-span-2 w-full space-y-6">
-          
           <ImageGallery
             images={currentBoarding.images}
             currentIndex={currentIndex}
@@ -100,28 +169,36 @@ const BoardingDetailsPage = () => {
             badge={currentBoarding.badge}
           />
 
-          {/* TABLET/MOBILE VIEW: Cards appear here immediately after images (< 1400px) */}
           <div className="flex flex-col gap-4 min-[1400px]:hidden">
-            <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
-            <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
+            <QuickInfoCard
+              boarding={currentBoarding}
+              onBookVisit={handleBookVisit}
+            />
+            <OwnerCard
+              owner={currentBoarding.owner}
+              onContact={handleContact}
+            />
           </div>
 
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
             <h2 className="text-xl font-bold text-primary mb-3">Description</h2>
             {currentBoarding.description.map((para, idx) => (
-              <p key={idx} className="text-text-muted mb-3 leading-relaxed text-sm sm:text-base last:mb-0">
+              <p
+                key={idx}
+                className="text-text-muted mb-3 leading-relaxed text-sm sm:text-base last:mb-0"
+              >
                 {para}
               </p>
             ))}
           </motion.section>
 
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
             <h2 className="text-xl font-bold text-primary mb-4">Amenities</h2>
@@ -129,18 +206,23 @@ const BoardingDetailsPage = () => {
               {currentBoarding.amenities.map((amenity, idx) => {
                 const Icon = amenityIcons[amenity.icon] || FaWifi;
                 return (
-                  <div key={idx} className="flex flex-col items-center justify-center p-3 bg-background-light rounded-xl hover:bg-gray-100 transition-colors text-center gap-2">
+                  <div
+                    key={idx}
+                    className="flex flex-col items-center justify-center p-3 bg-background-light rounded-xl hover:bg-gray-100 transition-colors text-center gap-2"
+                  >
                     <Icon className="text-2xl text-accent" />
-                    <span className="text-sm font-medium text-text-dark">{amenity.label}</span>
+                    <span className="text-sm font-medium text-text-dark">
+                      {amenity.label}
+                    </span>
                   </div>
                 );
               })}
             </div>
           </motion.section>
 
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
             <h2 className="text-xl font-bold text-primary mb-4">Location</h2>
@@ -148,62 +230,102 @@ const BoardingDetailsPage = () => {
               <div className="absolute inset-0 bg-accent/5 group-hover:bg-accent/10 transition-colors"></div>
               <FaMapMarkedAlt className="text-5xl text-accent mb-2 transform group-hover:scale-110 transition-transform" />
               <p className="text-text-dark font-bold z-10">View on Map</p>
-              <p className="text-sm text-text-muted z-10 text-center px-4 mt-1">{currentBoarding.location.address}</p>
+              <p className="text-sm text-text-muted z-10 text-center px-4 mt-1">
+                {currentBoarding.location.address}
+              </p>
             </div>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {currentBoarding.nearbyPlaces.map((place, idx) => (
-                <li key={idx} className="text-sm text-text-muted flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> {place}
+                <li
+                  key={idx}
+                  className="text-sm text-text-muted flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>{" "}
+                  {place}
                 </li>
               ))}
             </ul>
           </motion.section>
 
-          <motion.section 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
-            <h2 className="text-xl font-bold text-primary mb-6">Reviews ({currentBoarding.reviewCount})</h2>
+            <h2 className="text-xl font-bold text-primary mb-6">
+              Reviews ({currentBoarding.reviewCount})
+            </h2>
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center justify-center bg-background-light rounded-2xl p-6 sm:w-40 text-center flex-shrink-0">
-                <div className="text-4xl font-bold text-text-dark">{currentBoarding.reviewsSummary?.overall || currentBoarding.rating}</div>
-                <div className="text-yellow-400 text-sm my-1">{'★'.repeat(5)}</div>
-                <div className="text-xs font-bold text-text-muted uppercase">Overall</div>
+                <div className="text-4xl font-bold text-text-dark">
+                  {currentBoarding.reviewsSummary?.overall ||
+                    currentBoarding.rating}
+                </div>
+                <div className="text-yellow-400 text-sm my-1">
+                  {"★".repeat(5)}
+                </div>
+                <div className="text-xs font-bold text-text-muted uppercase">
+                  Overall
+                </div>
               </div>
               <div className="flex-1 space-y-2">
                 {currentBoarding.reviewsSummary?.breakdown.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-text-muted w-10">{item.stars} ★</span>
+                    <span className="text-xs font-bold text-text-muted w-10">
+                      {item.stars} ★
+                    </span>
                     <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-accent rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                      <div
+                        className="h-full bg-accent rounded-full"
+                        style={{ width: `${item.percentage}%` }}
+                      ></div>
                     </div>
-                    <span className="text-xs font-bold text-text-dark w-8 text-right">{item.percentage}%</span>
+                    <span className="text-xs font-bold text-text-dark w-8 text-right">
+                      {item.percentage}%
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
+            <ReviewsList
+              boardingId={currentBoarding.id || id || "default-boarding-id"}
+            />
           </motion.section>
         </div>
 
-        {/* --- RIGHT COLUMN: SIDEBAR (Only visible > 1400px) --- */}
+        {/* --- RIGHT COLUMN: SIDEBAR --- */}
         <div className="hidden min-[1400px]:block w-full space-y-6">
-          <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
+          <QuickInfoCard
+            boarding={currentBoarding}
+            onBookVisit={handleBookVisit}
+          />
           <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
+          
           <div id="appointment-form">
-            <AppointmentForm 
-              formData={formData} updateField={updateField} 
-              onSubmit={submitAppointment} isSubmitting={isSubmitting} isSuccess={isSuccess} timeSlots={timeSlots}
+            <AppointmentForm
+              formData={formData}
+              updateField={updateField}
+              onSubmit={handleScheduleSubmit} 
+              isSubmitting={isSubmitting}
+              isSuccess={isSuccess}
+              timeSlots={timeSlots}
             />
           </div>
+
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
             <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase">
               <FaShieldAlt /> Safety Tips
             </h4>
             <ul className="space-y-2">
               {safetyTips.map((tip, idx) => (
-                <li key={idx} className="text-xs text-text-dark/80 pl-4 relative">
-                   <span className="absolute left-0 top-0.5 text-red-500 font-bold">•</span> {tip}
+                <li
+                  key={idx}
+                  className="text-xs text-text-dark/80 pl-4 relative"
+                >
+                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">
+                    •
+                  </span>{" "}
+                  {tip}
                 </li>
               ))}
             </ul>
@@ -212,10 +334,14 @@ const BoardingDetailsPage = () => {
 
         {/* --- BOTTOM SECTION (< 1400px) --- */}
         <div className="block min-[1400px]:hidden w-full space-y-6">
-           <div id="appointment-form">
-            <AppointmentForm 
-              formData={formData} updateField={updateField} 
-              onSubmit={submitAppointment} isSubmitting={isSubmitting} isSuccess={isSuccess} timeSlots={timeSlots}
+          <div id="appointment-form">
+            <AppointmentForm
+              formData={formData}
+              updateField={updateField}
+              onSubmit={handleScheduleSubmit}
+              isSubmitting={isSubmitting}
+              isSuccess={isSuccess}
+              timeSlots={timeSlots}
             />
           </div>
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
@@ -224,29 +350,31 @@ const BoardingDetailsPage = () => {
             </h4>
             <ul className="space-y-2">
               {safetyTips.map((tip, idx) => (
-                <li key={idx} className="text-xs text-text-dark/80 pl-4 relative">
-                   <span className="absolute left-0 top-0.5 text-red-500 font-bold">•</span> {tip}
+                <li
+                  key={idx}
+                  className="text-xs text-text-dark/80 pl-4 relative"
+                >
+                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">
+                    •
+                  </span>{" "}
+                  {tip}
                 </li>
               ))}
             </ul>
           </div>
         </div>
-
       </div>
 
-      {/* --- 2. MOBILE FLOATING BACK BUTTON --- */}
-      {/* Fixed to bottom right, visible ONLY on mobile (sm:hidden) */}
       <Link to="/student/search-boardings">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="fixed bottom-24 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+          className="fixed bottom-8 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
           aria-label="Back to Search"
         >
           <FaArrowLeft size={24} />
         </motion.button>
       </Link>
-
     </StudentLayout>
   );
 };
