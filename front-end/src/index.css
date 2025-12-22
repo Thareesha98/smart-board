@@ -1,25 +1,17 @@
+/* 1. Imports FIRST */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* 2. Tailwind Directives SECOND */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-body {
-  @apply font-sans text-text-dark bg-background-light leading-relaxed min-h-screen;
-}
-
+/* 3. Custom Styles THIRD */
 :root {
-  --primary: #D84C38;
-  --accent: #FF7A00;
-  --light: #E8DBC7;
-  --card-bg: #FFFFFF;
-  --text: #332720;
-  --muted: #665345;
+  font-family: 'Inter', sans-serif;
 }
 
 body {
-  @apply bg-light text-text;
-  font-family: 'Inter', sans-serif;
-  line-height: 1.6;
+  margin: 0;
+  background-color: #E8DBC7;
 }
