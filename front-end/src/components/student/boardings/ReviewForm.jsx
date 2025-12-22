@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FaStar, FaCheckCircle } from 'react-icons/fa';
 import { useAuth } from '../../../context/student/AuthContext.jsx';
@@ -11,6 +11,22 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isEditing, setIsEditing] = useState(false); // ✅ Track edit mode
+
+  // ✅ Check for existing review on mount
+  useEffect(() => {
+    if (currentUser?.studentId && boardingId) {
+      const existingReviews = JSON.parse(localStorage.getItem('boardingReviews') || '{}');
+      const boardReviews = existingReviews[boardingId] || [];
+      const myReview = boardReviews.find(r => r.userId === currentUser.studentId);
+      
+      if (myReview) {
+        setRating(myReview.rating);
+        setReview(myReview.review);
+        setIsEditing(true);
+      }
+    }
+  }, [currentUser, boardingId]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -56,7 +72,25 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
       if (!existingReviews[boardingId]) {
         existingReviews[boardingId] = [];
       }
-      existingReviews[boardingId].push(reviewData);
+
+      if (isEditing) {
+        // ✅ Update existing review
+        existingReviews[boardingId] = existingReviews[boardingId].map(r => 
+          r.userId === currentUser.studentId ? reviewData : r
+        );
+      } else {
+        // ✅ Add new review (Prevent duplicates check)
+        const hasReviewed = existingReviews[boardingId].some(r => r.userId === currentUser.studentId);
+        if (!hasReviewed) {
+           existingReviews[boardingId].push(reviewData);
+        } else {
+           // Fallback update if state missed it
+           existingReviews[boardingId] = existingReviews[boardingId].map(r => 
+            r.userId === currentUser.studentId ? reviewData : r
+          );
+        }
+      }
+
       localStorage.setItem('boardingReviews', JSON.stringify(existingReviews));
       
       // Save/update user data
@@ -68,8 +102,11 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
       
       // Reset form after 2 seconds
       setTimeout(() => {
-        setRating(0);
-        setReview('');
+        // Don't clear form if editing, keep the data visible
+        if (!isEditing) {
+            setRating(0);
+            setReview('');
+        }
         setIsSuccess(false);
         if (onSubmitSuccess) onSubmitSuccess();
       }, 2000);
@@ -83,7 +120,7 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
       className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm border border-gray-100"
     >
       <h2 className="text-xl sm:text-2xl font-bold text-primary mb-4 sm:mb-6">
-        Write a Review
+        {isEditing ? 'Edit Your Review' : 'Write a Review'} {/* ✅ Dynamic Title */}
       </h2>
 
       {isSuccess ? (
@@ -94,7 +131,7 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
         >
           <FaCheckCircle className="text-5xl sm:text-6xl text-green-500 mb-4" />
           <h3 className="text-lg sm:text-xl font-bold text-text-dark mb-2">
-            Review Submitted!
+            {isEditing ? 'Review Updated!' : 'Review Submitted!'}
           </h3>
           <p className="text-sm sm:text-base text-text-muted text-center">
             Thank you for your feedback
@@ -193,10 +230,10 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                Submitting...
+                {isEditing ? 'Updating...' : 'Submitting...'}
               </span>
             ) : (
-              'Submit Review'
+              isEditing ? 'Update Review' : 'Submit Review'
             )}
           </motion.button>
         </form>
