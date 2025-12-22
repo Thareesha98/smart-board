@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useOwnerAuth } from '../../../context/owner/OwnerAuthContext.jsx';
+import LoginForm from '../../../components/Owner/auth/LoginForm.jsx';
+import { motion } from 'framer-motion';
+import logo from '../../../assets/logo.png';
+import backgroundImage from '../../../assets/s5.jpg';
 
 const OwnerLoginPage = () => {
   const [email, setEmail] = useState('');
@@ -8,80 +12,131 @@ const OwnerLoginPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login } = useOwnerAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useOwnerAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    // Call the login function from OwnerAuthContext
-    const result = login(email, password);
-
-    if (result.success) {
-      // Redirect to the owner dashboard on success
-      navigate('/owner/dashboard');
-    } else {
-      setError(result.message || 'Invalid email or password');
-      setIsLoading(false);
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('', { replace: true });
     }
+  }, [isAuthenticated, authLoading, navigate]);
+
+  const handleLogin = async (formData) => {
+    setIsLoading(true);
+    setError('');
+    
+    // Simulate API call
+    setTimeout(() => {
+      const result = login(formData.email, formData.password);
+      if (result.success) {
+        setIsLoading(false);
+        navigate('/owner/dashboard', { replace: true });
+      } else {
+        setIsLoading(false);
+        setError(result.message);
+      }
+    }, 1500);
   };
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-muted">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-light p-4">
-      <div className="w-full max-w-md bg-card-bg p-8 rounded-report shadow-custom border border-light">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-primary uppercase tracking-tight">Owner Login</h2>
-          <p className="text-muted font-medium mt-2">Manage your boarding listings</p>
-        </div>
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: `url(${backgroundImage})`,
+          filter: 'blur(8px)',
+          transform: 'scale(1.1)',
+        }}
+      />
+      
+      {/* Overlay for opacity and color tint */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 backdrop-blur-sm" />
 
-        {error && (
-          <div className="mb-4 p-3 bg-error/10 border border-error text-error text-xs font-bold rounded-lg text-center uppercase tracking-widest">
-            {error}
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-md">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/95 backdrop-blur-md rounded-large shadow-2xl p-8 md:p-12 border border-white/20"
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <motion.img
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.3 }}
+                src={logo}
+                alt="SmartBoAD Logo"
+                className="w-[80px] h-[80px]"
+              />
+              <motion.h1 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+              >
+                SmartBoAD
+              </motion.h1>
+            </div>
+            <motion.h2 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-2xl font-bold text-text-dark mb-2"
+            >
+              Partner Portal
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-text-muted"
+            >
+              Sign in to manage your properties
+            </motion.p>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-2">Email Address</label>
-            <input
-              type="email"
-              required
-              className="w-full p-4 rounded-xl bg-light border border-light focus:border-accent outline-none transition-all font-bold text-text"
-              placeholder="owner@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+          {/* Login Form */}
+          <LoginForm onSubmit={handleLogin} isLoading={isLoading} error={error} />
+
+          {/* Signup Link */}
+          <div className="mt-8 text-center">
+            <p className="text-text-muted">
+              Want to list a property?{' '}
+              <Link
+                to="/owner/signup"
+                className="text-accent hover:text-primary font-semibold transition-colors"
+              >
+                Register
+              </Link>
+            </p>
           </div>
+        </motion.div>
 
-          <div>
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-2">Password</label>
-            <input
-              type="password"
-              required
-              className="w-full p-4 rounded-xl bg-light border border-light focus:border-accent outline-none transition-all font-bold text-text"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-4 bg-accent text-card-bg font-black uppercase tracking-[0.2em] rounded-full shadow-md hover:shadow-xl active:scale-95 transition-all disabled:opacity-50"
-          >
-            {isLoading ? 'Authenticating...' : 'Sign In'}
-          </button>
-        </form>
-
-        <div className="mt-8 text-center">
-          <p className="text-xs text-muted font-bold uppercase tracking-widest">
-            Don't have an owner account? 
-            <Link to="/owner/signup" className="text-accent ml-2 hover:underline">Register Now</Link>
-          </p>
-        </div>
+        {/* Footer */}
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-center text-white text-sm mt-8 drop-shadow-lg"
+        >
+          © 2024 SmartBoAD. All rights reserved.
+        </motion.p>
       </div>
     </div>
   );
