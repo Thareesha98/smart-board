@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import com.sbms.sbms_monolith.common.BaseEntity;
 import com.sbms.sbms_monolith.model.enums.MonthlyBillStatus;
@@ -30,7 +31,6 @@ public class MonthlyBill extends BaseEntity {
     @Column(name = "bill_month", nullable = false, length = 7)
     private String month;
 
-    // ---- COST BREAKDOWN ----
     @Column(nullable = false)
     private BigDecimal boardingFee;
 
@@ -46,4 +46,7 @@ public class MonthlyBill extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MonthlyBillStatus status = MonthlyBillStatus.UNPAID;
+    
+    @Column(nullable = false)
+    private LocalDate dueDate;
 }
