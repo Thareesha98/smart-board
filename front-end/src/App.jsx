@@ -1,36 +1,40 @@
 import React, { useState } from 'react';
+// Pages
 import AdminDashboard from './pages/AdminDashboard';
 import AdminUsers from './pages/AdminUsers';
 import AdminAds from './pages/AdminAds';
 import AdminReports from './pages/AdminReports';
-import AdminAnalytics from './pages/AdminAnalytics'; // Import the new page
+import AdminAnalytics from './pages/AdminAnalytics';
+import AdminSettings from './pages/AdminSettings';
 
 const App = () => {
-  // The state that controls which view is currently visible
+  // Central state for navigation
   const [activePage, setActivePage] = useState('dashboard');
 
   /**
-   * Central navigation handler
-   * Passed as a prop to Sidebar, QuickActions, and Layout components
+   * handleNavigate
+   * @param {string} pageId - The ID of the page to switch to
+   * This function is passed to Sidebar, Header, and QuickActions 
+   * to allow navigation from anywhere in the app.
    */
   const handleNavigate = (pageId) => {
     setActivePage(pageId);
-    // Smooth scroll to top on page change
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Smooth scroll to top on every "page" change
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   /**
-   * Conditional Rendering Logic
-   * Determines which "Smart Component" to mount based on activePage ID
+   * renderPage
+   * Conditional rendering logic to determine which component to show
    */
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard':
         return <AdminDashboard onNavigate={handleNavigate} />;
-      
-      case 'analytics':
-        // This handles navigation from both Sidebar and QuickActions
-        return <AdminAnalytics onNavigate={handleNavigate} />;
       
       case 'users':
         return <AdminUsers onNavigate={handleNavigate} />;
@@ -40,31 +44,23 @@ const App = () => {
       
       case 'reports':
         return <AdminReports onNavigate={handleNavigate} />;
-        
+      
+      case 'analytics':
+        return <AdminAnalytics onNavigate={handleNavigate} />;
+      
       case 'settings':
-        // Placeholder for Settings if not yet created
-        return (
-          <div className="flex items-center justify-center h-screen text-text-muted">
-            Settings Page Coming Soon...
-            <button 
-              onClick={() => handleNavigate('dashboard')}
-              className="ml-4 text-accent underline"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        );
-
+        return <AdminSettings onNavigate={handleNavigate} />;
+        
       default:
         return <AdminDashboard onNavigate={handleNavigate} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-background-light selection:bg-accent/30">
+    <div className="min-h-screen bg-background-light selection:bg-accent/30 selection:text-white">
       {/* The renderPage function injects the specific view. 
-          All pages are wrapped in AdminLayout inside their own files 
-          to keep the Sidebar and Header consistent.
+        Each page component uses AdminLayout internally to stay 
+        wrapped within the Sidebar and Header structure.
       */}
       {renderPage()}
     </div>
