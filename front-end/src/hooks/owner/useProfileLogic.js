@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useOwnerAuth } from '../../context/owner/OwnerAuthContext';
 
-const useOwnerProfileLogic = () => {
+const useProfileLogic = () => {
   const { currentUser } = useOwnerAuth();
 
   // Mock state to simulate the context updates if backend isn't ready
@@ -54,4 +54,4 @@ const useOwnerProfileLogic = () => {
   };
 };
 
-export default useOwnerProfileLogic;
+export default useProfileLogic;
