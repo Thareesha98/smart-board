@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
+import { FaHome } from "react-icons/fa"; // Import Icon
+
+// Components
 import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
 import BoardingCard from "../../components/Owner/myboardings/BoardingCard";
 import ViewToggle from "../../components/Owner/myboardings/ViewToggle";
@@ -51,7 +55,7 @@ export default function MyBoardingsPage() {
         title="My Boarding Properties"
         subtitle="Manage your property inventory and tenant details"
         navBtnText="Add New Property"
-        navBtnPath="#"
+        // navBtnPath is not needed since we use onClick
         onNavBtnClick={() => setIsCreateModalOpen(true)}
       />
 
@@ -68,35 +72,44 @@ export default function MyBoardingsPage() {
         </div>
 
         {/* Dynamic Grid/List Container */}
-        <div
+        <motion.div
+          layout // Smoothly animates container height changes
           className={`grid gap-8 transition-all duration-500 ${
             viewMode === "list"
               ? "grid-cols-1"
               : "grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
           }`}
         >
-          {boardings.length > 0 ? (
-            boardings.map((property) => (
-              <BoardingCard
-                key={property.id}
-                property={property}
-                viewMode={viewMode}
-                onManage={() => handleOpenManage(property)}
-                onViewTenants={() => handleOpenTenants(property)}
-              />
-            ))
-          ) : (
-            <div className="col-span-full py-32 bg-card-bg rounded-boarding border-2 border-dashed border-light flex flex-col items-center justify-center text-muted">
-              <i className="fas fa-home text-5xl mb-4 opacity-20"></i>
-              <p className="font-black uppercase tracking-widest text-xs">
-                Your inventory is empty.
-              </p>
-            </div>
-          )}
-        </div>
+          <AnimatePresence mode="popLayout"> 
+            {boardings.length > 0 ? (
+              boardings.map((property) => (
+                <BoardingCard
+                  key={property.id}
+                  property={property}
+                  viewMode={viewMode}
+                  onManage={() => handleOpenManage(property)}
+                  onViewTenants={() => handleOpenTenants(property)}
+                />
+              ))
+            ) : (
+              // Empty State
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="col-span-full py-32 bg-card-bg rounded-boarding border-2 border-dashed border-light flex flex-col items-center justify-center text-muted"
+              >
+                <FaHome className="text-5xl mb-4 opacity-20" />
+                <p className="font-black uppercase tracking-widest text-xs">
+                  Your inventory is empty.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </section>
 
-      {/* Modals remain clean and centralized */}
+      {/* --- Modals --- */}
+      
       <CreateBoardingModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -108,7 +121,8 @@ export default function MyBoardingsPage() {
         onClose={() => setActiveModal(null)}
         propertyName={selectedProperty?.name}
         tenants={selectedProperty?.tenantsList}
-        onRemoveTenant={(id, name) => alert(`Simulating removal of ${name}...`)}
+        // Updated to use onMessageTenant instead of onRemoveTenant
+        onMessageTenant={(id) => alert(`Opening chat for tenant ID: ${id}`)}
       />
 
       <ManageModal
