@@ -49,7 +49,7 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-accent">${boarding.price}</div>
+            <div className="text-2xl font-bold text-accent">LKR {boarding.price}</div>
             <span className="text-xs text-text-muted">/month</span>
           </div>
         </div>

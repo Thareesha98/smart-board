@@ -35,12 +35,12 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
       <div className="flex justify-between items-center mb-6">
         <div className="bg-background-light px-3 py-2 rounded-lg">
           <span className="text-xs text-text-muted block">Min</span>
-          <span className="text-base sm:text-lg font-bold text-primary">${minValue}</span>
+          <span className="text-base sm:text-lg font-bold text-primary">LKR {minValue}</span>
         </div>
         <div className="h-px w-6 sm:w-8 bg-gray-300"></div>
         <div className="bg-background-light px-3 py-2 rounded-lg">
           <span className="text-xs text-text-muted block">Max</span>
-          <span className="text-base sm:text-lg font-bold text-primary">${maxValue}</span>
+          <span className="text-base sm:text-lg font-bold text-primary">LKR {maxValue}</span>
         </div>
       </div>
 
