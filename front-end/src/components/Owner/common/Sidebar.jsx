@@ -167,7 +167,10 @@ const Sidebar = () => {
               )}
             </div>
             <span className="font-medium truncate">
-              {currentUser ? `Mr. ${currentUser.lastName}` : "Owner"}
+              {/* Check if currentUser exists AND has a lastName */}
+              {currentUser && currentUser.lastName
+                ? `Mr. ${currentUser.lastName}`
+                : "Owner"}
             </span>
           </Link>
           <button
