@@ -6,9 +6,7 @@ import com.sbms.sbms_monolith.model.enums.UserRole;
 
 public class UserMapper {
 
-    // ---------------------------------------------------------
-    // REGISTER DTO → USER ENTITY
-    // ---------------------------------------------------------
+  
     public static User toEntity(UserRegisterDTO dto) {
         if (dto == null) return null;
 
@@ -16,24 +14,21 @@ public class UserMapper {
 
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());  // will be encoded in service
+        user.setPassword(dto.getPassword()); 
         user.setPhone(dto.getPhone());
         user.setAddress(dto.getAddress());
         user.setGender(dto.getGender());
 
         user.setRole(dto.getRole());
 
-        // OWNER fields
         if (dto.getRole() == UserRole.OWNER) {
             user.setNicNumber(dto.getNicNumber());
             user.setAccNo(dto.getAccNo());
 
-            // Owner initially not verified
             user.setVerifiedOwner(false);
             user.setSubscription_id(0);
         }
 
-        // STUDENT fields
         if (dto.getRole() == UserRole.STUDENT) {
             user.setStudentUniversity(dto.getStudentUniversity());
         }
@@ -41,9 +36,7 @@ public class UserMapper {
         return user;
     }
 
-    // ---------------------------------------------------------
-    // USER ENTITY → USER RESPONSE DTO (general purpose)
-    // ---------------------------------------------------------
+  
     public static UserResponseDTO toUserResponse(User user) {
         if (user == null) return null;
 
@@ -58,14 +51,12 @@ public class UserMapper {
         dto.setGender(user.getGender());
         dto.setRole(user.getRole());
 
-        // OWNER fields
         if (user.getRole() == UserRole.OWNER) {
             dto.setVerifiedOwner(user.isVerifiedOwner());
             dto.setSubscription_id(user.getSubscription_id());
             dto.setAccNo(user.getAccNo());
         }
 
-        // STUDENT fields
         if (user.getRole() == UserRole.STUDENT) {
             dto.setStudentUniversity(user.getStudentUniversity());
         }
@@ -73,9 +64,6 @@ public class UserMapper {
         return dto;
     }
 
-    // ---------------------------------------------------------
-    // USER ENTITY → OWNER PROFILE DTO
-    // ---------------------------------------------------------
     public static OwnerProfileDTO toOwnerProfile(User user) {
         if (user == null) return null;
 
@@ -103,10 +91,7 @@ public class UserMapper {
         return dto;
     }
 
-    // ---------------------------------------------------------
-    // USER ENTITY → ADMIN USER DTO
-    // For admin user list dashboard
-    // ---------------------------------------------------------
+   
     public static AdminUserDTO toAdminUser(User user) {
         if (user == null) return null;
 

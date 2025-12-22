@@ -21,9 +21,6 @@ public class BoardingService {
     @Autowired
     private BoardingRepository boardingRepository;
 
-    // -------------------------------------------------------
-    // 1) SEARCH with filters + addressKeyword
-    // -------------------------------------------------------
     public Page<BoardingSummaryDTO> searchBoardings(BoardingSearchRequest request) {
 
         List<Boarding> all = boardingRepository.findAll();
@@ -50,7 +47,6 @@ public class BoardingService {
                 
                 .filter(b -> request.getMaxKeyMoney() == null ||
                 b.getKeyMoney().compareTo(request.getMaxKeyMoney()) <= 0)
-   // Search keyword (title + address)
                 
                 .filter(b -> {
                     if (request.getAddressKeyword() == null ||
@@ -68,9 +64,6 @@ public class BoardingService {
         return toPagedResult(request, filtered);
     }
 
-    // -------------------------------------------------------
-    // 2) FILTER ONLY (NO SEARCH KEYWORD)
-    // -------------------------------------------------------
     public Page<BoardingSummaryDTO> getAllFiltered(BoardingSearchRequest request) {
         List<Boarding> all = boardingRepository.findAll();
 
@@ -94,9 +87,7 @@ public class BoardingService {
         return toPagedResult(request, filtered);
     }
 
-    // -------------------------------------------------------
-    // 3) GET ALL (NO FILTERS, NO SEARCH) – only APPROVED
-    // -------------------------------------------------------
+   
     public Page<BoardingSummaryDTO> getAll(BoardingSearchRequest request) {
         List<Boarding> all = boardingRepository.findAll();
 
@@ -107,9 +98,6 @@ public class BoardingService {
         return toPagedResult(request, filtered);
     }
 
-    // -------------------------------------------------------
-    // GET ONE (DETAIL)
-    // -------------------------------------------------------
     public BoardingDetailDTO getById(Long id) {
         Boarding b = boardingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Boarding not found with id: " + id));
@@ -121,9 +109,6 @@ public class BoardingService {
         return BoardingMapper.toDetail(b);
     }
 
-    // -------------------------------------------------------
-    // Helper: common pagination + mapping
-    // -------------------------------------------------------
     private Page<BoardingSummaryDTO> toPagedResult(BoardingSearchRequest request,
                                                    List<Boarding> filtered) {
 

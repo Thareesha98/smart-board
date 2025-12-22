@@ -17,10 +17,7 @@ public class RefreshTokenService {
 
     private long refreshTokenDurationMs = 7L * 24 * 60 * 60 * 1000; // 7 days
 
-    // Create or replace a refresh token for a user
     public RefreshToken createRefreshToken(User user) {
-
-        // Optionally delete old refresh token
         refreshTokenRepository.findByUser(user)
                 .ifPresent(existing -> refreshTokenRepository.delete(existing));
 

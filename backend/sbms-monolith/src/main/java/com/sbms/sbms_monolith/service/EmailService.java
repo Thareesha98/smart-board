@@ -15,7 +15,6 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // 🔐 Reset Token Email
     public void sendResetToken(String to, String token) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
