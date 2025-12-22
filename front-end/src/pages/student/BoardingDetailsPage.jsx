@@ -67,7 +67,7 @@ const BoardingDetailsPage = () => {
   // --- 1. HEADER BUTTON (Desktop/Tablet Only) ---
   // Uses "hidden sm:flex" so it disappears on mobile to avoid header conflicts
   const headerRightContent = (
-    <Link to="/search-boardings">
+    <Link to="/student/search-boardings">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -236,11 +236,11 @@ const BoardingDetailsPage = () => {
 
       {/* --- 2. MOBILE FLOATING BACK BUTTON --- */}
       {/* Fixed to bottom right, visible ONLY on mobile (sm:hidden) */}
-      <Link to="/search-boardings">
+      <Link to="/student/search-boardings">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="fixed bottom-8 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+          className="fixed bottom-24 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
           aria-label="Back to Search"
         >
           <FaArrowLeft size={24} />

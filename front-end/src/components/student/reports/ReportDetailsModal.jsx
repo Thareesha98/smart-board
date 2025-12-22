@@ -13,7 +13,7 @@ const SEVERITY_CONFIG = {
   low: 'bg-success/20 text-success',
   medium: 'bg-info/20 text-info',
   high: 'bg-error/20 text-error',
-  critical: 'bg-critical text-white',
+  critical: 'bg-error text-white',
 };
 
 const TYPE_NAMES = {
