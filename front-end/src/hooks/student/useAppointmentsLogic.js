@@ -45,7 +45,7 @@ const useAppointmentsLogic = () => {
   // --- 3. Helper to Update State AND LocalStorage ---
   const updateAppointments = (updatedList) => {
     setAppointments(updatedList);
-    // Save only the new/user-created appointments to LS to avoid duplication issues
+    // Filter out the original sample data before saving to LS 
     const newOnly = updatedList.filter(a => !sampleAppointments.find(s => s.id === a.id));
     localStorage.setItem('appointments', JSON.stringify(newOnly));
   };
