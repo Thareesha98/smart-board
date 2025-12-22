@@ -289,6 +289,59 @@ export const initialReportsData = {
   ]
 };
 
+// ... Analytics page
+
+
+export const analyticsMockData = {
+  '30d': {
+    stats: [
+      { label: 'Total Boarders', value: '1,240', change: '12%', increase: true, icon: 'fa-user-graduate' },
+      { label: 'Verified Owners', value: '84', change: '5%', increase: true, icon: 'fa-house-user' },
+      { label: 'Active Listings', value: '156', change: '8%', increase: true, icon: 'fa-bed' },
+      { label: 'Monthly Revenue', value: 'LKR 450k', change: '2%', increase: true, icon: 'fa-wallet' }
+    ],
+    studentTrend: {
+      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+      datasets: [{ 
+        label: 'New Boarders',
+        data: [1100, 1150, 1200, 1240], 
+        borderColor: '#D84C38', 
+        backgroundColor: 'rgba(216, 76, 56, 0.1)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    listingTrend: {
+      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+      datasets: [{ 
+        label: 'Bookings',
+        data: [90, 105, 130, 156], 
+        borderColor: '#FF7A00', 
+        backgroundColor: 'rgba(255, 122, 0, 0.1)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    categoryData: {
+      labels: ['Single Rooms', 'Shared Rooms', 'Annexes', 'Full House'],
+      datasets: [{ 
+        data: [45, 25, 20, 10], 
+        backgroundColor: ['#D84C38', '#FF7A00', '#332720', '#E8DBC7'],
+        borderWidth: 0
+      }]
+    },
+    revenueTrend: {
+      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+      datasets: [{ 
+        label: 'Revenue',
+        data: [380, 410, 425, 450], 
+        borderColor: '#10B981', 
+        tension: 0.4 
+      }]
+    }
+  }
+};
+
 /**
  * 6. DASHBOARD APPROVALS LIST
  * Derived from initialAds
