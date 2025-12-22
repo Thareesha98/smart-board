@@ -1,62 +1,102 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { FaBell, FaPlus } from "react-icons/fa"; // Added FaPlus for icon consistency
+import { useNavigate } from "react-router-dom";
+import { useOwnerAuth } from "../../../context/owner/OwnerAuthContext.jsx";
 
-const HeaderBar = ({
-  title,
-  subtitle,
-  notificationCount,
-  userAvatar,
-  userName,
-  userProfilePath = "/ownerLayout/profile",
-  children,
-}) => {
+// Added navBtnText and navBtnPath props
+const Header = ({ title, subtitle, rightContent, navBtnText, navBtnPath }) => {
+  const { currentUser } = useOwnerAuth();
+  const navigate = useNavigate();
+
+  const handleNotificationClick = () => {
+    console.log("Notifications panel would open here");
+  };
+
+  const handleUserMenuClick = () => {
+    navigate("/owner/profile");
+  };
+
+  // Fallback values
+  const userFirstName = currentUser?.firstName || "Partner";
+  const userLastNameInitial = currentUser?.lastName
+    ? currentUser.lastName.charAt(0) + "."
+    : "";
+  const userAvatar =
+    currentUser?.avatar || "https://randomuser.me/api/portraits/men/32.jpg";
+
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 md:p-6 rounded-report shadow-custom sticky top-4 md:top-6 z-10 bg-white/95 backdrop-blur-md mx-2 md:mx-0 gap-4 md:gap-0">
-      {/* 1. Title & Subtitle Section */}
-      <div className="flex flex-col w-full md:w-auto">
-        <h1 className="text-xl md:text-[1.8rem] font-black leading-tight text-primary tracking-tight truncate">
-          {title}
+    <header
+      className="
+      flex flex-col md:flex-row justify-between items-center 
+      mb-8 bg-white/70 backdrop-blur-sm p-6 rounded-large 
+      shadow-custom sticky top-7 z-10 transition-all duration-500
+      hover:shadow-xl
+    "
+    >
+      <div className="text-center md:text-left mb-4 md:mb-0">
+        <h1 className="text-primary text-2xl md:text-3xl font-bold mb-1">
+          {title || `Welcome back, Mr. ${currentUser?.lastName || "Partner"}!`}
         </h1>
-        <p className="text-xs md:text-base font-medium text-muted line-clamp-1">
-          {subtitle}
+        <p className="text-text-muted">
+          {subtitle || "Here's your property overview"}
         </p>
       </div>
 
-      <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-3 md:gap-6">
-        {/* Custom Content Area (e.g., Action Buttons) */}
-        <div className="flex items-center gap-2">
-          {children}
+      <div className="flex items-center gap-6">
+        {/* 🔥 NEW: Dynamic Navigation Button */}
+        {/* Only renders if both text and path are provided */}
+        {navBtnText && navBtnPath && (
+          <button
+            onClick={() => navigate(navBtnPath)}
+            className="
+              hidden sm:flex items-center gap-2 
+              bg-accent text-white px-5 py-2.5 rounded-3xl 
+              font-medium shadow-md transition-all duration-300 
+              hover:bg-primary-dark hover:shadow-lg hover:-translate-y-0.5
+            "
+          >
+            <FaPlus className="text-sm" /> {/* Optional Icon */}
+            {navBtnText}
+          </button>
+        )}
+
+        {/* Existing Custom Content (if you need something other than a button) */}
+        {rightContent && <div className="hidden sm:block">{rightContent}</div>}
+
+        {/* Notification Bell */}
+        <div
+          className="relative cursor-pointer p-3 rounded-full bg-background-light text-text-dark transition-all duration-300 hover:bg-accent hover:text-white group"
+          onClick={handleNotificationClick}
+        >
+          <FaBell className="text-xl group-hover:animate-pulse" />
+          <span
+            className="
+            absolute -top-1.5 -right-1.5 bg-red-alert text-white 
+            rounded-full w-5 h-5 text-xs font-semibold flex items-center justify-center 
+            border-2 border-white
+          "
+          >
+            3
+          </span>
         </div>
 
-        <div className="flex items-center gap-3 md:gap-6">
-          {/* Notification Bell */}
-          <div className="relative cursor-pointer p-2.5 md:p-3 rounded-full bg-light text-text hover:bg-gray-200 transition-colors shrink-0">
-            <i className="fas fa-bell text-sm md:text-base"></i>
-            {notificationCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 text-[0.6rem] md:text-[0.75rem] flex items-center justify-center font-black rounded-full bg-error text-white shadow-sm">
-                {notificationCount}
-              </span>
-            )}
-          </div>
-
-          {/* User Menu */}
-          <Link to={userProfilePath} className="no-underline shrink-0">
-            <div className="flex items-center gap-2 md:gap-3 cursor-pointer p-1.5 md:p-2 md:px-4 rounded-full md:rounded-report transition-all duration-300 bg-light text-text hover:shadow-md border border-transparent hover:border-accent/20">
-              <img
-                src={userAvatar}
-                alt={userName}
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-accent shadow-sm"
-              />
-              {/* Hide name on small mobile screens to save space */}
-              <span className="hidden sm:block font-bold tracking-tight text-sm md:text-base">
-                {userName}
-              </span>
-            </div>
-          </Link>
+        {/* User Menu */}
+        <div
+          className="flex items-center gap-3 cursor-pointer p-2 pr-4 rounded-large bg-background-light text-text-dark transition-all duration-300 hover:bg-accent hover:text-white group"
+          onClick={handleUserMenuClick}
+        >
+          <img
+            src={userAvatar}
+            alt="Owner Profile"
+            className="w-10 h-10 rounded-full object-cover border-2 border-accent group-hover:border-white transition-colors duration-300"
+          />
+          <span className="font-semibold text-sm">
+            {userFirstName} {userLastNameInitial}
+          </span>
         </div>
       </div>
     </header>
   );
 };
 
-export default HeaderBar;
+export default Header;
