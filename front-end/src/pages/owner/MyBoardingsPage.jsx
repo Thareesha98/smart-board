@@ -1,6 +1,9 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion"; // Import Framer Motion
-import { FaHome } from "react-icons/fa"; // Import Icon
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaHome } from "react-icons/fa";
+
+// Logic Hook
+import useBoardingLogic from "../../hooks/owner/useBoardingLogic"; // Adjust path as needed
 
 // Components
 import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
@@ -10,44 +13,26 @@ import TenantModal from "../../components/Owner/myboardings/TenantModal";
 import ManageModal from "../../components/Owner/myboardings/ManageModal";
 import CreateBoardingModal from "../../components/Owner/myboardings/CreateBoardingModal.jsx";
 
-import {
-  boardingsData as initialData,
-  ownerData,
-} from "../../data/mockData.js";
+// Data
+import { boardingsData as initialData } from "../../data/mockData.js";
 
 export default function MyBoardingsPage() {
-  const [boardings, setBoardings] = useState(initialData);
-  const [viewMode, setViewMode] = useState("grid");
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  const [activeModal, setActiveModal] = useState(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  // --- Handlers ---
-  const handleOpenTenants = (prop) => {
-    setSelectedProperty(prop);
-    setActiveModal("tenants");
-  };
-  const handleOpenManage = (prop) => {
-    setSelectedProperty(prop);
-    setActiveModal("manage");
-  };
-
-  const handleUpdateProperty = (updatedData) => {
-    setBoardings((prev) =>
-      prev.map((p) => (p.id === updatedData.id ? updatedData : p))
-    );
-    setActiveModal(null);
-  };
-
-  const handleDeleteProperty = (id) => {
-    setBoardings((prev) => prev.filter((p) => p.id !== id));
-    setActiveModal(null);
-  };
-
-  const handleCreateNew = (newProperty) => {
-    setBoardings([newProperty, ...boardings]);
-    setIsCreateModalOpen(false);
-  };
+  // Extract logic from custom hook
+  const {
+    boardings,
+    viewMode,
+    selectedProperty,
+    activeModal,
+    isCreateModalOpen,
+    setViewMode,
+    setIsCreateModalOpen,
+    openTenantsModal,
+    openManageModal,
+    closeModal,
+    addProperty,
+    updateProperty,
+    deleteProperty,
+  } = useBoardingLogic(initialData);
 
   return (
     <div className="pt-4 space-y-8 min-h-screen pb-12 bg-light">
@@ -55,7 +40,6 @@ export default function MyBoardingsPage() {
         title="My Boarding Properties"
         subtitle="Manage your property inventory and tenant details"
         navBtnText="Add New Property"
-        // navBtnPath is not needed since we use onClick
         onNavBtnClick={() => setIsCreateModalOpen(true)}
       />
 
@@ -73,27 +57,26 @@ export default function MyBoardingsPage() {
 
         {/* Dynamic Grid/List Container */}
         <motion.div
-          layout // Smoothly animates container height changes
+          layout
           className={`grid gap-8 transition-all duration-500 ${
             viewMode === "list"
               ? "grid-cols-1"
               : "grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
           }`}
         >
-          <AnimatePresence mode="popLayout"> 
+          <AnimatePresence mode="popLayout">
             {boardings.length > 0 ? (
               boardings.map((property) => (
                 <BoardingCard
                   key={property.id}
                   property={property}
                   viewMode={viewMode}
-                  onManage={() => handleOpenManage(property)}
-                  onViewTenants={() => handleOpenTenants(property)}
+                  onManage={() => openManageModal(property)}
+                  onViewTenants={() => openTenantsModal(property)}
                 />
               ))
             ) : (
-              // Empty State
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="col-span-full py-32 bg-card-bg rounded-boarding border-2 border-dashed border-light flex flex-col items-center justify-center text-muted"
@@ -113,24 +96,23 @@ export default function MyBoardingsPage() {
       <CreateBoardingModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onCreate={handleCreateNew}
+        onCreate={addProperty}
       />
 
       <TenantModal
         isOpen={activeModal === "tenants"}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         propertyName={selectedProperty?.name}
         tenants={selectedProperty?.tenantsList}
-        // Updated to use onMessageTenant instead of onRemoveTenant
         onMessageTenant={(id) => alert(`Opening chat for tenant ID: ${id}`)}
       />
 
       <ManageModal
         isOpen={activeModal === "manage"}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         property={selectedProperty}
-        onUpdate={handleUpdateProperty}
-        onDelete={handleDeleteProperty}
+        onUpdate={updateProperty}
+        onDelete={deleteProperty}
       />
     </div>
   );
