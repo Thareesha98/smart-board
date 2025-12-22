@@ -86,33 +86,41 @@ const BoardingDetailsPage = () => {
   const { formData, updateField, submitAppointment, isSubmitting, isSuccess } =
     useAppointmentForm();
 
-  // ✅ UPDATED: Handle Submit without Redirection
+  // ✅ UPDATED: Submit handler without redirect
   const handleScheduleSubmit = async () => {
-    // 1. Run validation via the hook
+    // 1. Run validation
     const result = await submitAppointment();
 
     if (result.success) {
-      // 2. Create the appointment object
+      // 2. Prepare Data (with updated owner info)
+      const ownerPhone = currentBoarding.owner.contact || "+94 77 123 4567";
+      const ownerEmail = currentBoarding.owner.email || "owner@example.com"; 
+
+      // 3. Create the appointment object
       const newAppointment = {
-        id: Date.now(), // Unique ID
+        id: Date.now(),
         boardingId: currentBoarding.id,
         boardingName: currentBoarding.name,
         image: currentBoarding.images[0],
+        
+        // Save Owner details for the Appointments Page
         owner: currentBoarding.owner.name,
-        contact: currentBoarding.owner.contact,
+        contact: ownerPhone,
+        email: ownerEmail,
+
         address: currentBoarding.location.address,
         date: formData.date,
         time: formData.time,
         notes: formData.notes,
-        status: 'upcoming', // This puts it in the "Upcoming" tab on Appointments Page
+        status: 'upcoming', 
         registered: false
       };
 
-      // 3. Save to localStorage (So useAppointmentsLogic.js can find it)
+      // 4. Save to localStorage
       const existingAppointments = JSON.parse(localStorage.getItem('appointments') || '[]');
       localStorage.setItem('appointments', JSON.stringify([...existingAppointments, newAppointment]));
       
-      // 4. No Redirect. The button will simply show "Scheduled Successfully".
+      // 5. No redirect - user stays on page, button shows success state
     }
     return result;
   };
@@ -124,11 +132,10 @@ const BoardingDetailsPage = () => {
   };
 
   const handleContact = (type) => {
-    alert(
-      type === "message"
-        ? "Message feature coming soon!"
-        : "Call feature coming soon!"
-    );
+    // Optional: You can implement specific actions here or leave as placeholder alert
+    if (type === 'message') {
+        alert(`Message feature for ${currentBoarding.owner.email} coming soon!`);
+    }
   };
 
   const headerRightContent = (
@@ -173,7 +180,6 @@ const BoardingDetailsPage = () => {
             />
           </div>
 
-          {/* Description Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -190,7 +196,6 @@ const BoardingDetailsPage = () => {
             ))}
           </motion.section>
 
-          {/* Amenities Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -215,7 +220,6 @@ const BoardingDetailsPage = () => {
             </div>
           </motion.section>
 
-          {/* Location Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -243,7 +247,6 @@ const BoardingDetailsPage = () => {
             </ul>
           </motion.section>
 
-          {/* Reviews Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -299,7 +302,6 @@ const BoardingDetailsPage = () => {
           <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
           
           <div id="appointment-form">
-            {/* ✅ Pass the custom submit handler here */}
             <AppointmentForm
               formData={formData}
               updateField={updateField}
