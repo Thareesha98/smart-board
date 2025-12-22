@@ -2,10 +2,14 @@ package com.sbms.sbms_monolith.mapper;
 
 import com.sbms.sbms_monolith.dto.billing.MonthlyBillResponseDTO;
 import com.sbms.sbms_monolith.model.MonthlyBill;
+import com.sbms.sbms_monolith.model.enums.BillDueStatus;
 
 public class MonthlyBillMapper {
 
-    public static MonthlyBillResponseDTO toDTO(MonthlyBill b) {
+    public static MonthlyBillResponseDTO toDTO(MonthlyBill b , 
+    		BillDueStatus dueStatus,
+            int dueInDays
+        ) {
 
         MonthlyBillResponseDTO dto = new MonthlyBillResponseDTO();
 
@@ -24,6 +28,10 @@ public class MonthlyBillMapper {
         dto.setTotalAmount(b.getTotalAmount());
 
         dto.setStatus(b.getStatus());
+        
+        dto.setDueDate(b.getDueDate());
+        dto.setDueStatus(dueStatus);
+        dto.setDueInDays(dueInDays);
 
         return dto;
     }
