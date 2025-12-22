@@ -8,7 +8,7 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
 
   const handleViewDetails = () => {
     // Navigate to details page with boarding ID and pass boarding data
-    navigate(`/boarding-details/${boarding.id}`, { 
+    navigate(`/student/boarding-details/${boarding.id}`, { 
       state: { boarding } 
     });
   };

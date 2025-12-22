@@ -67,7 +67,7 @@ const BoardingDetailsPage = () => {
   // --- 1. HEADER BUTTON (Desktop/Tablet Only) ---
   // Uses "hidden sm:flex" so it disappears on mobile to avoid header conflicts
   const headerRightContent = (
-    <Link to="/search-boardings">
+    <Link to="/student/search-boardings">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -236,7 +236,7 @@ const BoardingDetailsPage = () => {
 
       {/* --- 2. MOBILE FLOATING BACK BUTTON --- */}
       {/* Fixed to bottom right, visible ONLY on mobile (sm:hidden) */}
-      <Link to="/search-boardings">
+      <Link to="/student/search-boardings">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}

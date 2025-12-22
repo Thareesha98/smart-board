@@ -39,7 +39,7 @@ const MyBoardingsPage = () => {
   };
 
   const handleRequestMaintenance = () => {
-    navigate('/maintenance');
+    navigate('/student/maintenance');
   };
 
   const handleContactOwner = () => {
