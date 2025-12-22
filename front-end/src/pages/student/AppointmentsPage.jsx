@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import StudentLayout from "../../components/student/common/StudentLayout";
 import useAppointmentsLogic from "../../hooks/student/useAppointmentsLogic.js";
 import AppointmentTab from "../../components/student/appointments/AppointmentTab";
@@ -10,6 +11,7 @@ import RegistrationModal from "../../components/student/appointments/Registratio
 import { FaPlus } from "react-icons/fa";
 
 const AppointmentsPage = () => {
+  const navigate = useNavigate();
   const {
     activeCategory,
     counts,
@@ -56,7 +58,7 @@ const AppointmentsPage = () => {
     if (action === "register") {
       setIsRegistrationModalOpen(true);
     } else if (action === "view") {
-      alert(`Redirecting to My Boardings for ${appointment.boardingName}.`);
+      navigate('/student/my-boardings');
     } else if (action === "reschedule") {
       setCurrentAppointmentId(id); 
       setIsScheduleModalOpen(true); 
@@ -90,7 +92,7 @@ const AppointmentsPage = () => {
         actionLabel: "Done",
         action: () => setIsDecisionModalOpen(false),
         secondaryActionLabel: "View My Boardings",
-        secondaryAction: () => (window.location.href = "my-boardings.html"),
+        secondaryAction: () => navigate('/student/my-boardings'),
         isSuccess: true,
         isRegistrationSuccess: true,
       });
