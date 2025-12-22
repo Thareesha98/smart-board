@@ -37,7 +37,12 @@ export default function MyAdsPage() {
 
       {/* Filter Section */}
       <section className="px-4 md:px-0">
-        <div className="flex overflow-x-auto md:grid md:grid-cols-5 gap-4 p-4 md:p-6 rounded-report shadow-custom bg-card-bg border border-light custom-scrollbar">
+        {/* 🔥 UPDATED LAYOUT: 
+            - Mobile: 'grid grid-cols-2' (2x2 Box)
+            - Desktop: 'md:grid-cols-4' (1 Row) 
+            - Removed: 'flex overflow-x-auto' (No more scrolling)
+        */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 p-4 md:p-6 rounded-report shadow-custom bg-card-bg border border-light">
           {Object.keys(STATUS_CONFIG).map((status) => (
             <div key={status} className="min-w-[140px] md:min-w-0 flex-shrink-0">
               <StatusTab

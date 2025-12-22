@@ -7,7 +7,7 @@ export const STATUS_CONFIG = {
   Active: { colorClass: "bg-success", icon: <FaCheckCircle /> },
   Pending: { colorClass: "bg-info", icon: <FaClock /> },
   Draft: { colorClass: "bg-muted", icon: <FaFileAlt /> },
-  Inactive: { colorClass: "bg-error", icon: <FaTimesCircle /> },
+  
 };
 
 export const StatusTab = ({ status, count, currentFilter, setFilter }) => {
@@ -18,24 +18,46 @@ export const StatusTab = ({ status, count, currentFilter, setFilter }) => {
     <motion.button
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.95 }}
-      className={`relative flex items-center justify-center p-3 rounded-2xl transition-colors duration-300 w-full font-semibold text-lg ${
-        isActive
-          ? `${theme.colorClass} text-white shadow-md`
-          : "bg-light text-text bg-opacity-80 hover:bg-gray-200"
-      }`}
+      // Responsive classes: smaller text/padding on mobile, larger on desktop
+      className={`
+        relative flex items-center justify-center 
+        py-3 px-4 md:py-4 md:px-6 
+        rounded-2xl md:rounded-3xl 
+        transition-colors duration-300 w-full 
+        font-bold text-sm md:text-base whitespace-nowrap
+        ${
+          isActive
+            ? `${theme.colorClass} text-white shadow-md`
+            : "bg-light text-text/70 bg-opacity-80 hover:bg-gray-200"
+        }
+      `}
       onClick={() => setFilter(status)}
     >
-      <span className="flex items-center gap-2">
-        {/* Render the icon if needed, currently just showing text for cleanliness */}
+      <span className="flex items-center gap-2 z-10">
+        {/* Icon hidden on small screens to save space, visible on md+ */}
+        <span className="hidden md:block">{theme.icon}</span>
         {status}
       </span>
-      <span
-        className={`absolute -top-2 -right-2 px-2 py-0.5 text-xs font-black rounded-full shadow-sm text-white ${
-          isActive ? "bg-primary" : "bg-accent"
-        }`}
-      >
-        {count}
-      </span>
+
+      {/* Notification Badge */}
+      {count > 0 && (
+        <span
+          className={`
+            absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 
+            px-1.5 min-w-[18px] h-[18px] md:min-w-[20px] md:h-[20px]
+            flex items-center justify-center
+            text-[9px] md:text-[10px] font-black 
+            rounded-full shadow-sm z-20
+            ${
+              isActive 
+                ? "bg-white text-primary border-2 border-transparent" 
+                : "bg-accent text-white"
+            }
+          `}
+        >
+          {count}
+        </span>
+      )}
     </motion.button>
   );
 };
