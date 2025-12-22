@@ -7,6 +7,7 @@ import BoardingCard from '../../components/student/boardings/BoardingCard';
 import InfoCards from '../../components/student/boardings/InfoCards';
 import EmptyState from '../../components/student/boardings/EmptyState';
 import Notification from '../../components/student/maintenance/Notification';
+import ReviewForm from '../../components/student/boardings/ReviewForm';
 
 const MyBoardingsPage = () => {
   const navigate = useNavigate();
@@ -50,6 +51,10 @@ const MyBoardingsPage = () => {
     showNotification('Opening documents panel...');
   };
 
+  const handleReviewSubmit = () => {
+    showNotification('Review submitted successfully! It will appear on the boarding details page.', 'success');
+  };
+
   return (
     <StudentLayout
       title="My Boardings"
@@ -68,7 +73,7 @@ const MyBoardingsPage = () => {
             className="flex flex-col min-[1400px]:grid min-[1400px]:grid-cols-3 gap-6 items-start"
           >
             {/* Main Content Area */}
-            <div className="w-full min-[1400px]:col-span-2">
+            <div className="w-full min-[1400px]:col-span-2 space-y-6">
               <BoardingCard
                 boarding={currentBoarding}
                 onViewDetails={handleViewDetails}
@@ -78,6 +83,12 @@ const MyBoardingsPage = () => {
                 onContactOwner={handleContactOwner}
                 onViewDocuments={handleViewDocuments}
                 isPayingRent={isPayingRent}
+              />
+              
+              {/* Review Form - Full width on mobile/tablet, left column on desktop */}
+              <ReviewForm 
+                boardingId={currentBoarding?.id || 'default-boarding-id'}
+                onSubmitSuccess={handleReviewSubmit}
               />
             </div>
 
