@@ -11,10 +11,6 @@ import {
   FaTv,
   FaDumbbell,
   FaBicycle,
-  FaClock,
-  FaUserFriends,
-  FaSmokingBan,
-  FaPaw,
   FaMapMarkedAlt,
 } from "react-icons/fa";
 
@@ -42,13 +38,6 @@ const amenityIcons = {
   tv: FaTv,
   dumbbell: FaDumbbell,
   bicycle: FaBicycle,
-};
-
-const ruleIcons = {
-  clock: FaClock,
-  "user-friends": FaUserFriends,
-  "smoking-ban": FaSmokingBan,
-  paw: FaPaw,
 };
 
 const mapAmenitiesWithIcons = (amenities) => {
@@ -92,8 +81,41 @@ const BoardingDetailsPage = () => {
 
   const { currentImage, currentIndex, nextImage, prevImage, selectImage } =
     useImageGallery(currentBoarding.images);
+    
+  // Get form logic from hook
   const { formData, updateField, submitAppointment, isSubmitting, isSuccess } =
     useAppointmentForm();
+
+  // ✅ UPDATED: Handle Submit without Redirection
+  const handleScheduleSubmit = async () => {
+    // 1. Run validation via the hook
+    const result = await submitAppointment();
+
+    if (result.success) {
+      // 2. Create the appointment object
+      const newAppointment = {
+        id: Date.now(), // Unique ID
+        boardingId: currentBoarding.id,
+        boardingName: currentBoarding.name,
+        image: currentBoarding.images[0],
+        owner: currentBoarding.owner.name,
+        contact: currentBoarding.owner.contact,
+        address: currentBoarding.location.address,
+        date: formData.date,
+        time: formData.time,
+        notes: formData.notes,
+        status: 'upcoming', // This puts it in the "Upcoming" tab on Appointments Page
+        registered: false
+      };
+
+      // 3. Save to localStorage (So useAppointmentsLogic.js can find it)
+      const existingAppointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      localStorage.setItem('appointments', JSON.stringify([...existingAppointments, newAppointment]));
+      
+      // 4. No Redirect. The button will simply show "Scheduled Successfully".
+    }
+    return result;
+  };
 
   const handleBookVisit = () => {
     document
@@ -109,10 +131,8 @@ const BoardingDetailsPage = () => {
     );
   };
 
-  // --- 1. HEADER BUTTON (Desktop/Tablet Only) ---
-  // Uses "hidden sm:flex" so it disappears on mobile to avoid header conflicts
   const headerRightContent = (
-    <Link to="/search-boardings">
+    <Link to="/student/search-boardings">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -130,7 +150,6 @@ const BoardingDetailsPage = () => {
       subtitle="Boarding Details"
       headerRightContent={headerRightContent}
     >
-      {/* LAYOUT LOGIC using 1400px breakpoint */}
       <div className="flex flex-col min-[1400px]:grid min-[1400px]:grid-cols-3 gap-6 mb-8 items-start">
         {/* --- LEFT COLUMN: CONTENT --- */}
         <div className="min-[1400px]:col-span-2 w-full space-y-6">
@@ -143,7 +162,6 @@ const BoardingDetailsPage = () => {
             badge={currentBoarding.badge}
           />
 
-          {/* TABLET/MOBILE VIEW: Cards appear here immediately after images (< 1400px) */}
           <div className="flex flex-col gap-4 min-[1400px]:hidden">
             <QuickInfoCard
               boarding={currentBoarding}
@@ -155,6 +173,7 @@ const BoardingDetailsPage = () => {
             />
           </div>
 
+          {/* Description Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -171,6 +190,7 @@ const BoardingDetailsPage = () => {
             ))}
           </motion.section>
 
+          {/* Amenities Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -195,6 +215,7 @@ const BoardingDetailsPage = () => {
             </div>
           </motion.section>
 
+          {/* Location Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -222,6 +243,7 @@ const BoardingDetailsPage = () => {
             </ul>
           </motion.section>
 
+          {/* Reviews Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -230,8 +252,6 @@ const BoardingDetailsPage = () => {
             <h2 className="text-xl font-bold text-primary mb-6">
               Reviews ({currentBoarding.reviewCount})
             </h2>
-
-            {/* Rating Summary */}
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center justify-center bg-background-light rounded-2xl p-6 sm:w-40 text-center flex-shrink-0">
                 <div className="text-4xl font-bold text-text-dark">
@@ -264,31 +284,32 @@ const BoardingDetailsPage = () => {
                 ))}
               </div>
             </div>
-
-            {/* User Reviews List - NEW */}
             <ReviewsList
               boardingId={currentBoarding.id || id || "default-boarding-id"}
             />
           </motion.section>
         </div>
 
-        {/* --- RIGHT COLUMN: SIDEBAR (Only visible > 1400px) --- */}
+        {/* --- RIGHT COLUMN: SIDEBAR --- */}
         <div className="hidden min-[1400px]:block w-full space-y-6">
           <QuickInfoCard
             boarding={currentBoarding}
             onBookVisit={handleBookVisit}
           />
           <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
+          
           <div id="appointment-form">
+            {/* ✅ Pass the custom submit handler here */}
             <AppointmentForm
               formData={formData}
               updateField={updateField}
-              onSubmit={submitAppointment}
+              onSubmit={handleScheduleSubmit} 
               isSubmitting={isSubmitting}
               isSuccess={isSuccess}
               timeSlots={timeSlots}
             />
           </div>
+
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
             <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase">
               <FaShieldAlt /> Safety Tips
@@ -315,7 +336,7 @@ const BoardingDetailsPage = () => {
             <AppointmentForm
               formData={formData}
               updateField={updateField}
-              onSubmit={submitAppointment}
+              onSubmit={handleScheduleSubmit}
               isSubmitting={isSubmitting}
               isSuccess={isSuccess}
               timeSlots={timeSlots}
@@ -342,9 +363,7 @@ const BoardingDetailsPage = () => {
         </div>
       </div>
 
-      {/* --- 2. MOBILE FLOATING BACK BUTTON --- */}
-      {/* Fixed to bottom right, visible ONLY on mobile (sm:hidden) */}
-      <Link to="/search-boardings">
+      <Link to="/student/search-boardings">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
