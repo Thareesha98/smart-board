@@ -24,7 +24,6 @@ const useAppointmentsLogic = () => {
     const combinedAppointments = [...sampleAppointments];
     
     storedData.forEach(newApp => {
-        // If this ID doesn't exist in samples, add it
         if (!combinedAppointments.find(a => a.id === newApp.id)) {
             combinedAppointments.push(newApp);
         }
@@ -45,7 +44,6 @@ const useAppointmentsLogic = () => {
   // --- 3. Helper to Update State AND LocalStorage ---
   const updateAppointments = (updatedList) => {
     setAppointments(updatedList);
-    // Filter out the original sample data before saving to LS 
     const newOnly = updatedList.filter(a => !sampleAppointments.find(s => s.id === a.id));
     localStorage.setItem('appointments', JSON.stringify(newOnly));
   };
@@ -69,6 +67,7 @@ const useAppointmentsLogic = () => {
 
   // --- 5. CRUD Logic ---
 
+  // ✅ UPDATED: Prevents navigation when cancelling/rejecting
   const handleStatusChange = (id, decision) => {
     const updatedList = appointments.map(a => {
       if (a.id === id) {
@@ -82,7 +81,12 @@ const useAppointmentsLogic = () => {
     });
     
     updateAppointments(updatedList);
-    setActiveCategory(decision === 'select' ? 'selected' : 'cancelled');
+
+    // Only switch tabs if the user SELECTED a boarding.
+    // If they Cancelled or Rejected, we do NOTHING (user stays on current tab).
+    if (decision === 'select') {
+        setActiveCategory('selected');
+    }
   };
 
   const handleScheduleSubmit = (formData, appointmentId = null) => {
@@ -103,7 +107,7 @@ const useAppointmentsLogic = () => {
         return a;
       });
     } else {
-      // NEW SCHEDULE (From Appointments Page Modal)
+      // NEW SCHEDULE
       const newAppointment = {
         id: generateId(),
         boardingName: formData.boardingName, 
