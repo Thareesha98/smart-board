@@ -121,12 +121,12 @@ const Sidebar = () => {
       </aside>
 
       {/* Mobile/Tablet Navigation */}
+      {/* UPDATED: Changed 'sticky top-0' to 'fixed bottom-0 left-0' */}
       <nav
         ref={mobileNavRef}
-        className="lg:hidden w-full bg-primary text-white shadow-lg sticky top-0 z-50 overflow-x-auto scrollbar-hide"
+        className="lg:hidden w-full bg-primary text-white shadow-lg fixed bottom-0 left-0 z-50 overflow-x-auto scrollbar-hide"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {/* FIX: md:justify-center centers items ONLY on tablet/larger screens */}
         <div className="flex min-w-full px-2 md:justify-center">
           <div className="flex gap-2 p-2">
             {navItems.map((item) => {
