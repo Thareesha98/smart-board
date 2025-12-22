@@ -15,7 +15,7 @@ const SignupPage = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      navigate('', { replace: true });
+      navigate('/student/login', { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -127,7 +127,7 @@ const SignupPage = () => {
             <p className="text-text-muted text-sm md:text-base">
               Already have an account?{" "}
               <Link
-                to="/login"
+                to="/student/login"
                 className="text-accent hover:text-primary font-semibold transition-colors"
               >
                 Sign In
