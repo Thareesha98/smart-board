@@ -125,6 +125,170 @@ export const initialActivities = [
   { id: 1, type: 'success', icon: 'fa-check-circle', text: 'Admin approved Sunset Hostel listing', time: '5 mins ago' }
 ];
 
+// src/data/mockData.js for Reports page
+
+export const initialReportsData = {
+  pending: [
+    {
+      id: "R-1001",
+      title: "Safety Concern - Exposed Wiring",
+      type: "Safety",
+      priority: "High",
+      date: "2023-11-20",
+      status: "pending",
+      reporter: { name: "John Doe", role: "student", avatar: "https://randomuser.me/api/portraits/men/1.jpg" },
+      reported: { name: "Kamal Perera", role: "owner", avatar: "https://randomuser.me/api/portraits/men/32.jpg" },
+      description: "There are exposed electrical wires in the common area that pose serious safety risks. The owner has been notified but hasn't acted.",
+      evidence: {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&w=800&q=80",
+        caption: "Exposed junction box in the shared kitchen"
+      }
+    },
+    {
+      id: "R-1002",
+      title: "Unauthorized Guest Fee",
+      type: "Financial",
+      priority: "Medium",
+      date: "2023-11-22",
+      status: "pending",
+      reporter: { name: "Priya Silva", role: "student", avatar: "https://randomuser.me/api/portraits/women/2.jpg" },
+      reported: { name: "Nimal Siri", role: "owner", avatar: "https://randomuser.me/api/portraits/men/40.jpg" },
+      description: "Owner is demanding an extra 5,000 LKR for weekend guests which was specifically listed as 'Free' in the original agreement.",
+      evidence: {
+        type: "document",
+        url: "#",
+        name: "Rental_Agreement_Oct_2023.pdf"
+      }
+    },
+    {
+      id: "R-1003",
+      title: "Noise Complaint - Frequent Parties",
+      type: "Conduct",
+      priority: "Low",
+      date: "2023-11-24",
+      status: "pending",
+      reporter: { name: "Arjun Mehta", role: "student", avatar: "https://randomuser.me/api/portraits/men/4.jpg" },
+      reported: { name: "Suresh G.", role: "student", avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
+      description: "The reported student frequently hosts loud parties past midnight on weekdays, making it impossible to study.",
+      evidence: null
+    }
+  ],
+  investigating: [
+    {
+      id: "R-1004",
+      title: "Misleading Photos in Listing",
+      type: "Misinformation",
+      priority: "Medium",
+      date: "2023-11-15",
+      status: "investigating",
+      reporter: { name: "Saman Kumara", role: "student", avatar: "https://randomuser.me/api/portraits/men/22.jpg" },
+      reported: { name: "Sunil Perera", role: "owner", avatar: "https://randomuser.me/api/portraits/men/50.jpg" },
+      description: "The photos show a renovated room, but the actual room provided has mold on the walls and a broken window.",
+      evidence: {
+        type: "image",
+        url: "https://images.unsplash.com/photo-1590274853856-f22d5ee3d228?auto=format&fit=crop&w=800&q=80",
+        caption: "Actual condition of the room upon arrival"
+      }
+    },
+    {
+      id: "R-1005",
+      title: "Water Supply Cut-off",
+      type: "Utility",
+      priority: "High",
+      date: "2023-11-18",
+      status: "investigating",
+      reporter: { name: "Dilini W.", role: "student", avatar: "https://randomuser.me/api/portraits/women/12.jpg" },
+      reported: { name: "Bandara K.", role: "owner", avatar: "https://randomuser.me/api/portraits/men/29.jpg" },
+      description: "The property has had no water for 3 days. Landlord claims a pipe burst but hasn't called a plumber."
+    },
+    {
+      id: "R-1006",
+      title: "Suspicious Payment Request",
+      type: "Fraud",
+      priority: "High",
+      date: "2023-11-25",
+      status: "investigating",
+      reporter: { name: "Liam O.", role: "student", avatar: "https://randomuser.me/api/portraits/men/33.jpg" },
+      reported: { name: "Unknown User", role: "owner", avatar: "https://randomuser.me/api/portraits/men/60.jpg" },
+      description: "User asked for a 'Holding Deposit' via a third-party link before I even saw the house."
+    }
+  ],
+  resolved: [
+    {
+      id: "R-0995",
+      title: "Broken Main Door Lock",
+      type: "Safety",
+      priority: "High",
+      date: "2023-11-05",
+      status: "resolved",
+      reporter: { name: "Kasun T.", role: "student", avatar: "https://randomuser.me/api/portraits/men/11.jpg" },
+      reported: { name: "Nimal Siri", role: "owner", avatar: "https://randomuser.me/api/portraits/men/40.jpg" },
+      description: "The electronic lock on the main entrance is malfunctioning, leaving the house unlocked at night.",
+      solution: "Owner provided proof of repair from a locksmith. Tenant confirmed the fix is working."
+    },
+    {
+      id: "R-0992",
+      title: "Incorrect Utility Billing",
+      type: "Financial",
+      priority: "Medium",
+      date: "2023-11-02",
+      status: "resolved",
+      reporter: { name: "Maya R.", role: "student", avatar: "https://randomuser.me/api/portraits/women/15.jpg" },
+      reported: { name: "Ruwan Dias", role: "owner", avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
+      description: "Charged double for electricity this month without any increase in usage.",
+      solution: "Admin verified the meter reading error. Landlord agreed to deduct the excess from next month's rent."
+    },
+    {
+      id: "R-0990",
+      title: "Wifi Services Not Provided",
+      type: "Utility",
+      priority: "Low",
+      date: "2023-10-28",
+      status: "resolved",
+      reporter: { name: "Kevin L.", role: "student", avatar: "https://randomuser.me/api/portraits/men/45.jpg" },
+      reported: { name: "Bandara K.", role: "owner", avatar: "https://randomuser.me/api/portraits/men/29.jpg" },
+      description: "Listing promised High-Speed Wifi, but it has been disconnected for weeks.",
+      solution: "Landlord upgraded the plan and provided a new router."
+    }
+  ],
+  dismissed: [
+    {
+      id: "R-0985",
+      title: "Neighbor's Dog Barking",
+      type: "Conduct",
+      priority: "Low",
+      date: "2023-10-25",
+      status: "dismissed",
+      reporter: { name: "John Doe", role: "student", avatar: "https://randomuser.me/api/portraits/men/1.jpg" },
+      description: "The neighbor's dog barks every morning for 10 minutes.",
+      dismissalReason: "Not a violation of platform policy. This is a general residential issue outside of the platform's control."
+    },
+    {
+      id: "R-0982",
+      title: "Listing price is too high",
+      type: "Feedback",
+      priority: "Low",
+      date: "2023-10-20",
+      status: "dismissed",
+      reporter: { name: "Sarah J.", role: "student", avatar: "https://randomuser.me/api/portraits/women/40.jpg" },
+      description: "This hostel is overpriced compared to others in the area.",
+      dismissalReason: "Owners are allowed to set their own prices. No policy violation detected."
+    },
+    {
+      id: "R-0980",
+      title: "Unfriendly Landlord",
+      type: "Conduct",
+      priority: "Low",
+      date: "2023-10-15",
+      status: "dismissed",
+      reporter: { name: "Alex K.", role: "student", avatar: "https://randomuser.me/api/portraits/men/52.jpg" },
+      description: "The landlord spoke rudely to me when I asked about the deposit.",
+      dismissalReason: "Insufficient evidence of harassment. Warning sent to landlord regarding professional conduct."
+    }
+  ]
+};
+
 /**
  * 6. DASHBOARD APPROVALS LIST
  * Derived from initialAds
