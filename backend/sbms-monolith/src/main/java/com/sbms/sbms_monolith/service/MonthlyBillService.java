@@ -1,6 +1,8 @@
 package com.sbms.sbms_monolith.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import com.sbms.sbms_monolith.model.MonthlyBill;
 import com.sbms.sbms_monolith.model.Registration;
 import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.UtilityBill;
+import com.sbms.sbms_monolith.model.enums.BillDueStatus;
 import com.sbms.sbms_monolith.model.enums.MonthlyBillStatus;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
 import com.sbms.sbms_monolith.repository.MonthlyBillRepository;
@@ -31,12 +34,8 @@ public class MonthlyBillService {
     @Autowired
     private RegistrationRepository registrationRepo;
 
-    // ------------------------------------------------
-    // SYSTEM: GENERATE MONTHLY BILLS
-    // ------------------------------------------------
     public void generateBillsForMonth(String month) {
 
-        // 1️⃣ Get all utility bills for the month
         List<UtilityBill> utilities = utilityRepo.findAll()
                 .stream()
                 .filter(u -> u.getMonth().equals(month))
@@ -46,7 +45,6 @@ public class MonthlyBillService {
 
             Boarding boarding = utility.getBoarding();
 
-            // 2️⃣ Get approved registrations for this boarding
             List<Registration> registrations =
                     registrationRepo.findByBoarding_IdAndStatus(
                             boarding.getId(),
@@ -57,7 +55,6 @@ public class MonthlyBillService {
 
                 User student = reg.getStudent();
 
-                // 3️⃣ Avoid duplicate bills
                 boolean exists = billRepo
                         .findByStudent_IdAndBoarding_IdAndMonth(
                                 student.getId(),
@@ -68,7 +65,6 @@ public class MonthlyBillService {
 
                 if (exists) continue;
 
-                // 4️⃣ Calculate costs
                 BigDecimal boardingFee = boarding.getPricePerMonth();
                 BigDecimal electricity = utility.getElectricityAmount();
                 BigDecimal water = utility.getWaterAmount();
@@ -77,39 +73,75 @@ public class MonthlyBillService {
                         .add(electricity)
                         .add(water);
 
-                // 5️⃣ Create bill
                 MonthlyBill bill = new MonthlyBill();
                 bill.setStudent(student);
                 bill.setBoarding(boarding);
                 bill.setMonth(month);
+                
                 bill.setBoardingFee(boardingFee);
                 bill.setElectricityFee(electricity);
                 bill.setWaterFee(water);
                 bill.setTotalAmount(total);
+                
                 bill.setStatus(MonthlyBillStatus.UNPAID);
+                bill.setDueDate(LocalDate.parse(month + "-10"));
 
                 billRepo.save(bill);
             }
         }
     }
 
-    // -----------------------------------------------
-    // STUDENT: VIEW MY BILLS
-    // -----------------------------------------------
     public List<MonthlyBillResponseDTO> getForStudent(Long studentId) {
         return billRepo.findByStudent_Id(studentId)
                 .stream()
-                .map(MonthlyBillMapper::toDTO)
+                .map(bill -> MonthlyBillMapper.toDTO(
+                        bill,
+                        getDueStatus(bill),
+                        getDueInDays(bill)
+                ))
                 .toList();
     }
 
-    // -----------------------------------------------
-    // OWNER: VIEW BILLS FOR MY BOARDINGS
-    // -----------------------------------------------
     public List<MonthlyBillResponseDTO> getForOwner(Long ownerId) {
         return billRepo.findByBoarding_Owner_Id(ownerId)
                 .stream()
-                .map(MonthlyBillMapper::toDTO)
+                .map(bill -> MonthlyBillMapper.toDTO(
+                        bill,
+                        getDueStatus(bill),
+                        getDueInDays(bill)
+                ))
                 .toList();
     }
+    
+    
+    public BillDueStatus getDueStatus(MonthlyBill bill) {
+
+        if (bill.getStatus() == MonthlyBillStatus.PAID) {
+            return BillDueStatus.PAID;
+        }
+
+        LocalDate today = LocalDate.now();
+
+        if (today.isAfter(bill.getDueDate())) {
+            return BillDueStatus.OVERDUE;
+        }
+
+        return BillDueStatus.DUE_SOON;
+    }
+
+    public int getDueInDays(MonthlyBill bill) {
+
+        if (bill.getStatus() == MonthlyBillStatus.PAID) {
+            return 0;
+        }
+
+        return (int) ChronoUnit.DAYS.between(
+                LocalDate.now(),
+                bill.getDueDate()
+        );
+    }
+
+    
+    
+    
 }
