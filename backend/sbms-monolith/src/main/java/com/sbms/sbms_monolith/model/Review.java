@@ -15,10 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Review extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "report_id")
-    private Long reviewId;
 
     @Column(nullable = false)
     @Min(1) // Ensures rating is at least 1
