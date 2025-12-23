@@ -65,7 +65,7 @@ public class Report extends BaseEntity {
     private User student;
 
     @PrePersist
-    public void setReportDefaults() {
+    public void cre() {
         if (this.submissionDate == null) this.submissionDate = LocalDateTime.now();
         if (this.status == null) this.status = "pending";
     }
