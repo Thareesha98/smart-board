@@ -1,5 +1,6 @@
 package com.sbms.sbms_monolith.model;
 
+import com.sbms.sbms_monolith.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.util.List;
 @Table(name = "report")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Report {
+public class Report extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,7 +65,7 @@ public class Report {
     private User student;
 
     @PrePersist
-    protected void onCreate() {
+    public void setReportDefaults() {
         if (this.submissionDate == null) this.submissionDate = LocalDateTime.now();
         if (this.status == null) this.status = "pending";
     }
