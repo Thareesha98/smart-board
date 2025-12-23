@@ -2,6 +2,7 @@ package com.sbms.sbms_monolith.model;
 
 import com.sbms.sbms_monolith.common.BaseEntity;
 import com.sbms.sbms_monolith.model.enums.ReportSeverity;
+import com.sbms.sbms_monolith.model.enums.ReportStatus;
 import com.sbms.sbms_monolith.model.enums.ReportType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
