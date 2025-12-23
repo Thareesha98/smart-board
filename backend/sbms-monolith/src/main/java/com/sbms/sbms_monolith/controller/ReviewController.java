@@ -25,6 +25,18 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviews(boardingId));
     }
 
+    @GetMapping("/student/{studentId}/boarding/{boardingId}")
+    public ResponseEntity<ReviewResponseDTO> getReview(@PathVariable Long studentId, @PathVariable Long boardingId){
+        ReviewResponseDTO dto = reviewService.getReviewByStudent(studentId,boardingId);
+
+        if(dto != null){
+            return ResponseEntity.ok(dto);
+        }else {
+            return ResponseEntity.notFound().build();
+        }
+
+    }
+
     @GetMapping("/boarding/{boardingId}/average")
     public ResponseEntity<Double> getAverageRating(@PathVariable Long boardingId){
         return ResponseEntity.ok(reviewService.getAverageRating(boardingId));

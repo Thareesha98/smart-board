@@ -64,6 +64,13 @@ public class ReviewService {
 
     }
 
+    public ReviewResponseDTO getReviewByStudent(Long studentId,Long boardingId){
+        return reviewRepository.findByStudentIdAndBoardingId(studentId,boardingId)
+                .map(reviewMapper::toResponseDto)
+                .orElse(null);
+
+    }
+
     public Double getAverageRating(Long boardingId){
         Double avg = reviewRepository.getAverageRatingForBoarding(boardingId);
         return (avg != null) ? avg : 0.0;
