@@ -34,6 +34,10 @@ public class Registration extends BaseEntity{
 	private String studentNote;
     private String ownerNote;
     
+    @Column
+    private String paymentTransactionRef;
+
+    
     
     
 	

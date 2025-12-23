@@ -3,10 +3,12 @@ package com.sbms.sbms_monolith.service;
 import com.sbms.sbms_monolith.mapper.RegistrationMapper;
 import com.sbms.sbms_monolith.mapper.StudentBoardingDashboardMapper;
 import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
+import com.sbms.sbms_monolith.dto.payment.PaymentResult;
 import com.sbms.sbms_monolith.dto.registration.*;
 import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.Registration;
 import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.model.enums.PaymentMethod;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
 import com.sbms.sbms_monolith.model.enums.Status;
 import com.sbms.sbms_monolith.model.enums.UserRole;
@@ -33,6 +35,8 @@ public class RegistrationService {
 
     @Autowired
     private UserRepository userRepo;
+    
+    
 
     @Autowired
     private PaymentService paymentService;
@@ -52,14 +56,21 @@ public class RegistrationService {
             throw new RuntimeException("Key money must be paid to register");
         }
 
-        boolean success = paymentService.processPayment(
+        PaymentResult result = paymentService.processPayment(
                 studentId,
-                boarding.getKeyMoney()
+                boarding.getKeyMoney(),
+                PaymentMethod.CARD   // simulated
         );
 
-        if (!success) {
-            throw new RuntimeException("Payment failed");
+        if (!result.isSuccess()) {
+            throw new RuntimeException(
+                    "Key money payment failed: " + result.getMessage()
+            );
         }
+        
+       
+
+
 
         Registration r = new Registration();
         r.setBoarding(boarding);
@@ -68,6 +79,8 @@ public class RegistrationService {
         r.setStudentNote(dto.getStudentNote());
         r.setStatus(RegistrationStatus.PENDING);
         r.setKeyMoneyPaid(true);
+        
+        r.setPaymentTransactionRef(result.getTransactionId());
 
         registrationRepo.save(r);
 
@@ -136,21 +149,14 @@ public class RegistrationService {
         Registration reg = registrationRepo.findById(regId)
                 .orElseThrow(() -> new RuntimeException("Registration not found"));
 
-        // 🔒 Security check
         if (!reg.getStudent().getId().equals(loggedStudentId)) {
             throw new RuntimeException("Forbidden");
         }
 
-        // ----------------------------
-        // PAYMENT (mock / safe)
-        // ----------------------------
         BigDecimal currentMonthDue = reg.getBoarding().getPricePerMonth();
         String paymentStatus = "PENDING";
         LocalDate lastPaymentDate = null;
 
-        // ----------------------------
-        // MAINTENANCE (safe defaults)
-        // ----------------------------
         int openIssues = 0;
         int resolvedIssues = 0;
         LocalDate lastIssueDate = null;
