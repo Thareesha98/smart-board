@@ -25,5 +25,4 @@ public interface ReviewRepository extends JpaRepository<Review,Long> {
     boolean existsByStudentIdAndBoardingId(Long studentId, Long boardingId);
 
 
-
 }
