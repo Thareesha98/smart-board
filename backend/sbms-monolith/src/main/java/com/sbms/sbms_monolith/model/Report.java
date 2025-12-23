@@ -1,6 +1,8 @@
 package com.sbms.sbms_monolith.model;
 
 import com.sbms.sbms_monolith.common.BaseEntity;
+import com.sbms.sbms_monolith.model.enums.ReportSeverity;
+import com.sbms.sbms_monolith.model.enums.ReportType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,11 +30,11 @@ public class Report extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String type; // boarding, owner, safety, fraud, other
+    private ReportType type; // boarding, owner, safety, fraud, other
 
-    private String severity; // low, medium, high, critical
+    private ReportSeverity severity; // low, medium, high, critical
 
-    private String status; // pending, under-review, resolved, dismissed
+    private ReportStatus status; // pending, under-review, resolved, dismissed
 
     @Column(name = "submission_date")
     private LocalDateTime submissionDate;
@@ -65,7 +67,7 @@ public class Report extends BaseEntity {
     private User student;
 
     @PrePersist
-    public void cre() {
+    public void creteOn() {
         if (this.submissionDate == null) this.submissionDate = LocalDateTime.now();
         if (this.status == null) this.status = "pending";
     }
