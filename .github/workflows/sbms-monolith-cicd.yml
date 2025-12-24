@@ -46,6 +46,15 @@ jobs:
       - name: Debug frontend artifact
         run: ls front-end/dist
 
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: echo "SSH CONNECTED SUCCESSFULLY"
+
+
       # -----------------------------
       # DEPLOY BACKEND
       # -----------------------------
