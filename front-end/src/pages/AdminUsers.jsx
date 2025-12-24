@@ -22,45 +22,49 @@ const AdminUsers = ({ onNavigate }) => {
         >
             {toast && <Toast message={toast.message} type={toast.type} />}
 
-            {/* QUICK STATS BAR - RESTORED FROM HTML VERSION */}
-            <div className="flex flex-wrap gap-4 mb-8">
-                <div className="flex-grow min-w-[150px] bg-white p-4 rounded-[20px] shadow-sm border-l-4 border-primary flex items-center gap-4">
-                    <div className="p-3 bg-primary/10 rounded-full text-primary">
-                        <i className="fas fa-users text-xl"></i>
+            {/* QUICK STATS BAR - RESPONSIVE GRID */}
+            <div className="grid grid-cols-2 lg:flex lg:flex-wrap gap-3 lg:gap-4 mb-6 lg:mb-8">
+                {/* Total Users */}
+                <div className="bg-white p-3 lg:p-4 rounded-[20px] shadow-sm border-l-4 border-primary flex items-center gap-3 lg:gap-4">
+                    <div className="hidden sm:flex p-2 lg:p-3 bg-primary/10 rounded-full text-primary">
+                        <i className="fas fa-users text-sm lg:text-xl"></i>
                     </div>
                     <div>
-                        <span className="block text-xs text-text-muted uppercase font-bold tracking-wider">Total Users</span>
-                        <span className="text-xl font-bold text-text-dark">{stats.total}</span>
+                        <span className="block text-[10px] text-text-muted uppercase font-bold tracking-wider">Total</span>
+                        <span className="text-lg lg:text-xl font-bold text-text-dark">{stats.total}</span>
                     </div>
                 </div>
 
-                <div className="flex-grow min-w-[150px] bg-white p-4 rounded-[20px] shadow-sm border-l-4 border-accent flex items-center gap-4">
-                    <div className="p-3 bg-accent/10 rounded-full text-accent">
-                        <i className="fas fa-user-grad text-xl"></i>
+                {/* Students */}
+                <div className="bg-white p-3 lg:p-4 rounded-[20px] shadow-sm border-l-4 border-accent flex items-center gap-3 lg:gap-4">
+                    <div className="hidden sm:flex p-2 lg:p-3 bg-accent/10 rounded-full text-accent">
+                        <i className="fas fa-user-graduate text-sm lg:text-xl"></i>
                     </div>
                     <div>
-                        <span className="block text-xs text-text-muted uppercase font-bold tracking-wider">Students</span>
-                        <span className="text-xl font-bold text-text-dark">{stats.students}</span>
+                        <span className="block text-[10px] text-text-muted uppercase font-bold tracking-wider">Students</span>
+                        <span className="text-lg lg:text-xl font-bold text-text-dark">{stats.students}</span>
                     </div>
                 </div>
 
-                <div className="flex-grow min-w-[150px] bg-white p-4 rounded-[20px] shadow-sm border-l-4 border-success flex items-center gap-4">
-                    <div className="p-3 bg-success/10 rounded-full text-success">
-                        <i className="fas fa-house-user text-xl"></i>
+                {/* Owners */}
+                <div className="bg-white p-3 lg:p-4 rounded-[20px] shadow-sm border-l-4 border-success flex items-center gap-3 lg:gap-4">
+                    <div className="hidden sm:flex p-2 lg:p-3 bg-success/10 rounded-full text-success">
+                        <i className="fas fa-house-user text-sm lg:text-xl"></i>
                     </div>
                     <div>
-                        <span className="block text-xs text-text-muted uppercase font-bold tracking-wider">Owners</span>
-                        <span className="text-xl font-bold text-text-dark">{stats.owners}</span>
+                        <span className="block text-[10px] text-text-muted uppercase font-bold tracking-wider">Owners</span>
+                        <span className="text-lg lg:text-xl font-bold text-text-dark">{stats.owners}</span>
                     </div>
                 </div>
 
-                <div className="flex-grow min-w-[150px] bg-white p-4 rounded-[20px] shadow-sm border-l-4 border-info flex items-center gap-4">
-                    <div className="p-3 bg-info/10 rounded-full text-info">
-                        <i className="fas fa-user-shield text-xl"></i>
+                {/* Admins */}
+                <div className="bg-white p-3 lg:p-4 rounded-[20px] shadow-sm border-l-4 border-info flex items-center gap-3 lg:gap-4">
+                    <div className="hidden sm:flex p-2 lg:p-3 bg-info/10 rounded-full text-info">
+                        <i className="fas fa-user-shield text-sm lg:text-xl"></i>
                     </div>
                     <div>
-                        <span className="block text-xs text-text-muted uppercase font-bold tracking-wider">Admins</span>
-                        <span className="text-xl font-bold text-text-dark">{stats.admins}</span>
+                        <span className="block text-[10px] text-text-muted uppercase font-bold tracking-wider">Admins</span>
+                        <span className="text-lg lg:text-xl font-bold text-text-dark">{stats.admins}</span>
                     </div>
                 </div>
             </div>
