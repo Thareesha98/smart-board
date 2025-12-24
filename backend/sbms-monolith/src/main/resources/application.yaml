@@ -7,9 +7,9 @@ spring:
 
   # Database Configuration
   datasource:
-    url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board
-    username: smartboard_admin
-    password: "09090909"
+    url:  jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/sbms_monolith
+    username: monolith_user
+    password: "monolith09090909"
     driver-class-name: org.postgresql.Driver
     hikari:
       max-lifetime: 250000
@@ -58,14 +58,6 @@ aws:
   region: ap-south-1
   s3:
     bucketName: smart-board-project
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      # FIX: Corrected indentation here (removed Tab, used spaces)
-      defaultZone: http://localhost:8761/eureka/
 
 
 #url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board
