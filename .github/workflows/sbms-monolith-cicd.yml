@@ -51,7 +51,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: |
             backend/sbms-monolith/target/*.jar
-            frontend/dist/*
+            frontend/dist/**
           target: /opt/sbms/tmp
 
       - name: Restart services
