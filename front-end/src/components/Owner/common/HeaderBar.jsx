@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useOwnerAuth } from "../../../context/owner/OwnerAuthContext.jsx";
 
 // Added navBtnText and navBtnPath props
-const Header = ({ title, subtitle, rightContent, navBtnText, navBtnPath,onNavBtnClick }) => {
+const HeaderBar = ({ title, subtitle, rightContent, navBtnText, navBtnPath,onNavBtnClick }) => {
   const { currentUser } = useOwnerAuth();
   const navigate = useNavigate();
 
@@ -107,4 +107,4 @@ const Header = ({ title, subtitle, rightContent, navBtnText, navBtnPath,onNavBtn
   );
 };
 
-export default Header;
+export default HeaderBar;
