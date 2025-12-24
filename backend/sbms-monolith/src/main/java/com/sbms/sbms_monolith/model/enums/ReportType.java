@@ -1,5 +1,19 @@
 package com.sbms.sbms_monolith.model.enums;
 
 public enum ReportType {
-    BOARDING, OWNER, STUDENT, SAFETY, FRAUD, OTHER
+    // --- STUDENT REPORTS ---
+    BOARDING,
+    OWNER,
+    STUDENT,
+    SAFETY,
+    FRAUD,
+
+    // --- OWNER REPORTS (New) ---
+    PAYMENT_ISSUE,
+    PROPERTY_DAMAGE,
+    RULE_VIOLATION,
+    MISCONDUCT,
+
+    // --- COMMON ---
+    OTHER
 }
