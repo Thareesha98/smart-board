@@ -26,6 +26,9 @@ jobs:
         working-directory: backend/sbms-monolith
         run: mvn clean package -DskipTests
 
+      - name: Debug backend artifact
+        run: ls backend/sbms-monolith/target
+
       # -----------------------------
       # FRONTEND BUILD
       # -----------------------------
@@ -40,20 +43,36 @@ jobs:
           npm install
           npm run build
 
+      - name: Debug frontend artifact
+        run: ls front-end/dist
+
       # -----------------------------
-      # DEPLOY TO EC2
+      # DEPLOY BACKEND
       # -----------------------------
-      - name: Deploy to EC2
+      - name: Upload backend jar
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: |
-            backend/sbms-monolith/target/*.jar
-            frontend/dist/**
-          target: /opt/sbms/tmp
+          source: backend/sbms-monolith/target/*.jar
+          target: /opt/sbms/tmp/backend
 
+      # -----------------------------
+      # DEPLOY FRONTEND
+      # -----------------------------
+      - name: Upload frontend
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: front-end/dist/**
+          target: /opt/sbms/tmp/frontend
+
+      # -----------------------------
+      # RESTART SERVICES
+      # -----------------------------
       - name: Restart services
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -61,12 +80,12 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Backend
-            mv /opt/sbms/tmp/backend/sbms-monolith/target/*.jar /opt/sbms/backend/sbms-backend.jar
-            sudo systemctl restart sbms-backend
+            echo "Deploying backend..."
+            sudo systemctl stop sbms-backend || true
+            mv /opt/sbms/tmp/backend/*.jar /opt/sbms/backend/sbms-backend.jar
+            sudo systemctl start sbms-backend
 
-            # Frontend
+            echo "Deploying frontend..."
             rm -rf /opt/sbms/frontend/*
-            mv /opt/sbms/tmp/frontend/dist/* /opt/sbms/frontend/
-
+            mv /opt/sbms/tmp/frontend/* /opt/sbms/frontend/
             sudo systemctl reload nginx
