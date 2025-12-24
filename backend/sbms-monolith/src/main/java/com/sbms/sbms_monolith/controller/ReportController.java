@@ -11,37 +11,59 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reports")
+@CrossOrigin("*")
 public class ReportController {
 
     @Autowired
     private ReportService reportService;
 
-    // Report submit
+    // Create Report
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ReportResponseDTO> create(
-            @RequestPart("data") ReportCreateDTO dto,
+            @ModelAttribute ReportCreateDTO dto,
             @RequestPart(value = "evidence", required = false) List<MultipartFile> evidence
     ) throws IOException {
-        dto.setEvidence(evidence);
-        ReportResponseDTO response = reportService.create(dto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(reportService.create(dto, evidence));
     }
 
-    // Get all reports
-    @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<ReportResponseDTO>> findAllByStudentId(@PathVariable Long studentId) {
-        List<ReportResponseDTO> reports = reportService.getReportsByStudent(studentId);
-        return ResponseEntity.ok(reports);
+    // Get My Sent Reports
+    @GetMapping("/sent/{userId}")
+    public ResponseEntity<List<ReportResponseDTO>> getSentReports(@PathVariable Long userId) {
+        return ResponseEntity.ok(reportService.getSentReports(userId));
     }
 
-    // Get single report detail
-    @GetMapping("/{reportId}")
-    public ResponseEntity<ReportResponseDTO> findById(@PathVariable Long reportId) {
-        ReportResponseDTO report = reportService.getReportsById(reportId);
-        return ResponseEntity.ok(report);
+    // Get Profile History
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<List<ReportResponseDTO>> getUserHistory(@PathVariable Long userId) {
+        return ResponseEntity.ok(reportService.getUserHistory(userId));
+    }
+
+    // Admin: All
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<ReportResponseDTO>> getAllReports() {
+        return ResponseEntity.ok(reportService.getAllReports());
+    }
+
+    // Admin: Actions
+    @PutMapping("/{id}/investigate")
+    public ResponseEntity<ReportResponseDTO> investigate(@PathVariable Long id) {
+        return ResponseEntity.ok(reportService.startInvestigation(id));
+    }
+
+    @PutMapping("/{id}/resolve")
+    public ResponseEntity<ReportResponseDTO> resolve(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(reportService.resolveReport(
+                id, body.get("text"), body.get("action"), body.get("duration"))
+        );
+    }
+
+    @PutMapping("/{id}/dismiss")
+    public ResponseEntity<ReportResponseDTO> dismiss(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(reportService.dismissReport(id, body.get("text")));
     }
 
 }
