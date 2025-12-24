@@ -5,6 +5,44 @@ export default {
   "./front-end/src/**/*.{js,ts,jsx,tsx}",
 ],
 
+  safelist: [
+    // layout
+    "flex",
+    "grid",
+    "hidden",
+    "block",
+
+    // spacing
+    "p-2", "p-3", "p-4", "p-6", "p-8",
+    "px-4", "py-2", "py-3", "py-4",
+
+    // colors
+    "bg-orange-500",
+    "bg-orange-600",
+    "bg-gray-100",
+    "bg-gray-200",
+    "bg-light",
+    "text-white",
+    "text-black",
+    "text-text",
+
+    // borders & radius
+    "rounded-lg",
+    "rounded-xl",
+    "rounded-2xl",
+    "border",
+    "border-gray-200",
+
+    // shadows
+    "shadow",
+    "shadow-md",
+    "shadow-lg",
+
+    // width / height
+    "w-full",
+    "h-full",
+  ],
+
   theme: {
     extend: {
       colors: {
