@@ -14,11 +14,14 @@ public class ReportCreateDTO {
     private String reportDescription;
     private String type;
     private String severity;
-    private Boarding boarding;             // Name of the boarding
-//    private String reportedPerson;
+    private String boarding;             // Name of the boarding
+
+    private Long senderId;         // The Owner/Student ID
+    private Long reportedUserId;   // (Optional) The Student ID being reported
+
     private Boolean allowContact;
     private LocalDate incidentDate;
-    private Long studentId;              // ID of the student sending it
+
 
     // The files uploaded by user
     private List<MultipartFile> evidence;
