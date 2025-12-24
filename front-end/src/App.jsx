@@ -24,8 +24,7 @@ function App() {
 
       <Routes>
         {/* Redirect root */}
-        <Route path="/" element={<Navigate to="/ownerLayout/dashboard" replace />} />
-
+        <Route path="/" element={<Navigate to="/student/login" replace />} />
         {/* Owner layout */}
         <Route path="ownerLayout" element={<OwnerLayout />}>
           <Route index element={<Dashboard />} />
