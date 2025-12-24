@@ -13,6 +13,18 @@ function App() {
       <ScrollToTop />
 
       <Routes>
+
+        {/* Root aliases */}
+        <Route path="/login" element={<Navigate to="/student/login" replace />} />
+        <Route path="/signup" element={<Navigate to="/student/signup" replace />} />
+
+        {/* Student routes */}
+        <Route path="/student/*" element={<StudentRoutes />} />
+
+        {/* Owner routes */}
+        <Route path="/ownerLayout/*" element={<OwnerRoutes />} />
+
+  <Route path="*" element={<h1>404</h1>} />
         {/* Default landing */}
         <Route path="/" element={<Navigate to="/student/login" replace />} />
 
