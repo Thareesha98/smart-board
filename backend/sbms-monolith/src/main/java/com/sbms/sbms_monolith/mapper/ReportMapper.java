@@ -5,7 +5,9 @@ import com.sbms.sbms_monolith.dto.report.ReportCreateDTO;
 import com.sbms.sbms_monolith.dto.report.ReportResponseDTO;
 import com.sbms.sbms_monolith.model.Report;
 import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.model.enums.ReportSeverity;
 import com.sbms.sbms_monolith.model.enums.ReportStatus;
+import com.sbms.sbms_monolith.model.enums.ReportType;
 
 import java.time.format.DateTimeFormatter;
 
@@ -59,22 +61,30 @@ public class ReportMapper {
             dto.setEvidenceCount(0);
         }
 
-        // Sender Mapping
-        if (r.getSender() != null) {
-            ReportResponseDTO.UserDTO userDto = new ReportResponseDTO.UserDTO();
-            userDto.setId(r.getSender().getId());
-            userDto.setName(r.getSender().getFullName());
-            userDto.setAvatar("https://ui-avatars.com/api/?name=" + r.getSender().getFullName());
-            dto.setSender(userDto);
-        }
+        // Map Users using helper
+        if (r.getSender() != null) dto.setSender(mapUser(r.getSender()));
+        if (r.getReportedUser() != null) dto.setReportedUser(mapUser(r.getReportedUser()));
 
         return dto;
     }
 
-    public static Report toEntity(ReportCreateDTO dto, User user) {
+    public static Report toEntity(ReportCreateDTO dto, User sender, User reportedTarget) {
         Report r = new Report();
+        r.setTitle(dto.getReportTitle());
+        r.setDescription(dto.getReportDescription());
+        r.setBoardingName(dto.getBoarding());
 
+        try { r.setType(ReportType.valueOf(dto.getType().toUpperCase())); }
+        catch (Exception e) { r.setType(ReportType.OTHER); }
 
+        try { r.setSeverity(ReportSeverity.valueOf(dto.getSeverity().toUpperCase())); }
+        catch (Exception e) { r.setSeverity(ReportSeverity.LOW); }
+
+        r.setSender(sender);
+        r.setReportedUser(reportedTarget);
+
+        r.setAllowContact(dto.getAllowContact() != null ? dto.getAllowContact() : false);
+        r.setIncidentDate(dto.getIncidentDate());
 
         return r;
     }
