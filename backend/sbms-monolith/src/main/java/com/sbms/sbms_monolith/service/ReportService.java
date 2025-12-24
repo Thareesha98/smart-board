@@ -27,29 +27,31 @@ public class ReportService {
     @Autowired
     private S3Service s3Service;
 
-    public ReportResponseDTO create(ReportCreateDTO dto) throws IOException {
+    // 1. Create Report (Unified)
+    public ReportResponseDTO create(ReportCreateDTO dto, List<MultipartFile> files) throws IOException {
+        User sender = userRepo.findById(dto.getSenderId())
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
 
-        User student = userRepo.findById(dto.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+        User reportedTarget = null;
+        if (dto.getReportedUserId() != null) {
+            reportedTarget = userRepo.findById(dto.getReportedUserId()).orElse(null);
+        }
 
-        // Use Static Mapper
-        Report report = ReportMapper.toEntity(dto, student);
+        // Pass both users to Mapper
+        Report report = ReportMapper.toEntity(dto, sender, reportedTarget);
 
-        // Upload files
-        List<String> fileUrls  = new ArrayList<>();
-
-        if (dto.getEvidence() != null && !dto.getEvidence().isEmpty()) {
-            for (MultipartFile file : dto.getEvidence()) {
-                String s3Url = s3Service.uploadFile(file, "reports");
-                fileUrls.add(s3Url);
+        // Upload
+        List<String> fileUrls = new ArrayList<>();
+        if (files != null) {
+            for (MultipartFile file : files) {
+                if(!file.isEmpty()) {
+                    fileUrls.add(s3Service.uploadFile(file, "reports"));
+                }
             }
         }
         report.setEvidence(fileUrls);
 
-        Report savedReport = reportRepo.save(report);
-
-        // Use Static Mapper
-        return ReportMapper.toDTO(savedReport);
+        return ReportMapper.toDTO(reportRepo.save(report));
     }
 
     public List<ReportResponseDTO> getReportsByStudent(Long studentId) {
