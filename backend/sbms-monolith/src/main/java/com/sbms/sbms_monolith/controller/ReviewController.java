@@ -2,6 +2,7 @@ package com.sbms.sbms_monolith.controller;
 
 import com.sbms.sbms_monolith.dto.review.ReviewCreateDTO;
 import com.sbms.sbms_monolith.dto.review.ReviewResponseDTO;
+import com.sbms.sbms_monolith.repository.ReviewRepository;
 import com.sbms.sbms_monolith.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
+    private final ReviewRepository reviewRepository;
 
     @PostMapping
     public ResponseEntity<ReviewResponseDTO> addReview(@RequestBody ReviewCreateDTO dto){
@@ -45,5 +47,10 @@ public class ReviewController {
     @PutMapping("/student/{studentId}/boarding/{boardingId}")
     public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable Long  studentId, @PathVariable Long boardingId, @RequestBody ReviewCreateDTO dto){
         return ResponseEntity.ok(reviewService.updateReview(studentId, boardingId, dto));
+    }
+
+    @DeleteMapping("/{reviewId}")
+    public void deleteReview(@PathVariable Long reviewId){
+        reviewRepository.deleteById(reviewId);
     }
 }
