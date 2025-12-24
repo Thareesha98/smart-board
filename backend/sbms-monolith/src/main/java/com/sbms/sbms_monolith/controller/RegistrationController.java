@@ -1,24 +1,32 @@
 package com.sbms.sbms_monolith.controller;
 
+import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
 import com.sbms.sbms_monolith.dto.registration.*;
+import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
+import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.RegistrationService;
+import com.sbms.sbms_monolith.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/registrations")
-@CrossOrigin
 public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
+    
+    @Autowired UserRepository userRepository;
+    
+    
 
-    // STUDENT: Register for a boarding
     @PostMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
     public RegistrationResponseDTO register(
@@ -28,14 +36,12 @@ public class RegistrationController {
         return registrationService.register(studentId, dto);
     }
 
-    // STUDENT: My registrations
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
     public List<RegistrationResponseDTO> studentRegistrations(@PathVariable Long studentId) {
         return registrationService.getStudentRegistrations(studentId);
     }
 
-    // STUDENT: Cancel
     @PutMapping("/student/{studentId}/{regId}/cancel")
     @PreAuthorize("hasRole('STUDENT')")
     public RegistrationResponseDTO cancel(
@@ -45,7 +51,6 @@ public class RegistrationController {
         return registrationService.cancel(studentId, regId);
     }
 
-    // OWNER: View registrations
     @GetMapping("/owner/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
     public List<RegistrationResponseDTO> ownerRegistrations(
@@ -55,7 +60,6 @@ public class RegistrationController {
         return registrationService.getOwnerRegistrations(ownerId, status);
     }
 
-    // OWNER: Approve or decline
     @PutMapping("/owner/{ownerId}/{regId}")
     @PreAuthorize("hasRole('OWNER')")
     public RegistrationResponseDTO decide(
@@ -65,4 +69,24 @@ public class RegistrationController {
     ) {
         return registrationService.decide(ownerId, regId, dto);
     }
+    
+    
+    @GetMapping("/{regId}/dashboard")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
+            @PathVariable Long regId,
+            Authentication authentication
+    ) {
+        String email = authentication.getName(); // 👈 from JWT
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        StudentBoardingDashboardDTO dto =
+                registrationService.getDashboard(regId, user.getId());
+
+        return ResponseEntity.ok(dto);
+    }
+
+
 }

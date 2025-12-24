@@ -15,7 +15,6 @@ public class OwnerBoardingController {
     @Autowired
     private OwnerBoardingService ownerBoardingService;
 
-    // CREATE
     @PostMapping("/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
     public OwnerBoardingResponseDTO create(
@@ -25,7 +24,6 @@ public class OwnerBoardingController {
         return ownerBoardingService.create(ownerId, dto);
     }
 
-    // UPDATE
     @PutMapping("/{ownerId}/{boardingId}")
     @PreAuthorize("hasRole('OWNER')")
     public OwnerBoardingResponseDTO update(
@@ -36,7 +34,6 @@ public class OwnerBoardingController {
         return ownerBoardingService.update(ownerId, boardingId, dto);
     }
 
-    // DELETE
     @DeleteMapping("/{ownerId}/{boardingId}")
     @PreAuthorize("hasRole('OWNER')")
     public String delete(
@@ -47,14 +44,12 @@ public class OwnerBoardingController {
         return "Boarding deleted successfully.";
     }
 
-    // GET ALL OWNER BOARDINGS
     @GetMapping("/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
     public List<OwnerBoardingResponseDTO> getAll(@PathVariable Long ownerId) {
         return ownerBoardingService.getAllByOwner(ownerId);
     }
 
-    // BOOST BOARDING
     @PostMapping("/{ownerId}/{boardingId}/boost")
     @PreAuthorize("hasRole('OWNER')")
     public OwnerBoardingResponseDTO boost(

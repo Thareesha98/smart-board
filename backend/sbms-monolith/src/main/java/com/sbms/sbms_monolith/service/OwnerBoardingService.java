@@ -23,7 +23,6 @@ public class OwnerBoardingService {
     @Autowired
     private UserRepository userRepository;
 
-    // CREATE
     public OwnerBoardingResponseDTO create(Long ownerId, BoardingCreateDTO dto) {
 
         User owner = userRepository.findById(ownerId)
@@ -37,7 +36,6 @@ public class OwnerBoardingService {
         return BoardingMapper.toOwnerResponse(saved);
     }
 
-    // UPDATE
     public OwnerBoardingResponseDTO update(Long ownerId, Long boardingId, BoardingUpdateDTO dto) {
 
         Boarding b = boardingRepository.findById(boardingId)
@@ -60,13 +58,11 @@ public class OwnerBoardingService {
         b.setImageUrls(dto.getImageUrls());
         b.setNearbyPlaces(dto.getNearbyPlaces());
 
-        // status stays same (admin approval needed)
 
         Boarding saved = boardingRepository.save(b);
         return BoardingMapper.toOwnerResponse(saved);
     }
 
-    // DELETE
     public void delete(Long ownerId, Long boardingId) {
         Boarding b = boardingRepository.findById(boardingId)
                 .orElseThrow(() -> new RuntimeException("Boarding not found"));
@@ -78,7 +74,6 @@ public class OwnerBoardingService {
         boardingRepository.delete(b);
     }
 
-    // GET ALL OWNER BOARDINGS
     public List<OwnerBoardingResponseDTO> getAllByOwner(Long ownerId) {
 
         return boardingRepository.findAll().stream()
@@ -87,7 +82,6 @@ public class OwnerBoardingService {
                 .collect(Collectors.toList());
     }
 
-    // BOOST AD (FR11)
     public OwnerBoardingResponseDTO boost(Long ownerId, Long boardingId, int days) {
 
         Boarding b = boardingRepository.findById(boardingId)

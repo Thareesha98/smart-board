@@ -16,18 +16,14 @@ public class FileController {
     @Autowired
     private S3Service s3Service;
 
-    // ---------------------------------------------------------
-    // Upload single file
-    // ---------------------------------------------------------
+    
     @PostMapping("/upload")
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
         String url = s3Service.uploadFile(file);
         return ResponseEntity.ok(url);
     }
 
-    // ---------------------------------------------------------
-    // Upload file to a specific folder (profile pics, boarding images…)
-    // ---------------------------------------------------------
+   
     @PostMapping("/upload/{folder}")
     public ResponseEntity<String> uploadToFolder(
             @RequestParam("file") MultipartFile file,
@@ -37,9 +33,7 @@ public class FileController {
         return ResponseEntity.ok(url);
     }
 
-    // ---------------------------------------------------------
-    // MULTI Upload
-    // ---------------------------------------------------------
+   
     @PostMapping("/upload-multiple/{folder}")
     public ResponseEntity<List<String>> uploadMultiple(
             @RequestParam("files") List<MultipartFile> files,
@@ -49,9 +43,7 @@ public class FileController {
         return ResponseEntity.ok(urls);
     }
 
-    // ---------------------------------------------------------
-    // DELETE
-    // ---------------------------------------------------------
+   
     @DeleteMapping("/delete")
     public ResponseEntity<String> delete(@RequestParam String fileUrl) {
         s3Service.deleteFile(fileUrl);

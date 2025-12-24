@@ -34,9 +34,6 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-    // ---------------------------------------------------------
-    // Security Filter Chain
-    // ---------------------------------------------------------
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -51,7 +48,11 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/api/auth/**",
                         "/api/boardings",
-                        "/api/boardings/**"
+                        "/api/boardings/**" , 
+                        
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
                 ).permitAll()
 
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -69,9 +70,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ---------------------------------------------------------
-    // Authentication Provider (UPDATED FOR SPRING BOOT 4.x)
-    // ---------------------------------------------------------
     @Bean
     public AuthenticationProvider authenticationProvider() {
 
@@ -84,9 +82,7 @@ public class SecurityConfig {
         return provider;
     }
 
-    // ---------------------------------------------------------
-    // Authentication Manager
-    // ---------------------------------------------------------
+  
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
             throws Exception {
@@ -94,17 +90,11 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // ---------------------------------------------------------
-    // Password Encoder (BCrypt)
-    // ---------------------------------------------------------
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ---------------------------------------------------------
-    // CORS
-    // ---------------------------------------------------------
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
