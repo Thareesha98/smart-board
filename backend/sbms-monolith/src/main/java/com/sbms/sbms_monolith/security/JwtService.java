@@ -15,15 +15,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // Generate a secure key (at least 256 bits). For now hardcode; later read from application.yml
     private static final String SECRET_KEY =
-            "4B6250655368566D597133743677397A244326452948404D635166546A576E5A"; // example hex string
+            "4B6250655368566D597133743677397A244326452948404D635166546A576E5A"; 
 
     private long jwtExpirationMs = 1000 * 60 * 60 * 24; // 24 hours
-
-    // ---------------------------------------------
-    // PUBLIC API
-    // ---------------------------------------------
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

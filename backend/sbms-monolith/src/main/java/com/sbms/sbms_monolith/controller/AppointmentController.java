@@ -17,10 +17,7 @@ public class AppointmentController {
     @Autowired
     private AppointmentService appointmentService;
 
-    // ---------------------------------------------------------
-    // STUDENT: CREATE APPOINTMENT REQUEST
     // POST /api/appointments/student/{studentId}
-    // ---------------------------------------------------------
     @PostMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
     public AppointmentResponseDTO createAppointment(
@@ -30,10 +27,7 @@ public class AppointmentController {
         return appointmentService.createAppointment(studentId, dto);
     }
 
-    // ---------------------------------------------------------
-    // STUDENT: VIEW OWN APPOINTMENTS
-    // GET /api/appointments/student/{studentId}
-    // ---------------------------------------------------------
+    
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
     public List<AppointmentResponseDTO> getStudentAppointments(
@@ -42,10 +36,7 @@ public class AppointmentController {
         return appointmentService.getAppointmentsForStudent(studentId);
     }
 
-    // ---------------------------------------------------------
-    // STUDENT: CANCEL APPOINTMENT
-    // PUT /api/appointments/student/{studentId}/{appointmentId}/cancel
-    // ---------------------------------------------------------
+   
     @PutMapping("/student/{studentId}/{appointmentId}/cancel")
     @PreAuthorize("hasRole('STUDENT')")
     public AppointmentResponseDTO cancelAppointment(
@@ -55,10 +46,7 @@ public class AppointmentController {
         return appointmentService.cancelAppointment(studentId, appointmentId);
     }
 
-    // ---------------------------------------------------------
-    // OWNER: VIEW APPOINTMENTS (OPTIONAL status filter)
-    // GET /api/appointments/owner/{ownerId}?status=PENDING
-    // ---------------------------------------------------------
+   
     @GetMapping("/owner/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
     public List<AppointmentResponseDTO> getOwnerAppointments(
@@ -68,10 +56,7 @@ public class AppointmentController {
         return appointmentService.getAppointmentsForOwner(ownerId, status);
     }
 
-    // ---------------------------------------------------------
-    // OWNER: RESPOND (ACCEPT / DECLINE)
-    // PUT /api/appointments/owner/{ownerId}/{appointmentId}
-    // ---------------------------------------------------------
+   
     @PutMapping("/owner/{ownerId}/{appointmentId}")
     @PreAuthorize("hasRole('OWNER')")
     public AppointmentResponseDTO respond(

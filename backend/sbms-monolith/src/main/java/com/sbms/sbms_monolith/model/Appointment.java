@@ -25,29 +25,22 @@ public class Appointment extends BaseEntity {
     @Column(nullable = false)
     private int numberOfStudents;  // total students in group (>=1)
 
-    // -----------------------------
-    // Time requested by student
-    // -----------------------------
+  
     @Column(nullable = false)
     private LocalDateTime requestedStartTime;
 
     @Column(nullable = false)
     private LocalDateTime requestedEndTime;
 
-    // -----------------------------
-    // Time proposed by owner
-    // must be within requested range
-    // -----------------------------
+  
     private LocalDateTime ownerStartTime;
     private LocalDateTime ownerEndTime;
 
-    // -----------------------------
-    // Status & messages
-    // -----------------------------
+   
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
-    private String studentNote; // optional message from student
-    private String ownerNote;   // optional message from owner
+    private String studentNote;
+    private String ownerNote;  
 }

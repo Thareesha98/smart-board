@@ -29,9 +29,6 @@ public class AppointmentService {
     @Autowired
     private UserRepository userRepository;
 
-    // ---------------------------------------------------------
-    // STUDENT: CREATE APPOINTMENT REQUEST
-    // ---------------------------------------------------------
     public AppointmentResponseDTO createAppointment(Long studentId, AppointmentCreateDTO dto) {
 
         User student = userRepository.findById(studentId)
@@ -76,9 +73,6 @@ public class AppointmentService {
         return AppointmentMapper.toDto(saved);
     }
 
-    // ---------------------------------------------------------
-    // STUDENT: VIEW OWN APPOINTMENTS
-    // ---------------------------------------------------------
     public List<AppointmentResponseDTO> getAppointmentsForStudent(Long studentId) {
 
         User student = userRepository.findById(studentId)
@@ -91,9 +85,7 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    // ---------------------------------------------------------
-    // OWNER: VIEW ALL APPOINTMENTS (OPTIONAL FILTER BY STATUS)
-    // ---------------------------------------------------------
+   
     public List<AppointmentResponseDTO> getAppointmentsForOwner(Long ownerId, AppointmentStatus status) {
 
         User owner = userRepository.findById(ownerId)
@@ -111,9 +103,6 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    // ---------------------------------------------------------
-    // OWNER: RESPOND TO APPOINTMENT (ACCEPT or DECLINE)
-    // ---------------------------------------------------------
     public AppointmentResponseDTO respondToAppointment(Long ownerId,
                                                        Long appointmentId,
                                                        AppointmentOwnerDecisionDTO dto) {
@@ -142,7 +131,6 @@ public class AppointmentService {
                 throw new RuntimeException("Invalid owner time range");
             }
 
-            // Must be within student requested range
             LocalDateTime reqStart = appointment.getRequestedStartTime();
             LocalDateTime reqEnd = appointment.getRequestedEndTime();
 
@@ -164,9 +152,7 @@ public class AppointmentService {
         return AppointmentMapper.toDto(saved);
     }
 
-    // ---------------------------------------------------------
-    // STUDENT: OPTIONALLY CANCEL APPOINTMENT
-    // ---------------------------------------------------------
+   
     public AppointmentResponseDTO cancelAppointment(Long studentId, Long appointmentId) {
 
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -177,7 +163,6 @@ public class AppointmentService {
         }
 
         if (appointment.getStatus() == AppointmentStatus.ACCEPTED) {
-            // optional rule: allow or disallow cancelling accepted appointments
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
