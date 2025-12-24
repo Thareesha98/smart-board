@@ -1,34 +1,28 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from '../components/student/common/ProtectedRoute';
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "../components/student/common/ProtectedRoute";
 
-// Auth Pages
-import LoginPage from '../pages/student/auth/LoginPage';
-import SignupPage from '../pages/student/auth/SignupPage';
+import LoginPage from "../pages/student/auth/LoginPage";
+import SignupPage from "../pages/student/auth/SignupPage";
+import StudentDashboard from "../pages/student/StudentDashboard";
+import AppointmentsPage from "../pages/student/AppointmentsPage";
+import SearchBoardingsPage from "../pages/student/SearchBoardingsPage";
+import BoardingDetailsPage from "../pages/student/BoardingDetailsPage";
+import MyBoardingsPage from "../pages/student/MyBoardingsPage";
+import BillingPage from "../pages/student/BillingPage";
+import MaintenancePage from "../pages/student/MaintenancePage";
+import ReportsPage from "../pages/student/ReportsPage";
+import ProfilePage from "../pages/student/ProfilePage";
 
-// Student Pages
-import StudentDashboard from '../pages/student/StudentDashboard';
-import AppointmentsPage from '../pages/student/AppointmentsPage';
-import SearchBoardingsPage from '../pages/student/SearchBoardingsPage';
-import BoardingDetailsPage from '../pages/student/BoardingDetailsPage';
-import MyBoardingsPage from '../pages/student/MyBoardingsPage';
-import BillingPage from '../pages/student/BillingPage';
-import MaintenancePage from '../pages/student/MaintenancePage';
-import ReportsPage from '../pages/student/ReportsPage';
-import ProfilePage from '../pages/student/ProfilePage';
-
-const AppRoutes = () => {
+export default function StudentRoutes() {
   return (
     <Routes>
-      {/* ==================== PUBLIC ROUTES ==================== */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
+      {/* Public */}
+      <Route path="login" element={<LoginPage />} />
+      <Route path="signup" element={<SignupPage />} />
 
-      {/* ==================== PROTECTED ROUTES ==================== */}
-      
-
+      {/* Protected */}
       <Route
-        path="/"
+        path="dashboard"
         element={
           <ProtectedRoute>
             <StudentDashboard />
@@ -37,7 +31,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/appointmentpage"
+        path="appointments"
         element={
           <ProtectedRoute>
             <AppointmentsPage />
@@ -46,7 +40,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/search-boardings"
+        path="search-boardings"
         element={
           <ProtectedRoute>
             <SearchBoardingsPage />
@@ -55,7 +49,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/boarding-details/:id"
+        path="boarding-details/:id"
         element={
           <ProtectedRoute>
             <BoardingDetailsPage />
@@ -64,7 +58,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/my-boardings"
+        path="my-boardings"
         element={
           <ProtectedRoute>
             <MyBoardingsPage />
@@ -73,7 +67,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/billing"
+        path="billing"
         element={
           <ProtectedRoute>
             <BillingPage />
@@ -82,7 +76,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/maintenance"
+        path="maintenance"
         element={
           <ProtectedRoute>
             <MaintenancePage />
@@ -91,7 +85,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/reports"
+        path="reports"
         element={
           <ProtectedRoute>
             <ReportsPage />
@@ -100,7 +94,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/profile"
+        path="profile"
         element={
           <ProtectedRoute>
             <ProfilePage />
@@ -108,10 +102,8 @@ const AppRoutes = () => {
         }
       />
 
-      {/* ==================== FALLBACK ROUTE ==================== */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/student/login" replace />} />
     </Routes>
   );
-};
-
-export default AppRoutes;
+}
