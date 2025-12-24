@@ -68,6 +68,23 @@ public class ReportMapper {
         return dto;
     }
 
+    // Helper to map User Entity -> Safe UserDTO
+    private static ReportResponseDTO.UserDTO mapUser(User user) {
+        ReportResponseDTO.UserDTO dto = new ReportResponseDTO.UserDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getFullName());
+
+        if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
+            dto.setAvatar(user.getProfileImageUrl());
+        } else {
+            dto.setAvatar("https://ui-avatars.com/api/?name=" + user.getFullName());
+        }
+
+        if (user.getRole() != null) dto.setRole(user.getRole().toString());
+
+        return dto;
+    }
+
     public static Report toEntity(ReportCreateDTO dto, User sender, User reportedTarget) {
         Report r = new Report();
         r.setTitle(dto.getReportTitle());
