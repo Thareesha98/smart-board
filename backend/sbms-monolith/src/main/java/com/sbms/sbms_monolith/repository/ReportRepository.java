@@ -9,10 +9,12 @@ import java.util.List;
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
-    // Find reports submitted by a specific student
-    List<Report> findByStudent(Long studentId);
+    // 1. Get reports created by a specific user (Owner or Student)
+    List<Report> findBySender_Id(Long senderId);
 
-    // Find reports by status (for filtering)
-//    List <Report> findByStudent_StudentIdAndStatus(Long studentId, String status);
+    // 2. Get reports AGAINST a user (To show on their profile as "History")
+    List<Report> findByReportedUser_Id(Long userId);
 
+    // 3. Admin: Get all reports, newest first
+    List<Report> findAllByOrderBySubmissionDateDesc();
 }
