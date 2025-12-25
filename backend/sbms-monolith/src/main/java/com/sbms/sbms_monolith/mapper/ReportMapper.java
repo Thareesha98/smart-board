@@ -26,7 +26,7 @@ public class ReportMapper {
         if (r.getStatus() == ReportStatus.PENDING) dto.setStatus("New");
         else if (r.getStatus() == ReportStatus.INVESTIGATING) dto.setStatus("In Progress");
         else if (r.getStatus() == ReportStatus.RESOLVED) dto.setStatus("Resolved");
-        else if (r.getStatus() == ReportStatus.DISMISSED) dto.setStatus("Resolved"); // Or "Dismissed"
+        else if (r.getStatus() == ReportStatus.DISMISSED) dto.setStatus("Dismissed"); // Or "Resolved"
         else dto.setStatus("New");
 
         // Date Formatting
