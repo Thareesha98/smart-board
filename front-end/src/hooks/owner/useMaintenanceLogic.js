@@ -18,6 +18,7 @@ const useMaintenanceLogic = () => {
   const [requests, setRequests] = useState(MOCK_REQUESTS);
 
   // New State for Scale
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6; // Show 6 cards per page
 
@@ -27,12 +28,25 @@ const useMaintenanceLogic = () => {
     avatar: "https://i.pravatar.cc/150?img=11" // Replace with real image
   };
 
-  // 1. Filter Logic
-  // 'Pending' tab groups 'pending' AND 'in-progress'
-  const filteredRequests = requests.filter(req => {
-    if (activeTab === 'pending') return req.status === 'pending' || req.status === 'in-progress';
-    return req.status === 'completed';
-  });
+  // Filter & Search Logic
+  const filteredRequests = useMemo(() => {
+    // Reset page when tab or search changes
+    return requests.filter(req => {
+      // Tab Filter
+      const matchesTab = activeTab === 'pending' 
+        ? (req.status === 'pending' || req.status === 'in-progress')
+        : req.status === 'completed';
+
+      // Search Filter
+      const matchesSearch = 
+        req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        req.roomNumber.includes(searchQuery) ||
+        req.boardingName.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesTab && matchesSearch;
+    });
+  }, [requests, activeTab, searchQuery]);
+  
 
   // Pagination Logic
   const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
@@ -65,6 +79,8 @@ const useMaintenanceLogic = () => {
     counts,
     ownerData,
 
+    searchQuery,
+    setSearchQuery,
     currentPage,
     setCurrentPage,
     totalPages
