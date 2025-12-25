@@ -80,7 +80,7 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
       </div>
 
       {/* Custom Slider Styles - ✅ NO SILVER LINE */}
-      <style jsx>{`
+      <style>{`
         .range-slider-thumb {
           position: absolute;
           width: 100%;

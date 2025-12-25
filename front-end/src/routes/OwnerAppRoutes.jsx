@@ -19,6 +19,7 @@ import ReportsPage from "../pages/owner/ReportsPage";
 import ReportStudentPage from "../pages/owner/AddReportPage";
 import SubscriptionPlanPage from "../pages/owner/SubscriptionPlanPage";
 import PaymentPage from "../pages/owner/PaymentPage";
+import MaintenancePage from '../pages/owner/MaintenancePage.jsx';
 
 const OwnerAppRoutes = () => {
   return (
@@ -45,6 +46,7 @@ const OwnerAppRoutes = () => {
         <Route path="appointments" element={<AppointmentsPage />} />
         <Route path="myboardings" element={<MyBoardingsPage />} />
         <Route path="utility" element={<UtilityPage />} />
+        <Route path="maintenance" element={<MaintenancePage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="payment" element={<PaymentPage />} />
         <Route path="reports" element={<ReportsPage />} />
