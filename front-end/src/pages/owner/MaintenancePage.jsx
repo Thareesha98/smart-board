@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaClipboardCheck, FaTools, FaCheckCircle } from 'react-icons/fa';
+import { FaClipboardCheck, FaTools, FaCheckCircle, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 // Components
 import HeaderBar from '../../components/Owner/common/HeaderBar';
@@ -12,12 +12,17 @@ import useMaintenanceLogic from '../../hooks/owner/useMaintenanceLogic';
 const MaintenancePage = () => {
   // Use the Custom Hook
   const {
+    paginatedRequests,
     filteredRequests,
     activeTab,
     setActiveTab,
     handleStatusUpdate,
     counts,
     ownerData,
+
+    currentPage,
+    setCurrentPage,
+    totalPages
   } = useMaintenanceLogic();
 
   return (
@@ -73,8 +78,8 @@ const MaintenancePage = () => {
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
         >
           <AnimatePresence mode='popLayout'>
-            {filteredRequests.length > 0 ? (
-              filteredRequests.map((request) => (
+            {paginatedRequests.length > 0 ? (
+              paginatedRequests.map((request) => (
                 <MaintenanceCard 
                   key={request.id} 
                   request={request} 
@@ -104,6 +109,41 @@ const MaintenancePage = () => {
             )}
           </AnimatePresence>
         </motion.div>
+
+        {/* --- PAGINATION CONTROLS --- */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-8 pt-4">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-gray-200 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <FaChevronLeft className="text-gray-600" />
+            </button>
+            
+            {/* Page Numbers */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`w-9 h-9 rounded-lg font-semibold text-sm transition-colors
+                  ${currentPage === pageNum 
+                    ? 'bg-accent text-white shadow-md' 
+                    : 'bg-transparent text-gray-600 hover:bg-white border border-transparent hover:border-gray-200'}`}
+              >
+                {pageNum}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-gray-200 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <FaChevronRight className="text-gray-600" />
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );
