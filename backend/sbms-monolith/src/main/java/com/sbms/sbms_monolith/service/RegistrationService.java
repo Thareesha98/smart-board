@@ -1,6 +1,8 @@
 package com.sbms.sbms_monolith.service;
 
 import com.sbms.sbms_monolith.mapper.RegistrationMapper;
+import com.sbms.sbms_monolith.mapper.StudentBoardingDashboardMapper;
+import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
 import com.sbms.sbms_monolith.dto.registration.*;
 import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.Registration;
@@ -15,6 +17,8 @@ import com.sbms.sbms_monolith.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -126,4 +130,47 @@ public class RegistrationService {
 
         return RegistrationMapper.toDTO(r);
     }
+    
+    public StudentBoardingDashboardDTO getDashboard(Long regId, Long loggedStudentId) {
+
+        Registration reg = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        // 🔒 Security check
+        if (!reg.getStudent().getId().equals(loggedStudentId)) {
+            throw new RuntimeException("Forbidden");
+        }
+
+        // ----------------------------
+        // PAYMENT (mock / safe)
+        // ----------------------------
+        BigDecimal currentMonthDue = reg.getBoarding().getPricePerMonth();
+        String paymentStatus = "PENDING";
+        LocalDate lastPaymentDate = null;
+
+        // ----------------------------
+        // MAINTENANCE (safe defaults)
+        // ----------------------------
+        int openIssues = 0;
+        int resolvedIssues = 0;
+        LocalDate lastIssueDate = null;
+
+       
+        Double avgRating = 0.0;
+        boolean reviewSubmitted = false;
+
+        return StudentBoardingDashboardMapper.toDTO(
+                reg,
+                currentMonthDue,
+                paymentStatus,
+                lastPaymentDate,
+                openIssues,
+                resolvedIssues,
+                lastIssueDate,
+                avgRating,
+                reviewSubmitted
+        );
+    }
+
+    
 }

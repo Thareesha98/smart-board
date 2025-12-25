@@ -13,4 +13,8 @@ public interface MaintenanceRepository extends JpaRepository<Maintenance, Long> 
     List<Maintenance> findByStudent(User student);
 
     List<Maintenance> findByBoarding_Owner(User owner);
+    
+    int countByRegistration_IdAndStatus(Long regId, String status);
+
+    Maintenance findTopByRegistration_IdOrderByCreatedAtDesc(Long regId);
 }

@@ -7,7 +7,7 @@ spring:
 
   # Database Configuration
   datasource:
-    url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/sbms_monolith
+    url:  jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/sbms_monolith
     username: monolith_user
     password: "monolith09090909"
     driver-class-name: org.postgresql.Driver
@@ -58,5 +58,6 @@ aws:
   region: ap-south-1
   s3:
     bucketName: smart-board-project
+
 
 #url: jdbc:postgresql://smart-board-db.c7miuo2k4f6h.ap-south-1.rds.amazonaws.com:5432/smart-board

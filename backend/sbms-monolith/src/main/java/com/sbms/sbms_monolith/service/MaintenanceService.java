@@ -32,10 +32,6 @@ public class MaintenanceService {
     @Autowired
     private S3Service s3Service;
 
-
-    // -----------------------------------------
-    // STUDENT: CREATE MAINTENANCE REQUEST
-    // -----------------------------------------
     public MaintenanceResponseDTO create(Long studentId, MaintenanceCreateDTO dto) {
 
         User student = userRepo.findById(studentId)
@@ -54,7 +50,6 @@ public class MaintenanceService {
 
         maintenanceRepo.save(m);
 
-        // 🔔 Notify OWNER
      /*   NotificationEvent event = new NotificationEvent();
         event.setReceiverId(boarding.getOwner().getId());
         event.setTitle("New Maintenance Request");

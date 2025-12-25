@@ -1,20 +1,36 @@
-import { Routes, Route } from "react-router-dom";
-import { Navbar } from "./components/Navbar";
-import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
+import React from "react";
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from "react-router-dom";
+import { StudentAuthProvider } from "./context/student/AuthContext.jsx";
+import ScrollToTop from "./ScrollToTop";
+// Import your two Route files
+import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
+import OwnerAppRoutes from "./routes/OwnerAppRoutes";
+import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
 
 function App() {
   return (
     <>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="grow">
-          <Routes>
-            <Route index element={<HomePage />}/>
-            <Route path="login" element={<LoginPage />}/>
-          </Routes>
-        </div>
-      </div>
+      <StudentAuthProvider>
+        <OwnerAuthProvider>
+          <Router>
+            <ScrollToTop />
+            <Routes>
+              {/* Delegate to Student routes if path starts with /student or is root */}
+              <Route path="/student/*" element={<StudentAppRoutes />} />
+
+              {/* Delegate to Owner routes if path starts with /ownerLayout */}
+              <Route path="/owner/*" element={<OwnerAppRoutes />} />
+              {/* Default Landing Logic */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Router>
+        </OwnerAuthProvider>
+      </StudentAuthProvider>
     </>
   );
 }
