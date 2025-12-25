@@ -1,38 +1,37 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import OwnerLayout from '../../components/owner/common/OwnerLayout'; // Assuming you have this
-import MaintenanceCard from '../../components/owner/maintenance/OwnerMaintenanceCard';
-import { FaClipboardCheck, FaTools } from 'react-icons/fa';
+import { FaClipboardCheck, FaTools, FaCheckCircle } from 'react-icons/fa';
 
-// Mock Data (Replace with your API call later)
-const MOCK_REQUESTS = [
-  { id: 'REQ-001', title: 'Leaking Faucet', boardingName: 'Sunset Villa', roomNumber: '101', date: '2025-10-24', urgency: 'medium', status: 'pending', description: 'The bathroom faucet is dripping continuously.' },
-  { id: 'REQ-002', title: 'Broken Window Latch', boardingName: 'City View', roomNumber: '204', date: '2025-10-22', urgency: 'high', status: 'in-progress', description: 'Window cannot be locked securely. Cold air coming in.' },
-  { id: 'REQ-003', title: 'Light Bulb Replacement', boardingName: 'Sunset Villa', roomNumber: '102', date: '2025-10-15', urgency: 'low', status: 'completed', description: 'Main bedroom light is flickering.' },
-];
+// Components
+import HeaderBar from '../../components/Owner/common/HeaderBar';
+import MaintenanceCard from '../../components/owner/maintenance/OwnerMaintenanceCard';
+
+// Hook
+import useMaintenanceLogic from '../../hooks/owner/useMaintenanceLogic';
 
 const MaintenancePage = () => {
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'completed'
-  const [requests, setRequests] = useState(MOCK_REQUESTS);
-
-  // Filter Logic: 'Pending' tab shows both 'pending' and 'in-progress'
-  const filteredRequests = requests.filter(req => {
-    if (activeTab === 'pending') return req.status === 'pending' || req.status === 'in-progress';
-    return req.status === 'completed';
-  });
-
-  const handleStatusUpdate = (id, newStatus) => {
-    // In a real app, call your API here
-    setRequests(prev => prev.map(req => 
-      req.id === id ? { ...req, status: newStatus } : req
-    ));
-  };
+  // Use the Custom Hook
+  const {
+    filteredRequests,
+    activeTab,
+    setActiveTab,
+    handleStatusUpdate,
+    counts,
+    ownerData,
+  } = useMaintenanceLogic();
 
   return (
-    <OwnerLayout title="Maintenance Dashboard" subtitle="Manage property repairs and issues">
-      
-      {/* --- STATUS TABS --- */}
-      <div className="flex justify-center mb-8">
+    <div className="pt-4 space-y-8 min-h-screen bg-light pb-10">
+      <HeaderBar
+        title="Maintenance"
+        subtitle="Manage property repairs and track issue resolution."
+        notificationCount={counts.pending}
+        userAvatar={ownerData.avatar}
+        userName={ownerData.firstName}
+      />
+
+      {/* Filter Tabs (Preserving your Pill Design) */}
+      <section className="flex justify-center mb-4">
         <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-100 inline-flex relative">
           {/* Animated Background Pill */}
           <motion.div
@@ -40,7 +39,7 @@ const MaintenancePage = () => {
             layoutId="activeTabPill"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             style={{
-              width: activeTab === 'pending' ? '50%' : '50%',
+              width: '50%',
               left: activeTab === 'pending' ? '4px' : '50%',
             }}
           />
@@ -58,45 +57,55 @@ const MaintenancePage = () => {
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* --- CONTENT GRID --- */}
-      <motion.div
-        layout
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-      >
-        <AnimatePresence mode='popLayout'>
-          {filteredRequests.length > 0 ? (
-            filteredRequests.map((request) => (
-              <OwnerMaintenanceCard 
-                key={request.id} 
-                request={request} 
-                onUpdateStatus={handleStatusUpdate}
-              />
-            ))
-          ) : (
-            /* Empty State */
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
-              className="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-gray-200"
-            >
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
-                {activeTab === 'pending' ? <FaCheckCircle size={32} /> : <FaClipboardCheck size={32} />}
-              </div>
-              <h3 className="text-gray-800 font-bold text-lg mb-1">
-                {activeTab === 'pending' ? "All Caught Up!" : "No History Yet"}
-              </h3>
-              <p className="text-gray-500 text-sm">
-                {activeTab === 'pending' 
-                  ? "You have no pending maintenance requests." 
-                  : "Completed maintenance tasks will appear here."}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      {/* Requests Grid */}
+      <section className="space-y-4 px-6">
+        <motion.h3
+          layout
+          className="text-2xl font-black text-primary uppercase tracking-tight ml-2"
+        >
+          {activeTab} Tasks
+        </motion.h3>
 
-    </OwnerLayout>
+        <motion.div 
+          layout
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+        >
+          <AnimatePresence mode='popLayout'>
+            {filteredRequests.length > 0 ? (
+              filteredRequests.map((request) => (
+                <MaintenanceCard 
+                  key={request.id} 
+                  request={request} 
+                  onUpdateStatus={handleStatusUpdate}
+                />
+              ))
+            ) : (
+              // Empty State (Preserving your design)
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }}
+                className="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-gray-200"
+              >
+                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                  {activeTab === 'pending' ? <FaCheckCircle size={32} /> : <FaClipboardCheck size={32} />}
+                </div>
+                <h3 className="text-gray-800 font-bold text-lg mb-1">
+                  {activeTab === 'pending' ? "All Caught Up!" : "No History Yet"}
+                </h3>
+                <p className="text-gray-500 text-sm">
+                  {activeTab === 'pending' 
+                    ? "You have no pending maintenance requests." 
+                    : "Completed maintenance tasks will appear here."}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </section>
+    </div>
   );
 };
 
