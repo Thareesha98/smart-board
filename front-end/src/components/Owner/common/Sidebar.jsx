@@ -37,6 +37,12 @@ const navItems = [
   },
   { path: "/owner/utility", icon: FaCogs, label: "Utility", key: "Utility" },
   {
+    path: "/owner/maintenance",
+    icon: FaCogs,
+    label: "Maintenance",
+    key: "Maintenance",
+  },
+  {
     path: "/owner/payment",
     icon: FaCreditCard,
     label: "Payment",

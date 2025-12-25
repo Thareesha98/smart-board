@@ -4,7 +4,7 @@ import { FaClipboardCheck, FaTools, FaCheckCircle } from 'react-icons/fa';
 
 // Components
 import HeaderBar from '../../components/Owner/common/HeaderBar';
-import MaintenanceCard from '../../components/owner/maintenance/OwnerMaintenanceCard';
+import MaintenanceCard from '../../components/Owner/Maintenance/MaintenanceCard.jsx';
 
 // Hook
 import useMaintenanceLogic from '../../hooks/owner/useMaintenanceLogic';
