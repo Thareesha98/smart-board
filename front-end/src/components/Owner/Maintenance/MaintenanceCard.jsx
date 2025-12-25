@@ -15,7 +15,7 @@ const STATUS_CONFIG = {
   completed: { label: 'Resolved', color: 'text-green-600 bg-green-50' },
 };
 
-const OwnerMaintenanceCard = ({ request, onUpdateStatus }) => {
+const MaintenanceCard = ({ request, onUpdateStatus }) => {
   const urgencyStyle = URGENCY_CONFIG[request.urgency.toLowerCase()] || URGENCY_CONFIG.low;
   const statusStyle = STATUS_CONFIG[request.status.toLowerCase()] || STATUS_CONFIG.pending;
 
@@ -104,4 +104,4 @@ const OwnerMaintenanceCard = ({ request, onUpdateStatus }) => {
   );
 };
 
-export default OwnerMaintenanceCard;
+export default MaintenanceCard;
