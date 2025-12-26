@@ -56,21 +56,13 @@ export default function AddReportPage() {
   return (
     <div className="pt-4 space-y-6">
       {/* HeaderBar with Back Button */}
+      
       <HeaderBar
         title="Report Student Issue"
         subtitle="Submit a formal report regarding student conduct or payment issues."
-        notificationCount={2}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
-      >
-        <button
-          onClick={() => navigate("/ownerLayout/reports")}
-          className="px-6 py-3 font-bold rounded-3xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02] bg-accent text-card-bg"
-        >
-          <i className="fas fa-arrow-left mr-2"></i>
-          Back to Reports
-        </button>
-      </HeaderBar>
+        navBtnText="Back to Reports"
+        navBtnPath="/owner/reports"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Incident Details Card */}
