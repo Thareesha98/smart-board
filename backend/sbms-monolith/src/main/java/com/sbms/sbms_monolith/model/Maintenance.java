@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "maintenance_request")
+@Table(name = "maintenance")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
