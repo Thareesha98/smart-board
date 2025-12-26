@@ -342,6 +342,33 @@ export const analyticsMockData = {
   }
 };
 
+
+// Third party Ads
+
+// src/data/adMockData.js
+
+export const initialSubmissions = [
+    {
+        id: 1,
+        user: { name: "John Smith", email: "john@example.com", phone: "+1 555" },
+        plan: "premium",
+        adDetails: {
+            title: "Student Laptop Sale",
+            image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853",
+            message: "20% off for students!"
+        },
+        status: "pending",
+        submittedDate: "2024-03-15"
+    }
+];
+
+export const initialCampaigns = [];
+
+export const initialPlans = [
+    { id: 1, name: "Basic", price: 49, features: ["Sidebar Display"] },
+    { id: 2, name: "Premium", price: 99, features: ["Homepage Display"] }
+];
+
 /**
  * 6. DASHBOARD APPROVALS LIST
  * Derived from initialAds
