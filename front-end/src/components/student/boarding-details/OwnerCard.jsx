@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const OwnerCard = ({ owner, onContact }) => {
+  const [showPhone, setShowPhone] = useState(false);
+
+  // Use data from props, with fallback just in case
+  const ownerPhone = owner.contact || "+94 77 123 4567";
+  const ownerEmail = owner.email || "owner@example.com";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,26 +55,46 @@ const OwnerCard = ({ owner, onContact }) => {
         </div>
       </div>
 
-      {/* 3. Buttons */}
+      {/* 3. Contact Info Display */}
       <div className="space-y-3 mb-6">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onContact('message')}
-          className="w-full border-2 border-accent text-accent py-3 rounded-xl font-bold hover:bg-accent hover:text-white transition-all flex items-center justify-center gap-2"
-        >
-          <FaEnvelope />
-          Send Message
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onContact('call')}
-          className="w-full border-2 border-gray-200 text-text-dark py-3 rounded-xl font-bold hover:border-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
-        >
-          <FaPhone />
-          Show Number
-        </motion.button>
+        {/* Email Button/Display */}
+        <div className="relative group">
+            <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onContact('message')}
+            className="w-full border-2 border-accent text-accent py-3 rounded-xl font-bold hover:bg-accent hover:text-white transition-all flex items-center justify-center gap-2"
+            >
+            <FaEnvelope />
+            Send Message
+            </motion.button>
+            {/* Tooltip showing email on hover */}
+            <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity bottom-full left-1/2 -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs py-1 px-2 rounded pointer-events-none whitespace-nowrap z-10">
+                {ownerEmail}
+            </div>
+        </div>
+
+        {/* Phone Button - Toggles to show number */}
+        {showPhone ? (
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-full bg-green-50 border-2 border-green-200 text-green-700 py-3 rounded-xl font-bold flex items-center justify-center gap-3"
+            >
+                <FaPhone className="text-sm" />
+                <span className="text-lg">{ownerPhone}</span>
+            </motion.div>
+        ) : (
+            <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowPhone(true)}
+            className="w-full border-2 border-gray-200 text-text-dark py-3 rounded-xl font-bold hover:border-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+            >
+            <FaPhone />
+            Show Number
+            </motion.button>
+        )}
       </div>
       
       {/* 4. Description */}
