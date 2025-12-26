@@ -33,9 +33,6 @@ public class MaintenanceService {
     @Autowired
     private S3Service s3Service;
 
-    // -----------------------------------------
-    // STUDENT: CREATE REQUEST
-    // -----------------------------------------
     public MaintenanceResponseDTO create(
             Long studentId,
             MaintenanceCreateDTO dto,
@@ -76,9 +73,6 @@ public class MaintenanceService {
     }
 
 
-    // -----------------------------------------
-    // STUDENT: VIEW MY REQUESTS
-    // -----------------------------------------
     public List<MaintenanceResponseDTO> getForStudent(Long studentId) {
 
         User student = userRepo.findById(studentId)
@@ -90,9 +84,6 @@ public class MaintenanceService {
                 .toList();
     }
 
-    // -----------------------------------------
-    // OWNER: VIEW REQUESTS
-    // -----------------------------------------
     public List<MaintenanceResponseDTO> getForOwner(Long ownerId) {
 
         User owner = userRepo.findById(ownerId)
@@ -104,9 +95,6 @@ public class MaintenanceService {
                 .toList();
     }
 
-    // -----------------------------------------
-    // OWNER: DECIDE
-    // -----------------------------------------
     public MaintenanceResponseDTO decide(Long ownerId,
                                          Long maintenanceId,
                                          MaintenanceDecisionDTO dto) {
