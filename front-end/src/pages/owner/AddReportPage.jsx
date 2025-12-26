@@ -6,11 +6,12 @@ import {
   SelectGroup,
   EvidenceUpload,
 } from "../../components/Owner/report/ReportFormComponents";
+import useReportLogic from "../../hooks/owner/useReportLogic";
 import { boardingsData, reportTypes } from "../../data/mockData";
 
 export default function AddReportPage() {
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { submitReport, isSubmitting } = useReportLogic();
   const [newFiles, setNewFiles] = useState([]);
   const [formData, setFormData] = useState({
     propertyId: "",
@@ -44,14 +45,18 @@ export default function AddReportPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      alert(`Formal report submitted successfully.`);
-      setIsSubmitting(false);
+    
+    // Call the hook's submit function
+    const result = await submitReport(formData, newFiles);
+
+    if (result.success) {
+      alert("Formal report submitted successfully.");
       navigate("/owner/reports");
-    }, 1500);
+    } else {
+      alert(result.message || "Error submitting report");
+    }
   };
 
   return (

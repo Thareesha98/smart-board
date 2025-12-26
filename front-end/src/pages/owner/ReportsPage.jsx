@@ -6,6 +6,14 @@ import StatusTab from "../../components/Owner/common/StatusTab.jsx";
 import ReportRow from "../../components/Owner/report/ReportRow";
 import ReportDetailModal from "../../components/Owner/report/ReportDetailModal";
 import { mockReports } from "../../data/mockData.js";
+const { 
+    filteredReports, 
+    counts, 
+    filter, 
+    setFilter, 
+    loading, 
+    error 
+  } = useReportLogic();
 
 const REPORT_STATUS_CONFIG = {
   New: {
@@ -27,6 +35,10 @@ const REPORT_STATUS_CONFIG = {
     icon: "fas fa-check-circle",
   },
 };
+
+// Handling Loading/Error states in UI
+  if (loading) return <div className="p-10 text-center">Loading Reports...</div>;
+  if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
 
 const containerVariants = {
   hidden: { opacity: 0 },
