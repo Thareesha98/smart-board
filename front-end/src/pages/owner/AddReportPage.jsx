@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import {
   SelectGroup,
   EvidenceUpload,
 } from "../../components/Owner/report/ReportFormComponents";
-import { ownerData, boardingsData, reportTypes } from "../../data/mockData";
+import { boardingsData, reportTypes } from "../../data/mockData";
 
 export default function AddReportPage() {
   const navigate = useNavigate();
@@ -54,9 +55,12 @@ export default function AddReportPage() {
   };
 
   return (
-    <div className="pt-4 space-y-6">
-      {/* HeaderBar with Back Button */}
-      
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="pt-4 space-y-6"
+    >
       <HeaderBar
         title="Report Student Issue"
         subtitle="Submit a formal report regarding student conduct or payment issues."
@@ -66,7 +70,12 @@ export default function AddReportPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Incident Details Card */}
-        <div className="bg-white p-8 rounded-report shadow-custom">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white p-8 rounded-report shadow-custom"
+        >
           <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b text-primary border-light">
             Incident Details
           </h2>
@@ -123,10 +132,15 @@ export default function AddReportPage() {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Evidence Card */}
-        <div className="bg-white p-8 rounded-report shadow-custom">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white p-8 rounded-report shadow-custom"
+        >
           <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b text-primary border-light">
             Evidence (Optional)
           </h2>
@@ -135,26 +149,35 @@ export default function AddReportPage() {
             files={newFiles}
             onRemoveFile={handleRemoveFile}
           />
-        </div>
+        </motion.div>
 
         <div className="flex justify-end pt-4">
-          <button
+          <motion.button
             type="submit"
             disabled={isSubmitting}
-            className="px-8 py-3 rounded-3xl font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 bg-error"
+            whileHover={{
+              scale: 1.02,
+              boxShadow: "0 10px 20px rgba(239, 68, 68, 0.5)",
+            }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-3 rounded-3xl font-bold text-white transition-all shadow-lg disabled:opacity-50 flex items-center gap-2 bg-error"
             style={{
               boxShadow: "0 8px 16px rgba(239, 68, 68, 0.4)",
             }}
           >
             {isSubmitting ? (
-              <i className="fas fa-circle-notch fa-spin"></i>
+              <motion.i
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                className="fas fa-circle-notch"
+              ></motion.i>
             ) : (
               <i className="fas fa-exclamation-triangle"></i>
             )}
             {isSubmitting ? "Submitting..." : "Submit Formal Report"}
-          </button>
+          </motion.button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 }
