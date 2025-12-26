@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/student/AuthContext";
+import { AuthProvider } from "./context/student/StudentAuthContext";
 import ScrollToTop from "./ScrollToTop";
 
 import OwnerLayout from "./layouts/OwnerLayout";
