@@ -1,6 +1,7 @@
 package com.sbms.sbms_monolith.service;
 
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceRequestDTO;
+import com.sbms.sbms_monolith.dto.maintenance.MaintenanceResponseDTO;
 import com.sbms.sbms_monolith.mapper.MaintenanceMapper;
 import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.Maintenance;
@@ -30,7 +31,7 @@ public class MaintenanceService {
 
     //1. Create Request
     @Transactional
-    public Maintenance createMaintenance(Long studentId, MaintenanceRequestDTO dto, List<MultipartFile> files) throws IOException {
+    public MaintenanceResponseDTO createMaintenance(Long studentId, MaintenanceRequestDTO dto, List<MultipartFile> files) throws IOException {
         User student = studentRepo.findById(studentId)
                 .orElseThrow(()->new RuntimeException("student not found"));
 
