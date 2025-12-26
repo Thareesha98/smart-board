@@ -69,4 +69,12 @@ public class MaintenanceService {
         return MaintenanceMapper.toDTO(maintenanceRepo.save(maintenance));
     }
 
+    // 2. Get Student History
+    public List<MaintenanceResponseDTO> getStudentMaintenances(Long studentId) {
+        return maintenanceRepo.findByStudent_IdOrderByDateDesc(studentId)
+                .stream().map(MaintenanceMapper::toDTO).toList();
+    }
+
+
+
 }
