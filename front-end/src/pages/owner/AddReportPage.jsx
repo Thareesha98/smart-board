@@ -50,7 +50,7 @@ export default function AddReportPage() {
     setTimeout(() => {
       alert(`Formal report submitted successfully.`);
       setIsSubmitting(false);
-      navigate("/ownerLayout/reports");
+      navigate("/owner/reports");
     }, 1500);
   };
 
