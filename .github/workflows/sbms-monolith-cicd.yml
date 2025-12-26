@@ -1,0 +1,72 @@
+name: Deploy SBMS Monolith
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # -----------------------------
+      # BACKEND BUILD
+      # -----------------------------
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build backend
+        working-directory: backend/sbms-monolith
+        run: mvn clean package -DskipTests
+
+      # -----------------------------
+      # FRONTEND BUILD
+      # -----------------------------
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend
+        working-directory: front-end
+        run: |
+          npm install
+          npm run build
+
+      # -----------------------------
+      # DEPLOY TO EC2
+      # -----------------------------
+      - name: Deploy to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: |
+            backend/sbms-monolith/target/*.jar
+            frontend/dist/*
+          target: /opt/sbms/tmp
+
+      - name: Restart services
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Backend
+            mv /opt/sbms/tmp/backend/sbms-monolith/target/*.jar /opt/sbms/backend/sbms-backend.jar
+            sudo systemctl restart sbms-backend
+
+            # Frontend
+            rm -rf /opt/sbms/frontend/*
+            mv /opt/sbms/tmp/frontend/dist/* /opt/sbms/frontend/
+
+            sudo systemctl reload nginx

@@ -46,6 +46,22 @@ public class S3Service {
             throw new RuntimeException("Failed to upload file", e);
         }
     }
+    
+    
+    public String uploadBytes(byte[] data, String key, String contentType) {
+
+        s3Client.putObject(
+                PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .contentType(contentType)
+                        .build(),
+                software.amazon.awssdk.core.sync.RequestBody.fromBytes(data)
+        );
+
+        return "https://" + bucketName + ".s3.amazonaws.com/" + key;
+    }
+
 
     public String uploadFile(MultipartFile file) {
         return uploadFile(file, "");
