@@ -4,55 +4,94 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceCreateDTO;
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceDecisionDTO;
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceResponseDTO;
+import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.MaintenanceService;
 
 @RestController
 @RequestMapping("/api/maintenance")
+@CrossOrigin
 public class MaintenanceController {
 
     @Autowired
     private MaintenanceService maintenanceService;
 
-    @PostMapping("/student/{studentId}")
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    // -----------------------------------------
+    // STUDENT: CREATE MAINTENANCE (WITH IMAGES)
+    // -----------------------------------------
+    @PostMapping(consumes = "multipart/form-data")
     @PreAuthorize("hasRole('STUDENT')")
     public MaintenanceResponseDTO create(
-            @PathVariable Long studentId,
-            @RequestBody MaintenanceCreateDTO dto
-    ) {
-        return maintenanceService.create(studentId, dto);
+            @RequestPart("data") String json,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            Authentication authentication
+    ) throws Exception {
+
+        String email = authentication.getName();
+
+        User student = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        MaintenanceCreateDTO dto =
+                objectMapper.readValue(json, MaintenanceCreateDTO.class);
+
+        return maintenanceService.create(student.getId(), dto, images);
     }
 
-    @GetMapping("/student/{studentId}")
+    // -----------------------------------------
+    // STUDENT: VIEW OWN REQUESTS
+    // -----------------------------------------
+    @GetMapping("/student")
     @PreAuthorize("hasRole('STUDENT')")
-    public List<MaintenanceResponseDTO> studentRequests(@PathVariable Long studentId) {
-        return maintenanceService.getForStudent(studentId);
+    public List<MaintenanceResponseDTO> studentRequests(Authentication authentication) {
+
+        User student = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return maintenanceService.getForStudent(student.getId());
     }
 
-    @GetMapping("/owner/{ownerId}")
+    // -----------------------------------------
+    // OWNER: VIEW OWN REQUESTS
+    // -----------------------------------------
+    @GetMapping("/owner")
     @PreAuthorize("hasRole('OWNER')")
-    public List<MaintenanceResponseDTO> ownerRequests(@PathVariable Long ownerId) {
-        return maintenanceService.getForOwner(ownerId);
+    public List<MaintenanceResponseDTO> ownerRequests(Authentication authentication) {
+
+        User owner = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return maintenanceService.getForOwner(owner.getId());
     }
 
-    @PutMapping("/owner/{ownerId}/{maintenanceId}")
+    // -----------------------------------------
+    // OWNER: DECIDE
+    // -----------------------------------------
+    @PutMapping("/owner/{maintenanceId}")
     @PreAuthorize("hasRole('OWNER')")
     public MaintenanceResponseDTO decide(
-            @PathVariable Long ownerId,
             @PathVariable Long maintenanceId,
-            @RequestBody MaintenanceDecisionDTO dto
+            @RequestBody MaintenanceDecisionDTO dto,
+            Authentication authentication
     ) {
-        return maintenanceService.decide(ownerId, maintenanceId, dto);
+
+        User owner = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return maintenanceService.decide(owner.getId(), maintenanceId, dto);
     }
 }
