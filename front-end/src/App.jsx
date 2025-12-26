@@ -1,37 +1,43 @@
 import React from "react";
-import {
-  Navigate,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from "react-router-dom";
-import { StudentAuthProvider } from "./context/student/AuthContext.jsx";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/student/AuthContext";
 import ScrollToTop from "./ScrollToTop";
-// Import your two Route files
-import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
-import OwnerAppRoutes from "./routes/OwnerAppRoutes";
-import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
+
+import OwnerLayout from "./layouts/OwnerLayout";
+import OwnerRoutes from "./routes/OwnerRoutes";
+import StudentRoutes from "./routes/StudentRoutes";
 
 function App() {
   return (
-    <>
-      <StudentAuthProvider>
-        <OwnerAuthProvider>
-          <Router>
-            <ScrollToTop />
-            <Routes>
-              {/* Delegate to Student routes if path starts with /student or is root */}
-              <Route path="/student/*" element={<StudentAppRoutes />} />
+    <AuthProvider>
+      <ScrollToTop />
 
-              {/* Delegate to Owner routes if path starts with /ownerLayout */}
-              <Route path="/owner/*" element={<OwnerAppRoutes />} />
-              {/* Default Landing Logic */}
-              <Route path="/" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </Router>
-        </OwnerAuthProvider>
-      </StudentAuthProvider>
-    </>
+      <Routes>
+
+        {/* Root aliases */}
+        <Route path="/login" element={<Navigate to="/student/login" replace />} />
+        <Route path="/signup" element={<Navigate to="/student/signup" replace />} />
+
+        {/* Student routes */}
+        <Route path="/student/*" element={<StudentRoutes />} />
+
+        {/* Owner routes */}
+        <Route path="/ownerLayout/*" element={<OwnerRoutes />} />
+
+  <Route path="*" element={<h1>404</h1>} />
+        {/* Default landing */}
+        <Route path="/" element={<Navigate to="/student/login" replace />} />
+
+        {/* Student routes */}
+        <Route path="/student/*" element={<StudentRoutes />} />
+
+        {/* Owner routes */}
+        <Route path="/ownerLayout/*" element={<OwnerRoutes />} />
+
+        {/* Global fallback */}
+        <Route path="*" element={<h1>404 Page Not Found</h1>} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
