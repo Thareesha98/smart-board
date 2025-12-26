@@ -25,15 +25,15 @@ import java.util.List;
 public class MaintenanceService {
 
     private final MaintenanceRepository maintenanceRepo;
-    private final UserRepository studentRepo;
+    private final UserRepository userRepo;
     private final BoardingRepository boardingRepo;
     private final S3Service s3Service;
 
     //1. Create Request
     @Transactional
     public MaintenanceResponseDTO createMaintenance(Long studentId, MaintenanceRequestDTO dto, List<MultipartFile> files) throws IOException {
-        User student = studentRepo.findById(studentId)
-                .orElseThrow(()->new RuntimeException("student not found"));
+        User student = userRepo.findById(studentId)
+                .orElseThrow(()->new RuntimeException("user not found"));
 
         Boarding boarding = boardingRepo.findById(dto.getBoardingId())
                 .orElseThrow(()->new RuntimeException("boarding not found"));
@@ -74,6 +74,14 @@ public class MaintenanceService {
         return maintenanceRepo.findByStudent_IdOrderByDateDesc(studentId)
                 .stream().map(MaintenanceMapper::toDTO).toList();
     }
+
+    // 3. Get Owner Tasks
+    public List<MaintenanceResponseDTO> getOwnerMaintenance(Long ownerId) {
+        return maintenanceRepo.findRequestsByOwnerId(ownerId)
+                .stream().map(MaintenanceMapper::toDTO).toList();
+    }
+
+
 
 
 
