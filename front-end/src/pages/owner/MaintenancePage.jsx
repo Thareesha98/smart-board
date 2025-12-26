@@ -13,12 +13,10 @@ const MaintenancePage = () => {
   // Use the Custom Hook
   const {
     paginatedRequests,
-    filteredRequests,
     activeTab,
     setActiveTab,
     handleStatusUpdate,
-    counts,
-    ownerData,
+    
 
     searchQuery,
     setSearchQuery,

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // 1. Create Axios Instance
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Make sure this matches your Spring Boot port
+  baseURL: 'http://localhost:8086/api', // Make sure this matches your Spring Boot port
   headers: {
     'Content-Type': 'application/json',
   },
