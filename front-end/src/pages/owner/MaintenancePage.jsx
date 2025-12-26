@@ -32,9 +32,8 @@ const MaintenancePage = () => {
       <HeaderBar
         title="Maintenance"
         subtitle="Manage property repairs and track issue resolution."
-        notificationCount={counts.pending}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
+        navBtnText="Log Issue"
+        onNavBtnClick={() => alert("Open Log Issue Modal Here")}
       />
 
       {/* --- CONTROLS SECTION --- */}
