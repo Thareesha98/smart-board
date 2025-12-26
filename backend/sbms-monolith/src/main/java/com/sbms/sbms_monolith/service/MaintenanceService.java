@@ -7,6 +7,7 @@ import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.Maintenance;
 import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
+import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
 import com.sbms.sbms_monolith.model.enums.MaintenanceUrgency;
 import com.sbms.sbms_monolith.repository.BoardingRepository;
 import com.sbms.sbms_monolith.repository.MaintenanceRepository;
@@ -79,6 +80,24 @@ public class MaintenanceService {
     public List<MaintenanceResponseDTO> getOwnerMaintenance(Long ownerId) {
         return maintenanceRepo.findRequestsByOwnerId(ownerId)
                 .stream().map(MaintenanceMapper::toDTO).toList();
+    }
+
+    // 4. Update Status
+    @Transactional
+    public MaintenanceResponseDTO updateStatus(Long requestId, String newStatus) {
+        Maintenance maintenance = maintenanceRepo.findById(requestId)
+                .orElseThrow(()->new RuntimeException("maintenance not found"));
+
+        String statusEnumStr = newStatus.replace("-","_").toUpperCase();
+
+        try {
+            maintenance.setStatus(MaintenanceStatus.valueOf(statusEnumStr));
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid status: " + newStatus);
+        }
+
+        Maintenance savedRequest = maintenanceRepo.save(maintenance);
+        return MaintenanceMapper.toDTO(savedRequest);
     }
 
 
