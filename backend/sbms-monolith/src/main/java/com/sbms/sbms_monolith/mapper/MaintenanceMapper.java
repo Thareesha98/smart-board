@@ -18,7 +18,7 @@ public class MaintenanceMapper {
 
         dto.setTitle(m.getTitle());
         dto.setDescription(m.getDescription());
-        dto.setImageUrl(m.getImageUrl());
+        dto.setImageUrls(m.getImageUrls());
 
         dto.setStatus(m.getStatus());
         dto.setStudentNote(m.getStudentNote());

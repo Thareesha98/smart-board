@@ -1,6 +1,8 @@
 package com.sbms.sbms_monolith.model;
 
 
+import java.util.List;
+
 import com.sbms.sbms_monolith.common.BaseEntity;
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
 
@@ -13,7 +15,7 @@ import lombok.Data;
 public class Maintenance extends BaseEntity {
 	
 	@ManyToOne
-    @JoinColumn(name = "registration_id", nullable = false)
+    @JoinColumn(name = "registration_id", nullable = true)
     private Registration registration;
 
     @ManyToOne
@@ -30,7 +32,7 @@ public class Maintenance extends BaseEntity {
     @Column(nullable = false, length = 1000)
     private String description;
 
-    private String imageUrl; // optional (S3 later)
+    private List<String> imageUrls; // optional (S3 later)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

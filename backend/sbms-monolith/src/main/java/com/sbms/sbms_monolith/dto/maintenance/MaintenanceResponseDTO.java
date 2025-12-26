@@ -1,6 +1,8 @@
 package com.sbms.sbms_monolith.dto.maintenance;
 
 
+import java.util.List;
+
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
 
 import lombok.Data;
@@ -18,7 +20,7 @@ public class MaintenanceResponseDTO {
 
     private String title;
     private String description;
-    private String imageUrl;
+    private List<String> imageUrls;
 
     private MaintenanceStatus status;
 
