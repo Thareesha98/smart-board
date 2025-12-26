@@ -1,6 +1,8 @@
 package com.sbms.sbms_monolith.dto.maintenance;
 
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -10,5 +12,6 @@ public class MaintenanceCreateDTO {
     private String title;
     private String description;
     private String studentNote;
-    private String imageUrl; // optional
+    private List<String> imageUrls;
+
 }

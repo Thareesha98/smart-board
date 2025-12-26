@@ -20,7 +20,6 @@ public class MonthlyBillController {
     @Autowired
     private MonthlyBillService billService;
 
-    // SYSTEM / ADMIN (manual trigger for now)
     @PostMapping("/generate/{month}")
     public String generate(@PathVariable String month) {
         billService.generateBillsForMonth(month);

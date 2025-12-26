@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceCreateDTO;
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceDecisionDTO;
@@ -28,11 +29,22 @@ public class MaintenanceService {
 
     @Autowired
     private UserRepository userRepo;
-    
+
     @Autowired
     private S3Service s3Service;
 
-    public MaintenanceResponseDTO create(Long studentId, MaintenanceCreateDTO dto) {
+    // -----------------------------------------
+    // STUDENT: CREATE REQUEST
+    // -----------------------------------------
+    public MaintenanceResponseDTO create(
+            Long studentId,
+            MaintenanceCreateDTO dto,
+            List<MultipartFile> images
+    ) {
+
+        if (studentId == null) {
+            throw new RuntimeException("Unauthorized request");
+        }
 
         User student = userRepo.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -40,26 +52,29 @@ public class MaintenanceService {
         Boarding boarding = boardingRepo.findById(dto.getBoardingId())
                 .orElseThrow(() -> new RuntimeException("Boarding not found"));
 
+        List<String> uploadedUrls = null;
+
+        if (images != null && !images.isEmpty()) {
+            uploadedUrls = s3Service.uploadFiles(
+                    images,
+                    "maintenance/" + boarding.getId() + "/"
+            );
+        }
+
         Maintenance m = new Maintenance();
         m.setStudent(student);
         m.setBoarding(boarding);
         m.setTitle(dto.getTitle());
         m.setDescription(dto.getDescription());
         m.setStudentNote(dto.getStudentNote());
-        m.setImageUrl(dto.getImageUrl());
+        m.setImageUrls(uploadedUrls);
+        m.setStatus(MaintenanceStatus.PENDING);
 
         maintenanceRepo.save(m);
 
-     /*   NotificationEvent event = new NotificationEvent();
-        event.setReceiverId(boarding.getOwner().getId());
-        event.setTitle("New Maintenance Request");
-        event.setMessage("New maintenance request for " + boarding.getTitle());
-        event.setType("ACTION_REQUIRED");
-
-        notificationPublisher.sendNotification(event); */
-
         return MaintenanceMapper.toDTO(m);
     }
+
 
     // -----------------------------------------
     // STUDENT: VIEW MY REQUESTS
@@ -90,9 +105,11 @@ public class MaintenanceService {
     }
 
     // -----------------------------------------
-    // OWNER: UPDATE STATUS
+    // OWNER: DECIDE
     // -----------------------------------------
-    public MaintenanceResponseDTO decide(Long ownerId, Long maintenanceId, MaintenanceDecisionDTO dto) {
+    public MaintenanceResponseDTO decide(Long ownerId,
+                                         Long maintenanceId,
+                                         MaintenanceDecisionDTO dto) {
 
         Maintenance m = maintenanceRepo.findById(maintenanceId)
                 .orElseThrow(() -> new RuntimeException("Maintenance not found"));
@@ -103,23 +120,15 @@ public class MaintenanceService {
 
         m.setStatus(dto.getStatus());
         m.setOwnerNote(dto.getOwnerNote());
-        maintenanceRepo.save(m);
 
-        // 🔔 Notify STUDENT
-     /*   NotificationEvent event = new NotificationEvent();
-        event.setReceiverId(m.getStudent().getId());
-        event.setTitle("Maintenance Update");
-        event.setMessage("Your maintenance request '" + m.getTitle() +
-                "' is now " + dto.getStatus());
-        event.setType("INFO");
-
-        notificationPublisher.sendNotification(event); */
-        
-        if (dto.getStatus() == MaintenanceStatus.REJECTED && m.getImageUrl() != null) {
-            s3Service.deleteFile(m.getImageUrl());
+        // If rejected → cleanup images
+        if (dto.getStatus() == MaintenanceStatus.REJECTED && m.getImageUrls() != null) {
+            for (String url : m.getImageUrls()) {
+                s3Service.deleteFile(url);
+            }
         }
 
-
+        maintenanceRepo.save(m);
         return MaintenanceMapper.toDTO(m);
     }
 }
