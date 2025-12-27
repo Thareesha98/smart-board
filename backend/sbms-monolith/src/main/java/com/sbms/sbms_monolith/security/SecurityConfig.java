@@ -60,6 +60,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/owner/**").hasRole("OWNER")
                 .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
 
+                .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/reports/**").authenticated()
+
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
 
                 .anyRequest().authenticated()
