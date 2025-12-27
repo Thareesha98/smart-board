@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/maintenance")
@@ -40,5 +41,14 @@ public class MaintenanceController {
     @GetMapping("/owner/{ownerId}")
     public ResponseEntity<List<MaintenanceResponseDTO>> getOwnerMaintenance(@PathVariable Long ownerId) {
         return ResponseEntity.ok(maintenanceService.getOwnerMaintenance(ownerId));
+    }
+
+    // Owner Status Update
+    @PatchMapping("/{requestId}/status")
+    public ResponseEntity<MaintenanceResponseDTO> updateStatus(
+            @PathVariable Long requestId,
+            @RequestBody Map<String, String> body
+    ) {
+        return ResponseEntity.ok(maintenanceService.updateStatus(requestId, body.get("status")));
     }
 }
