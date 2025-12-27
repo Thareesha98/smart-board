@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext.jsx";
 import api from "../../api/api";
+import { getOwnerMaintenanceRequests, updateMaintenanceStatus } from "../../api/owner/service.js";  
 
 const useMaintenanceLogic = () => {
   // --- STATE ---
@@ -17,14 +18,13 @@ const useMaintenanceLogic = () => {
   // --- API CALLS ---
   useEffect(() => {
     const fetchRequests = async () => {
-      // Safety check: ensure currentOwner exists before calling API
       if (!currentOwner?.id) return;
 
       try {
         setLoading(true);
-        // ✅ Matches Controller: GET /api/maintenance/owner/{id}
-        const response = await api.get(`/maintenance/owner/${currentOwner.id}`);
-        setRequests(response.data);
+        // ✅ USE SERVICE FUNCTION
+        const data = await getOwnerMaintenanceRequests(currentOwner.id);
+        setRequests(data);
         setError(null);
       } catch (err) {
         console.error("Fetch error:", err);
@@ -37,13 +37,9 @@ const useMaintenanceLogic = () => {
     fetchRequests();
   }, [currentOwner]);
 
-  // --- ⚠️ CRITICAL FIX: STATUS UPDATE ---
   const handleStatusUpdate = async (id, newStatus) => {
-    // 1. Optimistic Update (Update UI immediately)
+    // 1. Optimistic Update
     const originalRequests = [...requests];
-    
-    // Backend likely sends uppercase (PENDING), Frontend uses lowercase (pending).
-    // We send uppercase to backend, but keep local state consistent for UI.
     const statusToSend = newStatus.toUpperCase(); 
 
     setRequests((prev) =>
@@ -51,15 +47,12 @@ const useMaintenanceLogic = () => {
     );
 
     try {
-      // ✅ FIX: Controller expects @RequestBody Map<String, String>
-      // URL: PATCH /api/maintenance/{id}/status
-      await api.patch(`/maintenance/${id}/status`, { 
-        status: statusToSend 
-      });
+      // ✅ USE SERVICE FUNCTION
+      await updateMaintenanceStatus(id, statusToSend);
       
     } catch (err) {
       console.error("Update failed:", err);
-      setRequests(originalRequests); // Revert UI on error
+      setRequests(originalRequests); // Revert on error
       alert("Failed to update status. Please try again.");
     }
   };
