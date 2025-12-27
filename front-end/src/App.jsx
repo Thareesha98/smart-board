@@ -6,10 +6,10 @@ import {
 } from "react-router-dom";
 import { StudentAuthProvider } from "./context/student/AuthContext.jsx";
 import ScrollToTop from "./ScrollToTop";
-// Import your two Route files
-import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
-import OwnerAppRoutes from "./routes/OwnerAppRoutes";
-import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
+
+import OwnerLayout from "./layouts/OwnerLayout";
+import OwnerRoutes from "./routes/OwnerRoutes";
+import StudentRoutes from "./routes/StudentRoutes";
 
 function App() {
   return (

@@ -1,127 +1,140 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useOwnerAuth } from '../../../context/owner/OwnerAuthContext.jsx';
+import SignupForm from '../../../components/Owner/auth/SignupForm.jsx';
+import { motion } from 'framer-motion';
+import { FaArrowLeft } from 'react-icons/fa';
+import logo from '../../../assets/logo.png';
+import backgroundImage from '../../../assets/s5.jpg';
 
 const OwnerSignupPage = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    phone: '',
-  });
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const { signup } = useOwnerAuth();
   const navigate = useNavigate();
+  const { signup, isAuthenticated, isLoading: authLoading } = useOwnerAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+  const handleSignup = async (formData) => {
     setIsLoading(true);
 
-    // Call the signup function from OwnerAuthContext
-    const result = signup(formData);
-
-    if (result.success) {
-      navigate('/owner/login');
-    } else {
-      setError(result.message || 'Signup failed. Please try again.');
-      setIsLoading(false);
-    }
+    // Simulate API call
+    setTimeout(() => {
+      const result = signup(formData);
+      if (result.success) {
+        setIsLoading(false);
+        navigate('/owner/login/', { replace: true });
+      }
+    }, 2000);
   };
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-text-muted">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-light p-4">
-      <div className="w-full max-w-lg bg-card-bg p-8 rounded-report shadow-custom border border-light">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-primary uppercase tracking-tight">Owner Registration</h2>
-          <p className="text-muted font-medium mt-2">Start managing your property listings</p>
-        </div>
+    <div className="min-h-screen relative flex items-center justify-center p-4 py-8 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          filter: "blur(8px)",
+          transform: "scale(1.1)",
+        }}
+      />
 
-        {error && (
-          <div className="mb-4 p-3 bg-error/10 border border-error text-error text-xs font-bold rounded-lg text-center uppercase tracking-widest">
-            {error}
-          </div>
-        )}
+      {/* Overlay for opacity and color tint */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 backdrop-blur-sm" />
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-1">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-2">First Name</label>
-            <input
-              name="firstName"
-              type="text"
-              required
-              className="w-full p-3.5 rounded-xl bg-light border border-light focus:border-accent outline-none font-bold text-text"
-              value={formData.firstName}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="md:col-span-1">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-2">Last Name</label>
-            <input
-              name="lastName"
-              type="text"
-              required
-              className="w-full p-3.5 rounded-xl bg-light border border-light focus:border-accent outline-none font-bold text-text"
-              value={formData.lastName}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-2">Email Address</label>
-            <input
-              name="email"
-              type="email"
-              required
-              className="w-full p-3.5 rounded-xl bg-light border border-light focus:border-accent outline-none font-bold text-text"
-              value={formData.email}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-2">Phone Number</label>
-            <input
-              name="phone"
-              type="tel"
-              required
-              className="w-full p-3.5 rounded-xl bg-light border border-light focus:border-accent outline-none font-bold text-text"
-              value={formData.phone}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-2">Password</label>
-            <input
-              name="password"
-              type="password"
-              required
-              className="w-full p-3.5 rounded-xl bg-light border border-light focus:border-accent outline-none font-bold text-text"
-              value={formData.password}
-              onChange={handleChange}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="md:col-span-2 mt-4 py-4 bg-accent text-card-bg font-black uppercase tracking-[0.2em] rounded-full shadow-md hover:shadow-xl active:scale-95 transition-all"
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-4xl">
+        {/* Back Button */}
+        <motion.div
+          initial={{ x: -20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+        >
+          <Link
+            to="/owner/login"
+            className="inline-flex items-center gap-2 text-white hover:text-gray-200 transition-colors mb-6 font-semibold drop-shadow-lg bg-white/10 backdrop-blur-sm px-4 py-2 rounded-large hover:bg-white/20"
           >
-            {isLoading ? 'Creating Account...' : 'Register as Owner'}
-          </button>
-        </form>
+            <FaArrowLeft />
+            Back to Login
+          </Link>
+        </motion.div>
 
-        <div className="mt-8 text-center">
-          <p className="text-xs text-muted font-bold uppercase tracking-widest">
-            Already have an account? 
-            <Link to="/owner/login" className="text-accent ml-2 hover:underline">Sign In</Link>
-          </p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white/95 backdrop-blur-md rounded-large shadow-2xl p-6 md:p-12 border border-white/20 max-h-[85vh] overflow-y-auto"
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <motion.img
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.3 }}
+                src={logo}
+                alt="SmartBoAD Logo"
+                className="w-[80px] h-[80px]"
+              />
+              <motion.h1
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+              >
+                SmartBoAD
+              </motion.h1>
+            </div>
+            <motion.h2
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-xl md:text-2xl font-bold text-text-dark mb-2"
+            >
+              Partner Registration
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-text-muted text-sm md:text-base"
+            >
+              Join SmartBoAD to list and manage your properties
+            </motion.p>
+          </div>
+
+          {/* Signup Form */}
+          <SignupForm onSubmit={handleSignup} isLoading={isLoading} />
+
+          {/* Login Link */}
+          <div className="mt-8 text-center">
+            <p className="text-text-muted text-sm md:text-base">
+              Already have a partner account?{" "}
+              <Link
+                to="/owner/login"
+                className="text-accent hover:text-primary font-semibold transition-colors"
+              >
+                Sign In
+              </Link>
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
