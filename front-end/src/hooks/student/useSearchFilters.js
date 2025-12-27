@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 export const useSearchFilters = (initialBoardings) => {
   const [filters, setFilters] = useState({
     minPrice: 0,
-    maxPrice: 1000,
+    maxPrice: 50000, // ✅ Ensure this matches the slider max
     distance: '10',
     gender: 'any',
     amenities: [],
@@ -55,7 +55,7 @@ export const useSearchFilters = (initialBoardings) => {
   const clearAllFilters = useCallback(() => {
     setFilters({
       minPrice: 0,
-      maxPrice: 1000,
+      maxPrice: 50000, // ✅ Reset to 50000
       distance: '10',
       gender: 'any',
       amenities: [],

@@ -109,7 +109,7 @@ const AppRoutes = () => {
       />
 
       {/* ==================== FALLBACK ROUTE ==================== */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/student/login" replace />} />
     </Routes>
   );
 };
