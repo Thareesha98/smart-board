@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. Import Hook
 import { 
   FaCalendarAlt, 
   FaTimes, 
@@ -30,13 +31,25 @@ const getStatusClasses = (status) => {
 };
 
 const AppointmentCard = ({ appointment, onAction }) => {
-  const { id, boardingName, image, owner, address, contact, date, time, status, registered } = appointment;
+  // 2. Add ownerId to destructuring (Ensure your backend sends this!)
+  const { id, boardingName, image, owner, ownerId, address, contact, date, time, status, registered } = appointment;
   const { badge } = getStatusClasses(status); 
   const shortAddress = address.split(',')[0];
   const isRegistered = status === 'selected' && registered;
+  
+  const navigate = useNavigate(); // 3. Initialize Hook
+
+  // 4. Navigation Handler
+  const handleProfileClick = (e) => {
+    e.stopPropagation(); // Prevent bubbling
+    if (ownerId) {
+        navigate(`/profile/view/${ownerId}`);
+    } else {
+        console.warn("Owner ID is missing in appointment data");
+    }
+  };
 
   const renderButtons = () => {
-    // RESTORED: Your exact button styling classes
     const BASE_BTN_CLASSES = "text-sm py-2 px-4 rounded-large font-semibold transition-all duration-300 border-2 flex items-center justify-center gap-2 whitespace-nowrap flex-1";
 
     switch (status) {
@@ -121,8 +134,6 @@ const AppointmentCard = ({ appointment, onAction }) => {
     <div className="
       bg-card-bg rounded-large shadow-custom p-6 border border-gray-100
       transition-all duration-300 hover:shadow-xl hover:transform hover:-translate-y-0.5
-      
-      /* RESPONSIVE LAYOUT (1400px Breakpoint) */
       flex flex-col md:flex-row items-center gap-6
     ">
       
@@ -146,11 +157,20 @@ const AppointmentCard = ({ appointment, onAction }) => {
         {/* Name & Owner */}
         <div className="flex flex-col justify-center">
           <h4 className="text-lg font-bold text-text-dark mb-1">{boardingName}</h4>
+          
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-text-muted text-sm">
-            <div className="flex items-center gap-1.5">
+            
+            {/* --- CLICKABLE OWNER SECTION --- */}
+            <div 
+                onClick={handleProfileClick}
+                className="flex items-center gap-1.5 cursor-pointer hover:text-accent hover:underline decoration-2 underline-offset-2 transition-all"
+                title="View Owner Profile"
+            >
               <FaUser className="text-accent w-3" />
-              <span>{owner}</span>
+              <span className="font-semibold">{owner}</span>
             </div>
+            {/* ------------------------------- */}
+
             <div className="flex items-center gap-1.5">
               <FaMapMarkerAlt className="text-accent w-3" />
               <span className="truncate max-w-[150px]">{shortAddress}</span>
@@ -162,8 +182,8 @@ const AppointmentCard = ({ appointment, onAction }) => {
         <div className="flex flex-col justify-center">
           <span className="hidden md:block text-[10px] uppercase text-text-muted/60 font-bold tracking-wider mb-0.5">Contact</span>
           <div className="flex items-center justify-center md:justify-start gap-2 font-semibold text-text-dark">
-             <FaPhone className="text-success" size={14} />
-             <span>{contact}</span>
+              <FaPhone className="text-success" size={14} />
+              <span>{contact}</span>
           </div>
         </div>
 
@@ -180,7 +200,6 @@ const AppointmentCard = ({ appointment, onAction }) => {
       {/* 3. ACTIONS: Right Side */}
       <div className="
         flex flex-wrap md:flex-nowrap gap-3 justify-center md:justify-end flex-shrink-0 w-full md:w-auto
-        /* Tablet (768-1400): Stack buttons vertically to save horizontal space */
         md:flex-col min-[1400px]:flex-row
       ">
         {renderButtons()}
