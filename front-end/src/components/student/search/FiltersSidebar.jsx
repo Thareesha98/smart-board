@@ -20,12 +20,12 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
   const maxPercent = ((maxValue - min) / (max - min)) * 100;
 
   const handleMinChange = (e) => {
-    const value = Math.min(Number(e.target.value), maxValue - 10);
+    const value = Math.min(Number(e.target.value), maxValue - 100);
     onChange(value, maxValue);
   };
 
   const handleMaxChange = (e) => {
-    const value = Math.max(Number(e.target.value), minValue + 10);
+    const value = Math.max(Number(e.target.value), minValue + 100);
     onChange(minValue, value);
   };
 
