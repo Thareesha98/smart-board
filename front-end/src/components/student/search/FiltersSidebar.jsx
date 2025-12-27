@@ -1,4 +1,4 @@
-import React from 'react'; // Removed useState as it's controlled by parent
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaFilter, FaWifi, FaSnowflake, FaParking, FaTshirt, 
@@ -14,18 +14,23 @@ const amenityIcons = {
   furnished: FaCouch
 };
 
-// ✅ Professional Dual-Thumb Range Slider Component - FIXED (No Silver Line)
+// ✅ Professional Dual-Thumb Range Slider Component
 const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
   const minPercent = ((minValue - min) / (max - min)) * 100;
   const maxPercent = ((maxValue - min) / (max - min)) * 100;
 
+  // ✅ UPDATED: Step size of 500 prevents numbers like 49999
+  const step = 500; 
+  // ✅ UPDATED: Gap of 1000 prevents handles from overlapping
+  const minGap = 1000;
+
   const handleMinChange = (e) => {
-    const value = Math.min(Number(e.target.value), maxValue - 100);
+    const value = Math.min(Number(e.target.value), maxValue - minGap);
     onChange(value, maxValue);
   };
 
   const handleMaxChange = (e) => {
-    const value = Math.max(Number(e.target.value), minValue + 100);
+    const value = Math.max(Number(e.target.value), minValue + minGap);
     onChange(minValue, value);
   };
 
@@ -63,6 +68,7 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
           type="range"
           min={min}
           max={max}
+          step={step}
           value={minValue}
           onChange={handleMinChange}
           className="range-slider-thumb range-slider-min"
@@ -73,13 +79,13 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
           type="range"
           min={min}
           max={max}
+          step={step}
           value={maxValue}
           onChange={handleMaxChange}
           className="range-slider-thumb range-slider-max"
         />
       </div>
 
-      {/* Custom Slider Styles - ✅ NO SILVER LINE */}
       <style jsx>{`
         .range-slider-thumb {
           position: absolute;
@@ -118,6 +124,7 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
           box-shadow: 0 2px 8px rgba(216, 76, 56, 0.6);
         }
 
+        /* Mozilla Firefox Support */
         .range-slider-thumb::-moz-range-thumb {
           -moz-appearance: none;
           appearance: none;
@@ -132,16 +139,6 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
           transition: all 0.2s ease;
         }
 
-        .range-slider-thumb::-moz-range-thumb:hover {
-          transform: scale(1.15);
-          box-shadow: 0 4px 12px rgba(216, 76, 56, 0.5);
-        }
-
-        .range-slider-thumb::-moz-range-thumb:active {
-          transform: scale(1.05);
-          box-shadow: 0 2px 8px rgba(216, 76, 56, 0.6);
-        }
-
         .range-slider-min {
           z-index: ${minValue > max - 100 ? '5' : '3'};
         }
@@ -150,11 +147,7 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
           z-index: 4;
         }
 
-        .range-slider-thumb::-webkit-slider-runnable-track {
-          background: transparent;
-          border: none;
-        }
-
+        .range-slider-thumb::-webkit-slider-runnable-track,
         .range-slider-thumb::-moz-range-track {
           background: transparent;
           border: none;
@@ -163,16 +156,12 @@ const DualRangeSlider = ({ min, max, minValue, maxValue, onChange }) => {
         .range-slider-thumb:focus {
           outline: none;
         }
-
-        .range-slider-thumb::-moz-focus-outer {
-          border: 0;
-        }
       `}</style>
     </div>
   );
 };
 
-// ✅ Professional Radio Button Component
+// ... [RadioOption and CheckboxOption components remain exactly the same] ...
 const RadioOption = ({ name, value, checked, onChange, label }) => (
   <label className="relative flex items-center gap-3 cursor-pointer group py-1">
     <input 
@@ -185,20 +174,14 @@ const RadioOption = ({ name, value, checked, onChange, label }) => (
     />
     <div className={`
       w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-all duration-200
-      ${checked 
-        ? 'border-primary bg-primary shadow-md' 
-        : 'border-gray-300 bg-white group-hover:border-primary'
-      }
+      ${checked ? 'border-primary bg-primary shadow-md' : 'border-gray-300 bg-white group-hover:border-primary'}
     `}>
       {checked && <div className="w-2 h-2 rounded-full bg-white"></div>}
     </div>
-    <span className={`text-sm font-medium ${checked ? 'text-text-dark' : 'text-text-muted'}`}>
-      {label}
-    </span>
+    <span className={`text-sm font-medium ${checked ? 'text-text-dark' : 'text-text-muted'}`}>{label}</span>
   </label>
 );
 
-// ✅ Professional Checkbox Component
 const CheckboxOption = ({ checked, onChange, label, icon: Icon }) => (
   <label className="relative flex items-center gap-3 cursor-pointer group py-1">
     <input 
@@ -209,10 +192,7 @@ const CheckboxOption = ({ checked, onChange, label, icon: Icon }) => (
     />
     <div className={`
       w-5 h-5 flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all duration-200
-      ${checked 
-        ? 'border-primary bg-primary shadow-md' 
-        : 'border-gray-300 bg-white group-hover:border-primary'
-      }
+      ${checked ? 'border-primary bg-primary shadow-md' : 'border-gray-300 bg-white group-hover:border-primary'}
     `}>
       {checked && (
         <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -221,13 +201,10 @@ const CheckboxOption = ({ checked, onChange, label, icon: Icon }) => (
       )}
     </div>
     {Icon && <Icon className={`text-base sm:text-lg flex-shrink-0 ${checked ? 'text-accent' : 'text-gray-400'}`} />}
-    <span className={`text-sm font-medium ${checked ? 'text-text-dark' : 'text-text-muted'}`}>
-      {label}
-    </span>
+    <span className={`text-sm font-medium ${checked ? 'text-text-dark' : 'text-text-muted'}`}>{label}</span>
   </label>
 );
 
-// ✅ Filter Content Component (Reused the mobile version logic)
 const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose }) => (
   <div className="flex flex-col h-full">
     {/* Header */}
@@ -236,10 +213,7 @@ const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose }
         <FaFilter className="text-accent text-base sm:text-lg" /> Filters
       </h3>
       <div className="flex items-center gap-3">
-        <button 
-          onClick={onClearAll}
-          className="text-accent font-semibold text-xs sm:text-sm hover:text-primary transition-colors"
-        >
+        <button onClick={onClearAll} className="text-accent font-semibold text-xs sm:text-sm hover:text-primary transition-colors">
           Clear All
         </button>
         <button onClick={onClose} className="text-text-muted hover:text-text-dark">
@@ -256,9 +230,11 @@ const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose }
           <span className="w-1 h-4 sm:h-5 bg-accent rounded-full"></span>
           Price Range
         </h4>
+        
+        {/* ✅ FIX: Changed max from 1000 to 50000 so it matches the data */}
         <DualRangeSlider
           min={0}
-          max={1000}
+          max={50000} 
           minValue={filters.minPrice}
           maxValue={filters.maxPrice}
           onChange={(min, max) => {
@@ -387,7 +363,6 @@ const FilterContent = ({ filters, onFilterChange, onClearAll, onApply, onClose }
   </div>
 );
 
-// ✅ Main FiltersSidebar Component - NOW ONLY THE MODAL VERSION
 const FiltersSidebar = ({ isOpen, onClose, filters, onFilterChange, onClearAll, onApply }) => {
   return (
     <AnimatePresence>
@@ -399,7 +374,6 @@ const FiltersSidebar = ({ isOpen, onClose, filters, onFilterChange, onClearAll, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            // Removed lg:hidden, this is now universal
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
           />
 
@@ -409,7 +383,6 @@ const FiltersSidebar = ({ isOpen, onClose, filters, onFilterChange, onClearAll, 
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            // Removed lg:hidden. Added max-width constraint for larger screens so it doesn't stretch too wide.
             className="fixed right-0 top-0 h-full w-full sm:w-96 md:w-[450px] bg-white shadow-2xl z-[101] flex flex-col"
           >
             <div className="p-4 sm:p-6 flex-1 flex flex-col overflow-hidden">
@@ -419,7 +392,6 @@ const FiltersSidebar = ({ isOpen, onClose, filters, onFilterChange, onClearAll, 
                 onClearAll={onClearAll}
                 onApply={onApply}
                 onClose={onClose}
-                // It's always acting as a modal now
               />
             </div>
           </motion.div>
