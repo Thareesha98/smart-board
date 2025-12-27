@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FaStar, FaCheckCircle } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { FaStar, FaCheckCircle, FaCamera, FaTimes, FaCloudUploadAlt } from 'react-icons/fa';
 import { useAuth } from '../../../context/student/AuthContext.jsx';
 
 const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
@@ -14,6 +14,8 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
   const [errors, setErrors] = useState({});
   const [isEditing, setIsEditing] = useState(false); // ✅ Track edit mode
 
+  const fileInputRef = useRef(null);
+  
   // ✅ Check for existing review on mount
   useEffect(() => {
     if (currentUser?.studentId && boardingId) {
