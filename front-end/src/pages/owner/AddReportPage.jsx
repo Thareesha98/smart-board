@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import {useOwnerAuth} from "../../context/owner/OwnerAuthContext";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import {
   SelectGroup,
   EvidenceUpload,
 } from "../../components/Owner/report/ReportFormComponents";
 import useReportLogic from "../../hooks/owner/useReportLogic";
-import { boardingsData, reportTypes } from "../../data/mockData";
+import { getOwnerBoardings,getBoardingTenants } from "../../api/owner/service";
+import { reportTypes } from "../../data/mockData";
 
 // Severity Options for Dropdown
 const severityOptions = [
@@ -19,7 +21,13 @@ const severityOptions = [
 
 export default function AddReportPage() {
   const navigate = useNavigate();
+  const { currentOwner } = useOwnerAuth();
   const { submitNewReport, isSubmitting } = useReportLogic();
+
+  // --- 1. DYNAMIC DATA STATE ---
+  const [properties, setProperties] = useState([]); // List of Boardings
+  const [students, setStudents] = useState([]);     // List of Students for selected boarding
+  const [loadingData, setLoadingData] = useState(true);
 
   const [newFiles, setNewFiles] = useState([]);
 
@@ -36,13 +44,53 @@ export default function AddReportPage() {
     allowContact: true, // New Field
   });
 
-  // Calculate dependent dropdowns
-  const selectedPropertyObj = boardingsData.find(
-    (p) => p.id === parseInt(formData.propertyId)
-  );
-  const studentsForProperty = selectedPropertyObj
-    ? selectedPropertyObj.tenantsList
-    : [];
+  // --- 2. FETCH PROPERTIES ON LOAD ---
+  useEffect(() => {
+    const loadProperties = async () => {
+      if (currentOwner?.id) {
+        try {
+          const data = await getOwnerBoardings(currentOwner.id);
+          setProperties(data);
+        } catch (error) {
+          console.error("Failed to load properties");
+        } finally {
+          setLoadingData(false);
+        }
+      }
+    };
+    loadProperties();
+  }, [currentOwner]);
+
+
+  const handlePropertyChange = async (e) => {
+    const newPropertyId = e.target.value;
+    
+    // Find name for the backend DTO
+    const selectedProp = properties.find(p => p.id === parseInt(newPropertyId) || p.id === newPropertyId);
+    
+    setFormData(prev => ({
+      ...prev,
+      propertyId: newPropertyId,
+      boardingName: selectedProp ? selectedProp.name : "", // Use 'name' or 'boardingName' depending on your API
+      studentId: "" // Clear student selection
+    }));
+
+    // Fetch Students for this property
+    if (newPropertyId) {
+      const tenantList = await getBoardingTenants(newPropertyId);
+      setStudents(tenantList);
+    } else {
+      setStudents([]);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
+  };
 
   const handleFileChange = (e) => {
     setNewFiles((prev) => [...prev, ...Array.from(e.target.files)]);
@@ -52,32 +100,12 @@ export default function AddReportPage() {
     setNewFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    // Handle Boarding Name mapping when Property ID changes
-    if (name === "propertyId") {
-      const selectedProp = boardingsData.find((p) => p.id === parseInt(value));
-      setFormData((prev) => ({
-        ...prev,
-        propertyId: value,
-        boardingName: selectedProp ? selectedProp.name : "", // Capture Name
-        studentId: "", // Reset student
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      }));
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await submitNewReport(formData, newFiles);
 
     if (result.success) {
-      alert("Formal report submitted successfully.");
+      alert("Report submitted successfully.");
       navigate("/owner/reports");
     } else {
       alert(result.message || "Failed to submit report.");
@@ -114,9 +142,10 @@ export default function AddReportPage() {
               label="Select Boarding Property"
               name="propertyId"
               value={formData.propertyId}
-              onChange={handleChange}
-              options={boardingsData}
-              placeholder="Select a property"
+              onChange={handlePropertyChange} // ✅ Use specific handler
+              options={properties}            // ✅ From API
+              placeholder={loadingData ? "Loading properties..." : "Select a property"}
+              disabled={loadingData}
             />
 
             <SelectGroup
@@ -124,15 +153,15 @@ export default function AddReportPage() {
               name="studentId"
               value={formData.studentId}
               onChange={handleChange}
-              options={studentsForProperty}
+              options={students}              // ✅ From API (Tenants)
               placeholder={
-                formData.propertyId
-                  ? "Select a student"
-                  : "Select property first"
+                !formData.propertyId 
+                  ? "Select property first" 
+                  : students.length === 0 
+                    ? "No students found" 
+                    : "Select a student"
               }
-              disabled={
-                !formData.propertyId || studentsForProperty.length === 0
-              }
+              disabled={!formData.propertyId || students.length === 0}
             />
 
             {/* --- 2. NEW: Title (Required by Backend) --- */}

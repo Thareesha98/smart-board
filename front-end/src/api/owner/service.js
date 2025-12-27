@@ -1,7 +1,5 @@
 import api from "../api";
 
-// ... (Maintenance services remain unchanged)
-
 // =================================================================
 // 🚩 REPORT SERVICES
 // =================================================================
@@ -50,5 +48,29 @@ export const createReport = async (reportData, files) => {
   } catch (error) {
     console.error("Error creating report:", error);
     throw error;
+  }
+};
+
+// 1. Get all boardings owned by this user
+export const getOwnerBoardings = async (ownerId) => {
+  try {
+    // Endpoint: GET /api/boardings/owner/{id}
+    const response = await api.get(`/boardings/owner/${ownerId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching boardings:", error);
+    throw error;
+  }
+};
+
+// 2. Get all tenants (students) for a specific boarding
+export const getBoardingTenants = async (boardingId) => {
+  try {
+    // Endpoint: GET /api/boardings/{id}/tenants
+    const response = await api.get(`/boardings/${boardingId}/tenants`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching tenants:", error);
+    return []; // Return empty array on error to prevent crash
   }
 };
