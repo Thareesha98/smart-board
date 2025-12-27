@@ -9,27 +9,43 @@ import {
 import useReportLogic from "../../hooks/owner/useReportLogic";
 import { boardingsData, reportTypes } from "../../data/mockData";
 
+// Severity Options for Dropdown
+const severityOptions = [
+  { id: "LOW", name: "Low" },
+  { id: "MEDIUM", name: "Medium" },
+  { id: "HIGH", name: "High" },
+  { id: "CRITICAL", name: "Critical" },
+];
+
 export default function AddReportPage() {
   const navigate = useNavigate();
-  const { submitReport, isSubmitting } = useReportLogic();
+  const { submitNewReport, isSubmitting } = useReportLogic();
+
   const [newFiles, setNewFiles] = useState([]);
+
+  // ✅ FIX: Updated State to match DTO requirements
   const [formData, setFormData] = useState({
-    propertyId: "",
+    propertyId: "", // Used for UI logic to find student list
+    boardingName: "", // Sent to backend
     studentId: "",
     reportType: "",
+    severity: "", // New Field
+    title: "", // New Field
     description: "",
+    incidentDate: "", // New Field
+    allowContact: true, // New Field
   });
 
+  // Calculate dependent dropdowns
   const selectedPropertyObj = boardingsData.find(
-    (p) => p.id === formData.propertyId
+    (p) => p.id === parseInt(formData.propertyId)
   );
   const studentsForProperty = selectedPropertyObj
     ? selectedPropertyObj.tenantsList
     : [];
 
   const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    setNewFiles((prev) => [...prev, ...selectedFiles]);
+    setNewFiles((prev) => [...prev, ...Array.from(e.target.files)]);
   };
 
   const handleRemoveFile = (index) => {
@@ -37,25 +53,34 @@ export default function AddReportPage() {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === "propertyId" && { studentId: "" }),
-    }));
+    const { name, value, type, checked } = e.target;
+
+    // Handle Boarding Name mapping when Property ID changes
+    if (name === "propertyId") {
+      const selectedProp = boardingsData.find((p) => p.id === parseInt(value));
+      setFormData((prev) => ({
+        ...prev,
+        propertyId: value,
+        boardingName: selectedProp ? selectedProp.name : "", // Capture Name
+        studentId: "", // Reset student
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Call the hook's submit function
-    const result = await submitReport(formData, newFiles);
+    const result = await submitNewReport(formData, newFiles);
 
     if (result.success) {
       alert("Formal report submitted successfully.");
       navigate("/owner/reports");
     } else {
-      alert(result.message || "Error submitting report");
+      alert(result.message || "Failed to submit report.");
     }
   };
 
@@ -63,29 +88,28 @@ export default function AddReportPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
       className="pt-4 space-y-6"
     >
       <HeaderBar
         title="Report Student Issue"
-        subtitle="Submit a formal report regarding student conduct or payment issues."
+        subtitle="Submit a formal report regarding student conduct."
         navBtnText="Back to Reports"
         navBtnPath="/owner/reports"
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Incident Details Card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
           className="bg-white p-8 rounded-report shadow-custom"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
         >
           <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b text-primary border-light">
             Incident Details
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* --- 1. Property & Student --- */}
             <SelectGroup
               label="Select Boarding Property"
               name="propertyId"
@@ -111,19 +135,75 @@ export default function AddReportPage() {
               }
             />
 
+            {/* --- 2. NEW: Title (Required by Backend) --- */}
             <div className="md:col-span-2">
-              <SelectGroup
-                label="Type of Incident"
-                name="reportType"
-                value={formData.reportType}
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-primary">
+                Report Title *
+              </label>
+              <input
+                type="text"
+                name="title"
+                required
+                value={formData.title}
                 onChange={handleChange}
-                options={reportTypes}
-                placeholder="Choose category"
+                placeholder="e.g., Late Payment for October, Noise Complaint"
+                className="w-full p-3.5 px-4 rounded-xl text-sm border border-light focus:outline-none focus:border-accent"
               />
             </div>
 
+            {/* --- 3. Type & Severity --- */}
+            <SelectGroup
+              label="Type of Incident"
+              name="reportType"
+              value={formData.reportType}
+              onChange={handleChange}
+              options={reportTypes}
+              placeholder="Choose category"
+            />
+
+            <SelectGroup
+              label="Severity Level"
+              name="severity"
+              value={formData.severity}
+              onChange={handleChange}
+              options={severityOptions}
+              placeholder="Select severity"
+            />
+
+            {/* --- 4. NEW: Incident Date (Required by Backend) --- */}
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-primary">
+                Date of Incident *
+              </label>
+              <input
+                type="date"
+                name="incidentDate"
+                required
+                value={formData.incidentDate}
+                onChange={handleChange}
+                className="w-full p-3.5 px-4 rounded-xl text-sm border border-light focus:outline-none focus:border-accent text-gray-500"
+              />
+            </div>
+
+            {/* --- 5. NEW: Allow Contact Checkbox --- */}
+            <div className="flex items-center mt-8">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="allowContact"
+                  checked={formData.allowContact}
+                  onChange={handleChange}
+                  className="w-5 h-5 accent-accent"
+                />
+                <span className="text-sm font-bold text-text">
+                  Allow admin/student to contact me about this report
+                </span>
+              </label>
+            </div>
+
+            {/* --- 6. Description --- */}
             <div className="md:col-span-2">
-              <label className="block font-semibold mb-2 text-primary">
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-primary">
                 Detailed Description *
               </label>
               <textarea
@@ -141,10 +221,10 @@ export default function AddReportPage() {
 
         {/* Evidence Card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
           className="bg-white p-8 rounded-report shadow-custom"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
           <h2 className="text-[1.3rem] font-bold mb-6 pb-3 border-b text-primary border-light">
             Evidence (Optional)
@@ -160,22 +240,12 @@ export default function AddReportPage() {
           <motion.button
             type="submit"
             disabled={isSubmitting}
-            whileHover={{
-              scale: 1.02,
-              boxShadow: "0 10px 20px rgba(239, 68, 68, 0.5)",
-            }}
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-3 rounded-3xl font-bold text-white transition-all shadow-lg disabled:opacity-50 flex items-center gap-2 bg-error"
-            style={{
-              boxShadow: "0 8px 16px rgba(239, 68, 68, 0.4)",
-            }}
+            className="px-8 py-3 rounded-3xl font-bold text-white bg-error shadow-lg disabled:opacity-50 flex items-center gap-2"
           >
             {isSubmitting ? (
-              <motion.i
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                className="fas fa-circle-notch"
-              ></motion.i>
+              <i className="fas fa-circle-notch fa-spin"></i>
             ) : (
               <i className="fas fa-exclamation-triangle"></i>
             )}

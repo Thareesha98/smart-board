@@ -1,32 +1,31 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
-import api from "../../api/api";
+import { getOwnerReports, createReport } from "../../api/owner/service";
 
 const useReportLogic = () => {
   const { currentOwner } = useOwnerAuth();
-  
-  // --- STATE ---
+
+  // Data State
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // UI State
   const [filter, setFilter] = useState("New");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- FETCH REPORTS ---
+  // 1. Fetch Reports
   const fetchReports = useCallback(async () => {
     if (!currentOwner?.id) return;
 
     try {
       setLoading(true);
-      // Endpoint: GET /api/reports/owner/{ownerId}
-      const response = await api.get(`/reports/owner/${currentOwner.id}`);
-      setReports(response.data);
+      const data = await getOwnerReports(currentOwner.id);
+      setReports(data);
       setError(null);
     } catch (err) {
-      console.error("Error fetching reports:", err);
-      setError("Failed to load reports. Please try again.");
+      console.error("Fetch error:", err);
+      setError("Failed to load reports.");
     } finally {
       setLoading(false);
     }
@@ -37,78 +36,62 @@ const useReportLogic = () => {
     fetchReports();
   }, [fetchReports]);
 
-  // --- SUBMIT NEW REPORT ---
-  const submitReport = async (reportData, files = []) => {
+  // 2. Submit Report Wrapper
+  const submitNewReport = async (formData, files) => {
+    if (!currentOwner?.id)
+      return { success: false, message: "User not identified" };
+
     setIsSubmitting(true);
     try {
-      // Create FormData to handle text + files
-      const formData = new FormData();
-      
-      // Append text fields
-      formData.append("ownerId", currentOwner.id);
-      formData.append("propertyId", reportData.propertyId);
-      formData.append("studentId", reportData.studentId);
-      formData.append("type", reportData.reportType);
-      formData.append("description", reportData.description);
-      formData.append("status", "New"); // Default status
+      // Pass the entire formData object (AddReportPage now handles the structure)
+      // We just inject the ownerId here
+      const dataToSend = {
+        ...formData,
+        ownerId: currentOwner.id,
+      };
 
-      // Append files (if any)
-      files.forEach((file) => {
-        formData.append("evidence", file);
-      });
+      await createReport(dataToSend, files);
 
-      // Endpoint: POST /api/reports
-      // Note: Axios automatically sets 'Content-Type': 'multipart/form-data'
-      await api.post("/reports", formData);
-      
-      // Refresh list after add
-      await fetchReports(); 
+      await fetchReports();
       return { success: true };
-
     } catch (err) {
-      console.error("Submission error:", err);
-      return { 
-        success: false, 
-        message: err.response?.data?.message || "Failed to submit report." 
+      console.error("Submit error:", err);
+      return {
+        success: false,
+        message: err.response?.data?.message || "Failed to submit report",
       };
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // --- COMPUTED DATA (Memoized) ---
-  
-  // 1. Calculate Counts for Tabs
+  // 3. Computed Values (Tabs & Filtering)
   const counts = useMemo(() => {
-    return reports.reduce((acc, report) => {
-      // Ensure backend status matches these keys (case-sensitive)
-      const status = report.status || "New"; 
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, { New: 0, "In Progress": 0, Resolved: 0 });
+    return reports.reduce(
+      (acc, report) => {
+        // Ensure key matches Backend status exactly (Case Sensitive)
+        const status = report.status || "New";
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      },
+      { New: 0, "In Progress": 0, Resolved: 0 }
+    );
   }, [reports]);
 
-  // 2. Filter Reports for Display
   const filteredReports = useMemo(() => {
     return reports.filter((rep) => rep.status === filter);
   }, [reports, filter]);
 
   return {
-    // Data
     reports,
     filteredReports,
     counts,
-    
-    // UI State
     loading,
     error,
     isSubmitting,
     filter,
     setFilter,
-    
-    // Actions
-    fetchReports,
-    submitReport
+    submitNewReport,
   };
 };
 
