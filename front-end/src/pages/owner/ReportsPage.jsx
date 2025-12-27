@@ -45,12 +45,20 @@ export default function ReportsPage() {
   return (
     <div className="pt-4 space-y-8 min-h-screen pb-10 bg-light">
       <HeaderBar
-        title="Reports Management"
-        subtitle="Overview of student reports and their statuses"
-        navBtnText="Add New Report"
-        navBtnPath="/owner/reports/add"
-      />
-      
+        title="Student Reports Log"
+        subtitle="Track and manage formal misconduct and payment issues."
+        notificationCount={counts["New"]}
+        userAvatar={ownerData.avatar}
+        userName={ownerData.firstName}
+      >
+        <button
+          className="bg-accent text-card-bg px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest shadow-md hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95"
+          onClick={() => navigate("/owner/reports/add")}
+        >
+          <i className="fas fa-plus mr-2"></i>
+          Add New Report
+        </button>
+      </HeaderBar>
 
       {/* --- Status Tabs Section --- */}
       <section className="p-6 rounded-report shadow-custom bg-card-bg mx-2 border border-light">

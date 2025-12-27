@@ -11,7 +11,7 @@ import {
   FaFlag,
   FaSignOutAlt,
 } from "react-icons/fa";
-import { useAuth } from '../../../context/student/StudentAuthContext.jsx';
+import { useAuth } from '../../../context/student/AuthContext.jsx';
 
 const navItems = [
   { path: "/student", icon: FaHome, label: "Dashboard", key: "Dashboard" },
@@ -153,7 +153,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Hide scrollbar styling */}
-      <style>{`
+      <style jsx>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }

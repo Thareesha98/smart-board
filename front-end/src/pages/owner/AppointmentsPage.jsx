@@ -1,23 +1,66 @@
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
+import { mockAppointments, ownerData } from "../../data/mockData";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import StatusTab from "../../components/Owner/common/StatusTab";
 import AppointmentRow from "../../components/Owner/appointments/AppointmentRow";
-import useAppointmentsLogic from "../../hooks/owner/useAppointmentsLogic";
+
+const UTILS = {
+  formatDate: (d) =>
+    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+  formatTime: (t) =>
+    new Date(`2000-01-01T${t}`).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }),
+  getStatusStyle: (status) => {
+    const styles = {
+      pending: {
+        colorClass: "bg-accent",
+        textClass: "text-accent",
+        bgClass: "bg-accent/10",
+        icon: "fas fa-hourglass-half",
+      },
+      confirmed: {
+        colorClass: "bg-success",
+        textClass: "text-success",
+        bgClass: "bg-success/10",
+        icon: "fas fa-check-circle",
+      },
+      visited: {
+        colorClass: "bg-info",
+        textClass: "text-info",
+        bgClass: "bg-info/10",
+        icon: "fas fa-eye",
+      },
+      cancelled: {
+        colorClass: "bg-error",
+        textClass: "text-error",
+        bgClass: "bg-error/10",
+        icon: "fas fa-times-circle",
+      },
+    };
+    return styles[status] || {};
+  },
+};
 
 const AppointmentsPage = () => {
-  // Use the Custom Hook
-  const {
-    filteredAppointments,
-    counts,
-    ownerData,
-    filter,
-    setFilter,
-    handleAction,
-    formatDate,
-    formatTime,
-    getStatusStyle,
-  } = useAppointmentsLogic();
+  const [appointments, setAppointments] = useState(mockAppointments);
+  const [filter, setFilter] = useState("pending");
+
+  const handleAction = (id, newStatus) => {
+    setAppointments((prev) =>
+      prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app))
+    );
+  };
+
+  const counts = appointments.reduce(
+    (acc, app) => {
+      acc[app.status] = (acc[app.status] || 0) + 1;
+      return acc;
+    },
+    { pending: 0, confirmed: 0, visited: 0, cancelled: 0 }
+  );
 
   return (
     <div className="pt-4 space-y-8 min-h-screen bg-light pb-10">
@@ -29,7 +72,6 @@ const AppointmentsPage = () => {
         userName={ownerData.firstName}
       />
 
-      {/* Filter Tabs */}
       <section className="p-6 rounded-report shadow-custom bg-card-bg border border-light mx-2">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {Object.keys(counts).map((status) => (
@@ -39,47 +81,31 @@ const AppointmentsPage = () => {
               count={counts[status]}
               currentFilter={filter}
               setFilter={setFilter}
-              config={getStatusStyle(status)}
+              config={UTILS.getStatusStyle(status)}
             />
           ))}
         </div>
       </section>
 
-      {/* Appointments List */}
       <section className="space-y-4 px-2">
-        <motion.h3
-          layout
-          className="text-2xl font-black text-primary uppercase tracking-tight ml-2"
-        >
+        <h3 className="text-2xl font-black text-primary uppercase tracking-tight ml-2">
           {filter} Requests
-        </motion.h3>
+        </h3>
 
-        <motion.div layout className="flex flex-col gap-4">
-          <AnimatePresence mode="popLayout">
-            {filteredAppointments.length > 0 ? (
-              filteredAppointments.map((app) => (
-                <AppointmentRow
-                  key={app.id}
-                  appointment={app}
-                  config={getStatusStyle(app.status)}
-                  onAction={handleAction}
-                  formatDate={formatDate}
-                  formatTime={formatTime}
-                />
-              ))
-            ) : (
-              // Empty State Animation
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="py-12 text-center text-muted font-bold uppercase tracking-widest text-xs"
-              >
-                No {filter} appointments found.
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+        <div className="flex flex-col gap-4">
+          {appointments
+            .filter((app) => app.status === filter)
+            .map((app) => (
+              <AppointmentRow
+                key={app.id}
+                appointment={app}
+                config={UTILS.getStatusStyle(app.status)}
+                onAction={handleAction}
+                formatDate={UTILS.formatDate}
+                formatTime={UTILS.formatTime}
+              />
+            ))}
+        </div>
       </section>
     </div>
   );

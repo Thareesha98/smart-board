@@ -1,4 +1,4 @@
-import { useAuth } from '../../context/student/StudentAuthContext.jsx';
+import { useAuth } from '../../context/student/AuthContext.jsx';
 
 const useProfileLogic = () => {
   // Get everything from AuthContext instead of local state
