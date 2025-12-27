@@ -30,12 +30,15 @@ public class MaintenanceController {
         return ResponseEntity.ok(maintenanceService.createMaintenance(studentId, dto, images));
     }
 
+    // Student History
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<MaintenanceResponseDTO>> getStudentMaintenance(
-            @PathVariable Long studentId
-    ) {
+    public ResponseEntity<List<MaintenanceResponseDTO>> getStudentMaintenance(@PathVariable Long studentId) {
         return ResponseEntity.ok(maintenanceService.getStudentMaintenances(studentId));
     }
 
-
+    // Owner Tasks
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<List<MaintenanceResponseDTO>> getOwnerMaintenance(@PathVariable Long ownerId) {
+        return ResponseEntity.ok(maintenanceService.getOwnerMaintenance(ownerId));
+    }
 }
