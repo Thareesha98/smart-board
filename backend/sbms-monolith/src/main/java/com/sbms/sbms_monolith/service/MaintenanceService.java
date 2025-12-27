@@ -1,125 +1,103 @@
 package com.sbms.sbms_monolith.service;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.sbms.sbms_monolith.dto.maintenance.MaintenanceCreateDTO;
-import com.sbms.sbms_monolith.dto.maintenance.MaintenanceDecisionDTO;
+import com.sbms.sbms_monolith.dto.maintenance.MaintenanceRequestDTO;
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceResponseDTO;
 import com.sbms.sbms_monolith.mapper.MaintenanceMapper;
 import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.Maintenance;
 import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
+import com.sbms.sbms_monolith.model.enums.MaintenanceUrgency;
 import com.sbms.sbms_monolith.repository.BoardingRepository;
 import com.sbms.sbms_monolith.repository.MaintenanceRepository;
 import com.sbms.sbms_monolith.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MaintenanceService {
 
-    @Autowired
-    private MaintenanceRepository maintenanceRepo;
+    private final MaintenanceRepository maintenanceRepo;
+    private final UserRepository userRepo;
+    private final BoardingRepository boardingRepo;
+    private final S3Service s3Service;
 
-    @Autowired
-    private BoardingRepository boardingRepo;
-
-    @Autowired
-    private UserRepository userRepo;
-    
-    @Autowired
-    private S3Service s3Service;
-
-    public MaintenanceResponseDTO create(Long studentId, MaintenanceCreateDTO dto) {
-
+    //1. Create Request
+    @Transactional
+    public MaintenanceResponseDTO createMaintenance(Long studentId, MaintenanceRequestDTO dto, List<MultipartFile> files) throws IOException {
         User student = userRepo.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(()->new RuntimeException("user not found"));
 
         Boarding boarding = boardingRepo.findById(dto.getBoardingId())
-                .orElseThrow(() -> new RuntimeException("Boarding not found"));
+                .orElseThrow(()->new RuntimeException("boarding not found"));
 
-        Maintenance m = new Maintenance();
-        m.setStudent(student);
-        m.setBoarding(boarding);
-        m.setTitle(dto.getTitle());
-        m.setDescription(dto.getDescription());
-        m.setStudentNote(dto.getStudentNote());
-        m.setImageUrl(dto.getImageUrl());
+        Maintenance maintenance = new Maintenance();
+        maintenance.setStudent(student);
+        maintenance.setBoarding(boarding);
+        maintenance.setDescription(dto.getDescription());
 
-        maintenanceRepo.save(m);
-
-     /*   NotificationEvent event = new NotificationEvent();
-        event.setReceiverId(boarding.getOwner().getId());
-        event.setTitle("New Maintenance Request");
-        event.setMessage("New maintenance request for " + boarding.getTitle());
-        event.setType("ACTION_REQUIRED");
-
-        notificationPublisher.sendNotification(event); */
-
-        return MaintenanceMapper.toDTO(m);
-    }
-
-    // -----------------------------------------
-    // STUDENT: VIEW MY REQUESTS
-    // -----------------------------------------
-    public List<MaintenanceResponseDTO> getForStudent(Long studentId) {
-
-        User student = userRepo.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        return maintenanceRepo.findByStudent(student)
-                .stream()
-                .map(MaintenanceMapper::toDTO)
-                .toList();
-    }
-
-    // -----------------------------------------
-    // OWNER: VIEW REQUESTS
-    // -----------------------------------------
-    public List<MaintenanceResponseDTO> getForOwner(Long ownerId) {
-
-        User owner = userRepo.findById(ownerId)
-                .orElseThrow(() -> new RuntimeException("Owner not found"));
-
-        return maintenanceRepo.findByBoarding_Owner(owner)
-                .stream()
-                .map(MaintenanceMapper::toDTO)
-                .toList();
-    }
-
-    // -----------------------------------------
-    // OWNER: UPDATE STATUS
-    // -----------------------------------------
-    public MaintenanceResponseDTO decide(Long ownerId, Long maintenanceId, MaintenanceDecisionDTO dto) {
-
-        Maintenance m = maintenanceRepo.findById(maintenanceId)
-                .orElseThrow(() -> new RuntimeException("Maintenance not found"));
-
-        if (!m.getBoarding().getOwner().getId().equals(ownerId)) {
-            throw new RuntimeException("Unauthorized");
+        // Parse Enums safely
+        try {
+            maintenance.setIssueType(MaintenanceIssueType.valueOf(dto.getIssueType().toUpperCase()));
+        } catch (Exception e) {
+            maintenance.setIssueType(MaintenanceIssueType.OTHER);
         }
 
-        m.setStatus(dto.getStatus());
-        m.setOwnerNote(dto.getOwnerNote());
-        maintenanceRepo.save(m);
-
-        // 🔔 Notify STUDENT
-     /*   NotificationEvent event = new NotificationEvent();
-        event.setReceiverId(m.getStudent().getId());
-        event.setTitle("Maintenance Update");
-        event.setMessage("Your maintenance request '" + m.getTitle() +
-                "' is now " + dto.getStatus());
-        event.setType("INFO");
-
-        notificationPublisher.sendNotification(event); */
-        
-        if (dto.getStatus() == MaintenanceStatus.REJECTED && m.getImageUrl() != null) {
-            s3Service.deleteFile(m.getImageUrl());
+        try {
+            maintenance.setUrgency(MaintenanceUrgency.valueOf(dto.getUrgency().toUpperCase()));
+        } catch (Exception e) {
+            maintenance.setUrgency(MaintenanceUrgency.LOW);
         }
 
-
-        return MaintenanceMapper.toDTO(m);
+        // Upload Images
+        List<String> imageUrls = new ArrayList<>();
+        if (files != null) {
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    imageUrls.add(s3Service.uploadFile(file, "maintenance"));
+                }
+            }
+        }
+        maintenance.setImages(imageUrls);
+        return MaintenanceMapper.toDTO(maintenanceRepo.save(maintenance));
     }
+
+    // 2. Get Student History
+    public List<MaintenanceResponseDTO> getStudentMaintenances(Long studentId) {
+        return maintenanceRepo.findByStudent_IdOrderByDateDesc(studentId)
+                .stream().map(MaintenanceMapper::toDTO).toList();
+    }
+
+    // 3. Get Owner Tasks
+    public List<MaintenanceResponseDTO> getOwnerMaintenance(Long ownerId) {
+        return maintenanceRepo.findRequestsByOwnerId(ownerId)
+                .stream().map(MaintenanceMapper::toDTO).toList();
+    }
+
+    // 4. Update Status
+    @Transactional
+    public MaintenanceResponseDTO updateStatus(Long requestId, String newStatus) {
+        Maintenance maintenance = maintenanceRepo.findById(requestId)
+                .orElseThrow(()->new RuntimeException("maintenance not found"));
+
+        String statusEnumStr = newStatus.replace("-","_").toUpperCase();
+
+        try {
+            maintenance.setStatus(MaintenanceStatus.valueOf(statusEnumStr));
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid status: " + newStatus);
+        }
+
+        Maintenance savedRequest = maintenanceRepo.save(maintenance);
+        return MaintenanceMapper.toDTO(savedRequest);
+    }
+
 }

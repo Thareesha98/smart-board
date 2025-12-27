@@ -1,58 +1,54 @@
 package com.sbms.sbms_monolith.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.sbms.sbms_monolith.dto.maintenance.MaintenanceCreateDTO;
-import com.sbms.sbms_monolith.dto.maintenance.MaintenanceDecisionDTO;
+import com.sbms.sbms_monolith.dto.maintenance.MaintenanceRequestDTO;
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceResponseDTO;
 import com.sbms.sbms_monolith.service.MaintenanceService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/maintenance")
+@RequiredArgsConstructor
+@CrossOrigin("*")
 public class MaintenanceController {
 
-    @Autowired
-    private MaintenanceService maintenanceService;
+    private final MaintenanceService maintenanceService;
 
-    @PostMapping("/student/{studentId}")
-    @PreAuthorize("hasRole('STUDENT')")
-    public MaintenanceResponseDTO create(
-            @PathVariable Long studentId,
-            @RequestBody MaintenanceCreateDTO dto
-    ) {
-        return maintenanceService.create(studentId, dto);
+    // Student Submit
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MaintenanceResponseDTO> createMaintenance(
+            @ModelAttribute MaintenanceRequestDTO dto,
+            @RequestParam("studentId") Long studentId,
+            @RequestPart(value = "images", required = false)List<MultipartFile> images
+     ) throws IOException {
+        return ResponseEntity.ok(maintenanceService.createMaintenance(studentId, dto, images));
     }
 
+    // Student History
     @GetMapping("/student/{studentId}")
-    @PreAuthorize("hasRole('STUDENT')")
-    public List<MaintenanceResponseDTO> studentRequests(@PathVariable Long studentId) {
-        return maintenanceService.getForStudent(studentId);
+    public ResponseEntity<List<MaintenanceResponseDTO>> getStudentMaintenance(@PathVariable Long studentId) {
+        return ResponseEntity.ok(maintenanceService.getStudentMaintenances(studentId));
     }
 
+    // Owner Tasks
     @GetMapping("/owner/{ownerId}")
-    @PreAuthorize("hasRole('OWNER')")
-    public List<MaintenanceResponseDTO> ownerRequests(@PathVariable Long ownerId) {
-        return maintenanceService.getForOwner(ownerId);
+    public ResponseEntity<List<MaintenanceResponseDTO>> getOwnerMaintenance(@PathVariable Long ownerId) {
+        return ResponseEntity.ok(maintenanceService.getOwnerMaintenance(ownerId));
     }
 
-    @PutMapping("/owner/{ownerId}/{maintenanceId}")
-    @PreAuthorize("hasRole('OWNER')")
-    public MaintenanceResponseDTO decide(
-            @PathVariable Long ownerId,
-            @PathVariable Long maintenanceId,
-            @RequestBody MaintenanceDecisionDTO dto
+    // Owner Status Update
+    @PatchMapping("/{requestId}/status")
+    public ResponseEntity<MaintenanceResponseDTO> updateStatus(
+            @PathVariable Long requestId,
+            @RequestBody Map<String, String> body
     ) {
-        return maintenanceService.decide(ownerId, maintenanceId, dto);
+        return ResponseEntity.ok(maintenanceService.updateStatus(requestId, body.get("status")));
     }
 }

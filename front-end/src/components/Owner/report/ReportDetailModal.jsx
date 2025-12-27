@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 const getStatusBadgeStyle = (status) => {
   switch (status) {
@@ -29,22 +30,53 @@ const getStatusBadgeStyle = (status) => {
   }
 };
 
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
+};
+
+const modalVariants = {
+  hidden: { scale: 0.8, opacity: 0, y: 50 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", bounce: 0.3, duration: 0.5 },
+  },
+  exit: { scale: 0.8, opacity: 0, y: 50 },
+};
+
 const ReportDetailModal = ({ report, onClose }) => {
   if (!report) return null;
 
   const statusStyle = getStatusBadgeStyle(report.status);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text/40 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-light w-full max-w-3xl rounded-[32px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-light">
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text/40 backdrop-blur-md"
+      variants={backdropVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      onClick={onClose}
+    >
+      <motion.div
+        className="bg-light w-full max-w-3xl rounded-[32px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-light"
+        variants={modalVariants}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* --- Header Section --- */}
         <div className="px-8 py-6 bg-light border-b border-muted/10 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div
+            <motion.div
+              initial={{ rotate: -180, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
               className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm ${statusStyle.bgClass} ${statusStyle.textClass}`}
             >
               <i className={statusStyle.icon}></i>
-            </div>
+            </motion.div>
             <div>
               <h3 className="text-2xl font-black text-text tracking-tight">
                 View Incident Report
@@ -54,18 +86,25 @@ const ReportDetailModal = ({ report, onClose }) => {
               </p>
             </div>
           </div>
-          <button
+          <motion.button
+            whileHover={{ rotate: 90, scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-card-bg flex items-center justify-center text-muted hover:text-text transition-all hover:rotate-90 shadow-sm border border-light"
+            className="w-10 h-10 rounded-full bg-card-bg flex items-center justify-center text-muted hover:text-text shadow-sm border border-light"
           >
             <i className="fas fa-times text-lg"></i>
-          </button>
+          </motion.button>
         </div>
 
         {/* --- Content Area --- */}
         <div className="p-8 space-y-6 overflow-y-auto bg-light/30">
           {/* Card 1: Involved Parties */}
-          <div className="bg-card-bg p-6 rounded-report shadow-custom border border-light grid grid-cols-2 gap-6 relative overflow-hidden">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="bg-card-bg p-6 rounded-report shadow-custom border border-light grid grid-cols-2 gap-6 relative overflow-hidden"
+          >
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-accent"></div>
 
             <div className="space-y-1">
@@ -87,10 +126,15 @@ const ReportDetailModal = ({ report, onClose }) => {
                 <span className="font-black text-lg">{report.student}</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 2: Incident Details */}
-          <div className="bg-card-bg p-8 rounded-report shadow-custom border border-light space-y-6">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-card-bg p-8 rounded-report shadow-custom border border-light space-y-6"
+          >
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-muted uppercase tracking-widest">
@@ -116,10 +160,15 @@ const ReportDetailModal = ({ report, onClose }) => {
                 "{report.description}"
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 3: Evidence Files */}
-          <div className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-card-bg p-8 rounded-report shadow-custom border border-light"
+          >
             <h4 className="text-xs font-black text-text uppercase tracking-widest mb-4 flex items-center gap-2">
               <i className="fas fa-paperclip text-muted"></i> Attached Evidence
             </h4>
@@ -127,15 +176,16 @@ const ReportDetailModal = ({ report, onClose }) => {
             {report.evidenceCount > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[...Array(report.evidenceCount)].map((_, i) => (
-                  <div
+                  <motion.div
                     key={i}
-                    className="group relative aspect-square rounded-2xl bg-light/20 border-2 border-dashed border-light flex flex-col items-center justify-center transition-all hover:bg-info/5 cursor-default"
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    className="group relative aspect-square rounded-2xl bg-light/20 border-2 border-dashed border-light flex flex-col items-center justify-center cursor-default"
                   >
                     <i className="fas fa-file-image text-2xl text-muted/40"></i>
                     <span className="text-[10px] font-bold text-muted mt-2">
                       Evidence_{i + 1}.jpg
                     </span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             ) : (
@@ -145,7 +195,7 @@ const ReportDetailModal = ({ report, onClose }) => {
                 </p>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* --- Footer Section --- */}
@@ -154,15 +204,17 @@ const ReportDetailModal = ({ report, onClose }) => {
             <i className="fas fa-lock mr-1 opacity-50"></i> Official System Log
             - Read Only
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={onClose}
-            className="px-10 py-3 bg-text text-white rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-black transition-all active:scale-95"
+            className="px-10 py-3 bg-text text-white rounded-full font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-black transition-all"
           >
             Close Viewer
-          </button>
+          </motion.button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

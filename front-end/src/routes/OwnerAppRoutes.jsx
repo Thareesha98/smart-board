@@ -1,11 +1,11 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Auth Components
-import OwnerProtectedRoute from '../components/Owner/common/OwnerProtectedRoute.jsx';
-import LoginPage from '../pages/owner/auth/OwnerLoginPage.jsx';
-import SignupPage from '../pages/owner/auth/OwnerSignupPage.jsx';
+import OwnerProtectedRoute from "../components/Owner/common/OwnerProtectedRoute.jsx"; // Ensure this uses <Outlet />
+import LoginPage from "../pages/owner/auth/OwnerLoginPage.jsx";
+import SignupPage from "../pages/owner/auth/OwnerSignupPage.jsx";
 
-//Owner Pages
+// Owner Pages
 import CreateAdPage from "../pages/owner/CreateAdPage";
 import EditAdPage from "../pages/owner/EditAdPage";
 import MyAdsPage from "../pages/owner/MyAdsPage";
@@ -19,7 +19,7 @@ import ReportsPage from "../pages/owner/ReportsPage";
 import ReportStudentPage from "../pages/owner/AddReportPage";
 import SubscriptionPlanPage from "../pages/owner/SubscriptionPlanPage";
 import PaymentPage from "../pages/owner/PaymentPage";
-import MaintenancePage from '../pages/owner/MaintenancePage.jsx';
+import MaintenancePage from "../pages/owner/MaintenancePage.jsx";
 
 const OwnerAppRoutes = () => {
   return (
@@ -28,33 +28,39 @@ const OwnerAppRoutes = () => {
       <Route path="login" element={<LoginPage />} />
       <Route path="signup" element={<SignupPage />} />
 
-     
-      {/* ==================== OWNER ROUTES ==================== */}
-      <Route
-        path="/"
-        element={
-          <OwnerProtectedRoute>
-            <OwnerLayout />
-          </OwnerProtectedRoute>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="myAds" element={<MyAdsPage />} />
-        <Route path="myAds/createAd" element={<CreateAdPage />} />
-        <Route path="myAds/editAd/:adId" element={<EditAdPage />} />
-        <Route path="appointments" element={<AppointmentsPage />} />
-        <Route path="myboardings" element={<MyBoardingsPage />} />
-        <Route path="utility" element={<UtilityPage />} />
-        <Route path="maintenance" element={<MaintenancePage />} />
-        <Route path="profile" element={<ProfilePage />} />
-        <Route path="payment" element={<PaymentPage />} />
-        <Route path="reports" element={<ReportsPage />} />
-        <Route path="reports/add" element={<ReportStudentPage />} />
-        <Route path="subscriptions/:adId" element={<SubscriptionPlanPage />} />
+      {/* ==================== PROTECTED OWNER ROUTES ==================== */}
+      {/* Layer 1: Security Guard */}
+      <Route element={<OwnerProtectedRoute />}>
+        {/* Layer 2: Main Layout (Sidebar + Header) */}
+        <Route path="/" element={<OwnerLayout />}>
+          {/* Layer 3: The Pages */}
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+
+          <Route path="myAds" element={<MyAdsPage />} />
+          <Route path="myAds/createAd" element={<CreateAdPage />} />
+          <Route path="myAds/editAd/:adId" element={<EditAdPage />} />
+
+          <Route path="appointments" element={<AppointmentsPage />} />
+          <Route path="myboardings" element={<MyBoardingsPage />} />
+          <Route path="utility" element={<UtilityPage />} />
+          <Route path="maintenance" element={<MaintenancePage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="payment" element={<PaymentPage />} />
+
+          {/* Reports Module */}
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="reports/add" element={<ReportStudentPage />} />
+
+          <Route
+            path="subscriptions/:adId"
+            element={<SubscriptionPlanPage />}
+          />
+        </Route>
       </Route>
 
       {/* ==================== FALLBACK ROUTE ==================== */}
+      {/* Redirect unknown routes to login (or dashboard if already logged in) */}
       <Route path="*" element={<Navigate to="/owner/login" replace />} />
     </Routes>
   );
