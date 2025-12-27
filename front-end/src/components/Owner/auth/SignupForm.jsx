@@ -1,28 +1,35 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  FaUser, FaEnvelope, FaLock, FaPhone, 
-  FaIdCard, FaCalendar, FaVenusMars, FaMapMarkerAlt, 
-  FaEye, FaEyeSlash 
-} from 'react-icons/fa';
-// Ensure these validation functions exist in your owner utils
-import { 
-  validateEmail, validatePassword, validatePhone, 
-  validateRequired 
-} from '../../../utils/student/validation.js'; // Reusing student validation for common fields
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaPhone,
+  FaIdCard,
+  FaVenusMars,
+  FaMapMarkerAlt,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
+import {
+  validateEmail,
+  validatePassword,
+  validatePhone,
+  validateRequired,
+} from "../../../utils/student/validation.js"; 
 
 const SignupForm = ({ onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    phone: '',
-    nic: '', // Changed from studentId
-    dob: '',
-    gender: '',
-    address: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    nicNumber: "",
+    // accNo removed from state/validation as it is optional now
+    gender: "",
+    address: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -31,25 +38,31 @@ const SignupForm = ({ onSubmit, isLoading }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const validateForm = () => {
     const newErrors = {};
+    if (!validateRequired(formData.firstName))
+      newErrors.firstName = "First name is required";
+    if (!validateRequired(formData.lastName))
+      newErrors.lastName = "Last name is required";
+    if (!validateEmail(formData.email))
+      newErrors.email = "Valid email is required";
+    if (!validatePassword(formData.password))
+      newErrors.password = "Password must be at least 6 characters";
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
+    if (!validatePhone(formData.phone))
+      newErrors.phone = "Valid phone number is required";
+    if (!validateRequired(formData.nicNumber))
+      newErrors.nicNumber = "NIC number is required";
+    if (!formData.gender) newErrors.gender = "Gender is required";
+    if (!validateRequired(formData.address))
+      newErrors.address = "Address is required";
 
-    if (!validateRequired(formData.firstName)) newErrors.firstName = 'First name is required';
-    if (!validateRequired(formData.lastName)) newErrors.lastName = 'Last name is required';
-    if (!validateEmail(formData.email)) newErrors.email = 'Valid email is required';
-    if (!validatePassword(formData.password)) newErrors.password = 'Password must be at least 6 characters';
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    if (!validatePhone(formData.phone)) newErrors.phone = 'Valid phone number is required';
-    if (!validateRequired(formData.nic)) newErrors.nic = 'NIC number is required';
-    if (!formData.dob) newErrors.dob = 'Date of birth is required';
-    if (!formData.gender) newErrors.gender = 'Gender is required';
-    if (!validateRequired(formData.address)) newErrors.address = 'Permanent address is required';
+    // accNo validation REMOVED
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -58,13 +71,26 @@ const SignupForm = ({ onSubmit, isLoading }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData);
+      // Construct Payload matching Backend UserRegisterDTO
+      const payload = {
+        fullName: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+        address: formData.address,
+        gender: formData.gender,
+        role: "OWNER",
+        nicNumber: formData.nicNumber,
+        accNo: null, // Optional: Send null to backend
+      };
+
+      onSubmit(payload);
     }
   };
 
   return (
     <div className="space-y-4">
-      {/* Name Fields */}
+      {/* Names */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           icon={FaUser}
@@ -98,7 +124,7 @@ const SignupForm = ({ onSubmit, isLoading }) => {
         required
       />
 
-      {/* Password Fields */}
+      {/* Password */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <PasswordField
           label="Password"
@@ -122,7 +148,7 @@ const SignupForm = ({ onSubmit, isLoading }) => {
         />
       </div>
 
-      {/* Phone & NIC */}
+      {/* Phone & Gender */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           icon={FaPhone}
@@ -135,31 +161,6 @@ const SignupForm = ({ onSubmit, isLoading }) => {
           placeholder="+94 77 123 4567"
           required
         />
-        <InputField
-          icon={FaIdCard}
-          label="NIC Number"
-          name="nic"
-          value={formData.nic}
-          onChange={handleChange}
-          error={errors.nic}
-          placeholder="National ID Number"
-          required
-        />
-      </div>
-
-      {/* DOB & Gender */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InputField
-          icon={FaCalendar}
-          label="Date of Birth"
-          type="date"
-          name="dob"
-          value={formData.dob}
-          onChange={handleChange}
-          error={errors.dob}
-          max={new Date().toISOString().split('T')[0]}
-          required
-        />
         <SelectField
           icon={FaVenusMars}
           label="Gender"
@@ -168,11 +169,24 @@ const SignupForm = ({ onSubmit, isLoading }) => {
           onChange={handleChange}
           error={errors.gender}
           options={[
-            { value: '', label: 'Select Gender' },
-            { value: 'female', label: 'Female' },
-            { value: 'male', label: 'Male' },
-            { value: 'other', label: 'Other' },
+            { value: "", label: "Select Gender" },
+            { value: "FEMALE", label: "Female" },
+            { value: "MALE", label: "Male" },
           ]}
+          required
+        />
+      </div>
+
+      {/* Owner Specific: NIC ONLY */}
+      <div>
+        <InputField
+          icon={FaIdCard}
+          label="NIC Number"
+          name="nicNumber"
+          value={formData.nicNumber}
+          onChange={handleChange}
+          error={errors.nicNumber}
+          placeholder="National ID"
           required
         />
       </div>
@@ -185,7 +199,6 @@ const SignupForm = ({ onSubmit, isLoading }) => {
         value={formData.address}
         onChange={handleChange}
         error={errors.address}
-        placeholder="Your permanent residential address"
         required
       />
 
@@ -197,27 +210,24 @@ const SignupForm = ({ onSubmit, isLoading }) => {
         disabled={isLoading}
         className={`w-full py-4 rounded-large font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${
           isLoading
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-accent text-white hover:bg-primary shadow-lg'
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-accent text-white hover:bg-primary shadow-lg"
         }`}
       >
         {isLoading ? (
           <>
             <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-            Creating Account...
+            Registering...
           </>
         ) : (
-          'Register as Partner'
+          "Register as Partner"
         )}
       </motion.button>
     </div>
   );
 };
 
-// Reused components (InputField, PasswordField, SelectField, TextAreaField)
-// COPY THE BOTTOM PART OF YOUR ORIGINAL SIGNUPFORM.JSX HERE
-// (The InputField, PasswordField, SelectField, and TextAreaField components are identical)
-
+// Reusable Inputs (Keep exactly as before)
 const InputField = ({ icon: Icon, label, error, required, ...props }) => (
   <div>
     <label className="block text-sm font-semibold text-text-dark mb-2">
@@ -228,7 +238,9 @@ const InputField = ({ icon: Icon, label, error, required, ...props }) => (
       <input
         {...props}
         className={`w-full pl-12 pr-4 py-3 border-2 rounded-large transition-colors duration-200 focus:outline-none ${
-          error ? 'border-error focus:border-error' : 'border-gray-200 focus:border-accent'
+          error
+            ? "border-error focus:border-error"
+            : "border-gray-200 focus:border-accent"
         }`}
       />
     </div>
@@ -236,7 +248,14 @@ const InputField = ({ icon: Icon, label, error, required, ...props }) => (
   </div>
 );
 
-const PasswordField = ({ label, error, required, showPassword, toggleShow, ...props }) => (
+const PasswordField = ({
+  label,
+  error,
+  required,
+  showPassword,
+  toggleShow,
+  ...props
+}) => (
   <div>
     <label className="block text-sm font-semibold text-text-dark mb-2">
       {label} {required && <span className="text-error">*</span>}
@@ -245,9 +264,11 @@ const PasswordField = ({ label, error, required, showPassword, toggleShow, ...pr
       <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
       <input
         {...props}
-        type={showPassword ? 'text' : 'password'}
+        type={showPassword ? "text" : "password"}
         className={`w-full pl-12 pr-12 py-3 border-2 rounded-large transition-colors duration-200 focus:outline-none ${
-          error ? 'border-error focus:border-error' : 'border-gray-200 focus:border-accent'
+          error
+            ? "border-error focus:border-error"
+            : "border-gray-200 focus:border-accent"
         }`}
       />
       <button
@@ -262,7 +283,14 @@ const PasswordField = ({ label, error, required, showPassword, toggleShow, ...pr
   </div>
 );
 
-const SelectField = ({ icon: Icon, label, error, required, options, ...props }) => (
+const SelectField = ({
+  icon: Icon,
+  label,
+  error,
+  required,
+  options,
+  ...props
+}) => (
   <div>
     <label className="block text-sm font-semibold text-text-dark mb-2">
       {label} {required && <span className="text-error">*</span>}
@@ -272,12 +300,14 @@ const SelectField = ({ icon: Icon, label, error, required, options, ...props }) 
       <select
         {...props}
         className={`w-full pl-12 pr-4 py-3 border-2 rounded-large transition-colors duration-200 focus:outline-none appearance-none ${
-          error ? 'border-error focus:border-error' : 'border-gray-200 focus:border-accent'
+          error
+            ? "border-error focus:border-error"
+            : "border-gray-200 focus:border-accent"
         }`}
       >
-        {options.map(option => (
-          <option key={option.value} value={option.value}>
-            {option.label}
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
           </option>
         ))}
       </select>
@@ -288,14 +318,18 @@ const SelectField = ({ icon: Icon, label, error, required, options, ...props }) 
 
 const TextAreaField = ({ icon: Icon, label, error, ...props }) => (
   <div>
-    <label className="block text-sm font-semibold text-text-dark mb-2">{label}</label>
+    <label className="block text-sm font-semibold text-text-dark mb-2">
+      {label}
+    </label>
     <div className="relative">
       <Icon className="absolute left-4 top-4 text-text-muted" />
       <textarea
         {...props}
         rows="3"
         className={`w-full pl-12 pr-4 py-3 border-2 rounded-large transition-colors duration-200 focus:outline-none resize-vertical ${
-          error ? 'border-error focus:border-error' : 'border-gray-200 focus:border-accent'
+          error
+            ? "border-error focus:border-error"
+            : "border-gray-200 focus:border-accent"
         }`}
       />
     </div>

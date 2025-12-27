@@ -1,4 +1,5 @@
 import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // --- Sub-Component: Select Field ---
 export const SelectGroup = ({
@@ -53,10 +54,16 @@ export const EvidenceUpload = ({ onFileChange, files, onRemoveFile }) => {
       </label>
 
       {/* 1. The Dropzone/Upload Area */}
-      <div
+      <motion.div
+        whileHover={{
+          scale: 1.01,
+          backgroundColor: "#fafafa",
+          borderColor: "#FF7A00",
+        }}
+        whileTap={{ scale: 0.99 }}
         className="
-          border-2 border-dashed p-8 rounded-report text-center cursor-pointer transition-all duration-300 
-          bg-card-bg border-light hover:border-accent hover:bg-white group
+          border-2 border-dashed p-8 rounded-report text-center cursor-pointer transition-colors duration-300 
+          bg-card-bg border-light group
         "
         onClick={() => document.getElementById("fileUpload").click()}
       >
@@ -75,18 +82,22 @@ export const EvidenceUpload = ({ onFileChange, files, onRemoveFile }) => {
           accept="image/*, application/pdf"
           onChange={onFileChange}
         />
-      </div>
+      </motion.div>
 
       {/* 2. File Preview Grid */}
-      {files.length > 0 && (
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <AnimatePresence>
           {files.map((file, index) => {
             const isImage = file.type.startsWith("image/");
             const previewUrl = isImage ? URL.createObjectURL(file) : null;
 
             return (
-              <div
-                key={index}
+              <motion.div
+                key={index} // Ideally use a unique ID for files, but index works for simple appends
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
                 className="relative group rounded-card border border-light bg-card-bg overflow-hidden shadow-custom h-32"
               >
                 {isImage ? (
@@ -105,8 +116,10 @@ export const EvidenceUpload = ({ onFileChange, files, onRemoveFile }) => {
                 )}
 
                 {/* Remove Button Overlay */}
-                <button
+                <motion.button
                   type="button"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={(e) => {
                     e.stopPropagation();
                     onRemoveFile(index);
@@ -118,12 +131,12 @@ export const EvidenceUpload = ({ onFileChange, files, onRemoveFile }) => {
                   "
                 >
                   <i className="fas fa-times"></i>
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             );
           })}
-        </div>
-      )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
