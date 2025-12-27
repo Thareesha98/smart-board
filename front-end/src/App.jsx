@@ -2,7 +2,6 @@ import React from "react";
 import {
   Navigate,
   Route,
-  BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
 import { StudentAuthProvider } from "./context/student/AuthContext.jsx";
@@ -17,7 +16,7 @@ function App() {
     <>
       <StudentAuthProvider>
         <OwnerAuthProvider>
-          <Router>
+          
             <ScrollToTop />
             <Routes>
               {/* Delegate to Student routes if path starts with /student or is root */}
@@ -28,7 +27,7 @@ function App() {
               {/* Default Landing Logic */}
               <Route path="/" element={<Navigate to="/login" replace />} />
             </Routes>
-          </Router>
+          
         </OwnerAuthProvider>
       </StudentAuthProvider>
     </>
