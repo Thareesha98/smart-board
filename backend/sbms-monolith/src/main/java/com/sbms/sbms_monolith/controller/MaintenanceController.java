@@ -29,4 +29,13 @@ public class MaintenanceController {
      ) throws IOException {
         return ResponseEntity.ok(maintenanceService.createMaintenance(studentId, dto, images));
     }
+
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<MaintenanceResponseDTO>> getStudentMaintenance(
+            @PathVariable Long studentId
+    ) {
+        return ResponseEntity.ok(maintenanceService.getStudentMaintenances(studentId));
+    }
+
+
 }
