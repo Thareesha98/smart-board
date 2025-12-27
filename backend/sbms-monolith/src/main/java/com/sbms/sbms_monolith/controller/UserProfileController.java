@@ -16,6 +16,6 @@ public class UserProfileController {
 
     @GetMapping("/public/{id}")
     public ResponseEntity<UserProfileViewDTO> getPublicProfile(@PathVariable Long id){
-        return ResponseEntity.ok(userProfileService.getPublicProfile(id))
+        return ResponseEntity.ok(userProfileService.getPublicProfile(id));
     }
 }
