@@ -11,7 +11,7 @@ public class UserProfileViewDTO {
 
     // Common Details
     private Long id;
-    private String firstName;
+    private String fullName;
     private String email;
     private String phone;
     private String avatar;
