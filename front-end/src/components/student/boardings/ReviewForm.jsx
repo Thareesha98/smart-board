@@ -8,6 +8,7 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [review, setReview] = useState('');
+  const [photos, setPhotos] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState({});
@@ -23,6 +24,7 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
       if (myReview) {
         setRating(myReview.rating);
         setReview(myReview.review);
+        setPhotos(myReview.photos || []);
         setIsEditing(true);
       }
     }
@@ -42,6 +44,28 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ Handle Photo Upload
+  const handlePhotoUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (photos.length + files.length > 3) {
+      alert("You can only upload up to 3 photos.");
+      return;
+    }
+
+    const newPhotos = [];
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotos(prev => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removePhoto = (index) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -55,6 +79,7 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
         boardingId,
         rating,
         review: review.trim(),
+        photos,
         timestamp: new Date().toISOString(),
         userId: currentUser?.studentId || 'guest'
       };
@@ -106,6 +131,7 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
         if (!isEditing) {
             setRating(0);
             setReview('');
+            setPhotos([]);
         }
         setIsSuccess(false);
         if (onSubmitSuccess) onSubmitSuccess();
@@ -194,6 +220,53 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
               <p className="text-xs sm:text-sm text-text-muted ml-auto">
                 {review.length} characters
               </p>
+            </div>
+          </div>
+
+          {/* ✅ Photo Upload Section */}
+          <div>
+            <label className="block text-sm font-semibold text-text-dark mb-2 sm:mb-3">
+              Add Photos (Optional)
+            </label>
+            <div className="flex flex-wrap gap-3">
+              <AnimatePresence>
+                {photos.map((photo, index) => (
+                  <motion.div 
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border border-gray-200 group"
+                  >
+                    <img src={photo} alt={`Review ${index}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <FaTimes size={10} />
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {photos.length < 3 && (
+                <div 
+                  onClick={() => fileInputRef.current.click()}
+                  className="w-20 h-20 sm:w-24 sm:h-24 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-accent hover:bg-accent/5 transition-colors text-text-muted hover:text-accent"
+                >
+                  <FaCamera className="text-xl mb-1" />
+                  <span className="text-[10px] font-medium text-center px-1">Max 3</span>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handlePhotoUpload} 
+                    accept="image/*" 
+                    className="hidden" 
+                    multiple
+                  />
+                </div>
+              )}
             </div>
           </div>
 
