@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // 1. Import Hook
 
 const AppointmentRow = ({
   appointment,
@@ -7,8 +8,21 @@ const AppointmentRow = ({
   formatDate,
   formatTime,
 }) => {
+  const navigate = useNavigate(); // 2. Initialize Hook
+
   const isPending = appointment.status === "pending";
   const isConfirmed = appointment.status === "confirmed";
+
+  // 3. Navigation Handler
+  const handleStudentClick = (e) => {
+    e.stopPropagation(); // Prevent affecting other click events
+    // Ensure your appointment object has studentId
+    if (appointment.studentId) {
+      navigate(`/profile/view/${appointment.studentId}`);
+    } else {
+      console.warn("Student ID is missing in appointment data");
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-5 md:p-6 rounded-report shadow-custom bg-card-bg border border-light transition-all duration-300 hover:shadow-md relative overflow-hidden">
@@ -16,9 +30,17 @@ const AppointmentRow = ({
       {/* 1. Student & Property Details */}
       <div className="flex flex-col flex-1 gap-1">
         <div className="flex justify-between items-start md:block">
-          <h4 className="font-black text-base md:text-lg text-text tracking-tight uppercase">
+          
+          {/* --- CLICKABLE STUDENT NAME --- */}
+          <h4 
+            onClick={handleStudentClick}
+            className="font-black text-base md:text-lg text-text tracking-tight uppercase cursor-pointer hover:text-accent hover:underline decoration-2 underline-offset-2 transition-all"
+            title="View Student Profile"
+          >
             {appointment.student}
           </h4>
+          {/* ----------------------------- */}
+
           {/* Mobile Only: Status Badge at top right */}
           <span className={`md:hidden px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-full ${config.bgClass} ${config.textClass}`}>
              {appointment.status}
