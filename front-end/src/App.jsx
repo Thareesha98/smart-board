@@ -11,6 +11,8 @@ import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
 import OwnerAppRoutes from "./routes/OwnerAppRoutes";
 import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
 
+import PublicProfileView from './pages/common/PublicProfileView';
+
 function App() {
   return (
     <>
@@ -24,6 +26,9 @@ function App() {
 
               {/* Delegate to Owner routes if path starts with /ownerLayout */}
               <Route path="/owner/*" element={<OwnerAppRoutes />} />
+              
+              <Route path="/profile/view/:id" element={<PublicProfileView />} />
+              
               {/* Default Landing Logic */}
               <Route path="/" element={<Navigate to="/login" replace />} />
             </Routes>
