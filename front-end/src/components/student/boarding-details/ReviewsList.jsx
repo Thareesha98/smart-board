@@ -11,6 +11,9 @@ const ReviewsList = ({ boardingId }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState(null);
 
+  // ✅ Image Modal State
+  const [selectedImage, setSelectedImage] = useState(null);
+
   useEffect(() => {
     // Update current user's data in reviewUsers whenever they change their profile
     if (currentUser?.studentId) {
@@ -163,6 +166,22 @@ const ReviewsList = ({ boardingId }) => {
             <p className="text-text-dark text-sm sm:text-base leading-relaxed">
               {review.review}
             </p>
+
+            {/* ✅ Review Photos */}
+            {review.photos && review.photos.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {review.photos.map((photo, i) => (
+                  <img 
+                    key={i}
+                    src={photo} 
+                    alt="Review attachment" 
+                    onClick={() => setSelectedImage(photo)}
+                    className="w-20 h-20 rounded-lg object-cover border border-gray-200 cursor-zoom-in hover:opacity-90 transition-opacity"
+                  />
+                ))}
+              </div>
+            )}
+
           </motion.div>
         ))}
       </div>
@@ -199,6 +218,32 @@ const ReviewsList = ({ boardingId }) => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* ✅ Image Expand Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <div 
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative max-w-3xl w-full max-h-[90vh]"
+            >
+              <img src={selectedImage} alt="Full size" className="w-full h-full object-contain rounded-lg shadow-2xl" />
+              <button 
+                className="absolute -top-10 right-0 text-white hover:text-gray-300"
+                onClick={() => setSelectedImage(null)}
+              >
+                <FaTimes size={30} />
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      
     </div>
   );
 };
