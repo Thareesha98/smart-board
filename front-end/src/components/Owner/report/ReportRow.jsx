@@ -1,21 +1,43 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // 1. Import Hook
 
 const ReportRow = ({ report, config, onViewDetails }) => {
+  const navigate = useNavigate(); // 2. Initialize Hook
+
   const statusIcons = {
     New: "fa-flag",
     "In Progress": "fa-sync-alt",
     Resolved: "fa-check-circle",
   };
 
+  // 3. Navigation Handler
+  const handleStudentClick = (e) => {
+    e.stopPropagation(); // Prevent affecting other click events
+    // Ensure your report object has studentId
+    if (report.studentId) {
+      navigate(`/profile/view/${report.studentId}`);
+    } else {
+      console.warn("Student ID is missing in report data");
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 p-5 md:p-6 rounded-report shadow-custom bg-card-bg border border-light transition-all duration-300 hover:shadow-md group relative">
       
-      {/* 1. Header Area: Student, ID, and Status (ID & Status visible at top on mobile) */}
+      {/* 1. Header Area: Student, ID, and Status */}
       <div className="flex justify-between items-start md:items-center md:flex-1">
         <div className="flex flex-col gap-1">
-          <h4 className="font-black text-base md:text-lg text-text tracking-tight uppercase">
+          
+          {/* --- CLICKABLE STUDENT NAME --- */}
+          <h4 
+            onClick={handleStudentClick}
+            className="font-black text-base md:text-lg text-text tracking-tight uppercase cursor-pointer hover:text-accent hover:underline decoration-2 underline-offset-2 transition-all"
+            title="View Student Profile"
+          >
             {report.student}
           </h4>
+          {/* ----------------------------- */}
+
           <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-muted">
             <i className="fas fa-building text-accent"></i>
             <span className="truncate max-w-[150px] md:max-w-none">{report.property}</span>
@@ -29,7 +51,7 @@ const ReportRow = ({ report, config, onViewDetails }) => {
         </div>
       </div>
 
-      {/* 2. Incident Summary (Full width on mobile, middle column on desktop) */}
+      {/* 2. Incident Summary */}
       <div className="flex flex-col md:flex-[1.5] gap-1 md:border-l md:pl-6 border-light py-3 md:py-0 border-y md:border-y-0 border-light/50">
         <div className="font-bold text-sm md:text-base text-text">
           {report.type}
@@ -52,9 +74,9 @@ const ReportRow = ({ report, config, onViewDetails }) => {
         </div>
       </div>
 
-      {/* 4. Actions & Status Badge (Stacks button and status on mobile) */}
+      {/* 4. Actions & Status Badge */}
       <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 mt-2 md:mt-0">
-        {/* Mobile-only View Details Icon / Desktop Full Button */}
+        {/* View Details Button */}
         <button
           className="flex-1 md:flex-none flex items-center justify-center px-5 py-3 md:py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest bg-primary text-card-bg shadow-md active:scale-95 transition-all"
           onClick={() => onViewDetails(report)}
