@@ -38,6 +38,7 @@ public class ReportMapper {
         dto.setProperty(r.getBoardingName());
         dto.setAdminResponse(r.getResolutionDetails());
         dto.setActionTaken(r.getActionTaken());
+        dto.setActionDuration(r.getActionDuration());
 
         // Map "Student" name field (For Owner View)
         if (r.getReportedUser() != null) {

@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/student/AuthContext";
+import { StudentAuthProvider  } from "./context/student/StudentAuthContext";
 import ScrollToTop from "./ScrollToTop";
 
 import OwnerLayout from "./layouts/OwnerLayout";
@@ -9,7 +9,7 @@ import StudentRoutes from "./routes/StudentRoutes";
 
 function App() {
   return (
-    <AuthProvider>
+    <StudentAuthProvider>
       <ScrollToTop />
 
       <Routes>
@@ -37,7 +37,7 @@ function App() {
         {/* Global fallback */}
         <Route path="*" element={<h1>404 Page Not Found</h1>} />
       </Routes>
-    </AuthProvider>
+    </StudentAuthProvider>
   );
 }
 

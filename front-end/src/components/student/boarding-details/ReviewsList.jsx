@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaStar, FaUser, FaTrash } from 'react-icons/fa';
-import { useAuth } from '../../../context/student/AuthContext.jsx';
+import { useAuth } from '../../../context/student/StudentAuthContext.jsx';
 
 const ReviewsList = ({ boardingId }) => {
   const [reviews, setReviews] = useState([]);
