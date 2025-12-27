@@ -77,7 +77,16 @@ const SidebarItem = ({ path, Icon, label, currentPath }) => {
 
 const Sidebar = () => {
   const location = useLocation();
-  const { currentUser, logout } = useOwnerAuth(); // Assuming you have currentUser in your context
+  const { currentOwner, logout } = useOwnerAuth(); 
+
+  const getLastName = () => {
+    if (!currentOwner?.fullName) return null;
+    const parts = currentOwner.fullName.split(" ");
+    return parts[parts.length - 1]; // Gets the last word (e.g., "Jayaweera")
+  };
+
+  const displayLastName = getLastName();
+
   const currentPath = location.pathname.replace(/^\/|\/$/g, "").toLowerCase();
 
   const mobileNavRef = useRef(null);
@@ -108,7 +117,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col flex-shrink-0 bg-primary w-70 text-white p-6 rounded-large m-6 shadow-custom sticky top-6 h-[calc(100vh-3rem)] overflow-y-auto z-20">
+      <aside className="hidden lg:flex flex-col flex-shrink-0 bg-primary w-70 text-white p-6 rounded-large m-6 shadow-custom sticky top-6 h-[calc(100vh-3rem)]  z-20">
         <div className="pb-6 mb-4 border-b border-white/10">
           <Link
             to="/owner/dashboard"
@@ -162,9 +171,9 @@ const Sidebar = () => {
                   : "border-accent text-white"
               }`}
             >
-              {currentUser?.avatar ? (
+              {currentOwner?.avatar ? (
                 <img
-                  src={currentUser.avatar}
+                  src={currentOwner.avatar}
                   alt="Profile"
                   className="w-full h-full rounded-full object-cover"
                 />
@@ -173,9 +182,9 @@ const Sidebar = () => {
               )}
             </div>
             <span className="font-medium truncate">
-              {/* Check if currentUser exists AND has a lastName */}
-              {currentUser && currentUser.lastName
-                ? `Mr. ${currentUser.lastName}`
+              {/* Check if currentOwner exists AND has a lastName */}
+              {displayLastName
+                ? `Mr. ${displayLastName}`
                 : "Owner"}
             </span>
           </Link>
