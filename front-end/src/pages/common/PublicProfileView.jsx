@@ -7,10 +7,10 @@ import {
 } from 'react-icons/fa';
 
 // Import Custom Components
-import ProfileSidebar from '../components/public-profile/ProfileSidebar';
-import StatCard from '../components/public-profile/StatCard';
-import PublicBoardingCard from '../components/public-profile/PublicBoardingCard';
-import IncidentHistory from '../components/public-profile/IncidentHistory';
+import ProfileSidebar from '../../components/public-profile/ProfileSidebar';
+import StatCard from '../../components/public-profile/StatCard';
+import PublicBoardingCard from '../../components/public-profile/PublicBoardingCard';
+import IncidentHistory from '../../components/public-profile/IncidentHistory';
 
 const PublicProfileView = () => {
   const { id } = useParams();
