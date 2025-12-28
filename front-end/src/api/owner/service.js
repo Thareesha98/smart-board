@@ -51,6 +51,10 @@ export const createReport = async (reportData, files) => {
   }
 };
 
+// =================================================================
+// 🛠️ PROPERTIES SERVICES
+// =================================================================
+
 // 1. Get all boardings owned by this user
 export const getOwnerBoardings = async (ownerId) => {
   try {
@@ -72,5 +76,36 @@ export const getBoardingTenants = async (boardingId) => {
   } catch (error) {
     console.error("Error fetching tenants:", error);
     return []; // Return empty array on error to prevent crash
+  }
+};
+
+// =================================================================
+// 🛠️ MAINTENANCE SERVICES
+// =================================================================
+
+// 1. Get all maintenance requests for an Owner
+export const getOwnerMaintenanceRequests = async (ownerId) => {
+  try {
+    // Matches Controller: GET /api/maintenance/owner/{ownerId}
+    const response = await api.get(`/maintenance/owner/${ownerId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching maintenance requests:", error);
+    throw error;
+  }
+};
+
+// 2. Update the status of a request
+export const updateMaintenanceStatus = async (requestId, newStatus) => {
+  try {
+    // Matches Controller: PATCH /api/maintenance/{requestId}/status
+    // Body: { "status": "COMPLETED" }
+    const response = await api.patch(`/maintenance/${requestId}/status`, { 
+      status: newStatus 
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating status:", error);
+    throw error;
   }
 };
