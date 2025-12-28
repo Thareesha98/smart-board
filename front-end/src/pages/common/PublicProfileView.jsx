@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios'; 
+import { userService } from '../../api/common/userService'
 import { motion } from 'framer-motion';
 import { 
   FaExclamationTriangle, FaCheckCircle, FaBuilding, FaArrowLeft 
@@ -22,8 +22,8 @@ const PublicProfileView = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`http://localhost:8086/api/users/public/${id}`);
-        setProfile(response.data);
+        const data = await userService.getPublicProfile(id);
+        setProfile(data);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching profile:", err);
