@@ -18,4 +18,5 @@ public class UserProfileController {
     public ResponseEntity<UserProfileViewDTO> getPublicProfile(@PathVariable Long id){
         return ResponseEntity.ok(userProfileService.getPublicProfile(id));
     }
+    // .
 }
