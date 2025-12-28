@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useOwnerAuth } from '../../../context/owner/OwnerAuthContext.jsx';
 
 const OwnerProtectedRoute = ({ children }) => {
@@ -18,7 +18,7 @@ const OwnerProtectedRoute = ({ children }) => {
     return <Navigate to="/owner/login" replace />;
   }
 
-  return children;
+  return <Outlet />;
 };
 
 export default OwnerProtectedRoute;

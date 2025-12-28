@@ -1,23 +1,21 @@
-import React from "react";
 import {
-  Navigate,
   Route,
-  BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
-import { StudentAuthProvider } from "./context/student/AuthContext.jsx";
+import { StudentAuthProvider } from "./context/student/StudentAuthContext.jsx";
 import ScrollToTop from "./ScrollToTop";
 // Import your two Route files
 import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
 import OwnerAppRoutes from "./routes/OwnerAppRoutes";
 import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
+import Home from "./Home.jsx";
 
 function App() {
   return (
     <>
       <StudentAuthProvider>
         <OwnerAuthProvider>
-          <Router>
+          
             <ScrollToTop />
             <Routes>
               {/* Delegate to Student routes if path starts with /student or is root */}
@@ -26,9 +24,9 @@ function App() {
               {/* Delegate to Owner routes if path starts with /ownerLayout */}
               <Route path="/owner/*" element={<OwnerAppRoutes />} />
               {/* Default Landing Logic */}
-              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/" element={<Home />} />
             </Routes>
-          </Router>
+          
         </OwnerAuthProvider>
       </StudentAuthProvider>
     </>
