@@ -9,17 +9,11 @@ import {
 const InfoCards = ({ boarding, onContactOwner }) => {
   const navigate = useNavigate();
 
-  // 1. Navigation Handler for Owner
-  const handleProfileClick = () => {
-    if (boarding.owner?.id) {
-        navigate(`/profile/view/${boarding.owner.id}`);
-    }
-  };
-
-  // 2. Navigation Handler for Members (Tenants)
-  const handleMemberClick = (memberId) => {
-    if (memberId) {
-        navigate(`/profile/view/${memberId}`);
+  const handleViewProfile = (userId) => {
+    if (userId) {
+        navigate(`/profile/view/${userId}`);
+    } else {
+        console.warn("Cannot navigate: User ID is missing.");
     }
   };
 
@@ -62,7 +56,7 @@ const InfoCards = ({ boarding, onContactOwner }) => {
               
               {/* --- CLICKABLE AVATAR --- */}
               <img
-                onClick={handleProfileClick}
+                onClick={() => handleViewProfile(boarding.owner?.id)}
                 src={boarding.owner?.avatar || "https://via.placeholder.com/50"}
                 alt={boarding.owner?.name}
                 className="w-14 h-14 rounded-full object-cover border-2 border-accent p-0.5 flex-shrink-0 cursor-pointer hover:border-primary transition-colors duration-300"
@@ -71,7 +65,7 @@ const InfoCards = ({ boarding, onContactOwner }) => {
               <div className="flex-1 min-w-0">
                 {/* --- CLICKABLE NAME --- */}
                 <div 
-                    onClick={handleProfileClick}
+                    onClick={() => handleViewProfile(boarding.owner?.id)}
                     className="font-bold text-text-dark truncate cursor-pointer hover:text-accent hover:underline decoration-2 underline-offset-2 transition-all"
                     title={boarding.owner?.name}
                 >
@@ -135,7 +129,7 @@ const InfoCards = ({ boarding, onContactOwner }) => {
                     {membersList.map((member) => (
                         <div 
                             key={member.id} 
-                            onClick={() => handleMemberClick(member.id)}
+                            onClick={() => handleViewProfile(member.id)}
                             className="flex items-center gap-3 p-2 rounded-lg hover:bg-background-light cursor-pointer transition-colors group"
                         >
                             <img 
