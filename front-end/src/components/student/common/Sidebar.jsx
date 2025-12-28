@@ -11,7 +11,7 @@ import {
   FaFlag,
   FaSignOutAlt,
 } from "react-icons/fa";
-import { useAuth } from '../../../context/student/AuthContext.jsx';
+import { useAuth } from '../../../context/student/StudentAuthContext.jsx';
 
 const navItems = [
   { path: "/student", icon: FaHome, label: "Dashboard", key: "Dashboard" },

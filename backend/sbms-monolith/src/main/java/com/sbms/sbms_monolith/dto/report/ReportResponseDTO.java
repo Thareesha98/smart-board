@@ -27,6 +27,7 @@ public class ReportResponseDTO {
     // Admin Actions
     private String adminResponse;
     private String actionTaken;
+    private String actionDuration;
 
     // Evidence & Meta
     private int evidenceCount;
