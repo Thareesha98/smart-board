@@ -1,23 +1,29 @@
 package com.sbms.sbms_monolith.dto.maintenance;
 
-import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
+
+import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
+
+import lombok.Data;
 
 @Data
 public class MaintenanceResponseDTO {
+
     private Long id;
-    private String issueType;
+
+    private Long boardingId;
+    private String boardingTitle;
+
+    private Long studentId;
+    private String studentName;
+
+    private String title;
     private String description;
-    private String urgency;
-    private String status;
-    private LocalDateTime date;
+    private List<String> imageUrls;
 
-    // Context info
-    private String boardingName;
-    private String roomNumber;
+    private MaintenanceStatus status;
 
-    // Files
-    private List<String> image;
+    private String studentNote;
+    private String ownerNote;
 }
