@@ -18,15 +18,17 @@ const formatTime = (timeString) => new Date(`2000-01-01T${timeString}`).toLocale
 const getStatusClasses = (status) => {
   switch (status) {
     case 'upcoming': 
-      return { badge: 'bg-success/10 text-success border border-success/20' };
+      return { badge: 'bg-orange-50 text-orange-600 border border-orange-200' };
     case 'visited': 
-      return { badge: 'bg-info/10 text-info border border-info/20' };
+      return { badge: 'bg-blue-50 text-blue-600 border border-blue-200' };
     case 'selected': 
-      return { badge: 'bg-success/20 text-success border border-success' };
+      return { badge: 'bg-green-50 text-green-600 border border-green-200' };
     case 'cancelled': 
-      return { badge: 'bg-error/10 text-error border border-error/20' };
+      return { badge: 'bg-red-50 text-red-500 border border-red-200' };
+    case 'rejected': 
+      return { badge: 'bg-red-100 text-red-900 border border-red-800' }; // ✅ Dark Red
     default: 
-      return { badge: 'bg-gray-200 text-text-muted border border-gray-300' };
+      return { badge: 'bg-gray-100 text-gray-500 border border-gray-200' };
   }
 };
 
