@@ -1,21 +1,35 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'; // 1. Import Hook
+import { useNavigate } from 'react-router-dom';
 import { 
   FaHome, FaUserTie, FaShieldAlt, FaCheckCircle,
-  FaEnvelope, FaPhone, FaStar
+  FaEnvelope, FaPhone, FaStar, FaUserFriends, FaChevronRight
 } from 'react-icons/fa';
 
 const InfoCards = ({ boarding, onContactOwner }) => {
-  const navigate = useNavigate(); // 2. Initialize Hook
+  const navigate = useNavigate();
 
-  // 3. Navigation Handler
+  // 1. Navigation Handler for Owner
   const handleProfileClick = () => {
-    // Ensure we have an ID before navigating
     if (boarding.owner?.id) {
         navigate(`/profile/view/${boarding.owner.id}`);
     }
   };
+
+  // 2. Navigation Handler for Members (Tenants)
+  const handleMemberClick = (memberId) => {
+    if (memberId) {
+        navigate(`/profile/view/${memberId}`);
+    }
+  };
+
+  // --- MOCK MEMBERS DATA (Remove this if your backend provides boarding.members) ---
+  const membersList = boarding.members || [
+    { id: 101, name: "Kasun Perera", joinedDate: "Jan 2024", avatar: "https://ui-avatars.com/api/?name=Kasun+Perera&background=random" },
+    { id: 102, name: "Amal Silva", joinedDate: "Feb 2024", avatar: "https://ui-avatars.com/api/?name=Amal+Silva&background=random" },
+    { id: 103, name: "Nimali Fernando", joinedDate: "Mar 2024", avatar: "https://ui-avatars.com/api/?name=Nimali+Fernando&background=random" },
+  ];
+  // --------------------------------------------------------------------------------
 
   return (
     <motion.div
@@ -30,10 +44,10 @@ const InfoCards = ({ boarding, onContactOwner }) => {
         title="Details"
         content={
           <div className="space-y-3">
-            <DetailItem label="Room Type" value={boarding.details.roomType} />
-            <DetailItem label="Bathroom" value={boarding.details.bathroom} />
-            <DetailItem label="Kitchen" value={boarding.details.kitchen} />
-            <DetailItem label="Lease" value={boarding.details.leasePeriod} />
+            <DetailItem label="Room Type" value={boarding.details?.roomType || 'N/A'} />
+            <DetailItem label="Bathroom" value={boarding.details?.bathroom || 'N/A'} />
+            <DetailItem label="Kitchen" value={boarding.details?.kitchen || 'N/A'} />
+            <DetailItem label="Lease" value={boarding.details?.leasePeriod || 'N/A'} />
           </div>
         }
       />
@@ -49,8 +63,8 @@ const InfoCards = ({ boarding, onContactOwner }) => {
               {/* --- CLICKABLE AVATAR --- */}
               <img
                 onClick={handleProfileClick}
-                src={boarding.owner.avatar}
-                alt={boarding.owner.name}
+                src={boarding.owner?.avatar || "https://via.placeholder.com/50"}
+                alt={boarding.owner?.name}
                 className="w-14 h-14 rounded-full object-cover border-2 border-accent p-0.5 flex-shrink-0 cursor-pointer hover:border-primary transition-colors duration-300"
               />
               
@@ -59,15 +73,15 @@ const InfoCards = ({ boarding, onContactOwner }) => {
                 <div 
                     onClick={handleProfileClick}
                     className="font-bold text-text-dark truncate cursor-pointer hover:text-accent hover:underline decoration-2 underline-offset-2 transition-all"
-                    title={boarding.owner.name}
+                    title={boarding.owner?.name}
                 >
-                  {boarding.owner.name}
+                  {boarding.owner?.name}
                 </div>
                 
                 <div className="text-sm text-text-muted truncate">Verified Owner</div>
                 <div className="flex items-center gap-1 text-xs text-yellow-500 font-medium mt-0.5">
-                   <FaStar /> {boarding.owner.rating}
-                   <span className="text-text-muted">({boarding.owner.reviews})</span>
+                   <FaStar /> {boarding.owner?.rating || 'N/A'}
+                   <span className="text-text-muted">({boarding.owner?.reviews || 0})</span>
                 </div>
               </div>
             </div>
@@ -109,6 +123,56 @@ const InfoCards = ({ boarding, onContactOwner }) => {
           </div>
         }
       />
+
+      {/* ✅ 4. NEW: Current Members (Tenants) Card */}
+      <InfoCard
+        icon={FaUserFriends}
+        title="Current Tenants"
+        content={
+          <div className="flex flex-col h-full">
+            {membersList.length > 0 ? (
+                <div className="space-y-4 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+                    {membersList.map((member) => (
+                        <div 
+                            key={member.id} 
+                            onClick={() => handleMemberClick(member.id)}
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-background-light cursor-pointer transition-colors group"
+                        >
+                            <img 
+                                src={member.avatar} 
+                                alt={member.name} 
+                                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                            />
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-text-dark truncate group-hover:text-accent transition-colors">
+                                    {member.name}
+                                </p>
+                                <p className="text-xs text-text-muted">
+                                    Joined: {member.joinedDate}
+                                </p>
+                            </div>
+                            <FaChevronRight className="text-gray-300 text-xs group-hover:text-accent transition-colors" />
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-4 text-text-muted text-sm">
+                    No other tenants yet.
+                </div>
+            )}
+            
+            {/* Optional: View All button if list is long */}
+            {membersList.length > 3 && (
+                <div className="mt-3 pt-2 border-t border-gray-100 text-center">
+                    <button className="text-xs font-bold text-accent hover:text-primary transition-colors">
+                        View All Members
+                    </button>
+                </div>
+            )}
+          </div>
+        }
+      />
+
     </motion.div>
   );
 };
