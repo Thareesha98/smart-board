@@ -19,22 +19,44 @@ import java.util.Map;
 @CrossOrigin("*")
 public class MaintenanceController {
 
-    private final MaintenanceService maintenanceService;
+    @Autowired
+    private MaintenanceService maintenanceService;
 
-    // Student Submit
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MaintenanceResponseDTO> createMaintenance(
-            @ModelAttribute MaintenanceRequestDTO dto,
-            @RequestParam("studentId") Long studentId,
-            @RequestPart(value = "images", required = false)List<MultipartFile> images
-     ) throws IOException {
-        return ResponseEntity.ok(maintenanceService.createMaintenance(studentId, dto, images));
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    // -----------------------------------------
+    // STUDENT: CREATE MAINTENANCE (WITH IMAGES)
+    // -----------------------------------------
+    @PostMapping(consumes = "application/json")
+    @PreAuthorize("hasRole('STUDENT')")
+    public MaintenanceResponseDTO create(
+            @RequestBody MaintenanceCreateDTO dto,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+
+        User student = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return maintenanceService.create(student.getId(), dto);
     }
 
-    // Student History
-    @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<MaintenanceResponseDTO>> getStudentMaintenance(@PathVariable Long studentId) {
-        return ResponseEntity.ok(maintenanceService.getStudentMaintenances(studentId));
+
+    // -----------------------------------------
+    // STUDENT: VIEW OWN REQUESTS
+    // -----------------------------------------
+    @GetMapping("/student")
+    @PreAuthorize("hasRole('STUDENT')")
+    public List<MaintenanceResponseDTO> studentRequests(Authentication authentication) {
+
+        User student = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return maintenanceService.getForStudent(student.getId());
     }
 
     // Owner Tasks
