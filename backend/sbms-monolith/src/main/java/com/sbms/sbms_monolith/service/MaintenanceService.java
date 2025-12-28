@@ -33,15 +33,7 @@ public class MaintenanceService {
     @Autowired
     private S3Service s3Service;
 
-    public MaintenanceResponseDTO create(
-            Long studentId,
-            MaintenanceCreateDTO dto,
-            List<MultipartFile> images
-    ) {
-
-        if (studentId == null) {
-            throw new RuntimeException("Unauthorized request");
-        }
+    public MaintenanceResponseDTO create(Long studentId, MaintenanceCreateDTO dto) {
 
         User student = userRepo.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -49,26 +41,16 @@ public class MaintenanceService {
         Boarding boarding = boardingRepo.findById(dto.getBoardingId())
                 .orElseThrow(() -> new RuntimeException("Boarding not found"));
 
-        List<String> uploadedUrls = null;
-
-        if (images != null && !images.isEmpty()) {
-            uploadedUrls = s3Service.uploadFiles(
-                    images,
-                    "maintenance/" + boarding.getId() + "/"
-            );
-        }
-
         Maintenance m = new Maintenance();
         m.setStudent(student);
         m.setBoarding(boarding);
         m.setTitle(dto.getTitle());
         m.setDescription(dto.getDescription());
         m.setStudentNote(dto.getStudentNote());
-        m.setImageUrls(uploadedUrls);
+        m.setImageUrls(dto.getImageUrls()); // ✅ S3 URLs
         m.setStatus(MaintenanceStatus.PENDING);
 
         maintenanceRepo.save(m);
-
         return MaintenanceMapper.toDTO(m);
     }
 
