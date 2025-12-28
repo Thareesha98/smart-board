@@ -18,7 +18,6 @@ import com.sbms.sbms_monolith.service.MaintenanceService;
 
 @RestController
 @RequestMapping("/api/maintenance")
-@CrossOrigin
 public class MaintenanceController {
 
     @Autowired

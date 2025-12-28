@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/boardings")
-@CrossOrigin
 public class BoardingController {
 	
 	@Autowired

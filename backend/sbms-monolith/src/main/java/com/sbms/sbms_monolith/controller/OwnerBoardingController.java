@@ -80,7 +80,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/boardings/owner")
-@CrossOrigin
 public class OwnerBoardingController {
 
     @Autowired

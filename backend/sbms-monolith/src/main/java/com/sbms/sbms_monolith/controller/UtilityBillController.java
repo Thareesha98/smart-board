@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/utilities")
-@CrossOrigin
 public class UtilityBillController {
 
     @Autowired
