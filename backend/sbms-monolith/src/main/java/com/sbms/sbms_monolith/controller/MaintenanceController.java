@@ -33,24 +33,20 @@ public class MaintenanceController {
     // -----------------------------------------
     // STUDENT: CREATE MAINTENANCE (WITH IMAGES)
     // -----------------------------------------
-    @PostMapping(consumes = "multipart/form-data")
+    @PostMapping(consumes = "application/json")
     @PreAuthorize("hasRole('STUDENT')")
     public MaintenanceResponseDTO create(
-            @RequestPart("data") String json,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestBody MaintenanceCreateDTO dto,
             Authentication authentication
-    ) throws Exception {
-
+    ) {
         String email = authentication.getName();
 
         User student = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        MaintenanceCreateDTO dto =
-                objectMapper.readValue(json, MaintenanceCreateDTO.class);
-
-        return maintenanceService.create(student.getId(), dto, images);
+        return maintenanceService.create(student.getId(), dto);
     }
+
 
     // -----------------------------------------
     // STUDENT: VIEW OWN REQUESTS
