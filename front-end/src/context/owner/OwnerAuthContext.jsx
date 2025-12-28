@@ -8,6 +8,8 @@ export const OwnerAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  
+
   // 1. Check for logged-in user on load
   useEffect(() => {
     const initializeAuth = async () => {
@@ -34,6 +36,13 @@ export const OwnerAuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       const { token, refreshToken, user } = response.data;
+
+      if (user.role !== "OWNER") {
+        return { 
+          success: false, 
+          message: "Access Denied: This portal is for Owners only." 
+        };
+      }
 
       localStorage.setItem('token', token);
       localStorage.setItem('refresh_token', refreshToken);

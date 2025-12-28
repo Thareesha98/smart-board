@@ -30,8 +30,8 @@ const AppointmentsPage = () => {
       />
 
       {/* Filter Tabs */}
-      <section className="p-6 rounded-report shadow-custom bg-card-bg border border-light mx-2">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <section className="p-2 md:p-6 rounded-report shadow-custom bg-card-bg border border-light mx-2">
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-4">
           {Object.keys(counts).map((status) => (
             <StatusTab
               key={status}

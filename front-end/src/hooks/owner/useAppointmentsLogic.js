@@ -19,7 +19,7 @@ const useAppointmentsLogic = () => {
         acc[app.status] = (acc[app.status] || 0) + 1;
         return acc;
       },
-      { pending: 0, confirmed: 0, visited: 0, cancelled: 0 }
+      { pending: 0, confirmed: 0, visited: 0, cancelled: 0, rejected: 0 }
     );
   }, [appointments]);
 
@@ -60,6 +60,12 @@ const useAppointmentsLogic = () => {
         textClass: "text-error",
         bgClass: "bg-error/10",
       },
+      rejected: {
+        colorClass: "bg-warning",
+        textClass: "text-warning",
+        bgClass: "bg-warning/10",
+      },
+      
     };
     return styles[status] || {};
   };

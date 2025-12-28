@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext.jsx";
 import api from "../../api/api";
+import { getOwnerMaintenanceRequests, updateMaintenanceStatus } from "../../api/owner/service.js";  
 
 const useMaintenanceLogic = () => {
   // --- STATE ---
@@ -14,30 +15,16 @@ const useMaintenanceLogic = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // --- DATA MAPPING (Java DTO -> React Props) ---
-  const ownerData = useMemo(
-    () => ({
-      firstName: currentOwner?.fullName
-        ? currentOwner.fullName.split(" ")[0]
-        : "Owner",
-      avatar:
-        currentOwner?.profileImageUrl ||
-        `https://ui-avatars.com/api/?name=${currentOwner?.fullName || "Owner"}`,
-      id: currentOwner?.id,
-    }),
-    [currentOwner]
-  );
-
   // --- API CALLS ---
   useEffect(() => {
     const fetchRequests = async () => {
-      if (!ownerData.id) return;
+      if (!currentOwner?.id) return;
 
       try {
         setLoading(true);
-        // Assuming your backend endpoint is: GET /api/maintenance/owner/{id}
-        const response = await api.get(`/maintenance/owner/${ownerData.id}`);
-        setRequests(response.data);
+        // ✅ USE SERVICE FUNCTION
+        const data = await getOwnerMaintenanceRequests(currentOwner.id);
+        setRequests(data);
         setError(null);
       } catch (err) {
         console.error("Fetch error:", err);
@@ -48,35 +35,38 @@ const useMaintenanceLogic = () => {
     };
 
     fetchRequests();
-  }, [ownerData.id]);
+  }, [currentOwner]);
 
   const handleStatusUpdate = async (id, newStatus) => {
-    // Optimistic Update
+    // 1. Optimistic Update
     const originalRequests = [...requests];
+    const statusToSend = newStatus.toUpperCase(); 
+
     setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
+      prev.map((req) => (req.id === id ? { ...req, status: statusToSend } : req))
     );
 
     try {
-      // Assuming endpoint: PATCH /api/maintenance/{id}/status?status=COMPLETED
-      await api.patch(`/maintenance/${id}/status`, null, {
-        params: { status: newStatus },
-      });
+      // ✅ USE SERVICE FUNCTION
+      await updateMaintenanceStatus(id, statusToSend);
+      
     } catch (err) {
       console.error("Update failed:", err);
       setRequests(originalRequests); // Revert on error
-      alert("Failed to update status.");
+      alert("Failed to update status. Please try again.");
     }
   };
 
   // --- FILTERING & SORTING ---
   const filteredRequests = useMemo(() => {
     let result = requests.filter((req) => {
-      // Tab Filter
+      // Normalize status to lowercase for comparison
+      const reqStatus = req.status ? req.status.toLowerCase() : "pending";
+      
       const isPendingTab = activeTab === "pending";
-      const isReqPending =
-        req.status === "pending" || req.status === "in-progress";
-      const isReqCompleted = req.status === "completed";
+      // Check for both "pending" and "in-progress"
+      const isReqPending = reqStatus === "pending" || reqStatus === "in_progress" || reqStatus === "in-progress";
+      const isReqCompleted = reqStatus === "completed" || reqStatus === "resolved";
 
       if (isPendingTab && !isReqPending) return false;
       if (!isPendingTab && !isReqCompleted) return false;
@@ -84,10 +74,11 @@ const useMaintenanceLogic = () => {
       // Search Filter
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
+      // ✅ FIX: Use 'issueType' instead of 'title' (from DTO)
       return (
-        req.title?.toLowerCase().includes(q) ||
-        req.roomNumber?.toString().includes(q) ||
-        req.boardingName?.toLowerCase().includes(q)
+        (req.issueType && req.issueType.toLowerCase().includes(q)) ||
+        (req.roomNumber && req.roomNumber.toString().includes(q)) ||
+        (req.boardingName && req.boardingName.toLowerCase().includes(q))
       );
     });
 
@@ -102,24 +93,13 @@ const useMaintenanceLogic = () => {
     return filteredRequests.slice(start, start + itemsPerPage);
   }, [filteredRequests, currentPage]);
 
-  // Reset page when filter changes
   useEffect(() => setCurrentPage(1), [activeTab, searchQuery]);
-
-  // --- COUNTS ---
-  const counts = {
-    pending: requests.filter(
-      (r) => r.status === "pending" || r.status === "in-progress"
-    ).length,
-    completed: requests.filter((r) => r.status === "completed").length,
-  };
 
   return {
     paginatedRequests,
     activeTab,
     setActiveTab,
     handleStatusUpdate,
-    counts,
-    ownerData,
     searchQuery,
     setSearchQuery,
     currentPage,
