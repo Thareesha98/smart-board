@@ -2,6 +2,7 @@ package com.sbms.sbms_monolith.mapper;
 
 import com.sbms.sbms_monolith.dto.boarding.BoardingSummaryDTO;
 import com.sbms.sbms_monolith.dto.user.UserProfileViewDTO;
+import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.User;
 
 import java.time.format.DateTimeFormatter;
@@ -44,7 +45,22 @@ public class UserProfileMapper {
         dto.setActiveListings(listings);
 
         return dto;
+    }
 
+    public static BoardingSummaryDTO toBoardingSummary(Boarding b) {
+        BoardingSummaryDTO summary = new BoardingSummaryDTO();
+        summary.setId(b.getId());
+        summary.setTitle(b.getTitle());
+        summary.setAddress(b.getAddress());
+        summary.setPricePerMonth(b.getPricePerMonth());
 
+        summary.setGenderType(b.getGenderType());
+        summary.setBoardingType(b.getBoardingType());
+        summary.setStatus(b.getStatus());
+
+        summary.setImageUrls(b.getImageUrls());
+        summary.setAvailableSlots(b.getAvailable_slots());
+
+        return summary;
     }
 }
