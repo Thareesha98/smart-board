@@ -48,7 +48,9 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/api/auth/**",
                         "/api/boardings",
-                        "/api/boardings/**" , 
+                        "/api/boardings/**" ,
+
+                        "/api/users/public/**",
                         
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
@@ -103,7 +105,8 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("*"));
+//        config.setAllowedOrigins(List.of("*"));
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
