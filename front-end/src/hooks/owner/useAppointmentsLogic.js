@@ -61,9 +61,9 @@ const useAppointmentsLogic = () => {
         bgClass: "bg-error/10",
       },
       rejected: {
-        colorClass: "bg-secondary",
-        textClass: "text-secondary",
-        bgClass: "bg-secondary/10",
+        colorClass: "bg-warning",
+        textClass: "text-warning",
+        bgClass: "bg-warning/10",
       },
       
     };
