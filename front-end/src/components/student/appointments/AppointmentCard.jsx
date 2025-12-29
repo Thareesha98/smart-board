@@ -127,6 +127,12 @@ const AppointmentCard = ({ appointment, onAction }) => {
             Cancelled
           </span>
         );
+      case 'rejected':
+        return (
+          <span className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+             <FaBan /> Rejected by Owner
+          </span>
+        )  
       default:
         return null;
     }
