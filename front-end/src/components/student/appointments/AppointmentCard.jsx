@@ -8,7 +8,9 @@ import {
   FaHome, 
   FaUser, 
   FaMapMarkerAlt, 
-  FaPhone 
+  FaPhone,
+  FaExclamationCircle,
+  FaBan
 } from 'react-icons/fa';
 
 // Helper to format date and time
