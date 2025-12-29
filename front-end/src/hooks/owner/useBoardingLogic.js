@@ -1,111 +1,114 @@
 import { useState, useEffect } from "react";
-
-// --- MOCK BACKEND DATA ---
-const MOCK_DB_DATA = [
-  {
-    id: 1,
-    title: "Luxury Sea View Villa",
-    description: "A beautiful villa near the coast with full amenities.",
-    address: "123 Galle Road, Colombo",
-    pricePerMonth: 45000.0,
-    availableSlots: 3,
-    maxOccupants: 5,
-    imageUrls: ["https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af"],
-    status: "ACTIVE",
-    genderType: "MIXED",
-    boardingType: "ANNEX",
-    tenants: [
-      {
-        id: 101,
-        name: "Saman Perera",
-        phone: "0771234567",
-        joinedDate: "2024-01-15",
-        email: "saman.p@gmail.com",
-      },
-      {
-        id: 102,
-        name: "Nimali Silva",
-        phone: "0719876543",
-        joinedDate: "2024-02-20",
-        email: "nimali.s@yahoo.com",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Student Budget Room",
-    description: "Affordable shared room near university.",
-    address: "45 University Lane, Kandy",
-    pricePerMonth: 12000.0,
-    availableSlots: 1,
-    maxOccupants: 2,
-    imageUrls: ["https://images.unsplash.com/photo-1596276020528-c6861110757d"],
-    status: "ACTIVE",
-    genderType: "MALE",
-    boardingType: "HOSTEL",
-    tenants: [
-      {
-        id: 201,
-        name: "Kasun Bandara",
-        phone: "0765551234",
-        joinedDate: "2024-03-05",
-        email: "kasun.bandara@gmail.com",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Green Valley Cottage",
-    description: "Quiet cottage surrounded by nature.",
-    address: "88 Hill Top, Nuwara Eliya",
-    pricePerMonth: 35000.0,
-    availableSlots: 4,
-    maxOccupants: 4,
-    imageUrls: ["https://images.unsplash.com/photo-1510798831971-661eb04b3739"],
-    status: "INACTIVE",
-    genderType: "FEMALE",
-    boardingType: "HOUSE",
-    tenants: [],
-  },
-];
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext.jsx";
+import {
+  getOwnerBoardings,
+  getBoardingTenants,
+  createBoarding,
+  updateBoarding,
+  deleteBoarding,
+} from "../../services/ownerService";
 
 const useBoardingLogic = () => {
-  const [rawBoardings, setRawBoardings] = useState(MOCK_DB_DATA);
+  const [rawBoardings, setRawBoardings] = useState([]);
   const [boardings, setBoardings] = useState([]);
 
   const [viewMode, setViewMode] = useState("grid");
   const [activeModal, setActiveModal] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
-
-  // NEW STATE: For the specific tenant being viewed
   const [selectedTenant, setSelectedTenant] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const { currentOwner } = useOwnerAuth();
+
+  // --- 1. Fetch Data (READ) ---
   useEffect(() => {
-    const formattedData = rawBoardings.map((b) => ({
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    if (!currentOwner || !currentOwner.id) {
+      console.warn("No owner logged in, skipping fetch.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // API CALL
+      const data = await getOwnerBoardings(currentOwner.id);
+
+      // Handle response structure (Spring Boot 'Page' vs List)
+      // If your backend returns Page<DTO>, the list is in .content
+      const backendList = Array.isArray(data) ? data : data.content || [];
+
+      setRawBoardings(backendList);
+    } catch (error) {
+      console.error("Failed to load boardings", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- 2. Mapper (Backend -> Frontend) ---
+  // Runs automatically whenever raw data changes
+  useEffect(() => {
+    const formatted = rawBoardings.map((b) => ({
       id: b.id,
-      name: b.title,
+      name: b.title, // Backend: title -> Frontend: name
       address: b.address,
-      rent: `LKR ${b.pricePerMonth.toLocaleString()}`,
-      availableRooms: b.availableSlots,
-      status: b.status.toLowerCase(),
-      image: b.imageUrls?.[0] || "https://via.placeholder.com/300",
-      rawPrice: b.pricePerMonth,
-      gender: b.genderType,
-      type: b.boardingType,
-      description: b.description,
+      rent: `LKR ${b.pricePerMonth ? b.pricePerMonth.toLocaleString() : "0"}`,
+      availableRooms: b.availableSlots, // Backend: availableSlots
       maxOccupants: b.maxOccupants,
+      status: b.status ? b.status.toLowerCase() : "active",
+
+      // Image Handling: Backend sends list, we take first
+      image:
+        b.imageUrls && b.imageUrls.length > 0
+          ? b.imageUrls[0]
+          : "https://via.placeholder.com/300",
+
+      // Raw data for editing forms
+      description: b.description,
+      genderType: b.genderType,
+      boardingType: b.boardingType,
+
+      // Tenant logic (Placeholder until you link the getTenants API)
       rating: 4.5,
-      totalTenants: b.tenants ? b.tenants.length : 0,
-      tenantsList: b.tenants || [],
+      totalTenants: 0,
+      tenantsList: [],
     }));
-    setBoardings(formattedData);
+    setBoardings(formatted);
   }, [rawBoardings]);
 
   // --- Actions ---
-  const openTenantsModal = (property) => {
-    setSelectedProperty(property);
+  const openTenantsModal = async (property) => {
+    // 1. Open modal immediately with placeholder data
+    setSelectedProperty({ ...property, tenantsList: [] });
     setActiveModal("tenants");
+
+    try {
+      // 2. Fetch real tenants from Backend
+      const tenantsData = await getBoardingTenants(property.id);
+
+      // 3. Map Backend Tenant Data -> Frontend UI format
+      // (Adjust 't.username', 't.contactNo' based on your User Entity)
+      const formattedTenants = tenantsData.map((t) => ({
+        id: t.userId || t.id,
+        name: t.username || t.name || "Unknown",
+        email: t.email,
+        phone: t.contactNo || t.phone || "N/A",
+        joinedDate: t.joinedDate || "N/A", // Ensure backend sends this or format it
+      }));
+
+      // 4. Update the selected property with real data
+      setSelectedProperty((prev) => ({
+        ...prev,
+        tenantsList: formattedTenants,
+      }));
+    } catch (error) {
+      console.error("Failed to load tenants", error);
+      // Optional: Add error notification here
+    }
   };
 
   const openManageModal = (property) => {
@@ -118,73 +121,103 @@ const useBoardingLogic = () => {
     setSelectedProperty(null);
   };
 
-  // --- NEW: Open Tenant Details Modal (No Alert) ---
-  const openTenantDetails = (tenant) => {
-    setSelectedTenant(tenant);
+  const openTenantDetails = (tenant) => setSelectedTenant(tenant);
+  const closeTenantDetails = () => setSelectedTenant(null);
+
+  // --- 3. CRUD Operations (Connected) ---
+
+  // CREATE
+  const addProperty = async (formData) => {
+    try {
+      // 1. Transform Frontend Form -> Backend DTO
+      const payload = {
+        title: formData.name,
+        description: formData.description,
+        address: formData.address,
+        // Convert "LKR 15000" string to Number 15000.00
+        pricePerMonth: parseFloat(
+          formData.rent.toString().replace(/[^0-9.]/g, "")
+        ),
+        availableSlots: parseInt(formData.availableRooms),
+        maxOccupants: parseInt(formData.maxOccupants),
+        genderType: formData.genderType, // MALE, FEMALE, MIXED
+        boardingType: formData.boardingType, // ANNEX, HOSTEL, etc
+        status: "ACTIVE",
+        imageUrls: [formData.image], // Wrap single image in array
+        amenities: [],
+      };
+
+      // 2. API Call
+      await createBoarding(payload);
+
+      // 3. Refresh Data
+      await fetchData();
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      console.error("Create failed", error);
+      alert("Failed to create property.");
+    }
   };
 
-  const closeTenantDetails = () => {
-    setSelectedTenant(null);
+  // UPDATE
+  const updateProperty = async (uiData) => {
+    try {
+      const payload = {
+        title: uiData.name,
+        description: uiData.description,
+        address: uiData.address,
+        pricePerMonth: parseFloat(
+          uiData.rent.toString().replace(/[^0-9.]/g, "")
+        ),
+        availableSlots: parseInt(uiData.availableRooms),
+        maxOccupants: uiData.maxOccupants, // Ensure this exists in your Edit Form
+        status: uiData.status.toUpperCase(), // "active" -> "ACTIVE"
+        // Add other fields required by your BoardingUpdateDTO
+      };
+
+      // API Call
+      await updateBoarding(uiData.id, payload);
+
+      // Refresh Data
+      await fetchData();
+      closeModal();
+    } catch (error) {
+      console.error("Update failed", error);
+      alert("Failed to update property.");
+    }
   };
 
-  // --- CRUD (Simulated) ---
-  const addProperty = (formData) => {
-    const newBackendObject = {
-      id: Date.now(),
-      title: formData.name,
-      description: formData.description,
-      address: formData.address,
-      pricePerMonth: parseFloat(formData.rent.replace(/[^0-9.]/g, "")),
-      availableSlots: parseInt(formData.availableRooms),
-      maxOccupants: parseInt(formData.maxOccupants),
-      genderType: formData.genderType,
-      boardingType: formData.boardingType,
-      status: "ACTIVE",
-      imageUrls: [formData.image],
-      tenants: [],
-    };
-    setRawBoardings((prev) => [newBackendObject, ...prev]);
-    setIsCreateModalOpen(false);
-  };
+  // DELETE
+  const deleteProperty = async (id) => {
+    try {
+      // API Call
+      await deleteBoarding(id);
 
-  const updateProperty = (uiData) => {
-    setRawBoardings((prev) =>
-      prev.map((item) => {
-        if (item.id === uiData.id) {
-          return {
-            ...item,
-            pricePerMonth: parseFloat(uiData.rent.replace(/[^0-9.]/g, "")),
-            availableSlots: parseInt(uiData.availableRooms),
-            status: uiData.status.toUpperCase(),
-          };
-        }
-        return item;
-      })
-    );
-    closeModal();
-  };
-
-  const deleteProperty = (id) => {
-    setRawBoardings((prev) => prev.filter((b) => b.id !== id));
-    closeModal();
+      // Optimistic Update (Remove from UI immediately)
+      setRawBoardings((prev) => prev.filter((b) => b.id !== id));
+      closeModal();
+    } catch (error) {
+      console.error("Delete failed", error);
+      alert("Failed to delete property.");
+    }
   };
 
   return {
     boardings,
     viewMode,
     selectedProperty,
+    selectedTenant,
     activeModal,
     isCreateModalOpen,
-    // New exports
-    selectedTenant,
+    isLoading, // Export loading state
 
     setViewMode,
     setIsCreateModalOpen,
     openTenantsModal,
     openManageModal,
     closeModal,
-    openTenantDetails, // Renamed from viewTenantDetails
-    closeTenantDetails, // New function
+    openTenantDetails,
+    closeTenantDetails,
 
     addProperty,
     updateProperty,
