@@ -64,10 +64,9 @@ const AppointmentsPage = () => {
       setIsScheduleModalOpen(true); 
     } else if (action === "cancel") {
       if (
-        !window.confirm(`Confirm cancellation for ${appointment.boardingName}?`)
-      )
-        return;
-      handleStatusChange(id, action);
+        !window.confirm(`Are you sure you want to cancel the visit to ${appointment.boardingName}?`)
+      ) return;
+      handleStatusChange(id, 'cancelled');
       setCurrentAppointmentId(null);
     } else {
       openDecisionConfirmation(id, action);
@@ -112,7 +111,7 @@ const AppointmentsPage = () => {
           <h3 className="text-xl font-bold text-text-dark mb-2">
             No {category} Appointments Found
           </h3>
-          {category !== "cancelled" && (
+          {(category !== "cancelled" && category !== "rejected") && (
             <button
               className="flex items-center gap-2 py-3 px-6 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary hover:-translate-y-0.5 mx-auto mt-4"
               onClick={() => {
@@ -168,13 +167,11 @@ const AppointmentsPage = () => {
               key={category}
               category={category}
               icon={`fas fa-${
-                category === "upcoming"
-                  ? "clock"
-                  : category === "visited"
-                  ? "eye"
-                  : category === "selected"
-                  ? "check-circle"
-                  : "times-circle"
+                category === "upcoming" ? "clock"
+                : category === "visited" ? "eye"
+                : category === "selected" ? "check-circle"
+                : category === "rejected" ? "ban" 
+                : "times-circle"
               }`}
               label={category.charAt(0).toUpperCase() + category.slice(1)}
               count={counts[category]}
