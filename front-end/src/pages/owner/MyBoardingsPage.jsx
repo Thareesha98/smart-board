@@ -3,36 +3,39 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaHome } from "react-icons/fa";
 
 // Logic Hook
-import useBoardingLogic from "../../hooks/owner/useBoardingLogic"; // Adjust path as needed
+import useBoardingLogic from "../../hooks/owner/useBoardingLogic";
 
 // Components
-import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
+import HeaderBar from "../../components/Owner/common/HeaderBar";
 import BoardingCard from "../../components/Owner/myboardings/BoardingCard";
 import ViewToggle from "../../components/Owner/myboardings/ViewToggle";
 import TenantModal from "../../components/Owner/myboardings/TenantModal";
+import TenantDetailsModal from "../../components/Owner/myboardings/TenantDetailsModal";
 import ManageModal from "../../components/Owner/myboardings/ManageModal";
-import CreateBoardingModal from "../../components/Owner/myboardings/CreateBoardingModal.jsx";
-
-// Data
-import { boardingsData as initialData } from "../../data/mockData.js";
+import CreateBoardingModal from "../../components/Owner/myboardings/CreateBoardingModal";
 
 export default function MyBoardingsPage() {
-  // Extract logic from custom hook
   const {
     boardings,
     viewMode,
     selectedProperty,
     activeModal,
     isCreateModalOpen,
+    // New exports
+    selectedTenant,
+
     setViewMode,
     setIsCreateModalOpen,
     openTenantsModal,
     openManageModal,
     closeModal,
+    openTenantDetails, // Renamed from viewTenantDetails
+    closeTenantDetails, // New function
+
     addProperty,
     updateProperty,
     deleteProperty,
-  } = useBoardingLogic(initialData);
+  } = useBoardingLogic();
 
   return (
     <div className="pt-4 space-y-8 min-h-screen pb-12 bg-light">
@@ -92,7 +95,6 @@ export default function MyBoardingsPage() {
       </section>
 
       {/* --- Modals --- */}
-      
       <CreateBoardingModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -104,7 +106,13 @@ export default function MyBoardingsPage() {
         onClose={closeModal}
         propertyName={selectedProperty?.name}
         tenants={selectedProperty?.tenantsList}
-        onMessageTenant={(id) => alert(`Opening chat for tenant ID: ${id}`)}
+        onViewTenant={openTenantDetails} // Pass the open function here
+      />
+
+      {/* NEW: Render the details modal */}
+      <TenantDetailsModal
+        tenant={selectedTenant}
+        onClose={closeTenantDetails}
       />
 
       <ManageModal
