@@ -2,5 +2,7 @@ package com.sbms.sbms_monolith.model.enums;
 
 public enum Status {
 	PENDING,
-    APPROVED
+    APPROVED,
+    REJECTED,
+    ACTIVE
 }
