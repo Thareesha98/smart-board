@@ -196,11 +196,12 @@ const AppointmentsPage = () => {
                 <h3 className="text-2xl font-bold text-primary mb-1 capitalize">
                   {category} {category !== "selected" ? "Visits" : "Boardings"}
                 </h3>
-                <p className="text-text-muted text-sm sm:text-base">
+                <p className="text-gray-500 text-sm sm:text-base">
                   {category === "upcoming" && "Your scheduled visits awaiting action."}
                   {category === "visited" && "Time to decide on the places you've seen!"}
                   {category === "selected" && "Boardings you've chosen to move forward with."}
-                  {category === "cancelled" && "Records of previous cancellations."}
+                  {category === "cancelled" && "Visits you have cancelled."}
+                  {category === "rejected" && "Visits declined by the boarding owner."}
                 </p>
               </div>
               {renderAppointmentList(category)}
