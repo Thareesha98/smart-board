@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useContext } from 'react';
 import StudentService from '../../api/student/StudentService'; // Import the Service
-import { StudentAuthContext } from '../../context/student/StudentAuthContext';
+import { useAuth } from '../../context/student/StudentAuthContext';
 
 const useReportsLogic = () => {
-  const { user } = useContext(StudentAuthContext);
+  const { user } = useAuth();
   const [userReports, setUserReports] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
