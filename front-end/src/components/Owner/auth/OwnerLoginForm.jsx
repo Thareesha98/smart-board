@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const LoginForm = ({ onSubmit, isLoading, error }) => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -38,7 +38,7 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
             value={formData.email}
             onChange={handleChange}
             required
-            placeholder="your.email@university.edu"
+            placeholder="your.email@example.com"
             className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-large transition-colors duration-200 focus:border-accent focus:outline-none"
           />
         </div>
@@ -52,7 +52,7 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
         <div className="relative">
           <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             name="password"
             value={formData.password}
             onChange={handleChange}
@@ -109,8 +109,8 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
         disabled={isLoading}
         className={`w-full py-4 rounded-large font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${
           isLoading
-            ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-accent text-white hover:bg-primary shadow-lg'
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-accent text-white hover:bg-primary shadow-lg"
         }`}
       >
         {isLoading ? (
@@ -119,7 +119,7 @@ const LoginForm = ({ onSubmit, isLoading, error }) => {
             Signing In...
           </>
         ) : (
-          'Sign In'
+          "Sign In"
         )}
       </motion.button>
     </div>

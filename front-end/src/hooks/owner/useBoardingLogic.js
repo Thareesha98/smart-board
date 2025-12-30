@@ -6,7 +6,7 @@ import {
   createBoarding,
   updateBoarding,
   deleteBoarding,
-} from "../../services/ownerService";
+} from "../../api/owner/service.js";
 
 const useBoardingLogic = () => {
   const [rawBoardings, setRawBoardings] = useState([]);
