@@ -16,7 +16,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 
 // Public Profile View
-import PublicProfileView from "./pages/profile/PublicProfileView";
+import PublicProfileView from "./pages/common/PublicProfileView.jsx";
 
 function App() {
   return (

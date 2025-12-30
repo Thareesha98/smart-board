@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../context/student/AuthContext'; // Ensure correct path
+import { useAuth } from '../../context/student/StudentAuthContext'; // Ensure correct path
 import StudentService from '../../api/student/StudentService';
 
 const useAppointmentsLogic = () => {
