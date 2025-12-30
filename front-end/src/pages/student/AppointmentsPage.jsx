@@ -33,7 +33,7 @@ const AppointmentsPage = () => {
 
   const openDecisionConfirmation = (id, decision) => {
     const appointment = getAppointmentById(id);
-    if (!appointment) return; // Safety Check
+    if (!appointment) return;
 
     setCurrentAppointmentId(id);
     setModalContent({
@@ -66,11 +66,8 @@ const AppointmentsPage = () => {
       setCurrentAppointmentId(id); 
       setIsScheduleModalOpen(true); 
     } else if (action === "cancel") {
-      // ✅ FIXED: Safer check for cancellation
       if (!appointment) return;
-      
-      const confirmMsg = `Are you sure you want to cancel the visit to ${appointment.boardingName}?`;
-      if (window.confirm(confirmMsg)) {
+      if (window.confirm(`Confirm cancellation for ${appointment.boardingName}?`)) {
           handleStatusChange(id, 'cancelled');
           setCurrentAppointmentId(null);
       }
@@ -112,14 +109,14 @@ const AppointmentsPage = () => {
 
     if (list.length === 0) {
       return (
-        <div className="text-center p-12 bg-white rounded-2xl shadow-sm mt-8 animate-fadeIn border border-gray-100">
-          <i className="fas fa-calendar-times text-5xl text-gray-300 mb-4"></i>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">
+        <div className="text-center p-8 sm:p-12 bg-white rounded-2xl shadow-sm mt-4 sm:mt-8 animate-fadeIn border border-gray-100">
+          <i className="fas fa-calendar-times text-4xl sm:text-5xl text-gray-300 mb-4"></i>
+          <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
             No {category} Appointments
           </h3>
           {(category !== "cancelled" && category !== "rejected") && (
             <button
-              className="flex items-center gap-2 py-3 px-6 rounded-large font-semibold transition-all duration-300 bg-orange-500 text-white shadow-md hover:bg-orange-600 hover:-translate-y-0.5 mx-auto mt-4"
+              className="flex items-center gap-2 py-2 px-4 sm:py-3 sm:px-6 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 hover:-translate-y-0.5 mx-auto mt-4 text-sm sm:text-base"
               onClick={() => {
                 setCurrentAppointmentId(null);
                 setIsScheduleModalOpen(true);
@@ -164,25 +161,36 @@ const AppointmentsPage = () => {
         </motion.button>
       }
     >
-      {/* Categories (Tabs) */}
-      <section className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm mb-8 border border-gray-100">
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* ✅ UPDATED TABS SECTION */}
+      <section className="bg-white p-3 sm:p-6 rounded-2xl shadow-sm mb-6 sm:mb-8 border border-gray-100">
+        <div className="
+            flex lg:grid lg:grid-cols-5 
+            overflow-x-auto lg:overflow-visible 
+            gap-2 sm:gap-4 
+            pb-2 lg:pb-0 
+            snap-x
+            scrollbar-hide
+        ">
           {categories.map((category) => (
-            <AppointmentTab
-              key={category}
-              category={category}
-              icon={`fas fa-${
-                category === "upcoming" ? "clock"
-                : category === "visited" ? "eye"
-                : category === "selected" ? "check-circle"
-                : category === "rejected" ? "ban"
-                : "times-circle"
-              }`}
-              label={category.charAt(0).toUpperCase() + category.slice(1)}
-              count={counts[category] || 0}
-              active={activeCategory === category}
-              onClick={setActiveCategory}
-            />
+            <div key={category} className="min-w-[90px] sm:min-w-0 snap-start flex-1"> 
+                {/* min-w-[90px]: Ensures buttons don't get crushed on mobile 
+                   sm:min-w-0: Resets width on larger screens for grid
+                */}
+                <AppointmentTab
+                  category={category}
+                  icon={`fas fa-${
+                    category === "upcoming" ? "clock"
+                    : category === "visited" ? "eye"
+                    : category === "selected" ? "check-circle"
+                    : category === "rejected" ? "ban"
+                    : "times-circle"
+                  }`}
+                  label={category.charAt(0).toUpperCase() + category.slice(1)}
+                  count={counts[category] || 0}
+                  active={activeCategory === category}
+                  onClick={setActiveCategory}
+                />
+            </div>
           ))}
         </div>
       </section>
@@ -198,15 +206,15 @@ const AppointmentsPage = () => {
               }`}
             >
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-800 mb-1 capitalize">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1 capitalize">
                   {category} {category !== "selected" ? "Visits" : "Boardings"}
                 </h3>
-                <p className="text-gray-500 text-sm sm:text-base">
-                  {category === "upcoming" && "Your scheduled visits awaiting action."}
-                  {category === "visited" && "Time to decide on the places you've seen!"}
-                  {category === "selected" && "Boardings you've chosen to move forward with."}
+                <p className="text-gray-500 text-xs sm:text-base">
+                  {category === "upcoming" && "Scheduled visits awaiting action."}
+                  {category === "visited" && "Decide on places you've seen!"}
+                  {category === "selected" && "Boardings you chose."}
                   {category === "cancelled" && "Visits cancelled by you."}
-                  {category === "rejected" && "Visits declined by the boarding owner."}
+                  {category === "rejected" && "Visits declined by owner."}
                 </p>
               </div>
               {renderAppointmentList(category)}
@@ -257,6 +265,13 @@ const AppointmentsPage = () => {
         }
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
       `}</style>
     </StudentLayout>
