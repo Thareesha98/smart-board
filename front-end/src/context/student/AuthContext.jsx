@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../../api/api'; // Import your Axios instance
 
-// 1. FIX: Export this and rename it to StudentAuthContext
+// 1. Export the Context correctly
 export const StudentAuthContext = createContext(null);
 
 export const StudentAuthProvider = ({ children }) => {
@@ -12,22 +13,21 @@ export const StudentAuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = () => {
       try {
+        // Check for BOTH User and Token
         const storedUser = localStorage.getItem('smartboad_user');
-        // Note: For real backend, we usually check for a 'token' here
+        const token = localStorage.getItem('token'); 
         
-        if (storedUser) {
+        if (storedUser && token) {
           const userData = JSON.parse(storedUser);
           setCurrentUser(userData);
           setIsAuthenticated(true);
         } else {
-          setCurrentUser(null);
-          setIsAuthenticated(false);
+          // If token is missing, user is not logged in
+          handleLogoutCleanup();
         }
       } catch (error) {
-        console.error('Error loading user data:', error);
-        localStorage.removeItem('smartboad_user');
-        setCurrentUser(null);
-        setIsAuthenticated(false);
+        console.error('Error loading auth data:', error);
+        handleLogoutCleanup();
       } finally {
         setIsLoading(false);
       }
@@ -36,63 +36,71 @@ export const StudentAuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Signup function (Mock)
-  const signup = (userData) => {
-    const newUser = {
-      ...userData,
-      id: Date.now(), // Ensure ID exists for the hook
-      avatar: userData.avatar || 'https://randomuser.me/api/portraits/women/50.jpg',
-      joinDate: new Date().toISOString(),
-    };
-    
-    setCurrentUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('smartboad_user', JSON.stringify(newUser));
-    
-    // For real backend, you would save the token here:
-    // localStorage.setItem('token', response.data.token);
-    
-    return { success: true };
+  // --- REAL LOGIN FUNCTION ---
+  const login = async (email, password) => {
+    try {
+      // 1. Call your Spring Boot Backend
+      // Matches AuthController: @PostMapping("/login")
+      const response = await api.post('/auth/login', { email, password });
+      
+      const { token, refreshToken, user } = response.data;
+
+      // 2. Save Tokens & User Data
+      localStorage.setItem('token', token);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('smartboad_user', JSON.stringify(user));
+
+      // 3. Update State
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+
+      return { success: true };
+
+    } catch (error) {
+      console.error("Login failed:", error);
+      
+      // Handle different error types
+      let message = "Login failed. Please try again.";
+      if (error.response) {
+        if (error.response.status === 401) message = "Invalid email or password.";
+        else if (error.response.status === 404) message = "User not found.";
+      }
+      
+      return { success: false, message };
+    }
   };
 
-  // Login function (Mock)
-  const login = (email, password) => {
-    // ... existing mock logic ...
-    // NOTE: This mock login does NOT save a Token. 
-    // Your Report API calls will likely fail with 401 until you connect this to the Backend.
-    
-    // Simulating success for now:
-    const mockUser = {
-        id: 1, // HARDCODED ID FOR TESTING REPORT
-        fullName: "Test Student",
-        email: email,
-        role: "STUDENT"
-    };
-
-    setCurrentUser(mockUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('smartboad_user', JSON.stringify(mockUser));
-    return { success: true };
-  };
-
+  // --- LOGOUT ---
   const logout = () => {
+    handleLogoutCleanup();
+  };
+
+  // Helper to clear everything
+  const handleLogoutCleanup = () => {
     setCurrentUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('smartboad_user');
-    localStorage.removeItem('token'); // Clear token too
+    localStorage.removeItem('smartboad_credentials');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+  };
+
+  // --- SIGNUP (You can update this later similarly) ---
+  const signup = async (userData) => {
+     // For now, keeping your existing logic or you can connect to /auth/register
+     return { success: true }; 
   };
 
   const value = {
-    user: currentUser, // 2. FIX: Map 'currentUser' to 'user' so the hook can read it
-    currentUser,       // Keep this for backward compatibility
+    user: currentUser, // Ensure Hook can access 'user'
+    currentUser,
     isAuthenticated,
     isLoading,
-    signup,
     login,
     logout,
+    signup,
   };
 
-  // 3. FIX: Use StudentAuthContext.Provider
   return <StudentAuthContext.Provider value={value}>{children}</StudentAuthContext.Provider>;
 };
 
