@@ -12,7 +12,7 @@ import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
 // --- ROUTE FILES ---
 import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
 import OwnerAppRoutes from "./routes/OwnerAppRoutes";
-import Home from "./Home.jsx";
+
 
 function App() {
   return (
