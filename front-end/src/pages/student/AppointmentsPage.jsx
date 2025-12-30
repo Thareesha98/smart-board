@@ -29,6 +29,9 @@ const AppointmentsPage = () => {
   const [modalContent, setModalContent] = useState({});
   const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
 
+  // Define the order of tabs explicitly
+  const categories = ['upcoming', 'visited', 'selected', 'cancelled', 'rejected'];
+
   const openDecisionConfirmation = (id, decision) => {
     const appointment = getAppointmentById(id);
     setCurrentAppointmentId(id);
@@ -63,9 +66,7 @@ const AppointmentsPage = () => {
       setCurrentAppointmentId(id); 
       setIsScheduleModalOpen(true); 
     } else if (action === "cancel") {
-      if (
-        !window.confirm(`Are you sure you want to cancel the visit to ${appointment.boardingName}?`)
-      ) return;
+      if (!window.confirm(`Confirm cancellation for ${appointment.boardingName}?`)) return;
       handleStatusChange(id, 'cancelled');
       setCurrentAppointmentId(null);
     } else {
@@ -102,18 +103,18 @@ const AppointmentsPage = () => {
   };
 
   const renderAppointmentList = (category) => {
-    const list = categorizedAppointments[category];
+    const list = categorizedAppointments[category] || [];
 
     if (list.length === 0) {
       return (
-        <div className="text-center p-12 bg-card-bg rounded-large shadow-custom mt-8 animate-fadeIn border border-gray-100">
-          <i className="fas fa-calendar-times text-5xl text-text-muted mb-4 opacity-50"></i>
-          <h3 className="text-xl font-bold text-text-dark mb-2">
-            No {category} Appointments Found
+        <div className="text-center p-12 bg-white rounded-2xl shadow-sm mt-8 animate-fadeIn border border-gray-100">
+          <i className="fas fa-calendar-times text-5xl text-gray-300 mb-4"></i>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">
+            No {category} Appointments
           </h3>
           {(category !== "cancelled" && category !== "rejected") && (
             <button
-              className="flex items-center gap-2 py-3 px-6 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary hover:-translate-y-0.5 mx-auto mt-4"
+              className="flex items-center gap-2 py-3 px-6 rounded-large font-semibold transition-all duration-300 bg-orange-500 text-white shadow-md hover:bg-orange-600 hover:-translate-y-0.5 mx-auto mt-4"
               onClick={() => {
                 setCurrentAppointmentId(null);
                 setIsScheduleModalOpen(true);
@@ -147,8 +148,7 @@ const AppointmentsPage = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          // FIXED: "hidden sm:flex" ensures this ONLY shows on Tablet/Desktop where space exists
-          className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary whitespace-nowrap"
+          className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 whitespace-nowrap"
           onClick={() => {
             setCurrentAppointmentId(null);
             setIsScheduleModalOpen(true);
@@ -160,9 +160,9 @@ const AppointmentsPage = () => {
       }
     >
       {/* Categories (Tabs) */}
-      <section className="bg-card-bg p-4 sm:p-6 rounded-large shadow-custom mb-8 border border-gray-100">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {Object.keys(counts).map((category) => (
+      <section className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm mb-8 border border-gray-100">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          {categories.map((category) => (
             <AppointmentTab
               key={category}
               category={category}
@@ -170,11 +170,11 @@ const AppointmentsPage = () => {
                 category === "upcoming" ? "clock"
                 : category === "visited" ? "eye"
                 : category === "selected" ? "check-circle"
-                : category === "rejected" ? "ban" 
+                : category === "rejected" ? "ban" // Icon for Rejected
                 : "times-circle"
               }`}
               label={category.charAt(0).toUpperCase() + category.slice(1)}
-              count={counts[category]}
+              count={counts[category] || 0}
               active={activeCategory === category}
               onClick={setActiveCategory}
             />
@@ -185,7 +185,7 @@ const AppointmentsPage = () => {
       {/* Appointments List */}
       <section className="mb-8 min-h-[50vh]">
         <div className="appointments-container">
-          {Object.keys(categorizedAppointments).map((category) => (
+          {categories.map((category) => (
             <div
               key={`list-${category}`}
               className={`transition-opacity duration-500 ${
@@ -193,14 +193,14 @@ const AppointmentsPage = () => {
               }`}
             >
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-primary mb-1 capitalize">
+                <h3 className="text-2xl font-bold text-gray-800 mb-1 capitalize">
                   {category} {category !== "selected" ? "Visits" : "Boardings"}
                 </h3>
                 <p className="text-gray-500 text-sm sm:text-base">
                   {category === "upcoming" && "Your scheduled visits awaiting action."}
                   {category === "visited" && "Time to decide on the places you've seen!"}
                   {category === "selected" && "Boardings you've chosen to move forward with."}
-                  {category === "cancelled" && "Visits you have cancelled."}
+                  {category === "cancelled" && "Visits cancelled by you."}
                   {category === "rejected" && "Visits declined by the boarding owner."}
                 </p>
               </div>
@@ -209,23 +209,21 @@ const AppointmentsPage = () => {
           ))}
         </div>
       </section>
-
-      {/* MOBILE FLOATING ACTION BUTTON (Visible ONLY on Mobile) */}
-      {/* This ensures the button is always accessible on small screens even if the header hides it */}
-      <motion.button
+      
+      {/* Mobile Button and Modals */}
+       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => {
           setCurrentAppointmentId(null);
           setIsScheduleModalOpen(true);
         }}
-        className="fixed bottom-24 right-8 h-14 w-14 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+        className="fixed bottom-24 right-8 h-14 w-14 rounded-full bg-orange-600 text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-orange-700 transition-colors"
         aria-label="Schedule Visit"
       >
         <FaPlus size={24} />
       </motion.button>
 
-      {/* Modals */}
       <ScheduleModal
         isOpen={isScheduleModalOpen}
         onClose={handleScheduleClose} 
