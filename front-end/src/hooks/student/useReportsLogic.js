@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useContext } from 'react';
 import StudentService from '../../api/student/StudentService'; // Import the Service
-import { StudentAuthContext } from '../../context/student/AuthContext';
+import { StudentAuthContext } from '../../context/student/StudentAuthContext';
 
 const useReportsLogic = () => {
   const { user } = useContext(StudentAuthContext);
