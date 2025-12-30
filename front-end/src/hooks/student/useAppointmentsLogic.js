@@ -7,7 +7,6 @@ import {
   getRandomAddress,
 } from '../../data/student/appointmentsData.js'; 
 
-// Helper to simulate unique ID generation
 const generateId = () => Date.now() + Math.floor(Math.random() * 1000);
 
 const useAppointmentsLogic = () => {
@@ -17,19 +16,17 @@ const useAppointmentsLogic = () => {
 
   // --- 2. Load Data from LocalStorage on Mount ---
   useEffect(() => {
-    // Read from storage
     const storedData = JSON.parse(localStorage.getItem('appointments') || '[]');
     
-    // Merge stored data with sample data (avoiding duplicates based on ID)
+    // Merge stored data with sample data
     const combinedAppointments = [...sampleAppointments];
-    
     storedData.forEach(newApp => {
         if (!combinedAppointments.find(a => a.id === newApp.id)) {
             combinedAppointments.push(newApp);
         }
     });
 
-    // Check dates to auto-move expired upcoming visits to "visited"
+    // Auto-move expired upcoming visits
     const today = new Date().toISOString().split('T')[0];
     const processedAppointments = combinedAppointments.map(app => {
         if (app.status === 'upcoming' && app.date < today) {
@@ -51,10 +48,17 @@ const useAppointmentsLogic = () => {
   // --- 4. Categorization (Memoized) ---
   const { categorizedAppointments, counts } = useMemo(() => {
     const categorized = appointments.reduce((acc, app) => {
+      // Create array if it doesn't exist (safety check)
       acc[app.status] = acc[app.status] || [];
       acc[app.status].push(app);
       return acc;
-    }, { upcoming: [], visited: [], selected: [], cancelled: [] });
+    }, { 
+        upcoming: [], 
+        visited: [], 
+        selected: [], 
+        cancelled: [], 
+        rejected: [] // ✅ ADDED: Missing 'rejected' category
+    });
     
     const counts = Object.fromEntries(
       Object.entries(categorized).map(([key, list]) => [key, list.length])
@@ -67,33 +71,30 @@ const useAppointmentsLogic = () => {
 
   // --- 5. CRUD Logic ---
 
-  // ✅ UPDATED: Prevents navigation when cancelling/rejecting
-  const handleStatusChange = (id, decision) => {
+  // ✅ FIXED: Now handles 'cancelled', 'rejected', and 'select' correctly
+  const handleStatusChange = (id, newStatus) => {
     const updatedList = appointments.map(a => {
       if (a.id === id) {
-        if (decision === 'select') {
-          return { ...a, status: 'selected', registered: false };
-        } else if (decision === 'reject' || decision === 'cancel') {
-          return { ...a, status: 'cancelled' };
-        }
+        // Direct update: whatever string is passed (e.g., 'cancelled') becomes the status
+        return { ...a, status: newStatus, registered: false }; 
       }
       return a;
     });
     
     updateAppointments(updatedList);
 
-    // Only switch tabs if the user SELECTED a boarding.
-    // If they Cancelled or Rejected, we do NOTHING (user stays on current tab).
-    if (decision === 'select') {
+    // Auto-switch tab only for selection
+    if (newStatus === 'select' || newStatus === 'selected') {
         setActiveCategory('selected');
     }
+    // Note: We stay on the current tab for 'cancelled' so the user sees it disappear
   };
 
   const handleScheduleSubmit = (formData, appointmentId = null) => {
     let updatedList;
 
     if (appointmentId) {
-      // RESCHEDULE
+      // RESCHEDULE: Update details and reset status to 'upcoming'
       updatedList = appointments.map(a => {
         if (a.id === appointmentId) {
           return {
@@ -101,7 +102,7 @@ const useAppointmentsLogic = () => {
             date: formData.visitDate,
             time: formData.visitTime,
             notes: formData.visitNotes || a.notes,
-            status: 'upcoming', 
+            status: 'upcoming', // ✅ Reset status so Owner sees it again
           };
         }
         return a;
@@ -137,6 +138,7 @@ const useAppointmentsLogic = () => {
         registeredAppointment = {
           ...a,
           ...regData,
+          status: 'selected', // Ensure status is selected
           registered: true,
           registrationDate: new Date().toISOString().split('T')[0]
         };
