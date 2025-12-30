@@ -15,6 +15,9 @@ import OwnerAppRoutes from "./routes/OwnerAppRoutes";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 
+// Public Profile View
+import PublicProfileView from "./pages/profile/PublicProfileView";
+
 function App() {
   return (
     <>
