@@ -18,6 +18,7 @@ public class ReportCreateDTO {
 
     private Long senderId;         // The Owner/Student ID
     private Long reportedUserId;   // (Optional) The Student ID being reported
+    private String reportedPersonName;
 
     private Boolean allowContact;
     private LocalDate incidentDate;
