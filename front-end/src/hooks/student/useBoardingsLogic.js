@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/student/AuthContext';
-import StudentService from '../../services/StudentService';
+import StudentService from '../../api/student/StudentService';
 
 const useBoardingsLogic = () => {
   const { user } = useAuth();
