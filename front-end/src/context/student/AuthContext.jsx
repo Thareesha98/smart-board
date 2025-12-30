@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext(null);
+// 1. FIX: Export this and rename it to StudentAuthContext
+export const StudentAuthContext = createContext(null);
 
 export const StudentAuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -12,9 +13,9 @@ export const StudentAuthProvider = ({ children }) => {
     const checkAuth = () => {
       try {
         const storedUser = localStorage.getItem('smartboad_user');
-        const storedCredentials = localStorage.getItem('smartboad_credentials');
+        // Note: For real backend, we usually check for a 'token' here
         
-        if (storedUser && storedCredentials) {
+        if (storedUser) {
           const userData = JSON.parse(storedUser);
           setCurrentUser(userData);
           setIsAuthenticated(true);
@@ -25,11 +26,9 @@ export const StudentAuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error loading user data:', error);
         localStorage.removeItem('smartboad_user');
-        localStorage.removeItem('smartboad_credentials');
         setCurrentUser(null);
         setIsAuthenticated(false);
       } finally {
-        // Ensure loading completes
         setIsLoading(false);
       }
     };
@@ -37,112 +36,68 @@ export const StudentAuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Signup function
+  // Signup function (Mock)
   const signup = (userData) => {
     const newUser = {
       ...userData,
+      id: Date.now(), // Ensure ID exists for the hook
       avatar: userData.avatar || 'https://randomuser.me/api/portraits/women/50.jpg',
       joinDate: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
-      preferences: {
-        emailNotifications: true,
-        smsNotifications: false,
-        marketingEmails: false,
-      },
     };
     
     setCurrentUser(newUser);
     setIsAuthenticated(true);
     localStorage.setItem('smartboad_user', JSON.stringify(newUser));
     
-    // Store credentials for login
-    const credentials = {
-      email: userData.email,
-      password: userData.password,
-    };
-    localStorage.setItem('smartboad_credentials', JSON.stringify(credentials));
+    // For real backend, you would save the token here:
+    // localStorage.setItem('token', response.data.token);
     
     return { success: true };
   };
 
-  // Login function
+  // Login function (Mock)
   const login = (email, password) => {
-    const storedCredentials = localStorage.getItem('smartboad_credentials');
-    const storedUser = localStorage.getItem('smartboad_user');
+    // ... existing mock logic ...
+    // NOTE: This mock login does NOT save a Token. 
+    // Your Report API calls will likely fail with 401 until you connect this to the Backend.
     
-    if (storedCredentials && storedUser) {
-      try {
-        const credentials = JSON.parse(storedCredentials);
-        if (credentials.email === email && credentials.password === password) {
-          const userData = JSON.parse(storedUser);
-          userData.lastLogin = new Date().toISOString();
-          
-          setCurrentUser(userData);
-          setIsAuthenticated(true);
-          localStorage.setItem('smartboad_user', JSON.stringify(userData));
-          
-          return { success: true };
-        }
-      } catch (error) {
-        console.error('Error during login:', error);
-      }
-    }
-    
-    return { success: false, message: 'Invalid email or password' };
+    // Simulating success for now:
+    const mockUser = {
+        id: 1, // HARDCODED ID FOR TESTING REPORT
+        fullName: "Test Student",
+        email: email,
+        role: "STUDENT"
+    };
+
+    setCurrentUser(mockUser);
+    setIsAuthenticated(true);
+    localStorage.setItem('smartboad_user', JSON.stringify(mockUser));
+    return { success: true };
   };
 
-  // Logout function
   const logout = () => {
     setCurrentUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('smartboad_user');
-    localStorage.removeItem('smartboad_credentials');
-  };
-
-  // Update profile function
-  const updateProfile = (updatedData) => {
-    const updated = { ...currentUser, ...updatedData };
-    setCurrentUser(updated);
-    localStorage.setItem('smartboad_user', JSON.stringify(updated));
-  };
-
-  // Update avatar function
-  const updateAvatar = (avatarUrl) => {
-    const updated = { ...currentUser, avatar: avatarUrl };
-    setCurrentUser(updated);
-    localStorage.setItem('smartboad_user', JSON.stringify(updated));
-  };
-
-  // Update preferences function
-  const updatePreferences = (preference, value) => {
-    const updated = {
-      ...currentUser,
-      preferences: {
-        ...currentUser.preferences,
-        [preference]: value,
-      },
-    };
-    setCurrentUser(updated);
-    localStorage.setItem('smartboad_user', JSON.stringify(updated));
+    localStorage.removeItem('token'); // Clear token too
   };
 
   const value = {
-    currentUser,
+    user: currentUser, // 2. FIX: Map 'currentUser' to 'user' so the hook can read it
+    currentUser,       // Keep this for backward compatibility
     isAuthenticated,
     isLoading,
     signup,
     login,
     logout,
-    updateProfile,
-    updateAvatar,
-    updatePreferences,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // 3. FIX: Use StudentAuthContext.Provider
+  return <StudentAuthContext.Provider value={value}>{children}</StudentAuthContext.Provider>;
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context = useContext(StudentAuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
