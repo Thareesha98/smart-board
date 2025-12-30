@@ -17,20 +17,20 @@ export const getOwnerReports = async (ownerId) => {
 export const createReport = async (reportData, files) => {
   try {
     const formData = new FormData();
-    
+
     // ✅ FIX: Map keys exactly to Java 'ReportCreateDTO'
     formData.append("reportTitle", reportData.title);
     formData.append("reportDescription", reportData.description);
     formData.append("type", reportData.reportType); // e.g., "boarding", "safety"
     formData.append("severity", reportData.severity); // e.g., "HIGH", "LOW"
-    
+
     // Backend wants Boarding NAME, not ID
-    formData.append("boarding", reportData.boardingName); 
-    
+    formData.append("boarding", reportData.boardingName);
+
     // ID Mapping
     formData.append("senderId", reportData.ownerId);
     formData.append("reportedUserId", reportData.studentId);
-    
+
     // Date & Boolean
     formData.append("incidentDate", reportData.incidentDate); // YYYY-MM-DD
     formData.append("allowContact", reportData.allowContact); // true/false
@@ -44,7 +44,6 @@ export const createReport = async (reportData, files) => {
 
     const response = await api.post("/reports", formData);
     return response.data;
-
   } catch (error) {
     console.error("Error creating report:", error);
     throw error;
@@ -52,14 +51,14 @@ export const createReport = async (reportData, files) => {
 };
 
 // =================================================================
-// 🛠️ PROPERTIES SERVICES
+// 🛠️ BOARDING SERVICES
 // =================================================================
 
 // 1. Get all boardings owned by this user
 export const getOwnerBoardings = async (ownerId) => {
   try {
     // Endpoint: GET /api/boardings/owner/{id}
-    const response = await api.get(`/owner/ads/${ownerId}`);
+    const response = await api.get(`/boardings/owner/${ownerId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching boardings:", error);
@@ -76,6 +75,39 @@ export const getBoardingTenants = async (boardingId) => {
   } catch (error) {
     console.error("Error fetching tenants:", error);
     return []; // Return empty array on error to prevent crash
+  }
+};
+
+export const createBoarding = async (boardingData) => {
+  try {
+    // Endpoint: POST /api/owner/boardings
+    const response = await api.post("/boardings", boardingData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating boarding:", error);
+    throw error;
+  }
+};
+
+export const updateBoarding = async (boardingId, updatedData) => {
+  try {
+    // Endpoint: PUT /api/owner/boardings/{id}
+    const response = await api.put(`/boardings/${boardingId}`, updatedData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating boarding:", error);
+    throw error;
+  }
+};
+
+export const deleteBoarding = async (boardingId) => {
+  try {
+    // Endpoint: DELETE /api/owner/boardings/{id}
+    const response = await api.delete(`/owner/boardings/${boardingId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting boarding:", error);
+    throw error;
   }
 };
 
@@ -100,8 +132,8 @@ export const updateMaintenanceStatus = async (requestId, newStatus) => {
   try {
     // Matches Controller: PATCH /api/maintenance/{requestId}/status
     // Body: { "status": "COMPLETED" }
-    const response = await api.patch(`/maintenance/${requestId}/status`, { 
-      status: newStatus 
+    const response = await api.patch(`/maintenance/${requestId}/status`, {
+      status: newStatus,
     });
     return response.data;
   } catch (error) {
