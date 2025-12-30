@@ -9,8 +9,7 @@ import {
   FaUser, 
   FaMapMarkerAlt, 
   FaPhone,
-  FaBan,
-  FaExclamationCircle
+  FaBan
 } from 'react-icons/fa';
 
 // Helper to format date and time
@@ -28,7 +27,7 @@ const getStatusClasses = (status) => {
     case 'cancelled': 
       return { badge: 'bg-red-50 text-red-500 border border-red-200' };
     case 'rejected': 
-      return { badge: 'bg-red-100 text-red-900 border border-red-800' }; // Dark Red
+      return { badge: 'bg-red-100 text-red-900 border border-red-800' };
     default: 
       return { badge: 'bg-gray-100 text-gray-500 border border-gray-200' };
   }
@@ -51,8 +50,13 @@ const AppointmentCard = ({ appointment, onAction }) => {
     }
   };
 
+  // ✅ Helper to stop propagation safely
+  const handleBtnClick = (e, action) => {
+    e.stopPropagation();
+    onAction(id, action);
+  };
+
   const renderButtons = () => {
-    // Base classes for all buttons
     const BASE_BTN = "text-sm py-2 px-4 rounded-large font-semibold transition-all duration-300 border-2 flex items-center justify-center gap-2 whitespace-nowrap flex-1";
 
     switch (status) {
@@ -61,13 +65,13 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <>
             <button 
               className={`${BASE_BTN} text-orange-600 border-orange-600 hover:bg-orange-600 hover:text-white`} 
-              onClick={() => onAction(id, 'reschedule')}
+              onClick={(e) => handleBtnClick(e, 'reschedule')}
             >
               <FaCalendarAlt /> Reschedule
             </button>
             <button 
               className={`${BASE_BTN} text-red-500 border-red-500 hover:bg-red-500 hover:text-white`} 
-              onClick={() => onAction(id, 'cancel')}
+              onClick={(e) => handleBtnClick(e, 'cancel')} // ✅ Fixed Click Handler
             >
               <FaTimes /> Cancel
             </button>
@@ -81,13 +85,13 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <>
             <button 
               className={`${BASE_BTN} text-green-600 border-green-600 hover:bg-green-600 hover:text-white`} 
-              onClick={() => onAction(id, 'select')}
+              onClick={(e) => handleBtnClick(e, 'select')}
             >
               <FaCheck /> Select
             </button>
             <button 
               className={`${BASE_BTN} text-red-500 border-red-500 hover:bg-red-500 hover:text-white`} 
-              onClick={() => onAction(id, 'reject')}
+              onClick={(e) => handleBtnClick(e, 'reject')}
             >
               <FaTimes /> Reject
             </button>
@@ -101,7 +105,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <>
             <button 
               className={`${BASE_BTN} text-green-700 border-green-700 hover:bg-green-700 hover:text-white`} 
-              onClick={() => onAction(id, 'view')}
+              onClick={(e) => handleBtnClick(e, 'view')}
             >
               <FaEye /> View Details
             </button>
@@ -113,7 +117,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <>
             <button 
               className={`bg-green-600 text-white hover:bg-green-700 ${BASE_BTN} border-green-600`} 
-              onClick={() => onAction(id, 'register')}
+              onClick={(e) => handleBtnClick(e, 'register')}
             >
               <FaHome /> Add to My Boardings
             </button>
@@ -154,7 +158,6 @@ const AppointmentCard = ({ appointment, onAction }) => {
           className="w-20 h-20 md:w-16 md:h-16 min-[1400px]:w-16 min-[1400px]:h-16 rounded-2xl object-cover border-2 border-gray-100 shadow-sm flex-shrink-0"
           onError={(e) => { e.target.src = 'https://via.placeholder.com/150' }}
         />
-        {/* Mobile Status Badge */}
         <div className={`min-[1400px]:hidden absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white border shadow-sm ${badge}`}>
           {status}
         </div>
