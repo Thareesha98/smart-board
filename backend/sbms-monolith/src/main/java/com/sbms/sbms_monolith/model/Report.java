@@ -85,7 +85,6 @@ public class Report extends BaseEntity {
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
 
-    // Evidence Files
     @ElementCollection
     @CollectionTable(name = "report_evidence", joinColumns = @JoinColumn(name = "report_id"))
     @Column(name = "file_url")

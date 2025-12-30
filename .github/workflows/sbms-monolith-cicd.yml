@@ -36,13 +36,12 @@ jobs:
         with:
           node-version: '20'
 
-      # 🔹 Install dependencies (devDependencies INCLUDED)
+      # Install dependencies
       - name: Install frontend dependencies
         working-directory: front-end
-        run: |
-          npm install
+        run: npm install
 
-      # 🔹 PROOF: Tailwind exists during CI build
+      # PROOF: Tailwind exists during CI build
       - name: Debug Tailwind installation
         working-directory: front-end
         run: |
@@ -50,11 +49,10 @@ jobs:
           npm list postcss
           npm list autoprefixer
 
-      # 🔹 Build frontend (Tailwind compiled here)
+      # Build frontend
       - name: Build frontend
         working-directory: front-end
-        run: |
-          npm run build
+        run: npm run build
 
       - name: Debug frontend artifact
         run: ls front-end/dist
@@ -81,6 +79,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: backend/sbms-monolith/target/*.jar
           target: /opt/sbms/tmp/backend
+          strip_components: 3
 
       # -----------------------------
       # DEPLOY FRONTEND
@@ -106,10 +105,12 @@ jobs:
           script: |
             echo "Deploying backend..."
             sudo systemctl stop sbms-backend || true
-            mv /opt/sbms/tmp/backend/*.jar /opt/sbms/backend/sbms-backend.jar
+            sudo mkdir -p /opt/sbms/backend
+            sudo mv /opt/sbms/tmp/backend/*.jar /opt/sbms/backend/sbms-backend.jar
+            sudo systemctl daemon-reload
             sudo systemctl start sbms-backend
 
             echo "Deploying frontend..."
-            rm -rf /opt/sbms/frontend/*
-            mv /opt/sbms/tmp/frontend/* /opt/sbms/frontend/
+            sudo rm -rf /opt/sbms/frontend/*
+            sudo mv /opt/sbms/tmp/frontend/* /opt/sbms/frontend/
             sudo systemctl reload nginx

@@ -2,42 +2,28 @@ package com.sbms.sbms_monolith.mapper;
 
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceResponseDTO;
 import com.sbms.sbms_monolith.model.Maintenance;
-import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
 
 public class MaintenanceMapper {
 
-    public static MaintenanceResponseDTO toDTO(Maintenance maintenance) {
+    public static MaintenanceResponseDTO toDTO(Maintenance m) {
 
         MaintenanceResponseDTO dto = new MaintenanceResponseDTO();
 
-        dto.setId(maintenance.getId());
-        dto.setDescription(maintenance.getDescription());
-        dto.setDate(maintenance.getDate());
-        dto.setImage(maintenance.getImages());
+        dto.setId(m.getId());
+        dto.setBoardingId(m.getBoarding().getId());
+        dto.setBoardingTitle(m.getBoarding().getTitle());
 
-        // 1. Issue Type -> String
-        dto.setIssueType(maintenance.getIssueType().toString());
+        dto.setStudentId(m.getStudent().getId());
+        dto.setStudentName(m.getStudent().getFullName());
 
-        // 2. Urgency -> lowercase String ("high")
-        dto.setUrgency(maintenance.getUrgency().toString().toLowerCase());
+        dto.setTitle(m.getTitle());
+        dto.setDescription(m.getDescription());
+        dto.setImageUrls(m.getImageUrls());
 
-        // 3. Status -> Frontend format ("in-progress")
-        String statusStr = maintenance.getStatus().toString().toLowerCase();
-        if (maintenance.getStatus() == MaintenanceStatus.IN_PROGRESS) {
-            statusStr = "in-progress";
-        }
-        dto.setStatus(statusStr);
-
-        // 4. Boarding Info
-        if (maintenance.getBoarding() != null) {
-            dto.setBoardingName(maintenance.getBoarding().getTitle());
-        }
-
-        // 5. Room Info (Optional - depends  Student entity has this)
-        dto.setRoomNumber("N/A");
-        // if (request.getStudent() != null) dto.setRoomNumber(request.getStudent().getRoomNumber());
+        dto.setStatus(m.getStatus());
+        dto.setStudentNote(m.getStudentNote());
+        dto.setOwnerNote(m.getOwnerNote());
 
         return dto;
     }
-
 }

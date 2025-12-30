@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import api from "../../api/api";
 
 const OwnerAuthContext = createContext(null);
 
@@ -7,92 +8,127 @@ export const OwnerAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  
+
+  // 1. Check for logged-in user on load
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedOwner = localStorage.getItem('smartboad_owner_user');
-        const storedCreds = localStorage.getItem('smartboad_owner_credentials');
-        
-        if (storedOwner && storedCreds) {
-            const parsedOwner = JSON.parse(storedOwner);
-          setCurrentOwner(JSON.parse(storedOwner));
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user_data");
+
+      if (token && savedUser) {
+        try {
+          setCurrentOwner(JSON.parse(savedUser));
           setIsAuthenticated(true);
+        } catch (e) {
+          console.error("Failed to parse user data", e);
+          localStorage.clear();
         }
-      } catch (error) {
-        console.error('Error loading owner data:', error);
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
-    checkAuth();
+
+    initializeAuth();
   }, []);
 
-  // ADDED: Signup function
-  const signup = (userData) => {
+  // 2. Login
+  const login = async (email, password) => {
     try {
-      const newUser = {
-        ...userData,
-        role: 'owner',
-        joinDate: new Date().toISOString(),
-        avatar: 'https://ui-avatars.com/api/?name=' + userData.firstName, // Default avatar
-      };
-      
-      // Store in localStorage using owner-specific keys
-      localStorage.setItem('smartboad_owner_user', JSON.stringify(newUser));
-      localStorage.setItem('smartboad_owner_credentials', JSON.stringify({
-        email: userData.email,
-        password: userData.password,
-      }));
-      
-      // Update state so the user is "logged in" immediately after signup if desired
-      // Or keep it as is and let them manually login
+      const response = await api.post("/auth/login", { email, password });
+      const { token, refreshToken, user } = response.data;
+
+      if (user.role !== "OWNER") {
+        return {
+          success: false,
+          message: "Access Denied: This account is not a Partner account.",
+        };
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_data", JSON.stringify(user));
+
+      setCurrentOwner(user);
+      setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
-      console.error('Signup Error:', error);
-      return { success: false, message: 'Could not complete registration' };
+      console.error("Login Error:", error);
+      const msg =
+        error.response?.status === 401 ? "Invalid credentials" : "Login failed";
+      return { success: false, message: msg };
     }
   };
 
-  const login = (email, password) => {
-    const storedCreds = localStorage.getItem('smartboad_owner_credentials');
-    const storedOwner = localStorage.getItem('smartboad_owner_user');
-    
-    if (storedCreds && storedOwner) {
-      const credentials = JSON.parse(storedCreds);
-      if (credentials.email === email && credentials.password === password) {
-        const ownerData = JSON.parse(storedOwner);
-        ownerData.lastLogin = new Date().toISOString();
-        setCurrentOwner(ownerData);
-        setIsAuthenticated(true);
-        localStorage.setItem('smartboad_owner_user', JSON.stringify(ownerData));
-        return { success: true };
-      }
+  // 3. Signup Step 1: Request OTP
+  const signup = async (userData) => {
+    try {
+      // 🚀 FIX: We manually override the headers for this request.
+      // Setting Authorization to undefined removes it completely.
+      const config = {
+        headers: {
+          Authorization: undefined,
+        },
+      };
+
+      const response = await api.post(
+        "/auth/register/request",
+        userData,
+        config
+      );
+      return { success: true, message: response.data };
+    } catch (error) {
+      console.error("Owner Signup Error:", error);
+      return {
+        success: false,
+        message: error.response?.data || "Registration failed",
+      };
     }
-    return { success: false, message: 'Invalid owner credentials' };
+  };
+  // 4. Signup Step 2: Verify OTP
+  const verifyRegistration = async (email, otp) => {
+    try {
+      const response = await api.post("/auth/register/verify", { email, otp });
+      const { token, refreshToken, user } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_data", JSON.stringify(user));
+
+      setCurrentOwner(user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: "Invalid OTP" };
+    }
   };
 
   const logout = () => {
+    localStorage.clear();
     setCurrentOwner(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('smartboad_owner_user');
-    localStorage.removeItem('smartboad_owner_credentials');
+    window.location.href = "/login";
   };
 
-  // UPDATED: Include signup in the value object
-  const value = { 
-    currentOwner, 
-    isAuthenticated, 
-    isLoading, 
-    login, 
-    logout, 
-    signup // MUST BE HERE
+  const value = {
+    currentOwner,
+    isAuthenticated,
+    isLoading,
+    login,
+    logout,
+    signup,
+    verifyRegistration,
   };
 
-  return <OwnerAuthContext.Provider value={value}>{children}</OwnerAuthContext.Provider>;
+  return (
+    <OwnerAuthContext.Provider value={value}>
+      {children}
+    </OwnerAuthContext.Provider>
+  );
 };
 
 export const useOwnerAuth = () => {
   const context = useContext(OwnerAuthContext);
-  if (!context) throw new Error('useOwnerAuth must be used within an OwnerAuthProvider');
+  if (!context)
+    throw new Error("useOwnerAuth must be used within an OwnerAuthProvider");
   return context;
 };

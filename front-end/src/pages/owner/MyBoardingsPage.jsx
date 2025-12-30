@@ -1,49 +1,41 @@
-import React, { useState } from "react";
-import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaHome } from "react-icons/fa";
+
+// Logic Hook
+import useBoardingLogic from "../../hooks/owner/useBoardingLogic";
+
+// Components
+import HeaderBar from "../../components/Owner/common/HeaderBar";
 import BoardingCard from "../../components/Owner/myboardings/BoardingCard";
 import ViewToggle from "../../components/Owner/myboardings/ViewToggle";
 import TenantModal from "../../components/Owner/myboardings/TenantModal";
+import TenantDetailsModal from "../../components/Owner/myboardings/TenantDetailsModal";
 import ManageModal from "../../components/Owner/myboardings/ManageModal";
-import CreateBoardingModal from "../../components/Owner/myboardings/CreateBoardingModal.jsx";
-
-import {
-  boardingsData as initialData,
-  ownerData,
-} from "../../data/mockData.js";
+import CreateBoardingModal from "../../components/Owner/myboardings/CreateBoardingModal";
 
 export default function MyBoardingsPage() {
-  const [boardings, setBoardings] = useState(initialData);
-  const [viewMode, setViewMode] = useState("grid");
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  const [activeModal, setActiveModal] = useState(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const {
+    boardings,
+    viewMode,
+    selectedProperty,
+    activeModal,
+    isCreateModalOpen,
+    // New exports
+    selectedTenant,
 
-  // --- Handlers ---
-  const handleOpenTenants = (prop) => {
-    setSelectedProperty(prop);
-    setActiveModal("tenants");
-  };
-  const handleOpenManage = (prop) => {
-    setSelectedProperty(prop);
-    setActiveModal("manage");
-  };
+    setViewMode,
+    setIsCreateModalOpen,
+    openTenantsModal,
+    openManageModal,
+    closeModal,
+    openTenantDetails, // Renamed from viewTenantDetails
+    closeTenantDetails, // New function
 
-  const handleUpdateProperty = (updatedData) => {
-    setBoardings((prev) =>
-      prev.map((p) => (p.id === updatedData.id ? updatedData : p))
-    );
-    setActiveModal(null);
-  };
-
-  const handleDeleteProperty = (id) => {
-    setBoardings((prev) => prev.filter((p) => p.id !== id));
-    setActiveModal(null);
-  };
-
-  const handleCreateNew = (newProperty) => {
-    setBoardings([newProperty, ...boardings]);
-    setIsCreateModalOpen(false);
-  };
+    addProperty,
+    updateProperty,
+    deleteProperty,
+  } = useBoardingLogic();
 
   return (
     <div className="pt-4 space-y-8 min-h-screen pb-12 bg-light">
@@ -103,7 +95,7 @@ export default function MyBoardingsPage() {
         </div>
       </section>
 
-      {/* Modals remain clean and centralized */}
+      {/* --- Modals --- */}
       <CreateBoardingModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -115,7 +107,13 @@ export default function MyBoardingsPage() {
         onClose={() => setActiveModal(null)}
         propertyName={selectedProperty?.name}
         tenants={selectedProperty?.tenantsList}
-        onRemoveTenant={(id, name) => alert(`Simulating removal of ${name}...`)}
+        onViewTenant={openTenantDetails} // Pass the open function here
+      />
+
+      {/* NEW: Render the details modal */}
+      <TenantDetailsModal
+        tenant={selectedTenant}
+        onClose={closeTenantDetails}
       />
 
       <ManageModal
