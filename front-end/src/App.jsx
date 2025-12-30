@@ -1,7 +1,4 @@
-import {
-  Route,
-  Routes,
-} from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import Home from "./Home.jsx";
 
@@ -13,6 +10,10 @@ import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
 import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
 import OwnerAppRoutes from "./routes/OwnerAppRoutes";
 
+// --- NEW UNIFIED PAGES ---
+// Ensure these paths match where you saved the files above
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
 
 function App() {
   return (
