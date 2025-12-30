@@ -7,15 +7,15 @@ import {
 } from 'react-icons/fa';
 
 const actionButtons = [
-  { path: "/search-boardings", icon: FaSearch, label: "Search Boardings" },
-  { path: "/appointmentpage", icon: FaCalendarAlt, label: "View Appointments" },
-  { path: "/billing", icon: FaCreditCard, label: "Pay Bills" },
+  { path: "/student/search-boardings", icon: FaSearch, label: "Search Boardings" },
+  { path: "/student/appointmentpage", icon: FaCalendarAlt, label: "View Appointments" },
+  { path: "/student/billing", icon: FaCreditCard, label: "Pay Bills" },
 ];
 
 const manageButtons = [
-  { path: "/maintenance", icon: FaTools, label: "Maintenance Requests" },
-  { path: "/reports", icon: FaFlag, label: "Report Issues" },
-  { path: "/profile", icon: FaUserCog, label: "Profile Settings" },
+  { path: "/student/maintenance", icon: FaTools, label: "Maintenance Requests" },
+  { path: "/student/reports", icon: FaFlag, label: "Report Issues" },
+  { path: "/student/profile", icon: FaUserCog, label: "Profile Settings" },
 ];
 
 const QuickActionButton = ({ path, icon: Icon, label }) => (

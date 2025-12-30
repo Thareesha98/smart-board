@@ -1,16 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCalendarPlus } from 'react-icons/fa';
+import { FaCalendarPlus, FaCheckCircle } from 'react-icons/fa';
 
 const AppointmentForm = ({ formData, updateField, onSubmit, isSubmitting, isSuccess, timeSlots }) => {
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await onSubmit();
-    if (result.success) {
-      alert(result.message);
-    } else {
-      alert(result.message);
-    }
+    await onSubmit(); 
   };
 
   return (
@@ -75,17 +71,17 @@ const AppointmentForm = ({ formData, updateField, onSubmit, isSubmitting, isSucc
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isSuccess}
           className={`
             w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all mt-2
             ${isSuccess 
-              ? 'bg-green-600 text-white shadow-lg shadow-green-600/30' 
+              ? 'bg-green-600 text-white shadow-lg shadow-green-600/30 cursor-default' 
               : 'bg-primary text-white hover:bg-primary-dark shadow-lg shadow-primary/30'
             } 
-            disabled:opacity-50 disabled:cursor-not-allowed
+            disabled:opacity-90
           `}
         >
-          <FaCalendarPlus />
+          {isSuccess ? <FaCheckCircle /> : <FaCalendarPlus />}
           {isSubmitting ? 'Scheduling...' : isSuccess ? 'Scheduled Successfully' : 'Confirm Appointment'}
         </motion.button>
       </form>
