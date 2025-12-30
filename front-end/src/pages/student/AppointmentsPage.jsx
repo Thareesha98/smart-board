@@ -29,13 +29,13 @@ const AppointmentsPage = () => {
   const [modalContent, setModalContent] = useState({});
   const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
 
-  // Define the order of tabs explicitly
   const categories = ['upcoming', 'visited', 'selected', 'cancelled', 'rejected'];
 
   const openDecisionConfirmation = (id, decision) => {
     const appointment = getAppointmentById(id);
-    setCurrentAppointmentId(id);
+    if (!appointment) return; // Safety Check
 
+    setCurrentAppointmentId(id);
     setModalContent({
       title: decision === "select" ? "Confirm Selection" : "Confirm Rejection",
       message: `Are you sure you want to ${decision} **${appointment.boardingName}**?`,
@@ -66,9 +66,14 @@ const AppointmentsPage = () => {
       setCurrentAppointmentId(id); 
       setIsScheduleModalOpen(true); 
     } else if (action === "cancel") {
-      if (!window.confirm(`Confirm cancellation for ${appointment.boardingName}?`)) return;
-      handleStatusChange(id, 'cancelled');
-      setCurrentAppointmentId(null);
+      // ✅ FIXED: Safer check for cancellation
+      if (!appointment) return;
+      
+      const confirmMsg = `Are you sure you want to cancel the visit to ${appointment.boardingName}?`;
+      if (window.confirm(confirmMsg)) {
+          handleStatusChange(id, 'cancelled');
+          setCurrentAppointmentId(null);
+      }
     } else {
       openDecisionConfirmation(id, action);
     }
@@ -170,7 +175,7 @@ const AppointmentsPage = () => {
                 category === "upcoming" ? "clock"
                 : category === "visited" ? "eye"
                 : category === "selected" ? "check-circle"
-                : category === "rejected" ? "ban" // Icon for Rejected
+                : category === "rejected" ? "ban"
                 : "times-circle"
               }`}
               label={category.charAt(0).toUpperCase() + category.slice(1)}
