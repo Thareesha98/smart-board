@@ -18,5 +18,4 @@ public class MaintenanceCreateDTO {
     private MaintenanceUrgency maintenanceUrgency;
     
     private List<String> imageUrls;
-
 }
