@@ -13,31 +13,48 @@ const UTILS = {
       minute: "2-digit",
       hour12: true,
     }),
+  // ✅ UPDATED COLOR SCHEME
   getStatusStyle: (status) => {
     const styles = {
-      pending: {
-        colorClass: "bg-accent",
-        textClass: "text-accent",
-        bgClass: "bg-accent/10",
-        icon: "fas fa-hourglass-half",
+      // Orange (Pending/Upcoming)
+      pending: { 
+        colorClass: "bg-orange-500", 
+        textClass: "text-orange-600", 
+        bgClass: "bg-orange-100 border-orange-200", 
+        icon: "fas fa-clock",
+        label: "Upcoming" 
       },
-      confirmed: {
-        colorClass: "bg-success",
-        textClass: "text-success",
-        bgClass: "bg-success/10",
+      // Green (Confirmed/Selected)
+      confirmed: { 
+        colorClass: "bg-green-600", 
+        textClass: "text-green-600", 
+        bgClass: "bg-green-100 border-green-200", 
         icon: "fas fa-check-circle",
+        label: "Confirmed" 
       },
-      visited: {
-        colorClass: "bg-info",
-        textClass: "text-info",
-        bgClass: "bg-info/10",
+      // Blue (Visited)
+      visited: { 
+        colorClass: "bg-blue-600", 
+        textClass: "text-blue-600", 
+        bgClass: "bg-blue-100 border-blue-200", 
         icon: "fas fa-eye",
+        label: "Visited"
       },
-      cancelled: {
-        colorClass: "bg-error",
-        textClass: "text-error",
-        bgClass: "bg-error/10",
-        icon: "fas fa-times-circle",
+      // Red (Cancelled by Student)
+      cancelled: { 
+        colorClass: "bg-red-500", 
+        textClass: "text-red-500", 
+        bgClass: "bg-red-50 border-red-200", 
+        icon: "fas fa-times",
+        label: "Cancelled" 
+      },
+      // Dark Red (Rejected by Owner)
+      rejected: { 
+        colorClass: "bg-red-900", 
+        textClass: "text-red-900", 
+        bgClass: "bg-red-200 border-red-800", 
+        icon: "fas fa-ban",
+        label: "Rejected" 
       },
     };
     return styles[status] || {};
@@ -49,6 +66,8 @@ const AppointmentsPage = () => {
   const [filter, setFilter] = useState("pending");
 
   const handleAction = (id, newStatus) => {
+    // Logic: Updates state.
+    // If student rescheduled, it would likely come in as a status reset to 'pending' from backend.
     setAppointments((prev) =>
       prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app))
     );
@@ -59,8 +78,11 @@ const AppointmentsPage = () => {
       acc[app.status] = (acc[app.status] || 0) + 1;
       return acc;
     },
-    { pending: 0, confirmed: 0, visited: 0, cancelled: 0 }
+    { pending: 0, confirmed: 0, visited: 0, cancelled: 0, rejected: 0 }
   );
+
+  // Tabs list to ensure order
+  const tabs = ['pending', 'confirmed', 'visited', 'cancelled', 'rejected'];
 
   return (
     <div className="pt-4 space-y-8 min-h-screen bg-light pb-10">
@@ -73,8 +95,8 @@ const AppointmentsPage = () => {
       />
 
       <section className="p-6 rounded-report shadow-custom bg-card-bg border border-light mx-2">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.keys(counts).map((status) => (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {tabs.map((status) => (
             <StatusTab
               key={status}
               status={status}
@@ -105,6 +127,10 @@ const AppointmentsPage = () => {
                 formatTime={UTILS.formatTime}
               />
             ))}
+            
+            {appointments.filter((app) => app.status === filter).length === 0 && (
+                <div className="text-center py-8 text-gray-400 italic">No appointments found in this category.</div>
+            )}
         </div>
       </section>
     </div>
