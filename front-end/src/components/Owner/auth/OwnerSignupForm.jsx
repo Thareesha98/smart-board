@@ -16,7 +16,7 @@ import {
   validatePassword,
   validatePhone,
   validateRequired,
-} from "../../../utils/student/validation.js"; 
+} from "../../../utils/student/validation.js";
 
 const SignupForm = ({ onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({

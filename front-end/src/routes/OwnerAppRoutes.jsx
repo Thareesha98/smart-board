@@ -1,18 +1,16 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
-// Auth Components
-import OwnerProtectedRoute from "../components/Owner/common/OwnerProtectedRoute.jsx"; // Ensure this uses <Outlet />
-import LoginPage from "../pages/owner/auth/OwnerLoginPage.jsx";
-import SignupPage from "../pages/owner/auth/OwnerSignupPage.jsx";
+// Auth Components (Login/Signup removed from here)
+import OwnerProtectedRoute from "../components/Owner/common/OwnerProtectedRoute.jsx";
 
 // Owner Pages
 import CreateAdPage from "../pages/owner/CreateAdPage";
 import EditAdPage from "../pages/owner/EditAdPage";
 import MyAdsPage from "../pages/owner/MyAdsPage";
 import OwnerLayout from "../layouts/OwnerLayout";
+import Dashboard from "../pages/owner/Dashboard";
 import AppointmentsPage from "../pages/owner/AppointmentsPage";
 import ProfilePage from "../pages/owner/ProfilePage";
-import Dashboard from "../pages/owner/Dashboard";
 import MyBoardingsPage from "../pages/owner/MyBoardingsPage";
 import UtilityPage from "../pages/owner/UtilityPage";
 import ReportsPage from "../pages/owner/ReportsPage";
@@ -24,16 +22,9 @@ import MaintenancePage from "../pages/owner/MaintenancePage.jsx";
 const OwnerAppRoutes = () => {
   return (
     <Routes>
-      {/* ==================== PUBLIC ROUTES ==================== */}
-      <Route path="login" element={<LoginPage />} />
-      <Route path="signup" element={<SignupPage />} />
-
       {/* ==================== PROTECTED OWNER ROUTES ==================== */}
-      {/* Layer 1: Security Guard */}
       <Route element={<OwnerProtectedRoute />}>
-        {/* Layer 2: Main Layout (Sidebar + Header) */}
         <Route path="/" element={<OwnerLayout />}>
-          {/* Layer 3: The Pages */}
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
 
@@ -48,7 +39,6 @@ const OwnerAppRoutes = () => {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="payment" element={<PaymentPage />} />
 
-          {/* Reports Module */}
           <Route path="reports" element={<ReportsPage />} />
           <Route path="reports/add" element={<ReportStudentPage />} />
 
@@ -60,8 +50,8 @@ const OwnerAppRoutes = () => {
       </Route>
 
       {/* ==================== FALLBACK ROUTE ==================== */}
-      {/* Redirect unknown routes to login (or dashboard if already logged in) */}
-      <Route path="*" element={<Navigate to="/owner/login" replace />} />
+      {/* Redirects to global login if user is not authenticated or path is wrong */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };
