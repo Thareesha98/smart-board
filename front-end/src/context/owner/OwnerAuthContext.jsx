@@ -8,6 +8,8 @@ export const OwnerAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  
+
   // 1. Check for logged-in user on load
   useEffect(() => {
     const initializeAuth = async () => {

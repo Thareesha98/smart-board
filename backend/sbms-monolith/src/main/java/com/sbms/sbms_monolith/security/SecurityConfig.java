@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
 
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
+                
 
                 .anyRequest().authenticated()
             )
