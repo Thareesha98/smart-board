@@ -1,8 +1,4 @@
-import {
-  Route,
-  Routes,
-} from "react-router-dom";
-import { StudentAuthProvider } from "./context/student/StudentAuthContext.jsx";
+import { Route, Routes } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import Home from "./Home.jsx";
 
@@ -13,26 +9,33 @@ import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
 // --- ROUTE FILES ---
 import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
 import OwnerAppRoutes from "./routes/OwnerAppRoutes";
-import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
-import Home from "./Home.jsx";
+
+// --- NEW UNIFIED PAGES ---
+// Ensure these paths match where you saved the files above
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
 
 function App() {
   return (
     <>
       <StudentAuthProvider>
         <OwnerAuthProvider>
-          
-            <ScrollToTop />
-            <Routes>
-              {/* Delegate to Student routes if path starts with /student or is root */}
-              <Route path="/student/*" element={<StudentAppRoutes />} />
+          <ScrollToTop />
+          <Routes>
+            {/* ==================== GLOBAL AUTH ROUTES ==================== */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
 
-              {/* Delegate to Owner routes if path starts with /ownerLayout */}
-              <Route path="/owner/*" element={<OwnerAppRoutes />} />
-              {/* Default Landing Logic */}
-              <Route path="/" element={<Home />} />
-            </Routes>
-          
+            {/* ==================== ROLE SPECIFIC ROUTES ==================== */}
+            {/* Student routes (Dashboard, etc.) */}
+            <Route path="/student/*" element={<StudentAppRoutes />} />
+
+            {/* Owner routes (Dashboard, My Ads, etc.) */}
+            <Route path="/owner/*" element={<OwnerAppRoutes />} />
+
+            {/* ==================== LANDING PAGE ==================== */}
+            <Route path="/" element={<Home />} />
+          </Routes>
         </OwnerAuthProvider>
       </StudentAuthProvider>
     </>
