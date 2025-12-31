@@ -1,12 +1,12 @@
 import React from 'react';
 
-const SubmissionCard = ({ ad, onApprove, onReject, onViewDetails }) => {
+const SubmissionCard = ({ ad, onApprove, onReject, onDelete, onViewDetails }) => {
   const isPending = ad.status === 'pending';
   const isApproved = ad.status === 'approved';
+  const isRejected = ad.status === 'rejected';
 
   return (
     <div className="bg-white border border-[#e0d6c5] rounded-[25px] overflow-hidden hover:shadow-xl transition-all group">
-      {/* Ad Image Preview */}
       <div className="h-44 relative overflow-hidden">
         <img 
           src={ad.adDetails.image || 'https://via.placeholder.com/300x150?text=No+Image'} 
@@ -31,7 +31,8 @@ const SubmissionCard = ({ ad, onApprove, onReject, onViewDetails }) => {
         <div className="flex justify-between items-start mb-1">
           <h4 className="font-bold text-[#332720] truncate text-base flex-1">{ad.adDetails.title}</h4>
           <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
-            isPending ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'
+            isPending ? 'bg-orange-100 text-orange-600' : 
+            isApproved ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
           }`}>
             {ad.status}
           </span>
@@ -56,9 +57,19 @@ const SubmissionCard = ({ ad, onApprove, onReject, onViewDetails }) => {
             </div>
           ) : (
             <div className="flex gap-2">
-              <button disabled className="flex-1 bg-gray-100 text-gray-500 py-2.5 rounded-xl text-xs font-bold">
-                Processed
+              <div className="flex-1 bg-gray-50 text-gray-400 py-2.5 rounded-xl text-xs font-bold text-center border border-gray-100 uppercase tracking-widest">
+                {ad.status}
+              </div>
+              
+              {/* Delete Option for Approved/Rejected Ads */}
+              <button 
+                onClick={() => onDelete(ad.id)}
+                className="w-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all border border-red-100"
+                title="Delete Submission"
+              >
+                <i className="fas fa-trash-alt text-xs"></i>
               </button>
+
               {isApproved && (
                 <a 
                   href={ad.adDetails.image} 
@@ -67,7 +78,7 @@ const SubmissionCard = ({ ad, onApprove, onReject, onViewDetails }) => {
                   rel="noopener noreferrer"
                   className="flex-1 bg-blue-50 text-blue-600 py-2.5 rounded-xl text-xs font-bold text-center hover:bg-blue-100 transition-all"
                 >
-                  <i className="fas fa-download mr-1"></i> Download
+                  <i className="fas fa-download"></i>
                 </a>
               )}
             </div>
