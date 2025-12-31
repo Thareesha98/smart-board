@@ -13,6 +13,7 @@ const AdminThirdParty = ({ onNavigate, onLogout }) => {
     const {
         submissions, campaigns, plans, activeTab, setActiveTab,
         stats, toast, prefillAdData, handleApprove, handleReject,
+        handleDeleteSubmission, // New function from updated hook
         startPublishWorkflow, createAd, toggleCampaignStatus, 
         updateCampaign, addPlan, updatePlan, togglePlanStatus, deletePlan
     } = useThirdPartyAds();
@@ -34,7 +35,7 @@ const AdminThirdParty = ({ onNavigate, onLogout }) => {
                 <ThirdPartyStats stats={stats || { pending: 0, activeCampaigns: 0, totalRevenue: 0 }} />
 
                 {/* Tab Navigation */}
-                <div className="flex gap-8 mb-10 border-b border-gray-100 overflow-x-auto no-scrollbar">
+                <div className="flex gap-8 mb-10 border-b border-gray-100 overflow-x-auto no-scrollbar text-[15px]">
                     {['submissions', 'create', 'campaigns', 'plans'].map((id) => (
                         <button 
                             key={id} 
@@ -53,8 +54,11 @@ const AdminThirdParty = ({ onNavigate, onLogout }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {submissions.map(ad => (
                                 <SubmissionCard 
-                                    key={ad.id} ad={ad} 
-                                    onApprove={handleApprove} onReject={handleReject}
+                                    key={ad.id} 
+                                    ad={ad} 
+                                    onApprove={handleApprove} 
+                                    onReject={handleReject}
+                                    onDelete={handleDeleteSubmission} // Now functional
                                     onViewDetails={() => setSelectedAd(ad)}
                                     onPublishWorkflow={startPublishWorkflow}
                                 />
