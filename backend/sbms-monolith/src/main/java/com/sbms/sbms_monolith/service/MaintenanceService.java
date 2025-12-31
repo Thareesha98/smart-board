@@ -46,7 +46,7 @@ public class MaintenanceService {
         m.setBoarding(boarding);
         m.setTitle(dto.getTitle());
         m.setDescription(dto.getDescription());
-        //m.setStudentNote(dto.getStudentNote());
+        m.setStudentNote(dto.getStudentNote());
         m.setImageUrls(dto.getImageUrls()); // ✅ S3 URLs
         m.setStatus(MaintenanceStatus.PENDING);
 
