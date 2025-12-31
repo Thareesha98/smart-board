@@ -7,14 +7,23 @@ public class MaintenanceMapper {
 
     public static MaintenanceResponseDTO toDTO(Maintenance m) {
 
+        if (m == null) {
+            return null;
+        }
+
         MaintenanceResponseDTO dto = new MaintenanceResponseDTO();
 
         dto.setId(m.getId());
-        dto.setBoardingId(m.getBoarding().getId());
-        dto.setBoardingTitle(m.getBoarding().getTitle());
 
-        dto.setStudentId(m.getStudent().getId());
-        dto.setStudentName(m.getStudent().getFullName());
+        if (m.getBoarding() != null) {
+            dto.setBoardingId(m.getBoarding().getId());
+            dto.setBoardingTitle(m.getBoarding().getTitle());
+        }
+
+        if (m.getStudent() != null) {
+            dto.setStudentId(m.getStudent().getId());
+            dto.setStudentName(m.getStudent().getFullName());
+        }
 
         dto.setTitle(m.getTitle());
         dto.setDescription(m.getDescription());
@@ -23,6 +32,8 @@ public class MaintenanceMapper {
         dto.setStatus(m.getStatus());
         dto.setStudentNote(m.getStudentNote());
         dto.setOwnerNote(m.getOwnerNote());
+        dto.setMaintenanceUrgency(m.getMaintenanceUrgency());
+
 
         return dto;
     }
