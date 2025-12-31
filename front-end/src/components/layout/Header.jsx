@@ -1,6 +1,11 @@
 import React from 'react';
 
-const Header = ({ title = "Welcome back, Alex!", subtitle = "Manage your platform efficiently", onNavigate }) => {
+const Header = ({ 
+  title = "Welcome back, Alex!", 
+  subtitle = "Manage your platform efficiently", 
+  onNavigate,
+  onLogout 
+}) => {
   return (
     <header className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white/70 backdrop-blur-sm py-4 px-6 lg:py-8 lg:px-10 rounded-[25px] shadow-custom sticky top-4 z-40 border border-white/20">
       
@@ -9,7 +14,7 @@ const Header = ({ title = "Welcome back, Alex!", subtitle = "Manage your platfor
         <p className="text-text-muted text-[10px] lg:text-sm">{subtitle}</p>
       </div>
 
-      <div className="flex items-center gap-3 md:gap-6">
+      <div className="flex items-center gap-3 md:gap-4 lg:gap-6">
         {/* MOBILE ONLY: Third Party Ads Shortcut */}
         <button 
           onClick={() => onNavigate?.('thirdparty')}
@@ -19,24 +24,32 @@ const Header = ({ title = "Welcome back, Alex!", subtitle = "Manage your platfor
           <span className="text-[10px] font-bold uppercase">Ads</span>
         </button>
 
-        <div className="hidden sm:flex gap-3">
-          <div className="bg-background-light px-4 py-2 rounded-[15px] text-center border border-white/50">
-            <span className="block text-[10px] text-text-muted uppercase font-bold tracking-wider">Online</span>
-            <span className="block font-bold text-sm lg:text-base text-text-dark">247</span>
-          </div>
-        </div>
-
+        {/* Notifications */}
         <div className="relative p-2.5 lg:p-3 rounded-full bg-background-light hover:bg-accent hover:text-white transition-colors cursor-pointer group shadow-sm">
           <i className="fas fa-bell text-sm lg:text-xl"></i>
           <span className="absolute -top-1 -right-1 bg-red-alert text-white rounded-full w-4 h-4 lg:w-5 lg:h-5 text-[9px] lg:text-[10px] flex items-center justify-center font-bold shadow-md">5</span>
         </div>
 
-        <div className="flex items-center gap-3 p-1.5 lg:px-4 lg:py-2 bg-background-light rounded-full lg:rounded-[25px] cursor-pointer hover:bg-accent hover:text-white transition-colors group shadow-sm border border-white/50">
-          <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="User" className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-accent object-cover" />
+        {/* User Profile Section */}
+        <div className="flex items-center gap-2 p-1.5 pr-2 lg:px-4 lg:py-2 bg-background-light rounded-full lg:rounded-[25px] border border-white/50 shadow-sm">
+          <img 
+            src="https://randomuser.me/api/portraits/men/75.jpg" 
+            alt="User" 
+            className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-accent object-cover" 
+          />
           <div className="hidden md:flex flex-col">
-            <span className="font-bold text-sm leading-tight text-inherit">Alex Morgan</span>
+            <span className="font-bold text-sm leading-tight text-text-dark">Alex Morgan</span>
             <span className="text-[10px] opacity-60 uppercase font-medium">Admin</span>
           </div>
+
+          {/* LOGOUT BUTTON - MOBILE ONLY (lg:hidden) */}
+          <button 
+            onClick={onLogout}
+            className="lg:hidden ml-1 w-8 h-8 flex items-center justify-center rounded-full bg-red-alert/10 text-red-alert active:bg-red-alert active:text-white transition-all"
+            title="Logout"
+          >
+            <i className="fas fa-sign-out-alt text-xs"></i>
+          </button>
         </div>
       </div>
     </header>
