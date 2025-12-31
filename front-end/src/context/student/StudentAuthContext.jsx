@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../../api/api";
-import StudentService from "../../api/student/StudentService";
 
 const StudentAuthContext = createContext(null);
 
