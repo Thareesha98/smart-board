@@ -9,16 +9,26 @@
 /* 3. Custom Styles THIRD */
 @layer base {
   html {
-    /* This makes 1rem = 20px instead of 16px, simulating 125% zoom */
-    font-size: 125%; 
+    /* 90% zoom look: 1rem now equals 14.4px instead of 16px */
+    font-size: 90%; 
     font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Updated Utility Layer */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }
 
 body {
   margin: 0;
   background-color: #E8DBC7;
-  /* Ensure text rendering stays smooth at larger sizes */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
