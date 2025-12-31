@@ -1,6 +1,4 @@
 package com.sbms.sbms_monolith.dto.maintenance;
-
-
 import java.util.List;
 
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
