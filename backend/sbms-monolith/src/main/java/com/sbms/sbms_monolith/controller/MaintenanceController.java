@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceCreateDTO;
@@ -29,9 +28,6 @@ public class MaintenanceController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // -----------------------------------------
-    // STUDENT: CREATE MAINTENANCE (WITH IMAGES)
-    // -----------------------------------------
     @PostMapping(consumes = "application/json")
     @PreAuthorize("hasRole('STUDENT')")
     public MaintenanceResponseDTO create(
@@ -47,9 +43,6 @@ public class MaintenanceController {
     }
 
 
-    // -----------------------------------------
-    // STUDENT: VIEW OWN REQUESTS
-    // -----------------------------------------
     @GetMapping("/student")
     @PreAuthorize("hasRole('STUDENT')")
     public List<MaintenanceResponseDTO> studentRequests(Authentication authentication) {
@@ -60,9 +53,7 @@ public class MaintenanceController {
         return maintenanceService.getForStudent(student.getId());
     }
 
-    // -----------------------------------------
-    // OWNER: VIEW OWN REQUESTS
-    // -----------------------------------------
+    
     @GetMapping("/owner")
     @PreAuthorize("hasRole('OWNER')")
     public List<MaintenanceResponseDTO> ownerRequests(Authentication authentication) {
@@ -73,9 +64,7 @@ public class MaintenanceController {
         return maintenanceService.getForOwner(owner.getId());
     }
 
-    // -----------------------------------------
-    // OWNER: DECIDE
-    // -----------------------------------------
+   
     @PutMapping("/owner/{maintenanceId}")
     @PreAuthorize("hasRole('OWNER')")
     public MaintenanceResponseDTO decide(
