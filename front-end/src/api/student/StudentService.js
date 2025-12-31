@@ -17,7 +17,39 @@ const calculateEndTime = (date, time) => {
 const StudentService = {
 
   // ==========================================
-  // 1. REPORTS (Your Existing Code)
+  // 1. AUTHENTICATION (Called by Context)
+  // ==========================================
+  
+  // Matches UserController: @PostMapping("/api/users/login")
+  loginUser: async (credentials) => {
+    const response = await api.post('/users/login', credentials);
+    return response.data; // Returns UserResponseDTO
+  },
+
+  // Matches UserController: @PostMapping("/api/users/register")
+  registerUser: async (userData) => {
+    const response = await api.post('/users/register', userData);
+    return response.data; // Returns UserResponseDTO
+  },
+
+  // ==========================================
+  // 2. PROFILE DATA 
+  // ==========================================
+
+  // Matches UserController: @GetMapping("/api/users/{id}")
+  getProfile: async (userId) => {
+    const response = await api.get(`/users/${userId}`);
+    return response.data;
+  },
+
+  // Matches UserController: @PutMapping("/api/users/{id}")
+  updateProfile: async (userId, updateData) => {
+    const response = await api.put(`/users/${userId}`, updateData);
+    return response.data;
+  },
+
+  // ==========================================
+  // 3. REPORTS (Your Existing Code)
   // ==========================================
   
   getSentReports: async (studentId) => {
@@ -33,7 +65,7 @@ const StudentService = {
   },
 
   // ==========================================
-  // 2. BOARDINGS (Search & Details)
+  // 4. BOARDINGS (Search & Details)
   // ==========================================
 
   // Matches BoardingController: @GetMapping("/api/boardings/search")
@@ -62,7 +94,7 @@ const StudentService = {
   },
 
   // ==========================================
-  // 3. APPOINTMENTS (Visits)
+  // 5. APPOINTMENTS (Visits)
   // ==========================================
 
   // Matches AppointmentController: @PostMapping("/api/appointments/student/{id}")
@@ -92,7 +124,7 @@ const StudentService = {
   },
 
   // ==========================================
-  // 4. REVIEWS (Ratings)
+  // 6. REVIEWS (Ratings)
   // ==========================================
 
   // Matches ReviewController: @PostMapping("/api/reviews")
