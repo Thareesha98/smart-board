@@ -14,6 +14,27 @@ export const useThirdPartyAds = () => {
         setTimeout(() => setToast(null), 3000);
     }, []);
 
+    // --- Submission Handlers ---
+    const handleApprove = (id) => {
+        setSubmissions(prev => prev.map(ad => 
+            ad.id === id ? { ...ad, status: 'approved' } : ad
+        ));
+        showToast("Ad submission approved");
+    };
+
+    const handleReject = (id) => {
+        setSubmissions(prev => prev.map(ad => 
+            ad.id === id ? { ...ad, status: 'rejected' } : ad
+        ));
+        showToast("Ad submission rejected", "error");
+    };
+
+    const handleDeleteSubmission = (id) => {
+        setSubmissions(prev => prev.filter(ad => ad.id !== id));
+        showToast("Submission removed from history");
+    };
+
+    // --- Plan Handlers ---
     const togglePlanStatus = (id) => {
         setPlans(prev => prev.map(p => 
             p.id === id ? { ...p, status: p.status === 'active' ? 'inactive' : 'active' } : p
@@ -36,14 +57,36 @@ export const useThirdPartyAds = () => {
         showToast("Plan deleted", "error");
     };
 
+    // --- Stats Calculation ---
+    const stats = useMemo(() => ({
+        pending: submissions.filter(s => s.status === 'pending').length,
+        activeCampaigns: campaigns.filter(c => c.status === 'active').length,
+        totalRevenue: plans.reduce((acc, p) => acc + (parseInt(p.price) || 0), 0)
+    }), [submissions, campaigns, plans]);
+
     return {
-        submissions, campaigns, plans, activeTab, setActiveTab, toast,
+        submissions, campaigns, plans, activeTab, setActiveTab, toast, stats,
         prefillAdData, togglePlanStatus, updatePlan, addPlan, deletePlan,
-        handleApprove: (id) => {}, // Placeholder
-        handleReject: (id) => {}, // Placeholder
-        startPublishWorkflow: (ad) => {}, // Placeholder
-        createAd: (data) => {}, // Placeholder
-        toggleCampaignStatus: (id) => {}, // Placeholder
-        updateCampaign: (id, data) => {} // Placeholder
+        handleApprove, 
+        handleReject, 
+        handleDeleteSubmission,
+        startPublishWorkflow: (ad) => {
+            setPrefillAdData(ad);
+            setActiveTab('create');
+        },
+        createAd: (data) => {
+            setCampaigns(prev => [...prev, { ...data, id: Date.now(), status: 'active' }]);
+            showToast("Ad published successfully");
+            setActiveTab('campaigns');
+        },
+        toggleCampaignStatus: (id) => {
+            setCampaigns(prev => prev.map(c => 
+                c.id === id ? { ...c, status: c.status === 'active' ? 'paused' : 'active' } : c
+            ));
+        },
+        updateCampaign: (id, data) => {
+            setCampaigns(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+            showToast("Campaign updated");
+        }
     };
 };
