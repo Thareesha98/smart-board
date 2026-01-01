@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sbms.sbms_monolith.common.BaseEntity;
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
+import com.sbms.sbms_monolith.model.enums.MaintenanceUrgency;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -40,4 +41,9 @@ public class Maintenance extends BaseEntity {
 
     private String studentNote;
     private String ownerNote;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "urgency", nullable = true)
+    private MaintenanceUrgency maintenanceUrgency;
+
 }
