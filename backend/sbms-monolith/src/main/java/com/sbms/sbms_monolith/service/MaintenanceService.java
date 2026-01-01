@@ -46,9 +46,10 @@ public class MaintenanceService {
         m.setBoarding(boarding);
         m.setTitle(dto.getTitle());
         m.setDescription(dto.getDescription());
-        m.setStudentNote(dto.getStudentNote());
-        m.setImageUrls(dto.getImageUrls()); // ✅ S3 URLs
+        m.setStudentNote(null);
+        m.setImageUrls(dto.getImageUrls()); 
         m.setStatus(MaintenanceStatus.PENDING);
+        m.setMaintenanceUrgency(dto.getMaintenanceUrgency());
 
         maintenanceRepo.save(m);
         return MaintenanceMapper.toDTO(m);
@@ -91,8 +92,7 @@ public class MaintenanceService {
         m.setStatus(dto.getStatus());
         m.setOwnerNote(dto.getOwnerNote());
 
-        // If rejected → cleanup images
-        if (dto.getStatus() == MaintenanceStatus.REJECTED && m.getImageUrls() != null) {
+                if (dto.getStatus() == MaintenanceStatus.REJECTED && m.getImageUrls() != null) {
             for (String url : m.getImageUrls()) {
                 s3Service.deleteFile(url);
             }
