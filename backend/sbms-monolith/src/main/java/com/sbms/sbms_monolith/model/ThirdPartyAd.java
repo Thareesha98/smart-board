@@ -1,7 +1,8 @@
 package com.sbms.sbms_monolith.model;
 
 import com.sbms.sbms_monolith.common.BaseEntity;
-import com.sbms.sbms_monolith.model.enums.Status;
+import com.sbms.sbms_monolith.model.enums.AdPanelType;
+import com.sbms.sbms_monolith.model.enums.AdStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,14 +31,22 @@ public class ThirdPartyAd extends BaseEntity {
     private LocalDateTime expiryDate;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.PENDING;
+    @Column(nullable = false)
+    private AdStatus status = AdStatus.PENDING;
 
-    // Matches the "Plan" logic in your frontend useThirdPartyAds.js
+    /**
+     * planName and planPrice store the snapshot of the pricing plan 
+     * at the time of purchase.
+     */
     private String planName; 
     private Double planPrice;
 
-    @ElementCollection
-    @CollectionTable(name = "ad_target_panels", joinColumns = @JoinColumn(name = "ad_id"))
-    @Column(name = "panel_name")
-    private List<String> targetPanels = new ArrayList<>();
+    @ElementCollection(targetClass = AdPanelType.class)
+    @CollectionTable(
+        name = "ad_target_panels", 
+        joinColumns = @JoinColumn(name = "ad_id")
+    )
+    @Column(name = "panel_type")
+    @Enumerated(EnumType.STRING)
+    private List<AdPanelType> targetPanels = new ArrayList<>();
 }
