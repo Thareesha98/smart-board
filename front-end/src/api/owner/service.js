@@ -115,25 +115,27 @@ export const deleteBoarding = async (boardingId) => {
 // 🛠️ MAINTENANCE SERVICES
 // =================================================================
 
-// 1. Get all maintenance requests for an Owner
-export const getOwnerMaintenanceRequests = async (ownerId) => {
+// 1. Get all maintenance requests for the logged-in Owner
+// Matches Java: @GetMapping("/owner") inside MaintenanceController
+// Note: No ownerId needed param; backend takes it from the token/auth
+export const getOwnerMaintenanceRequests = async () => {
   try {
-    // Matches Controller: GET /api/maintenance/owner/{ownerId}
-    const response = await api.get(`/maintenance/owner/${ownerId}`);
-    return response.data;
+    const response = await api.get(`/maintenance/owner`);
+    return response.data; 
   } catch (error) {
     console.error("Error fetching maintenance requests:", error);
     throw error;
   }
 };
 
-// 2. Update the status of a request
-export const updateMaintenanceStatus = async (requestId, newStatus) => {
+// 2. Update the status of a request (Decide)
+// Matches Java: @PutMapping("/owner/{maintenanceId}")
+// Expects MaintenanceDecisionDTO body
+export const updateMaintenanceStatus = async (requestId, newStatus, ownerNote = "") => {
   try {
-    // Matches Controller: PATCH /api/maintenance/{requestId}/status
-    // Body: { "status": "COMPLETED" }
-    const response = await api.patch(`/maintenance/${requestId}/status`, {
+    const response = await api.put(`/maintenance/owner/${requestId}`, {
       status: newStatus,
+      ownerNote: ownerNote 
     });
     return response.data;
   } catch (error) {
