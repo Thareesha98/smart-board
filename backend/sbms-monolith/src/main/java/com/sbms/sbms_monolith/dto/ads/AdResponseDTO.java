@@ -1,6 +1,7 @@
 package com.sbms.sbms_monolith.dto.ads;
 
-import com.sbms.sbms_monolith.model.enums.Status;
+import com.sbms.sbms_monolith.model.enums.AdPanelType;
+import com.sbms.sbms_monolith.model.enums.AdStatus;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,8 +14,9 @@ public class AdResponseDTO {
     private String redirectUrl;
     private String bannerImageUrl;
     private LocalDateTime expiryDate;
-    private Status status;
+    private AdStatus status; // Changed to AdStatus
     private String planName;
-    private List<String> targetPanels;
+    private Double planPrice;
+    private List<AdPanelType> targetPanels; // Changed to Enum List
     private LocalDateTime createdAt;
 }
