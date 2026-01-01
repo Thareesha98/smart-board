@@ -1,5 +1,6 @@
 package com.sbms.sbms_monolith.dto.ads;
 
+import com.sbms.sbms_monolith.model.enums.AdPanelType;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,5 +14,5 @@ public class AdCreateDTO {
     private LocalDateTime expiryDate;
     private String planName;
     private Double planPrice;
-    private List<String> targetPanels;
+    private List<AdPanelType> targetPanels; // Changed to Enum List
 }
