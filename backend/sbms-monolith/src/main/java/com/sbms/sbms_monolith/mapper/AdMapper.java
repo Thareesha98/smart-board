@@ -3,7 +3,7 @@ package com.sbms.sbms_monolith.mapper;
 import com.sbms.sbms_monolith.dto.ads.AdCreateDTO;
 import com.sbms.sbms_monolith.dto.ads.AdResponseDTO;
 import com.sbms.sbms_monolith.model.ThirdPartyAd;
-import com.sbms.sbms_monolith.model.enums.Status;
+import com.sbms.sbms_monolith.model.enums.AdStatus;
 
 public class AdMapper {
 
@@ -17,7 +17,7 @@ public class AdMapper {
         ad.setTargetPanels(dto.getTargetPanels());
         ad.setPlanName(dto.getPlanName());
         ad.setPlanPrice(dto.getPlanPrice());
-        ad.setStatus(Status.PENDING);
+        ad.setStatus(AdStatus.PENDING); // Uses AdStatus
         return ad;
     }
 
@@ -29,9 +29,10 @@ public class AdMapper {
         dto.setRedirectUrl(ad.getRedirectUrl());
         dto.setBannerImageUrl(ad.getBannerImageUrl());
         dto.setExpiryDate(ad.getExpiryDate());
-        dto.setStatus(ad.getStatus());
+        dto.setStatus(ad.getStatus()); // Returns AdStatus
         dto.setTargetPanels(ad.getTargetPanels());
         dto.setPlanName(ad.getPlanName());
+        dto.setPlanPrice(ad.getPlanPrice());
         dto.setCreatedAt(ad.getCreatedAt());
         return dto;
     }
