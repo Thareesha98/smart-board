@@ -146,20 +146,20 @@ const AppointmentsPage = () => {
     <StudentLayout
       title="My Appointments"
       subtitle="Manage your boarding visits and selections"
-      headerRightContent={
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 whitespace-nowrap"
-          onClick={() => {
-            setCurrentAppointmentId(null);
-            setIsScheduleModalOpen(true);
-          }}
-        >
-          <FaPlus />
-          Schedule Visit
-        </motion.button>
-      }
+      // headerRightContent={
+      //   <motion.button
+      //     whileHover={{ scale: 1.05 }}
+      //     whileTap={{ scale: 0.95 }}
+      //     className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 whitespace-nowrap"
+      //     onClick={() => {
+      //       setCurrentAppointmentId(null);
+      //       setIsScheduleModalOpen(true);
+      //     }}
+      //   >
+      //     <FaPlus />
+      //     Schedule Visit
+      //   </motion.button>
+      // }
     >
       {/* ✅ UPDATED TABS SECTION */}
       <section className="bg-white p-3 sm:p-6 rounded-2xl shadow-sm mb-6 sm:mb-8 border border-gray-100">
