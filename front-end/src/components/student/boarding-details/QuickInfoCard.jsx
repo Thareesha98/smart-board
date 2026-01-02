@@ -17,6 +17,12 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
     users: FaUsers,
   };
 
+  // ✅ FIX: Ensure boarding exists before rendering
+  if (!boarding) return null;
+
+  // ✅ FIX: Safe access for quickStats to prevent .map() crash
+  const safeStats = boarding.quickStats || [];
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -26,15 +32,15 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
       {/* 1. Header Section */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-text-dark mb-2 leading-tight">
-          {boarding.name}
+          {boarding.name || "Boarding Name"}
         </h1>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-md border border-yellow-100">
             <span className="text-yellow-500 text-base">★</span>
-            <span className="font-bold text-text-dark">{boarding.rating}</span>
+            <span className="font-bold text-text-dark">{boarding.rating || "New"}</span>
           </div>
           <span className="text-text-muted text-sm">
-            ({boarding.reviewCount} reviews)
+            ({boarding.reviewCount || 0} reviews)
           </span>
         </div>
       </div>
@@ -44,10 +50,10 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
         <FaMapMarkerAlt className="text-accent mt-1 flex-shrink-0 text-lg" />
         <div>
           <p className="text-text-dark font-medium text-sm sm:text-base leading-snug">
-            {boarding.location.address}
+            {boarding.location?.address || "Address not available"}
           </p>
           <p className="text-xs sm:text-sm text-text-muted mt-1">
-            {boarding.location.distance}
+            {boarding.location?.distance || "Distance info unavailable"}
           </p>
         </div>
       </div>
@@ -56,7 +62,7 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
       <div className="border-t border-b border-gray-100 py-4">
         <div className="flex flex-wrap items-baseline gap-1">
           <span className="text-3xl sm:text-4xl font-bold text-accent">
-            LKR {boarding.price}
+            LKR {boarding.price || "0"}
           </span>
           <span className="text-text-muted font-medium">/month</span>
         </div>
@@ -67,22 +73,26 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
         )}
       </div>
 
-      {/* 4. Stats Section */}
+      {/* 4. Stats Section - FIXED CRASH HERE */}
       <div className="grid grid-cols-3 gap-3">
-        {boarding.quickStats.map((stat, idx) => {
-          const Icon = iconMap[stat.icon];
-          return (
-            <div
-              key={idx}
-              className="flex flex-col items-center justify-center bg-background-light rounded-xl p-3 hover:bg-gray-100 transition-colors"
-            >
-              <Icon className="text-2xl text-accent mb-2" />
-              <p className="text-xs font-bold text-text-dark text-center">
-                {stat.label}
-              </p>
-            </div>
-          );
-        })}
+        {safeStats.length > 0 ? (
+          safeStats.map((stat, idx) => {
+            const Icon = iconMap[stat.icon] || FaBed; // Default icon fallback
+            return (
+              <div
+                key={idx}
+                className="flex flex-col items-center justify-center bg-background-light rounded-xl p-3 hover:bg-gray-100 transition-colors"
+              >
+                <Icon className="text-2xl text-accent mb-2" />
+                <p className="text-xs font-bold text-text-dark text-center">
+                  {stat.label}
+                </p>
+              </div>
+            );
+          })
+        ) : (
+          <p className="text-xs text-text-muted col-span-3 text-center">No stats available</p>
+        )}
       </div>
 
       {/* 5. Action Buttons */}
@@ -91,7 +101,6 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onBookVisit}
-          // CHANGED: Reduced flex from flex-[2] to flex-[1.3] to give Save/Share more width on desktop
           className="flex-[1.3] bg-accent text-white py-3.5 rounded-xl font-bold text-sm sm:text-base shadow-lg shadow-accent/25 hover:shadow-accent/40 hover:bg-primary transition-all flex items-center justify-center gap-2"
         >
           <FaCalendarCheck />
@@ -103,7 +112,6 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            // ADDED: min-w-[80px] to ensure it doesn't get too small
             className="flex-1 min-w-[80px] border-2 border-gray-100 bg-white text-gray-600 py-3.5 rounded-xl font-semibold shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-500 hover:shadow-md transition-all flex items-center justify-center gap-2"
           >
             <FaHeart />
@@ -114,7 +122,6 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            // ADDED: min-w-[80px] to ensure it doesn't get too small
             className="flex-1 min-w-[80px] border-2 border-gray-100 bg-white text-gray-600 py-3.5 rounded-xl font-semibold shadow-sm hover:border-orange-200 hover:bg-orange-50 hover:text-accent hover:shadow-md transition-all flex items-center justify-center gap-2"
           >
             <FaShareAlt />
