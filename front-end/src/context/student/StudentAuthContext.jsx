@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../../api/api";
+import StudentService from "../../api/student/StudentService";
 
 const StudentAuthContext = createContext(null);
 
 export const StudentAuthProvider = ({ children }) => {
-  const [currentStudent, setCurrentStudent] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,16 +21,14 @@ export const StudentAuthProvider = ({ children }) => {
 
           // 🔒 Security Check: Ensure the saved user is a STUDENT
           if (user.role === "STUDENT") {
-            setCurrentStudent(user);
+            setCurrentUser(user);
             setIsAuthenticated(true);
           } else {
-            setIsAuthenticated(false);
-            setCurrentStudent(null);
+            handleLogout();
           }
         } catch (e) {
           console.error("Failed to parse user data", e);
-          localStorage.removeItem("user_data");
-          localStorage.removeItem("token");
+          handleLogout();
         }
       }
       setIsLoading(false);
@@ -55,7 +54,7 @@ export const StudentAuthProvider = ({ children }) => {
       localStorage.setItem("refresh_token", refreshToken);
       localStorage.setItem("user_data", JSON.stringify(user));
 
-      setCurrentStudent(user);
+      setCurrentUser(user);
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
@@ -109,7 +108,7 @@ export const StudentAuthProvider = ({ children }) => {
       localStorage.setItem("refresh_token", refreshToken);
       localStorage.setItem("user_data", JSON.stringify(user));
 
-      setCurrentStudent(user);
+      setCurrentUser(user);
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
@@ -119,19 +118,87 @@ export const StudentAuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.clear();
-    setCurrentStudent(null);
+    setCurrentUser(null);
     setIsAuthenticated(false);
     window.location.href = "/login";
   };
 
+  // --- 3. PROFILE UPDATE ACTIONS (Connects Sidebar/Header/Profile) ---
+
+  // Update Text Details
+  const updateProfile = async (updatedData) => {
+    try {
+      if (!currentUser?.id) throw new Error("No User ID found");
+
+      // 1. Call Backend
+      const response = await StudentService.updateProfile(currentUser.id, updatedData);
+      
+      // 2. Merge response with current user state (Backend should return updated user object)
+      const newUserState = { ...currentUser, ...updatedData, ...response };
+
+      // 3. Update LocalStorage & State
+      localStorage.setItem("user_data", JSON.stringify(newUserState));
+      setCurrentUser(newUserState);
+
+      return { success: true };
+    } catch (error) {
+      console.error("Profile Update Failed:", error);
+      return { success: false, message: "Failed to update profile." };
+    }
+  };
+
+  // Update Avatar
+  const updateAvatar = async (fileOrUrl) => {
+    try {
+        let newAvatarUrl;
+
+        // Check if it's a file (for upload) or a string (gallery selection)
+        if (typeof fileOrUrl === 'object') {
+             // It's a File object, upload to backend
+             const response = await StudentService.updateAvatar(currentUser.id, fileOrUrl);
+             newAvatarUrl = response.avatarUrl; // Assuming backend returns { avatarUrl: "..." }
+        } else {
+             // It's a string from the gallery, just update profile directly
+             newAvatarUrl = fileOrUrl;
+             // Optional: Call updateProfile here to save the gallery URL choice to backend
+             await updateProfile({ ...currentUser, avatar: newAvatarUrl });
+        }
+
+        // Update State
+        const newUserState = { ...currentUser, avatar: newAvatarUrl };
+        localStorage.setItem("user_data", JSON.stringify(newUserState));
+        setCurrentUser(newUserState);
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Avatar Update Failed", error);
+        return { success: false };
+    }
+  };
+
+  // Update Preferences (Mock implementation if no backend endpoint yet)
+  const updatePreferences = (key, value) => {
+      const newPreferences = { ...(currentUser.preferences || {}), [key]: value };
+      const newUserState = { ...currentUser, preferences: newPreferences };
+      
+      // Update Local & State
+      localStorage.setItem("user_data", JSON.stringify(newUserState));
+      setCurrentUser(newUserState);
+      
+      // Ideally call backend API here to save preference
+  };
+
   const value = {
-    currentStudent,
+    currentUser,
     isAuthenticated,
     isLoading,
     login,
     logout,
     signup,
     verifyRegistration,
+    updateProfile,
+    updateAvatar,
+    updatePreferences
   };
 
   return (
