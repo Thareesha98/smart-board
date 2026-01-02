@@ -85,8 +85,21 @@ const ReviewsList = ({ boardingId }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Recently';
+
+    // 1. Check if it's the Java string format "yyyy-MM-dd HH:mm"
+    if (typeof dateString === 'string' && dateString.includes(' ')) {
+        const isoString = dateString.replace(' ', 'T');
+        const date = new Date(isoString);
+        if (!isNaN(date.getTime())) {
+             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+    }
+
+    // 2. Standard fallback
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return isNaN(date.getTime()) 
+        ? 'Recently' 
+        : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   if (loading) return <div className="text-sm text-text-muted mt-4">Loading reviews...</div>;
