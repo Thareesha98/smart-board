@@ -41,6 +41,7 @@ const amenityIcons = {
 };
 
 const mapAmenitiesWithIcons = (amenities) => {
+  if (!amenities || !Array.isArray(amenities)) return [];
   const amenityIconMap = {
     wifi: "wifi",
     ac: "snowflake",
@@ -61,9 +62,17 @@ const BoardingDetailsPage = () => {
   const { id } = useParams();
   const passedBoarding = location.state?.boarding;
   
-  // Safe initialization
+  // Safe initialization with fallback defaults
   const [currentBoarding, setCurrentBoarding] = useState(
-    passedBoarding || defaultBoardingDetails || { images: [], owner: {}, location: {}, amenities: [], description: [] }
+    passedBoarding || defaultBoardingDetails || { 
+        images: [], 
+        owner: {}, 
+        location: {}, 
+        amenities: [], 
+        description: [],
+        nearbyPlaces: [],
+        reviewsSummary: { breakdown: [] }
+    }
   );
 
   useEffect(() => {
@@ -77,41 +86,37 @@ const BoardingDetailsPage = () => {
         amenities: passedBoarding.amenities && passedBoarding.amenities[0]?.icon
           ? passedBoarding.amenities
           : mapAmenitiesWithIcons(passedBoarding.amenities || []),
+        // Ensure arrays exist
+        description: passedBoarding.description || [],
+        nearbyPlaces: passedBoarding.nearbyPlaces || [],
+        images: passedBoarding.images || []
       });
     }
   }, [passedBoarding]);
 
   const galleryImages = currentBoarding?.images || [];
-  const { currentImage, currentIndex, nextImage, prevImage, selectImage } =
-    useImageGallery(galleryImages)
+  const { currentIndex, nextImage, prevImage, selectImage } =
+    useImageGallery(galleryImages);
     
-  // Get form logic from hook
   const { formData, updateField, submitAppointment, isSubmitting, isSuccess } =
     useAppointmentForm();
 
-  // ✅ UPDATED: Submit handler without redirect
   const handleScheduleSubmit = async () => {
-    // 1. Run validation
     const result = await submitAppointment();
 
     if (result.success) {
-      // 2. Prepare Data (with updated owner info)
-      const ownerPhone = currentBoarding.owner.contact || "+94 77 123 4567";
-      const ownerEmail = currentBoarding.owner.email || "owner@example.com"; 
+      const ownerPhone = currentBoarding?.owner?.contact || "+94 77 123 4567";
+      const ownerEmail = currentBoarding?.owner?.email || "owner@example.com"; 
 
-      // 3. Create the appointment object
       const newAppointment = {
         id: Date.now(),
         boardingId: currentBoarding.id,
         boardingName: currentBoarding.name,
-        image: galleryImages.length > 0 ? galleryImages[0] : "",
-        
-        // Save Owner details for the Appointments Page
-        owner: currentBoarding.owner.name,
+        image: galleryImages.length > 0 ? galleryImages[0] : "", 
+        owner: currentBoarding?.owner?.name || "Unknown Owner",
         contact: ownerPhone,
         email: ownerEmail,
-
-        address: currentBoarding.location.address,
+        address: currentBoarding?.location?.address,
         date: formData.date,
         time: formData.time,
         notes: formData.notes,
@@ -119,11 +124,8 @@ const BoardingDetailsPage = () => {
         registered: false
       };
 
-      // 4. Save to localStorage
       const existingAppointments = JSON.parse(localStorage.getItem('appointments') || '[]');
       localStorage.setItem('appointments', JSON.stringify([...existingAppointments, newAppointment]));
-      
-      // 5. No redirect - user stays on page, button shows success state
     }
     return result;
   };
@@ -135,9 +137,8 @@ const BoardingDetailsPage = () => {
   };
 
   const handleContact = (type) => {
-    // Optional: You can implement specific actions here or leave as placeholder alert
     if (type === 'message') {
-        alert(`Message feature for ${currentBoarding.owner.email} coming soon!`);
+        alert(`Message feature for ${currentBoarding?.owner?.email} coming soon!`);
     }
   };
 
@@ -154,9 +155,17 @@ const BoardingDetailsPage = () => {
     </Link>
   );
 
+  if (!currentBoarding) return <div>Loading...</div>;
+
+  // Helper to safely get array
+  const safeDescription = currentBoarding.description || [];
+  const safeAmenities = currentBoarding.amenities || [];
+  const safeNearby = currentBoarding.nearbyPlaces || [];
+  const safeBreakdown = currentBoarding.reviewsSummary?.breakdown || [];
+
   return (
     <StudentLayout
-      title={currentBoarding.name}
+      title={currentBoarding.name || "Boarding Details"}
       subtitle="Boarding Details"
       headerRightContent={headerRightContent}
     >
@@ -164,7 +173,7 @@ const BoardingDetailsPage = () => {
         {/* --- LEFT COLUMN: CONTENT --- */}
         <div className="min-[1400px]:col-span-2 w-full space-y-6">
           <ImageGallery
-            images={currentBoarding.images}
+            images={galleryImages}
             currentIndex={currentIndex}
             onPrev={prevImage}
             onNext={nextImage}
@@ -178,27 +187,30 @@ const BoardingDetailsPage = () => {
               onBookVisit={handleBookVisit}
             />
             <OwnerCard
-              owner={currentBoarding.owner}
+              owner={currentBoarding.owner || {}}
               onContact={handleContact}
             />
           </div>
 
+          {/* DESCRIPTION SECTION - FIXED MAP ERROR */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
             <h2 className="text-xl font-bold text-primary mb-3">Description</h2>
-            {currentBoarding.description.map((para, idx) => (
-              <p
-                key={idx}
-                className="text-text-muted mb-3 leading-relaxed text-sm sm:text-base last:mb-0"
-              >
-                {para}
-              </p>
-            ))}
+            {safeDescription.length > 0 ? (
+                safeDescription.map((para, idx) => (
+                  <p key={idx} className="text-text-muted mb-3 leading-relaxed text-sm sm:text-base last:mb-0">
+                    {para}
+                  </p>
+                ))
+            ) : (
+                <p className="text-text-muted">No description available.</p>
+            )}
           </motion.section>
 
+          {/* AMENITIES SECTION - FIXED MAP ERROR */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -206,7 +218,7 @@ const BoardingDetailsPage = () => {
           >
             <h2 className="text-xl font-bold text-primary mb-4">Amenities</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {currentBoarding.amenities.map((amenity, idx) => {
+              {safeAmenities.map((amenity, idx) => {
                 const Icon = amenityIcons[amenity.icon] || FaWifi;
                 return (
                   <div
@@ -223,6 +235,7 @@ const BoardingDetailsPage = () => {
             </div>
           </motion.section>
 
+          {/* LOCATION SECTION - FIXED MAP ERROR */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -234,11 +247,11 @@ const BoardingDetailsPage = () => {
               <FaMapMarkedAlt className="text-5xl text-accent mb-2 transform group-hover:scale-110 transition-transform" />
               <p className="text-text-dark font-bold z-10">View on Map</p>
               <p className="text-sm text-text-muted z-10 text-center px-4 mt-1">
-                {currentBoarding.location.address}
+                {currentBoarding?.location?.address || "Address not available"}
               </p>
             </div>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {currentBoarding.nearbyPlaces.map((place, idx) => (
+              {safeNearby.map((place, idx) => (
                 <li
                   key={idx}
                   className="text-sm text-text-muted flex items-center gap-2"
@@ -250,19 +263,20 @@ const BoardingDetailsPage = () => {
             </ul>
           </motion.section>
 
+          {/* REVIEWS SECTION - FIXED MAP ERROR */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
             <h2 className="text-xl font-bold text-primary mb-6">
-              Reviews ({currentBoarding.reviewCount})
+              Reviews ({currentBoarding.reviewCount || 0})
             </h2>
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center justify-center bg-background-light rounded-2xl p-6 sm:w-40 text-center flex-shrink-0">
                 <div className="text-4xl font-bold text-text-dark">
                   {currentBoarding.reviewsSummary?.overall ||
-                    currentBoarding.rating}
+                    currentBoarding.rating || 0}
                 </div>
                 <div className="text-yellow-400 text-sm my-1">
                   {"★".repeat(5)}
@@ -272,7 +286,7 @@ const BoardingDetailsPage = () => {
                 </div>
               </div>
               <div className="flex-1 space-y-2">
-                {currentBoarding.reviewsSummary?.breakdown.map((item, idx) => (
+                {safeBreakdown.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-3">
                     <span className="text-xs font-bold text-text-muted w-10">
                       {item.stars} ★
@@ -302,7 +316,7 @@ const BoardingDetailsPage = () => {
             boarding={currentBoarding}
             onBookVisit={handleBookVisit}
           />
-          <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
+          <OwnerCard owner={currentBoarding.owner || {}} onContact={handleContact} />
           
           <div id="appointment-form">
             <AppointmentForm
@@ -320,7 +334,7 @@ const BoardingDetailsPage = () => {
               <FaShieldAlt /> Safety Tips
             </h4>
             <ul className="space-y-2">
-              {safetyTips.map((tip, idx) => (
+              {safetyTips && safetyTips.map((tip, idx) => (
                 <li
                   key={idx}
                   className="text-xs text-text-dark/80 pl-4 relative"
@@ -352,7 +366,7 @@ const BoardingDetailsPage = () => {
               <FaShieldAlt /> Safety Tips
             </h4>
             <ul className="space-y-2">
-              {safetyTips.map((tip, idx) => (
+              {safetyTips && safetyTips.map((tip, idx) => (
                 <li
                   key={idx}
                   className="text-xs text-text-dark/80 pl-4 relative"
