@@ -55,6 +55,17 @@ public class BoardingMapper {
         dto.setBosted(b.isBosted());
         dto.setBoostEndDate(b.getBoostEndDate());
 
+        if (b.getOwner() != null) {
+            BoardingDetailDTO.OwnerDto ownerDto = new BoardingDetailDTO.OwnerDto();
+            ownerDto.setId(b.getOwner().getId());
+            ownerDto.setName(b.getOwner().getFullName());
+            ownerDto.setContact(b.getOwner().getPhone());
+            ownerDto.setEmail(b.getOwner().getEmail());
+            ownerDto.setImage(b.getOwner().getProfileImageUrl());
+
+            dto.setOwner(ownerDto);
+        }
+
         return dto;
     }
     
