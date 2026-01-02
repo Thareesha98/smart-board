@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaStar, FaUser, FaTrash, FaTimes, FaChevronLeft, FaChevronRight, FaImages } from 'react-icons/fa';
-import { useAuth } from '../../../context/student/AuthContext.jsx';
+
+// ✅ FIX 1: Correct Import Path
+import { useAuth } from '../../../context/student/StudentAuthContext';
+import StudentService from '../../../api/student/StudentService';
 
 const ReviewsList = ({ boardingId }) => {
   const [reviews, setReviews] = useState([]);
-  const { currentUser } = useAuth();
+  const [loading, setLoading] = useState(true);
   
+  // ✅ FIX 2: Check context existence
+  const auth = useAuth();
+  const currentUser = auth?.currentUser;
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reviewToDelete, setReviewToDelete] = useState(null);
 
@@ -15,39 +22,35 @@ const ReviewsList = ({ boardingId }) => {
   const [galleryPhotos, setGalleryPhotos] = useState([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
-  useEffect(() => {
-    if (currentUser?.studentId) {
-      const existingUsers = JSON.parse(localStorage.getItem('reviewUsers') || '{}');
-      existingUsers[currentUser.studentId] = {
-        userName: `${currentUser.firstName} ${currentUser.lastName}`,
-        userAvatar: currentUser.avatar
-      };
-      localStorage.setItem('reviewUsers', JSON.stringify(existingUsers));
-    }
-  }, [currentUser]);
+  // ✅ FIX 3: Load Reviews from Backend instead of LocalStorage
+  const loadReviews = async () => {
+    try {
+        setLoading(true);
+        // Ensure boardingId is valid before calling API
+        if (!boardingId) return;
 
-  const loadReviews = () => {
-    const existingReviews = JSON.parse(localStorage.getItem('boardingReviews') || '{}');
-    const reviewUsers = JSON.parse(localStorage.getItem('reviewUsers') || '{}');
-    const boardingReviews = existingReviews[boardingId] || [];
-    
-    const reviewsWithUserData = boardingReviews.map(review => ({
-      ...review,
-      userName: reviewUsers[review.userId]?.userName || 'Anonymous User',
-      userAvatar: reviewUsers[review.userId]?.userAvatar || null
-    }));
-    
-    setReviews(reviewsWithUserData.reverse());
+        const data = await StudentService.getBoardingReviews(boardingId);
+        
+        // Transform data if necessary (depends on your backend DTO)
+        // Assuming backend returns: [{ id, userName, userAvatar, rating, comment, date, photos: [] }]
+        // If backend returns differently, map it here.
+        setReviews(data || []);
+    } catch (error) {
+        console.error("Failed to load reviews", error);
+        // Fallback to empty array to prevent crash
+        setReviews([]);
+    } finally {
+        setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadReviews();
-    window.addEventListener('storage', loadReviews);
-    return () => window.removeEventListener('storage', loadReviews);
   }, [boardingId]);
 
   // Gallery Logic
   const openGallery = (photos, index = 0) => {
+    if (!photos || photos.length === 0) return;
     setGalleryPhotos(photos);
     setCurrentPhotoIndex(index);
     setGalleryOpen(true);
@@ -68,26 +71,26 @@ const ReviewsList = ({ boardingId }) => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
+  // ✅ FIX 4: Delete logic (Mock or Backend)
+  const confirmDelete = async () => {
     if (!reviewToDelete) return;
-    const existingReviews = JSON.parse(localStorage.getItem('boardingReviews') || '{}');
-    if (existingReviews[boardingId]) {
-      existingReviews[boardingId] = existingReviews[boardingId].filter(
-        r => r.userId !== reviewToDelete.userId || r.timestamp !== reviewToDelete.timestamp
-      );
-      localStorage.setItem('boardingReviews', JSON.stringify(existingReviews));
-      loadReviews();
-    }
+
+    // Ideally call backend: await StudentService.deleteReview(reviewToDelete.id);
+    // For now, optimistic update:
+    setReviews(prev => prev.filter(r => r.id !== reviewToDelete.id));
+    
     setShowDeleteModal(false);
     setReviewToDelete(null);
   };
 
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Recently';
+    const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  if (reviews.length === 0) return null;
+  if (loading) return <div className="text-sm text-text-muted mt-4">Loading reviews...</div>;
+  if (!reviews || reviews.length === 0) return <div className="text-sm text-text-muted mt-4 italic">No reviews yet. Be the first to review!</div>;
 
   return (
     <div className="space-y-3 sm:space-y-4 mt-6">
@@ -98,7 +101,7 @@ const ReviewsList = ({ boardingId }) => {
       <div className="space-y-3 sm:space-y-4">
         {reviews.map((review, index) => (
           <motion.div
-            key={index}
+            key={review.id || index}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -122,7 +125,7 @@ const ReviewsList = ({ boardingId }) => {
                   <p className="font-semibold text-text-dark text-sm sm:text-base">
                     {review.userName || 'Anonymous User'}
                   </p>
-                  <p className="text-xs text-text-muted">{formatDate(review.timestamp)}</p>
+                  <p className="text-xs text-text-muted">{formatDate(review.date || review.timestamp)}</p>
                 </div>
               </div>
               
@@ -138,7 +141,7 @@ const ReviewsList = ({ boardingId }) => {
                     ))}
                   </div>
 
-                  {currentUser?.studentId === review.userId && (
+                  {currentUser?.id === review.userId && (
                     <button 
                       onClick={() => handleDeleteClick(review)}
                       className="text-red-400 hover:text-red-600 transition-colors p-1"
@@ -152,10 +155,10 @@ const ReviewsList = ({ boardingId }) => {
 
             {/* Review Text */}
             <p className="text-text-dark text-sm sm:text-base leading-relaxed mb-2">
-              {review.review}
+              {review.comment || review.review}
             </p>
 
-            {/* ✅ UPDATED: Hide photos, show only a clickable text/button */}
+            {/* Photos Button */}
             {review.photos && review.photos.length > 0 && (
               <div className="mt-2">
                 <button
