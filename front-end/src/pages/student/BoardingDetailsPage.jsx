@@ -60,8 +60,10 @@ const BoardingDetailsPage = () => {
   const location = useLocation();
   const { id } = useParams();
   const passedBoarding = location.state?.boarding;
+  
+  // Safe initialization
   const [currentBoarding, setCurrentBoarding] = useState(
-    passedBoarding || defaultBoardingDetails
+    passedBoarding || defaultBoardingDetails || { images: [], owner: {}, location: {}, amenities: [], description: [] }
   );
 
   useEffect(() => {
@@ -69,18 +71,19 @@ const BoardingDetailsPage = () => {
       setCurrentBoarding({
         ...passedBoarding,
         location: {
-          address: passedBoarding.location,
-          distance: `${passedBoarding.distance} km from University of Ruhuna`,
+          address: passedBoarding.location || "Location not available",
+          distance: `${passedBoarding.distance || 0} km from University of Ruhuna`,
         },
-        amenities: passedBoarding.amenities[0]?.icon
+        amenities: passedBoarding.amenities && passedBoarding.amenities[0]?.icon
           ? passedBoarding.amenities
-          : mapAmenitiesWithIcons(passedBoarding.amenities),
+          : mapAmenitiesWithIcons(passedBoarding.amenities || []),
       });
     }
   }, [passedBoarding]);
 
+  const galleryImages = currentBoarding?.images || [];
   const { currentImage, currentIndex, nextImage, prevImage, selectImage } =
-    useImageGallery(currentBoarding.images);
+    useImageGallery(galleryImages)
     
   // Get form logic from hook
   const { formData, updateField, submitAppointment, isSubmitting, isSuccess } =
@@ -101,7 +104,7 @@ const BoardingDetailsPage = () => {
         id: Date.now(),
         boardingId: currentBoarding.id,
         boardingName: currentBoarding.name,
-        image: currentBoarding.images[0],
+        image: galleryImages.length > 0 ? galleryImages[0] : "",
         
         // Save Owner details for the Appointments Page
         owner: currentBoarding.owner.name,
