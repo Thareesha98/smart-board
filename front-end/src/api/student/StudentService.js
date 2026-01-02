@@ -6,24 +6,23 @@ const StudentService = {
   // 1. AUTHENTICATION (Called by Context)
   // ==========================================
   
- // Update generic profile info
-  updateProfile: async (studentId, data) => {
-    // Assuming backend endpoint: PUT /api/students/{id}
-    const response = await api.put(`/students/${studentId}`, data);
+ // Matches UserController: @PutMapping("/api/users/{id}")
+  updateProfile: async (userId, data) => {
+    const response = await api.put(`/users/${userId}`, data);
     return response.data;
   },
 
-  // Upload Avatar
-  updateAvatar: async (studentId, file) => {
-    const formData = new FormData();
-    formData.append('file', file); // Ensure backend expects 'file'
+  // // Upload Avatar
+  // updateAvatar: async (studentId, file) => {
+  //   const formData = new FormData();
+  //   formData.append('file', file); // Ensure backend expects 'file'
     
-    // Assuming backend endpoint: POST /api/students/{id}/avatar
-    const response = await api.post(`/students/${studentId}/avatar`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response.data; // Should return the new avatar URL
-  },
+  //   // Assuming backend endpoint: POST /api/students/{id}/avatar
+  //   const response = await api.post(`/students/${studentId}/avatar`, formData, {
+  //     headers: { 'Content-Type': 'multipart/form-data' },
+  //   });
+  //   return response.data; // Should return the new avatar URL
+  // },
 
   // ==========================================
   // 2. REPORTS (Your Existing Code)
