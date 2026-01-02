@@ -129,7 +129,7 @@ const HeaderBar = ({ title, subtitle, rightContent, navBtnText, navBtnPath,onNav
             </div>
           )}
           <span className="font-semibold text-sm">
-            {firstName} {lastInitial}
+              Mr. {lastName || "Partner"}
           </span>
         </div>
       </div>

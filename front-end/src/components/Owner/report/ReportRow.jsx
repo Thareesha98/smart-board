@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom"; // 1. Import Hook
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
