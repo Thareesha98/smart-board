@@ -24,11 +24,11 @@ export const StudentAuthProvider = ({ children }) => {
             setCurrentUser(user);
             setIsAuthenticated(true);
           } else {
-            handleLogout();
+            localStorage.clear();
           }
         } catch (e) {
           console.error("Failed to parse user data", e);
-          handleLogout();
+          localStorage.clear();
         }
       }
       setIsLoading(false);
@@ -41,7 +41,7 @@ export const StudentAuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await api.post("/auth/login", { email, password });
-      const { token, refreshToken, user } = response.data;
+      const user = response.data;
 
       if (user.role !== "STUDENT") {
         return {
