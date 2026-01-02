@@ -1,55 +1,32 @@
 import api from '../api'; 
 
-// --- HELPER FUNCTIONS ---
-// Combine Date and Time for backend 
-const formatDateTime = (date, time) => {
-  const cleanTime = time.length === 5 ? `${time}:00` : time;
-  return `${date}T${cleanTime}`;
-};
-
-// Calculate End Time (Start Time + 1 Hour)
-const calculateEndTime = (date, time) => {
-  const start = new Date(`${date}T${time}`);
-  start.setHours(start.getHours() + 1);
-  return start.toISOString().split('.')[0]; // Removes milliseconds
-};
-
 const StudentService = {
 
   // ==========================================
   // 1. AUTHENTICATION (Called by Context)
   // ==========================================
   
-  // Matches UserController: @PostMapping("/api/users/login")
-  loginUser: async (credentials) => {
-    const response = await api.post('/users/login', credentials);
-    return response.data; // Returns UserResponseDTO
-  },
-
-  // Matches UserController: @PostMapping("/api/users/register")
-  registerUser: async (userData) => {
-    const response = await api.post('/users/register', userData);
-    return response.data; // Returns UserResponseDTO
-  },
-
-  // ==========================================
-  // 2. PROFILE DATA 
-  // ==========================================
-
-  // Matches UserController: @GetMapping("/api/users/{id}")
-  getProfile: async (userId) => {
-    const response = await api.get(`/users/${userId}`);
+ // Update generic profile info
+  updateProfile: async (studentId, data) => {
+    // Assuming backend endpoint: PUT /api/students/{id}
+    const response = await api.put(`/students/${studentId}`, data);
     return response.data;
   },
 
-  // Matches UserController: @PutMapping("/api/users/{id}")
-  updateProfile: async (userId, updateData) => {
-    const response = await api.put(`/users/${userId}`, updateData);
-    return response.data;
+  // Upload Avatar
+  updateAvatar: async (studentId, file) => {
+    const formData = new FormData();
+    formData.append('file', file); // Ensure backend expects 'file'
+    
+    // Assuming backend endpoint: POST /api/students/{id}/avatar
+    const response = await api.post(`/students/${studentId}/avatar`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data; // Should return the new avatar URL
   },
 
   // ==========================================
-  // 3. REPORTS (Your Existing Code)
+  // 2. REPORTS (Your Existing Code)
   // ==========================================
   
   getSentReports: async (studentId) => {
@@ -65,7 +42,7 @@ const StudentService = {
   },
 
   // ==========================================
-  // 4. BOARDINGS (Search & Details)
+  // 3. BOARDINGS (Search & Details)
   // ==========================================
 
   // Matches BoardingController: @GetMapping("/api/boardings/search")
@@ -94,16 +71,25 @@ const StudentService = {
   },
 
   // ==========================================
-  // 5. APPOINTMENTS (Visits)
+  // 4. APPOINTMENTS (Visits)
   // ==========================================
 
   // Matches AppointmentController: @PostMapping("/api/appointments/student/{id}")
   createAppointment: async (studentId, appointmentData) => {
+    // Helper to format date/time
+    const formatDateTime = (date, time) => {
+        const cleanTime = time.length === 5 ? `${time}:00` : time;
+        return `${date}T${cleanTime}`;
+    };
+
     const payload = {
       boardingId: appointmentData.boardingId,
       numberOfStudents: 1, 
       requestedStartTime: formatDateTime(appointmentData.visitDate, appointmentData.visitTime),
-      requestedEndTime: calculateEndTime(appointmentData.visitDate, appointmentData.visitTime),
+      // Simple logic: End time = Start + 1hr
+      requestedEndTime: formatDateTime(appointmentData.visitDate, 
+        `${parseInt(appointmentData.visitTime.split(':')[0]) + 1}:${appointmentData.visitTime.split(':')[1]}`
+      ),
       studentNote: appointmentData.visitNotes
     };
 
@@ -124,7 +110,7 @@ const StudentService = {
   },
 
   // ==========================================
-  // 6. REVIEWS (Ratings)
+  // 5. REVIEWS (Ratings)
   // ==========================================
 
   // Matches ReviewController: @PostMapping("/api/reviews")
