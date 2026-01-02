@@ -41,7 +41,7 @@ export const StudentAuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await api.post("/auth/login", { email, password });
-      const user = response.data;
+      const { token, refreshToken, user } = response.data;
 
       if (user.role !== "STUDENT") {
         return {
@@ -128,17 +128,17 @@ export const StudentAuthProvider = ({ children }) => {
   // Update Text Details
   const updateProfile = async (updatedData) => {
     try {
-      if (!currentUser?.id) throw new Error("No User ID found");
+      if (!currentUser?.id) return { success: false };
 
       // 1. Call Backend
-      const response = await StudentService.updateProfile(currentUser.id, updatedData);
+      const responseUser = await StudentService.updateProfile(currentUser.id, updatedData);
       
       // 2. Merge response with current user state (Backend should return updated user object)
-      const newUserState = { ...currentUser, ...updatedData, ...response };
+      const newUser = { ...currentUser, ...responseUser };
 
       // 3. Update LocalStorage & State
-      localStorage.setItem("user_data", JSON.stringify(newUserState));
-      setCurrentUser(newUserState);
+      localStorage.setItem("user_data", JSON.stringify(newUser));
+      setCurrentUser(newUser);
 
       return { success: true };
     } catch (error) {
