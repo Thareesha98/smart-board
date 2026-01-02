@@ -1,9 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
-import {
-  getOwnerMaintenanceRequests,
-  updateMaintenanceStatus,
-} from "../../api/owner/service";
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext.jsx";
+import api from "../../api/api";
+import { getOwnerMaintenanceRequests, updateMaintenanceStatus } from "../../api/owner/service.js";  
 
 const useMaintenanceLogic = () => {
   // --- STATE ---
@@ -20,31 +18,13 @@ const useMaintenanceLogic = () => {
   // --- API CALLS ---
   useEffect(() => {
     const fetchRequests = async () => {
-      // We don't need currentOwner.id for the API call anymore (handled by token),
-      // but we still check if auth is ready.
-      if (!currentOwner) return;
+      if (!currentOwner?.id) return;
 
       try {
         setLoading(true);
-        const rawData = await getOwnerMaintenanceRequests();
-
-        // 🔄 MAPPER: Convert Java DTO keys to Frontend keys
-        // Java: title, boardingTitle, imageUrls, maintenanceUrgency
-        // UI:   issueType, boardingName, image, urgency
-        const mappedData = (rawData || []).map((item) => ({
-          id: item.id,
-          issueType: item.title, // Map 'title' -> 'issueType'
-          description: item.description,
-          boardingName: item.boardingTitle, // Map 'boardingTitle' -> 'boardingName'
-          studentName: item.studentName,
-          status: item.status,
-          urgency: item.maintenanceUrgency, // Map 'maintenanceUrgency' -> 'urgency'
-          image: item.imageUrls || [], // Map 'imageUrls' -> 'image'
-          roomNumber: item.roomNumber,
-          date: item.createdDate, 
-        }));
-
-        setRequests(mappedData);
+        // ✅ USE SERVICE FUNCTION
+        const data = await getOwnerMaintenanceRequests(currentOwner.id);
+        setRequests(data);
         setError(null);
       } catch (err) {
         console.error("Fetch error:", err);
@@ -60,18 +40,16 @@ const useMaintenanceLogic = () => {
   const handleStatusUpdate = async (id, newStatus) => {
     // 1. Optimistic Update
     const originalRequests = [...requests];
-    const statusToSend = newStatus.toUpperCase();
+    const statusToSend = newStatus.toUpperCase(); 
 
     setRequests((prev) =>
-      prev.map((req) =>
-        req.id === id ? { ...req, status: statusToSend } : req
-      )
+      prev.map((req) => (req.id === id ? { ...req, status: statusToSend } : req))
     );
 
     try {
-      // 2. Send to Backend
-      // Passing empty note "" for now as UI doesn't have a note input yet
-      await updateMaintenanceStatus(id, statusToSend, "");
+      // ✅ USE SERVICE FUNCTION
+      await updateMaintenanceStatus(id, statusToSend);
+      
     } catch (err) {
       console.error("Update failed:", err);
       setRequests(originalRequests); // Revert on error
@@ -82,33 +60,34 @@ const useMaintenanceLogic = () => {
   // --- FILTERING & SORTING ---
   const filteredRequests = useMemo(() => {
     let result = requests.filter((req) => {
+      // Normalize status to lowercase for comparison
       const reqStatus = req.status ? req.status.toLowerCase() : "pending";
-
+      
       const isPendingTab = activeTab === "pending";
-      // Allow "pending", "in_progress", and "in-progress" for the first tab
-      const isReqPending = ["pending", "in_progress", "in-progress"].includes(
-        reqStatus
-      );
-      const isReqCompleted = ["completed", "resolved"].includes(reqStatus);
+      // Check for both "pending" and "in-progress"
+      const isReqPending = reqStatus === "pending" || reqStatus === "in_progress" || reqStatus === "in-progress";
+      const isReqCompleted = reqStatus === "completed" || reqStatus === "resolved";
 
       if (isPendingTab && !isReqPending) return false;
       if (!isPendingTab && !isReqCompleted) return false;
 
+      // Search Filter
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
-
+      // ✅ FIX: Use 'issueType' instead of 'title' (from DTO)
       return (
         (req.issueType && req.issueType.toLowerCase().includes(q)) ||
+        (req.roomNumber && req.roomNumber.toString().includes(q)) ||
         (req.boardingName && req.boardingName.toLowerCase().includes(q))
       );
     });
 
-    // Sort by ID descending (newest first) since Date is missing in DTO
-    return result.sort((a, b) => b.id - a.id);
+    // Sort: Newest First
+    return result.sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [requests, activeTab, searchQuery]);
 
   // --- PAGINATION ---
-  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage) || 1;
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
   const paginatedRequests = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredRequests.slice(start, start + itemsPerPage);

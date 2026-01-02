@@ -55,10 +55,10 @@ export const createReport = async (reportData, files) => {
 // =================================================================
 
 // 1. Get all boardings owned by this user
-export const getOwnerBoardings = async () => {
+export const getOwnerBoardings = async (ownerId) => {
   try {
     // Endpoint: GET /api/boardings/owner/{id}
-    const response = await api.get("/boardings/owner");
+    const response = await api.get(`/boardings/owner/${ownerId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching boardings:", error);
@@ -115,27 +115,25 @@ export const deleteBoarding = async (boardingId) => {
 // 🛠️ MAINTENANCE SERVICES
 // =================================================================
 
-// 1. Get all maintenance requests for the logged-in Owner
-// Matches Java: @GetMapping("/owner") inside MaintenanceController
-// Note: No ownerId needed param; backend takes it from the token/auth
-export const getOwnerMaintenanceRequests = async () => {
+// 1. Get all maintenance requests for an Owner
+export const getOwnerMaintenanceRequests = async (ownerId) => {
   try {
-    const response = await api.get(`/maintenance/owner`);
-    return response.data; 
+    // Matches Controller: GET /api/maintenance/owner/{ownerId}
+    const response = await api.get(`/maintenance/owner/${ownerId}`);
+    return response.data;
   } catch (error) {
     console.error("Error fetching maintenance requests:", error);
     throw error;
   }
 };
 
-// 2. Update the status of a request (Decide)
-// Matches Java: @PutMapping("/owner/{maintenanceId}")
-// Expects MaintenanceDecisionDTO body
-export const updateMaintenanceStatus = async (requestId, newStatus, ownerNote = "") => {
+// 2. Update the status of a request
+export const updateMaintenanceStatus = async (requestId, newStatus) => {
   try {
-    const response = await api.put(`/maintenance/owner/${requestId}`, {
+    // Matches Controller: PATCH /api/maintenance/{requestId}/status
+    // Body: { "status": "COMPLETED" }
+    const response = await api.patch(`/maintenance/${requestId}/status`, {
       status: newStatus,
-      ownerNote: ownerNote 
     });
     return response.data;
   } catch (error) {
