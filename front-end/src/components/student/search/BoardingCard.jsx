@@ -8,7 +8,7 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
 
   const handleViewDetails = () => {
     // Navigate to details page with boarding ID and pass boarding data
-    navigate(`/student/boarding-details/${boarding.id}`, { 
+    navigate(`/boarding-details/${boarding.id}`, { 
       state: { boarding } 
     });
   };
@@ -49,7 +49,7 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-accent">LKR {boarding.price}</div>
+            <div className="text-2xl font-bold text-accent">${boarding.price}</div>
             <span className="text-xs text-text-muted">/month</span>
           </div>
         </div>

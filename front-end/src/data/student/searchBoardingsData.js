@@ -58,9 +58,6 @@ export const sampleBoardings = [
       verified: true,
       rating: 4.7,
       reviewCount: 45,
-      // ✅ Added Contact Info
-      contact: "077-1234567",
-      email: "kamal.p@example.com",
       stats: {
         properties: 3,
         years: 2,
@@ -128,9 +125,6 @@ export const sampleBoardings = [
       verified: true,
       rating: 4.5,
       reviewCount: 32,
-      // ✅ Added Contact Info
-      contact: "071-9876543",
-      email: "nimal.silva@example.com",
       stats: {
         properties: 8,
         years: 5,
@@ -198,9 +192,6 @@ export const sampleBoardings = [
       verified: true,
       rating: 4.8,
       reviewCount: 67,
-      // ✅ Added Contact Info
-      contact: "070-5551234",
-      email: "sangeeta.f@example.com",
       stats: {
         properties: 4,
         years: 4,
@@ -268,9 +259,6 @@ export const sampleBoardings = [
       verified: true,
       rating: 4.4,
       reviewCount: 41,
-      // ✅ Added Contact Info
-      contact: "076-4449988",
-      email: "ravi.mendis@example.com",
       stats: {
         properties: 2,
         years: 3,
@@ -338,9 +326,6 @@ export const sampleBoardings = [
       verified: true,
       rating: 4.9,
       reviewCount: 93,
-      // ✅ Added Contact Info
-      contact: "072-9993322",
-      email: "dinesh.j@example.com",
       stats: {
         properties: 6,
         years: 7,
@@ -408,9 +393,6 @@ export const sampleBoardings = [
       verified: true,
       rating: 4.2,
       reviewCount: 28,
-      // ✅ Added Contact Info
-      contact: "078-7771122",
-      email: "sunil.w@example.com",
       stats: {
         properties: 3,
         years: 2,
@@ -419,21 +401,4 @@ export const sampleBoardings = [
       description: "Budget accommodation specialist serving students for over 2 years."
     }
   }
-];
-
-export const timeSlots = [
-  { value: '09:00', label: '9:00 AM' },
-  { value: '10:00', label: '10:00 AM' },
-  { value: '11:00', label: '11:00 AM' },
-  { value: '14:00', label: '2:00 PM' },
-  { value: '15:00', label: '3:00 PM' },
-  { value: '16:00', label: '4:00 PM' },
-];
-
-export const safetyTips = [
-  "Always verify the owner's identity before paying any advance.",
-  "Visit the boarding place in person before making a final decision.",
-  "Read the contract carefully and understand the refund policy.",
-  "Check the neighborhood for safety, especially if you have late classes.",
-  "Keep a record of all payments and communications with the owner."
 ];

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaEnvelope, FaPhone, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -97,7 +97,7 @@ const OwnerCard = ({ owner, onContact }) => {
         </div>
       </div>
 
-      {/* 3. Contact Info Display */}
+      {/* 3. Buttons */}
       <div className="space-y-3 mb-6">
         <div className="relative group">
             <motion.button

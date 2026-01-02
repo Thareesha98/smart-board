@@ -169,7 +169,7 @@ const MaintenancePage = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setShowForm(!showForm)}
-        className="fixed bottom-24 right-8 h-14 w-14 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+        className="fixed bottom-8 right-8 h-14 w-14 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
         aria-label="New Request"
       >
         <FaPlus size={24} className={`transition-transform duration-300 ${showForm ? 'rotate-45' : ''}`} />

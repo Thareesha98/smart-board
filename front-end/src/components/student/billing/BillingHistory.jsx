@@ -45,7 +45,7 @@ const HistoryItem = ({ payment, onViewReceipt, onPayNow, index }) => {
       className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border border-gray-200 rounded-large transition-all duration-300 hover:border-accent"
     >
       <div className="flex items-center gap-4 flex-1 w-full sm:w-auto">
-        <div className="text-2xl font-bold text-text-dark w-24">LKR {payment.amount}</div>
+        <div className="text-2xl font-bold text-text-dark w-24">${payment.amount}</div>
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-text-dark truncate">{payment.title}</h4>
           <span className="text-sm text-text-muted truncate block">{payment.boarding}</span>

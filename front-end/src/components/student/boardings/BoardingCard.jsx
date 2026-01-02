@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { 
   FaEye, FaCog, FaMapMarkerAlt, FaCalendarAlt, 
   FaDollarSign, FaUserFriends, FaCreditCard, 
@@ -84,7 +83,7 @@ const BoardingCard = ({
               </div>
               <div className="flex items-center gap-3 text-text-muted">
                 <FaDollarSign className="text-accent w-4" />
-                <span>LKR {boarding.rent}/month (Utilities included)</span>
+                <span>${boarding.rent}/month (Utilities included)</span>
               </div>
               <div className="flex items-center gap-3 text-text-muted">
                 <FaUserFriends className="text-accent w-4" />
@@ -120,7 +119,7 @@ const BoardingCard = ({
           <div>
             <h4 className="text-lg font-bold text-text-dark mb-2">Next Payment</h4>
             <div className="flex items-center gap-4 mb-4">
-              <span className="text-3xl font-bold text-accent">LKR {boarding.nextPayment.amount}</span>
+              <span className="text-3xl font-bold text-accent">${boarding.nextPayment.amount}</span>
               <span className="text-text-muted">Due {boarding.nextPayment.dueDate}</span>
             </div>
             <motion.button

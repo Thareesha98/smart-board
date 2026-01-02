@@ -32,14 +32,14 @@ const QuickPay = ({ defaultAmount, paymentMethods, activeMethodId, onPayment, is
             <div>
             <label className="block font-bold text-text-dark text-xs uppercase tracking-wide mb-2">Amount</label>
             <div className="relative group">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg group-focus-within:text-accent transition-colors">LKR</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-bold text-lg group-focus-within:text-accent transition-colors">$</span>
                 <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(Number(e.target.value))}
                 min="1"
                 step="1"
-                className="w-full pl-16 pr-4 py-3.5 border-2 border-gray-200 rounded-2xl text-lg font-bold text-text-dark transition-all duration-300 focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none"
+                className="w-full pl-10 pr-4 py-3.5 border-2 border-gray-200 rounded-2xl text-lg font-bold text-text-dark transition-all duration-300 focus:border-accent focus:ring-4 focus:ring-accent/10 outline-none"
                 />
             </div>
             </div>

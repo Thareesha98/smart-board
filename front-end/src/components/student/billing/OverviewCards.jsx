@@ -69,7 +69,7 @@ const OverviewCard = ({ icon: Icon, title, amount, subtitle, colorClass, index }
     <div className="flex-1 min-w-0">
       <h3 className="text-sm font-semibold text-text-muted mb-2 truncate">{title}</h3>
       <div className={`text-3xl font-bold ${colorClass} mb-1 truncate`}>
-        {typeof amount === 'number' ? `LKR ${amount}` : amount}
+        {typeof amount === 'number' ? `$${amount}` : amount}
       </div>
       <span className="text-sm text-text-muted truncate block">{subtitle}</span>
     </div>

@@ -74,10 +74,10 @@ export const sampleBillingData = {
     },
   ],
   billingDetails: [
-    { label: 'Monthly Rent', value: 'LKR 350.00' },
+    { label: 'Monthly Rent', value: '$350.00' },
     { label: 'Utilities Included', value: 'Yes' },
     { label: 'Payment Due Date', value: '5th of each month' },
-    { label: 'Late Fee', value: 'LK 25 after 5 days' },
-    { label: 'Security Deposit', value: 'LK 350 (Paid)' },
+    { label: 'Late Fee', value: '$25 after 5 days' },
+    { label: 'Security Deposit', value: '$350 (Paid)' },
   ],
 };
