@@ -19,7 +19,9 @@ const Header = ({ title, subtitle, rightContent }) => {
     <header className="
       flex flex-col md:flex-row justify-between items-center 
       mb-8 bg-white/70 backdrop-blur-sm p-6 rounded-large 
-      shadow-custom sticky top-6 z-10 transition-all duration-500
+      shadow-custom
+      static md:sticky top-0 md:top-6 z-10
+      transition-all duration-500
       hover:shadow-xl
     ">
       <div className="text-center md:text-left mb-4 md:mb-0">

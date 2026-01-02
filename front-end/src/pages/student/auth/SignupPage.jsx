@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAuth } from "../../../context/student/AuthContext.jsx";
+import { useAuth } from "../../../context/student/StudentAuthContext.jsx";
 import SignupForm from "../../../components/student/auth/SignupForm";
 import { FaArrowLeft } from "react-icons/fa";
 import backgroundImage from "../../../assets/s5.jpg";
@@ -15,7 +15,7 @@ const SignupPage = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      navigate('', { replace: true });
+      navigate('/student/login', { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
 
@@ -127,7 +127,7 @@ const SignupPage = () => {
             <p className="text-text-muted text-sm md:text-base">
               Already have an account?{" "}
               <Link
-                to="/login"
+                to="/student/login"
                 className="text-accent hover:text-primary font-semibold transition-colors"
               >
                 Sign In

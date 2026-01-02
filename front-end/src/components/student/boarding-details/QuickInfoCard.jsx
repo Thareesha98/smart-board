@@ -56,7 +56,7 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
       <div className="border-t border-b border-gray-100 py-4">
         <div className="flex flex-wrap items-baseline gap-1">
           <span className="text-3xl sm:text-4xl font-bold text-accent">
-            ${boarding.price}
+            LKR {boarding.price}
           </span>
           <span className="text-text-muted font-medium">/month</span>
         </div>
