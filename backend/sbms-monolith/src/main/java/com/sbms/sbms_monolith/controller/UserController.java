@@ -21,16 +21,6 @@ public class UserController {
         return userService.register(dto);
     }
 
-    @PostMapping("/register/request")
-    public String registerRequest(@RequestBody UserRegisterDTO dto) {
-        return userService.registerRequest(dto);
-    }
-
-    @PostMapping("/register/verify")
-    public UserResponseDTO verifyRegistration(@RequestBody VerifyOtpDTO dto) {
-        return userService.verifyRegistration(dto.getEmail(), dto.getOtp());
-    }
-
     @PostMapping("/login")
     public UserResponseDTO login(@RequestBody UserLoginDTO dto) {
         return userService.login(dto);
