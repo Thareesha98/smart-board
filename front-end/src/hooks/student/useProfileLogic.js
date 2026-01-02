@@ -28,7 +28,13 @@ const useProfileLogic = () => {
       firstName: firstName,
       lastName: lastName,
       university: currentUser.studentUniversity, // Map Backend 'studentUniversity' -> Frontend 'university'
-      avatar: currentUser.profileImageUrl || 'https://randomuser.me/api/portraits/women/50.jpg' // Map 'profileImageUrl' -> 'avatar'
+      avatar: currentUser.profileImageUrl || 'https://randomuser.me/api/portraits/women/50.jpg', // Map 'profileImageUrl' -> 'avatar'
+  
+      preferences: currentUser.preferences || {
+        emailNotifications: true,
+        smsNotifications: false,
+        marketingEmails: false
+      }
   } : {};
 
   // --- 2. UPDATE HANDLERS (Frontend -> Backend) ---
