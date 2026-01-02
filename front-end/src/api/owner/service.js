@@ -55,10 +55,10 @@ export const createReport = async (reportData, files) => {
 // =================================================================
 
 // 1. Get all boardings owned by this user
-export const getOwnerBoardings = async (ownerId) => {
+export const getOwnerBoardings = async () => {
   try {
     // Endpoint: GET /api/boardings/owner/{id}
-    const response = await api.get(`/boardings/owner/${ownerId}`);
+    const response = await api.get("/boardings/owner");
     return response.data;
   } catch (error) {
     console.error("Error fetching boardings:", error);
