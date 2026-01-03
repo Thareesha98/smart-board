@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import FormGroup from "../../components/Owner/forms/FormGroup";
+import useMyAdsLogic from "../../hooks/owner/useMyAdsLogic";
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; // ✅ Import Context
 import HeaderBar from "../../components/Owner/common/HeaderBar";
-import { ownerData, mockAds } from "../../data/mockData";
+import FormGroup from "../../components/Owner/forms/FormGroup";
 
 import {
   AdStatusBadge,
@@ -20,49 +21,38 @@ const availableAmenities = [
   { label: "Laundry", icon: "fa-washing-machine" },
 ];
 
-// Refactored to return Tailwind class strings
-const getStatusBadgeStyle = (status) => {
-  switch (status) {
-    case "Active":
-      return "bg-success text-white";
-    case "Pending":
-      return "bg-accent text-white";
-    case "Draft":
-      return "bg-muted text-white";
-    case "Deactivated":
-      return "bg-error text-white";
-    default:
-      return "bg-light text-text";
-  }
-};
-
 const EditAdPage = () => {
   const { adId } = useParams();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newImages, setNewImages] = useState([]);
-  const [imagePreviews, setImagePreviews] = useState([]);
+  // ✅ Get Current Owner from Context
+  const { currentOwner } = useOwnerAuth();
 
+  const { fetchSingleAd, updateAd, isLoading } = useMyAdsLogic();
+
+  const [formData, setFormData] = useState(null);
+  const [newImageFiles, setNewImageFiles] = useState([]);
+  const [newImagePreviews, setNewImagePreviews] = useState([]);
+
+  // --- 1. Load Data ---
   useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const ad = mockAds.find((item) => item.id === adId);
-      if (ad) {
+    const loadAdData = async () => {
+      const data = await fetchSingleAd(adId);
+      if (data) {
         setFormData({
-          ...ad,
-          rent: String(ad.rent),
-          amenities: ad.amenities || ["Wi-Fi"],
-          currentImages: [ad.image || "https://via.placeholder.com/150"],
-          adStatus: ad.status || "Active",
+          ...data,
+          rent: data.rent || "",
+          deposit: data.deposit || "",
+          amenities: data.amenities || [],
+          currentImages: data.currentImages || [],
+          adStatus: data.status || "Draft",
         });
       }
-      setIsLoading(false);
-    }, 500);
-  }, [adId]);
+    };
+    loadAdData();
+  }, [adId, fetchSingleAd]);
 
+  // --- 2. Handlers ---
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
@@ -80,51 +70,51 @@ const EditAdPage = () => {
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
-      setNewImages((prev) => [...prev, ...files]);
+      setNewImageFiles((prev) => [...prev, ...files]);
       const newPreviews = files.map((file) => URL.createObjectURL(file));
-      setImagePreviews((prev) => [...prev, ...newPreviews]);
+      setNewImagePreviews((prev) => [...prev, ...newPreviews]);
     }
   };
 
   const handleRemoveNewImage = (index) => {
-    setNewImages((prev) => prev.filter((_, i) => i !== index));
-    setImagePreviews((prev) => {
+    setNewImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewImagePreviews((prev) => {
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      alert(
-        `Success! A new version of "${formData.title}" has been submitted for review.`
-      );
-      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
-      setIsSubmitting(false);
-      navigate("/ownerLayout/myAds");
-    }, 1500);
+  const handleRemoveExistingImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      currentImages: prev.currentImages.filter((_, i) => i !== index),
+    }));
   };
 
-  if (isLoading || !formData) return <LoadingSpinner id={adId} />;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await updateAd(adId, formData, newImageFiles, formData.currentImages);
+  };
+
+  if (isLoading && !formData) return <LoadingSpinner id={adId} />;
+  if (!formData)
+    return <div className="p-8 text-center text-error">Ad not found.</div>;
 
   return (
     <div className="pt-4 space-y-8 bg-light min-h-screen pb-12">
+      {/* ✅ Updated HeaderBar with Context Data */}
       <HeaderBar
         title={`Edit Ad: ${adId}`}
-        subtitle={`Creating a pending revision for **${formData.title}**`}
-        notificationCount={1}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
+        subtitle={`Editing details for **${formData.title}**`}
+        userAvatar={currentOwner?.avatar}
+        userName={currentOwner?.firstName}
       />
 
       <form
         onSubmit={handleSubmit}
         className="space-y-8 px-4 max-w-6xl mx-auto"
       >
-        {/* Ad Information Section */}
+        {/* Ad Information */}
         <div className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
           <div className="flex justify-between items-center mb-6 pb-4 border-b border-light">
             <h2 className="text-xl font-black text-primary uppercase tracking-tight">
@@ -132,7 +122,13 @@ const EditAdPage = () => {
             </h2>
             <AdStatusBadge
               status={formData.adStatus}
-              className={getStatusBadgeStyle(formData.adStatus)}
+              className={
+                formData.adStatus === "Active"
+                  ? "bg-success text-white"
+                  : formData.adStatus === "Pending"
+                  ? "bg-accent text-white"
+                  : "bg-muted text-white"
+              }
             />
           </div>
 
@@ -159,14 +155,26 @@ const EditAdPage = () => {
             <FormGroup
               label="Security Deposit (LKR)"
               name="deposit"
-              value={formData.deposit || "30000"}
+              value={formData.deposit}
               onChange={handleChange}
               type="number"
             />
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold uppercase text-muted tracking-wider mb-2">
+                Description
+              </label>
+              <textarea
+                name="description"
+                rows="3"
+                value={formData.description}
+                onChange={handleChange}
+                className="w-full p-3 border border-light rounded-xl bg-white/50 focus:border-accent"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Features & Media Section */}
+        {/* Features & Media */}
         <div className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
           <h2 className="text-xl font-black mb-6 pb-4 border-b border-light text-primary uppercase tracking-tight">
             Features & Media
@@ -197,10 +205,10 @@ const EditAdPage = () => {
                 <ImagePreview
                   key={`curr-${idx}`}
                   src={src}
-                  onRemove={() => {}}
+                  onRemove={() => handleRemoveExistingImage(idx)}
                 />
               ))}
-              {imagePreviews.map((src, idx) => (
+              {newImagePreviews.map((src, idx) => (
                 <ImagePreview
                   key={`new-${idx}`}
                   src={src}
@@ -217,17 +225,24 @@ const EditAdPage = () => {
         <div className="flex justify-end pt-4 space-x-4">
           <button
             type="button"
-            onClick={() => navigate("/ownerLayout/myAds")}
+            onClick={() => navigate("/owner/myAds")}
             className="px-8 py-3 font-black text-[10px] uppercase tracking-widest rounded-full border-2 border-primary text-primary transition-all hover:bg-primary hover:text-white"
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="px-10 py-3 font-black text-[10px] uppercase tracking-widest rounded-full shadow-lg bg-accent text-white transition-all hover:shadow-xl hover:-translate-y-1 active:scale-95 disabled:opacity-50"
+            disabled={isLoading}
+            className={`
+                px-10 py-3 font-black text-[10px] uppercase tracking-widest rounded-full shadow-lg text-white transition-all 
+                ${
+                  isLoading
+                    ? "bg-muted cursor-not-allowed"
+                    : "bg-accent hover:shadow-xl hover:-translate-y-1 active:scale-95"
+                }
+            `}
           >
-            {isSubmitting ? "Submitting..." : "Submit for Approval"}
+            {isLoading ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>
