@@ -44,25 +44,20 @@ const Sidebar = () => {
   const location = useLocation();
   const { currentUser, logout } = useAuth();
   const currentPath = location.pathname.replace(/^\/|\/$/g, "").toLowerCase();
+  
+  // Ref for the mobile scroll container
   const mobileNavRef = useRef(null);
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       logout();
+      window.location.href = '/student/login';
     }
   };
 
   const isProfileActive = currentPath === "profile";
 
-  // Helper to safely get display name from 'fullName'
-  const getDisplayName = () => {
-    if (!currentUser || !currentUser.fullName) return "Guest User";
-    const parts = currentUser.fullName.split(" ");
-    if (parts.length === 1) return parts[0];
-    // Returns "John D."
-    return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-  };
-
+  // Auto-scroll active item into view on mobile
   useEffect(() => {
     if (mobileNavRef.current) {
       const activeLink = mobileNavRef.current.querySelector('.mobile-active');
@@ -107,13 +102,12 @@ const Sidebar = () => {
             className={`flex items-center gap-3 p-3 rounded-btn transition-all duration-300 ${isProfileActive ? "bg-card-bg text-primary shadow-lg transform scale-[1.01]" : "text-white hover:bg-white/10"}`}
           >
             <img 
-              // Fix: Use profileImageUrl mapped from backend
-              src={currentUser?.profileImageUrl || 'https://randomuser.me/api/portraits/women/50.jpg'} 
-              alt="User"
+              src={currentUser?.avatar || 'https://randomuser.me/api/portraits/women/50.jpg'} 
+              alt={currentUser?.firstName || 'User'}
               className={`w-8 h-8 rounded-full object-cover border-2 transition-colors duration-300 ${isProfileActive ? "border-primary" : "border-accent"}`}
             />
             <span className="font-medium">
-              {getDisplayName()}
+              {currentUser ? `${currentUser.firstName} ${currentUser.lastName.charAt(0)}.` : 'Guest U.'}
             </span>
           </Link>
           <button
@@ -127,6 +121,7 @@ const Sidebar = () => {
       </aside>
 
       {/* Mobile/Tablet Navigation */}
+      {/* UPDATED: Changed 'sticky top-0' to 'fixed bottom-0 left-0' */}
       <nav
         ref={mobileNavRef}
         className="lg:hidden w-full bg-primary text-white shadow-lg fixed bottom-0 left-0 z-50 overflow-x-auto scrollbar-hide"
@@ -157,7 +152,8 @@ const Sidebar = () => {
         </div>
       </nav>
 
-      <style jsx>{`
+      {/* Hide scrollbar styling */}
+      <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }

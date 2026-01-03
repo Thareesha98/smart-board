@@ -50,15 +50,7 @@ export default function AddReportPage() {
       if (currentOwner?.id) {
         try {
           const data = await getOwnerBoardings(currentOwner.id);
-          console.log("Backend Boarding Data:", data);
-
-          // ✅ FIX: Robust mapping that tries multiple common field names
-          const formattedData = data.map(boarding => ({
-            ...boarding,
-            // Try 'title', then 'name', then 'boardingName', then fallback
-            name: boarding.title || boarding.name || boarding.boardingName || "Unnamed Property"
-          }));
-          setProperties(formattedData);
+          setProperties(data);
         } catch (error) {
           console.error("Failed to load properties");
         } finally {
