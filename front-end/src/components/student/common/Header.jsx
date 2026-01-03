@@ -15,20 +15,6 @@ const Header = ({ title, subtitle, rightContent }) => {
     navigate('/student/profile');
   }
 
-  // Helper to safely get display name from 'fullName'
-  const getDisplayName = () => {
-    if (!currentUser || !currentUser.fullName) return "Guest User";
-    const parts = currentUser.fullName.split(" ");
-    if (parts.length === 1) return parts[0];
-    return `${parts[0]} ${parts[parts.length - 1].charAt(0)}.`;
-  };
-
-  // Helper to get First Name only for Welcome message
-  const getFirstName = () => {
-    if (!currentUser || !currentUser.fullName) return "Guest";
-    return currentUser.fullName.split(" ")[0];
-  }
-
   return (
     <header className="
       flex flex-col md:flex-row justify-between items-center 
@@ -39,17 +25,19 @@ const Header = ({ title, subtitle, rightContent }) => {
       hover:shadow-xl
     ">
       <div className="text-center md:text-left mb-4 md:mb-0">
+        {/* 🔥 DYNAMIC TITLE - Shows real user name */}
         <h1 className="text-primary text-2xl md:text-3xl font-bold mb-1">
-          {title || `Welcome back, ${getFirstName()}!`}
+          {title || `Welcome back, ${currentUser?.firstName || 'Guest'}!`}
         </h1>
         <p className="text-text-muted">{subtitle || "Here's your boarding overview"}</p>
       </div>
       
       <div className="flex items-center gap-6">
         
+        {/* If custom content is provided, render it here */}
         {rightContent && <div className="hidden sm:block">{rightContent}</div>}
 
-        {/* Notification Bell */}
+        {/* Notification Bell with Animated Hover */}
         <div 
           className="relative cursor-pointer p-3 rounded-full bg-background-light text-text-dark transition-all duration-300 hover:bg-accent hover:text-white group"
           onClick={handleNotificationClick}
@@ -64,19 +52,20 @@ const Header = ({ title, subtitle, rightContent }) => {
           </span>
         </div>
         
-        {/* User Menu */}
+        {/* User Menu with Animated Hover - ✅ NAVIGATES TO PROFILE */}
         <div 
           className="flex items-center gap-3 cursor-pointer p-2 pr-4 rounded-large bg-background-light text-text-dark transition-all duration-300 hover:bg-accent hover:text-white group"
           onClick={handleUserMenuClick}
         >
+          {/* 🔥 DYNAMIC AVATAR - Updates when user changes profile pic */}
           <img 
-            // Fix: Use profileImageUrl mapped from backend
-            src={currentUser?.profileImageUrl || 'https://randomuser.me/api/portraits/women/50.jpg'} 
-            alt={currentUser?.fullName || 'User'} 
+            src={currentUser?.avatar || 'https://randomuser.me/api/portraits/women/50.jpg'} 
+            alt={currentUser?.firstName || 'User'} 
             className="w-10 h-10 rounded-full object-cover border-2 border-accent group-hover:border-white transition-colors duration-300"
           />
+          {/* 🔥 DYNAMIC NAME - Shows real user name */}
           <span className="font-semibold text-sm">
-            {getDisplayName()}
+            {currentUser ? `${currentUser.firstName} ${currentUser.lastName.charAt(0)}.` : 'Guest U.'}
           </span>
         </div>
       </div>

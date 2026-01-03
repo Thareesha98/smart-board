@@ -15,9 +15,6 @@ import OwnerAppRoutes from "./routes/OwnerAppRoutes";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 
-// Public Profile View
-import PublicProfileView from "./pages/common/PublicProfileView.jsx";
-
 function App() {
   return (
     <>
@@ -35,9 +32,6 @@ function App() {
 
             {/* Owner routes (Dashboard, My Ads, etc.) */}
             <Route path="/owner/*" element={<OwnerAppRoutes />} />
-
-            {/* Public Profile view */}
-            <Route path="/profile/view/:id" element={<PublicProfileView />} />
 
             {/* ==================== LANDING PAGE ==================== */}
             <Route path="/" element={<Home />} />

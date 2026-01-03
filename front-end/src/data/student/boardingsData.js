@@ -21,7 +21,6 @@ export const sampleBoardingData = {
     leasePeriod: '12 Months'
   },
   owner: {
-    id: 4,
     name: 'Kamal Perera',
     avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
     rating: 4.9,
