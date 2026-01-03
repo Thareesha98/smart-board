@@ -4,7 +4,7 @@ export const sampleBoardings = [
     name: "Sunshine Hostel",
     price: 350,
     priceNote: "Utilities included",
-    rating: 4.5,
+    // rating: 4.5,
     reviewCount: 23,
     location: "1.2 km from campus",
     distance: 1.2,
