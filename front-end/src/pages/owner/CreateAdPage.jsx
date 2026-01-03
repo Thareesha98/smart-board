@@ -1,12 +1,16 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import useMyAdsLogic from "../../hooks/owner/useMyAdsLogic"; 
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; // ✅ Import Auth Context
 import FormGroup from "../../components/Owner/forms/FormGroup";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
-import { ownerData } from "../../data/mockData.js";
 import {
   AmenityCheckbox,
   PhotoUploader,
 } from "../../components/Owner/ads/CreateAdSubComponents";
+
+// Backend Enum Options
+const BOARDING_TYPES = ["ANNEX", "ROOM", "HOUSE"]; 
+const GENDER_TYPES = ["MALE", "FEMALE", "MIXED"]; 
 
 const availableAmenities = [
   { label: "Attached Bathroom", icon: "fa-bath" },
@@ -17,23 +21,36 @@ const availableAmenities = [
 ];
 
 const CreateAdPage = () => {
+  // ✅ Get Current Owner from Context
+  const { currentOwner } = useOwnerAuth();
+  
+  // Destructure Logic Hook
+  const { createAd, isLoading } = useMyAdsLogic();
+
+  // --- Local Form State ---
   const [formData, setFormData] = useState({
     title: "",
     address: "",
-    rent: "",
-    deposit: "",
+    rent: "",        
+    deposit: "",     
     description: "",
     amenities: [],
+    genderType: "MIXED",
+    boardingType: "ROOM",
+    availableSlots: 1,
+    maxOccupants: 1,
   });
+
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const navigate = useNavigate();
+  // --- Handlers ---
 
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files);
     setSelectedFiles((prev) => [...prev, ...files]);
+    
+    // Generate previews for UI
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviews((prev) => [...prev, ...newPreviews]);
   };
@@ -41,63 +58,63 @@ const CreateAdPage = () => {
   const handleRemoveImage = (index) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
     setPreviews((prev) => {
-      URL.revokeObjectURL(prev[index]);
+      URL.revokeObjectURL(prev[index]); 
       return prev.filter((_, i) => i !== index);
     });
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox"
-          ? checked
-            ? [...prev.amenities, value]
-            : prev.amenities.filter((i) => i !== value)
-          : value,
+      [name]: type === "checkbox"
+        ? checked
+          ? [...prev.amenities, value]
+          : prev.amenities.filter((i) => i !== value)
+        : value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      alert("Boarding Ad Created Successfully!");
-      navigate("../myAds");
-    }, 2000);
+    createAd(formData, selectedFiles); 
   };
 
   return (
     <div className="space-y-8 pb-12 bg-light min-h-screen">
+      {/* ✅ Updated HeaderBar with currentOwner data */}
       <HeaderBar
         title="Create New Boarding Ad"
-        subtitle={"Fill in the details below to create your ad."}
+        subtitle="Fill in the details below to create your ad."
         navBtnText="Back to My Ads"
         navBtnPath="/owner/myAds"
+        userAvatar={currentOwner?.avatar}   // Pass avatar if available
+        userName={currentOwner?.firstName}  // Pass name if available
       />
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-8 px-4 max-w-6xl mx-auto"
-      >
+      <form onSubmit={handleSubmit} className="space-y-8 px-4 max-w-6xl mx-auto">
+        
         {/* Section 1: Details */}
         <section className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
           <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
             Boarding Details
           </h2>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <FormGroup
               label="Ad Title"
               name="title"
               value={formData.title}
               onChange={handleChange}
+              placeholder="e.g. Spacious Room near University"
             />
             <FormGroup
               label="Full Address"
               name="address"
               value={formData.address}
               onChange={handleChange}
+              placeholder="e.g. 123 Main St, Colombo"
             />
             <FormGroup
               label="Monthly Rent (LKR)"
@@ -113,7 +130,52 @@ const CreateAdPage = () => {
               value={formData.deposit}
               onChange={handleChange}
             />
+            
+            {/* Dropdowns for Backend Enums */}
+            <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-muted tracking-wider">
+                    Gender Preference
+                </label>
+                <select 
+                    name="genderType" 
+                    value={formData.genderType} 
+                    onChange={handleChange}
+                    className="p-3 border border-light rounded-xl bg-white/50 focus:border-accent font-medium text-text"
+                >
+                    {GENDER_TYPES.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase text-muted tracking-wider">
+                    Boarding Type
+                </label>
+                <select 
+                    name="boardingType" 
+                    value={formData.boardingType} 
+                    onChange={handleChange}
+                    className="p-3 border border-light rounded-xl bg-white/50 focus:border-accent font-medium text-text"
+                >
+                    {BOARDING_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+            </div>
+
+            <FormGroup
+              label="Available Slots"
+              name="availableSlots"
+              type="number"
+              value={formData.availableSlots}
+              onChange={handleChange}
+            />
+            <FormGroup
+              label="Max Occupants"
+              name="maxOccupants"
+              type="number"
+              value={formData.maxOccupants}
+              onChange={handleChange}
+            />
           </div>
+          
           <div className="mt-8">
             <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-muted">
               Description
@@ -164,17 +226,17 @@ const CreateAdPage = () => {
         <div className="flex justify-end pt-6">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isLoading}
             className={`
               px-12 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all
               ${
-                isSubmitting
+                isLoading
                   ? "bg-muted text-white cursor-not-allowed"
                   : "bg-accent text-white hover:shadow-xl hover:-translate-y-1 active:scale-95"
               }
             `}
           >
-            {isSubmitting ? (
+            {isLoading ? (
               <span className="flex items-center">
                 <i className="fas fa-circle-notch fa-spin mr-3"></i>{" "}
                 Publishing...
