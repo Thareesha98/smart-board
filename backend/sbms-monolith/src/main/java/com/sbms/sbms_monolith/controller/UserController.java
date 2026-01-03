@@ -21,7 +21,6 @@ public class UserController {
         return userService.register(dto);
     }
 
-
     @PostMapping("/login")
     public UserResponseDTO login(@RequestBody UserLoginDTO dto) {
         return userService.login(dto);

@@ -1,64 +1,80 @@
 import { useAuth } from '../../context/student/StudentAuthContext.jsx';
 
 const useProfileLogic = () => {
-  // Get everything from AuthContext instead of local state
   const { 
     currentUser, 
-    updateProfile: updateProfileContext, 
+    updateProfile, 
     updateAvatar: updateAvatarContext, 
     updatePreferences: updatePreferencesContext 
   } = useAuth();
 
-  // Update personal info - syncs with AuthContext
-  const updatePersonalInfo = (data) => {
-    const updatedData = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      dob: data.dob,
-      gender: data.gender,
-      phone: data.phone,
-      university: data.university,
-      studentId: data.studentId,
-      address: data.address,
-      emergencyContact: data.emergencyContact,
+  // --- 1. TRANSFORM DATA (Backend -> Frontend) ---
+  // Backend provides "fullName", Frontend Profile needs "firstName" and "lastName"
+  
+  let firstName = "Student";
+  let lastName = "";
+  
+  if (currentUser?.fullName) {
+    const parts = currentUser.fullName.trim().split(" ");
+    if (parts.length > 0) {
+        firstName = parts[0];
+        lastName = parts.slice(1).join(" "); // Everything else is last name
+    }
+  }
+
+  // Create a user object that the Profile Page understands
+  const userData = currentUser ? {
+      ...currentUser,
+      firstName: firstName,
+      lastName: lastName,
+      university: currentUser.studentUniversity, // Map Backend 'studentUniversity' -> Frontend 'university'
+      avatar: currentUser.profileImageUrl || 'https://randomuser.me/api/portraits/women/50.jpg', // Map 'profileImageUrl' -> 'avatar'
+  
+      preferences: currentUser.preferences || {
+        emailNotifications: true,
+        smsNotifications: false,
+        marketingEmails: false
+      }
+  } : {};
+
+  // --- 2. UPDATE HANDLERS (Frontend -> Backend) ---
+
+  // Called by "Edit Personal Info" Modal
+  const updatePersonalInfo = async (data) => {
+    const payload = {
+       // Combine First/Last back into FullName for Backend
+       fullName: `${data.firstName} ${data.lastName}`.trim(),
+       
+       phone: data.phone,
+       address: data.address,
+       gender: data.gender ? data.gender.toUpperCase() : null,
+       studentUniversity: data.university, // Send as 'studentUniversity'
+       studentId: data.studentId,
+       dob: data.dob,
+       emergencyContact: data.emergencyContact
     };
-    updateProfileContext(updatedData);
+
+    await updateProfile(payload);
   };
 
-  // Update full profile - syncs with AuthContext
-  const updateProfile = (data) => {
-    const updatedData = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      username: data.username,
-      phone: data.phone,
-      university: data.university,
-      studentId: data.studentId,
-      dob: data.dob,
-      gender: data.gender,
-      address: data.address,
-      emergencyContact: data.emergencyContact,
-    };
-    updateProfileContext(updatedData);
-  };
-
-  // Update avatar - syncs with AuthContext (also updates Sidebar & Header)
-  const updateAvatar = (avatarUrl) => {
-    updateAvatarContext(avatarUrl);
-  };
-
-  // Update preferences - syncs with AuthContext
-  const updatePreferences = (preference, value) => {
-    updatePreferencesContext(preference, value);
+  // Called by generic "Edit Profile" Modal
+  const updateProfileHandler = async (data) => {
+     let payload = { ...data };
+     
+     // If user edited names separately, combine them
+     if (data.firstName || data.lastName) {
+        payload.fullName = `${data.firstName || firstName} ${data.lastName || lastName}`.trim();
+     }
+     
+     await updateProfile(payload);
   };
 
   return {
-    userData: currentUser || {}, // Return current user from AuthContext
+    userData,
     updatePersonalInfo,
-    updateProfile,
-    updateAvatar,
-    updatePreferences,
+    updateProfile: updateProfileHandler,
+    updateAvatar: updateAvatarContext,
+    updatePreferences: updatePreferencesContext
   };
 };
 

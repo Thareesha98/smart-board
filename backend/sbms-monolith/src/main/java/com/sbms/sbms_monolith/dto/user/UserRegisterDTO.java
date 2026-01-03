@@ -43,6 +43,9 @@ public class UserRegisterDTO {
     )
     private UserRole role;
 
+    @Schema(example = "https://example.com/image.jpg")
+    private String profileImageUrl;
+
     // -------- OWNER FIELDS --------
 
     @Schema(

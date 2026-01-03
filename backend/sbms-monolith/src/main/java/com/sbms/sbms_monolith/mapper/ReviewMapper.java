@@ -49,8 +49,11 @@ public class ReviewMapper {
 
         User student = review.getStudent();
         if (student != null) {
-            dto.setStudentName(student.getFullName());
-            dto.setStudentProfileImage(student.getProfileImageUrl());
+            dto.setUserId(student.getId());
+            dto.setUserName(student.getFullName());
+            dto.setUserAvatar(student.getProfileImageUrl());
+        } else {
+            dto.setUserName("Anonymous");
         }
 
         return dto;

@@ -63,12 +63,12 @@ const AppointmentCard = ({ appointment, onAction }) => {
       case 'upcoming':
         return (
           <>
-            <button 
+            {/* <button 
               className={`${BASE_BTN} text-orange-600 border-orange-600 hover:bg-orange-600 hover:text-white`} 
               onClick={(e) => handleBtnClick(e, 'reschedule')}
             >
               <FaCalendarAlt /> Reschedule
-            </button>
+            </button> */}
             <button 
               className={`${BASE_BTN} text-red-500 border-red-500 hover:bg-red-500 hover:text-white`} 
               onClick={(e) => handleBtnClick(e, 'cancel')} // ✅ Fixed Click Handler

@@ -114,7 +114,7 @@ const AppointmentsPage = () => {
           <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
             No {category} Appointments
           </h3>
-          {(category !== "cancelled" && category !== "rejected") && (
+          {/* {(category !== "cancelled" && category !== "rejected") && (
             <button
               className="flex items-center gap-2 py-2 px-4 sm:py-3 sm:px-6 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 hover:-translate-y-0.5 mx-auto mt-4 text-sm sm:text-base"
               onClick={() => {
@@ -124,7 +124,7 @@ const AppointmentsPage = () => {
             >
               <FaPlus /> Schedule Your First Visit
             </button>
-          )}
+          )} */}
         </div>
       );
     }
@@ -146,20 +146,20 @@ const AppointmentsPage = () => {
     <StudentLayout
       title="My Appointments"
       subtitle="Manage your boarding visits and selections"
-      headerRightContent={
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 whitespace-nowrap"
-          onClick={() => {
-            setCurrentAppointmentId(null);
-            setIsScheduleModalOpen(true);
-          }}
-        >
-          <FaPlus />
-          Schedule Visit
-        </motion.button>
-      }
+      // headerRightContent={
+      //   <motion.button
+      //     whileHover={{ scale: 1.05 }}
+      //     whileTap={{ scale: 0.95 }}
+      //     className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 whitespace-nowrap"
+      //     onClick={() => {
+      //       setCurrentAppointmentId(null);
+      //       setIsScheduleModalOpen(true);
+      //     }}
+      //   >
+      //     <FaPlus />
+      //     Schedule Visit
+      //   </motion.button>
+      // }
     >
       {/* ✅ UPDATED TABS SECTION */}
       <section className="bg-white p-3 sm:p-6 rounded-2xl shadow-sm mb-6 sm:mb-8 border border-gray-100">
@@ -224,7 +224,7 @@ const AppointmentsPage = () => {
       </section>
       
       {/* Mobile Button and Modals */}
-       <motion.button
+       {/* <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => {
@@ -235,7 +235,7 @@ const AppointmentsPage = () => {
         aria-label="Schedule Visit"
       >
         <FaPlus size={24} />
-      </motion.button>
+      </motion.button> */}
 
       <ScheduleModal
         isOpen={isScheduleModalOpen}

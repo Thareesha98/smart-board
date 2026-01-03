@@ -16,6 +16,7 @@ public class MaintenanceCreateDTO {
     private String description;
     private MaintenanceIssueType issueType;
     private MaintenanceUrgency maintenanceUrgency;
+    private String studentNote;
     
     private List<String> imageUrls;
 }

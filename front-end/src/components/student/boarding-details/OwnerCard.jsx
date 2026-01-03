@@ -1,26 +1,42 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaCheckCircle, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { FaCheckCircle, FaEnvelope, FaPhone, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const OwnerCard = ({ owner, onContact }) => {
   const [showPhone, setShowPhone] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ SAFETY CHECK: If owner is missing, show a placeholder
+  if (!owner) {
+    return (
+      <div className="bg-white rounded-2xl p-6 shadow-custom border border-gray-100">
+        <p className="text-text-muted text-center">Owner details loading...</p>
+      </div>
+    );
+  }
+
+  // ✅ SAFE DATA EXTRACTION (Handles missing fields)
+  // Checks for avatar OR image (backend might send either)
+  const ownerAvatar = owner.avatar || owner.image || null; 
   const ownerPhone = owner.contact || "+94 77 123 4567";
   const ownerEmail = owner.email || "owner@example.com";
+  
+  // Safe stats object (prevents crash if owner.stats is undefined)
+  const stats = owner.stats || {}; 
 
   // Navigation Handler
   const handleProfileClick = (e) => {
-    e.stopPropagation(); // Good practice to keep, just in case
-    navigate(`/profile/view/${owner.id}`);
+    e.stopPropagation();
+    if (owner.id) {
+        navigate(`/profile/view/${owner.id}`);
+    }
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      // REMOVED onClick from here
       className="bg-white rounded-2xl p-6 shadow-custom border border-gray-100 transition-shadow duration-300 hover:shadow-lg"
     >
       {/* 1. Header */}
@@ -31,16 +47,21 @@ const OwnerCard = ({ owner, onContact }) => {
           onClick={handleProfileClick}
           className="relative flex-shrink-0 cursor-pointer group"
         >
-            <img 
-              src={owner.avatar} 
-              alt={owner.name} 
-              className="w-20 h-20 rounded-full object-cover border-4 border-background-light shadow-sm group-hover:border-accent transition-colors duration-300"
-            />
-            {owner.verified && (
-                <div className="absolute bottom-0 right-0 bg-white rounded-full p-0.5">
-                    <FaCheckCircle className="text-green-500 text-lg" />
-                </div>
-            )}
+          {ownerAvatar ? (
+             <img 
+               src={ownerAvatar} 
+               alt={owner.name || "Owner"} 
+               className="w-20 h-20 rounded-full object-cover border-4 border-background-light shadow-sm group-hover:border-accent transition-colors duration-300"
+             />
+          ) : (
+             <FaUserCircle className="w-20 h-20 text-gray-200" />
+          )}
+          
+          {owner.verified && (
+            <div className="absolute bottom-0 right-0 bg-white rounded-full p-0.5">
+              <FaCheckCircle className="text-green-500 text-lg" />
+            </div>
+          )}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -49,29 +70,29 @@ const OwnerCard = ({ owner, onContact }) => {
             onClick={handleProfileClick}
             className="text-xl font-bold text-text-dark truncate cursor-pointer hover:text-accent hover:underline decoration-2 underline-offset-4 transition-all"
           >
-            {owner.name}
+            {owner.name || "Unknown Owner"}
           </h3>
           
           <p className="text-sm text-text-muted mb-1">Property Owner</p>
           <div className="inline-flex items-center gap-1 text-xs font-medium bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-md">
-             <span>★ {owner.rating}</span>
-             <span className="text-yellow-700/60">({owner.reviewCount} reviews)</span>
+             <span>★ {owner.rating || "New"}</span>
+             <span className="text-yellow-700/60">({owner.reviewCount || 0} reviews)</span>
           </div>
         </div>
       </div>
 
-      {/* 2. Stats Grid */}
+      {/* 2. Stats Grid - ✅ SAFE ACCESS using 'stats' variable */}
       <div className="grid grid-cols-3 gap-2 py-4 border-t border-b border-gray-100 mb-6 divide-x divide-gray-100">
         <div className="text-center px-1">
-          <div className="text-xl font-bold text-text-dark">{owner.stats.properties}</div>
+          <div className="text-xl font-bold text-text-dark">{stats.properties || 0}</div>
           <div className="text-xs font-bold text-text-muted uppercase">Properties</div>
         </div>
         <div className="text-center px-1">
-          <div className="text-xl font-bold text-text-dark">{owner.stats.years}</div>
+          <div className="text-xl font-bold text-text-dark">{stats.years || 0}</div>
           <div className="text-xs font-bold text-text-muted uppercase">Years Exp.</div>
         </div>
         <div className="text-center px-1">
-          <div className="text-xl font-bold text-green-600">{owner.stats.responseRate}%</div>
+          <div className="text-xl font-bold text-green-600">{stats.responseRate || 0}%</div>
           <div className="text-xs font-bold text-text-muted uppercase">Response</div>
         </div>
       </div>
@@ -115,10 +136,12 @@ const OwnerCard = ({ owner, onContact }) => {
         )}
       </div>
       
-      {/* 4. Description */}
-      <p className="text-sm text-text-muted leading-relaxed italic bg-background-light p-4 rounded-xl">
-        "{owner.description}"
-      </p>
+      {/* 4. Description - ✅ SAFE ACCESS */}
+      {owner.description && (
+        <p className="text-sm text-text-muted leading-relaxed italic bg-background-light p-4 rounded-xl">
+            "{owner.description}"
+        </p>
+      )}
     </motion.div>
   );
 };
