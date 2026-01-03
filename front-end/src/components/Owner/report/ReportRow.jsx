@@ -7,10 +7,23 @@ const itemVariants = {
 };
 
 const ReportRow = ({ report, config, onViewDetails }) => {
+  const navigate = useNavigate(); // 2. Initialize Hook
+
   const statusIcons = {
     New: "fa-flag",
     "In Progress": "fa-sync-alt",
     Resolved: "fa-check-circle",
+  };
+
+  // 3. Navigation Handler
+  const handleStudentClick = (e) => {
+    e.stopPropagation(); // Prevent affecting other click events
+    // Ensure your report object has studentId
+    if (report.studentId) {
+      navigate(`/profile/view/${report.studentId}`);
+    } else {
+      console.warn("Student ID is missing in report data");
+    }
   };
 
   return (
@@ -26,9 +39,17 @@ const ReportRow = ({ report, config, onViewDetails }) => {
       {/* 1. Header Area */}
       <div className="flex justify-between items-start md:items-center md:flex-1">
         <div className="flex flex-col gap-1">
-          <h4 className="font-black text-base md:text-lg text-text tracking-tight uppercase">
+          
+          {/* --- CLICKABLE STUDENT NAME --- */}
+          <h4 
+            onClick={handleStudentClick}
+            className="font-black text-base md:text-lg text-text tracking-tight uppercase cursor-pointer hover:text-accent hover:underline decoration-2 underline-offset-2 transition-all"
+            title="View Student Profile"
+          >
             {report.student}
           </h4>
+          {/* ----------------------------- */}
+
           <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-muted">
             <i className="fas fa-building text-accent"></i>
             <span className="truncate max-w-[150px] md:max-w-none">

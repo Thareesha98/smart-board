@@ -91,6 +91,7 @@ public class ReportMapper {
         r.setTitle(dto.getReportTitle());
         r.setDescription(dto.getReportDescription());
         r.setBoardingName(dto.getBoarding());
+        r.setReportedPersonName(dto.getReportedPersonName());
 
         try { r.setType(ReportType.valueOf(dto.getType().toUpperCase())); }
         catch (Exception e) { r.setType(ReportType.OTHER); }

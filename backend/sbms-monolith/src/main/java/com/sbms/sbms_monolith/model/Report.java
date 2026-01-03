@@ -61,6 +61,9 @@ public class Report extends BaseEntity {
     @JoinColumn(name = "reported_user_id")
     private User reportedUser;
 
+    @Column(name = "reported_person_name")
+    private String reportedPersonName;
+
 
     @Column(name = "allow_contact")
     private boolean allowContact;

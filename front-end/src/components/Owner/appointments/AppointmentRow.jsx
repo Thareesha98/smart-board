@@ -79,7 +79,7 @@ const AppointmentRow = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex-1 md:flex-none px-4 py-2.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest border-2 border-error text-error flex items-center justify-center gap-2"
-                onClick={() => onAction(appointment.id, "cancelled")}
+                onClick={() => onAction(appointment.id, "rejected")}
               >
                 <FaTimesCircle /> Reject
               </motion.button>
@@ -87,6 +87,7 @@ const AppointmentRow = ({
           )}
 
           {isConfirmed && (
+            <>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -95,6 +96,15 @@ const AppointmentRow = ({
             >
               <FaEye /> Mark Visited
             </motion.button>
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex-1 md:flex-none px-4 py-2.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest border-2 border-error text-error flex items-center justify-center gap-2"
+                onClick={() => onAction(appointment.id, "rejected")}
+              >
+                <FaTimesCircle /> Reject
+              </motion.button>
+            </>
           )}
         </div>
 

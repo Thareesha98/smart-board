@@ -1,16 +1,15 @@
 import React from "react";
 
-/**
- * StatusTab component refactored for Tailwind CSS v3.
- * Uses config-based utility classes for dynamic styling.
- */
+
 const StatusTab = ({ status, count, currentFilter, setFilter, config }) => {
   const isActive = currentFilter === status;
 
   return (
     <button
       className={`
-        relative flex flex-col items-center gap-2 p-6 rounded-report transition-all duration-300 w-full
+        relative flex flex-col items-center justify-center transition-all duration-300 w-full
+        /* Mobile: Small padding & gap | Desktop: Original p-6 & gap-2 */
+        p-2 gap-1 md:p-6 md:gap-2 rounded-report
         ${
           isActive
             ? `${config.colorClass} text-card-bg shadow-lg scale-105`
@@ -19,18 +18,21 @@ const StatusTab = ({ status, count, currentFilter, setFilter, config }) => {
       `}
       onClick={() => setFilter(status)}
     >
-      {/* Icon - Inherits color from parent text class or specific config */}
-      <i className={`${config.icon} text-2xl mb-1`}></i>
+      {/* Icon - Smaller on mobile */}
+      <i className={`${config.icon} text-lg md:text-2xl mb-0.5 md:mb-1`}></i>
 
-      {/* Label - Architectural Ledger Typography */}
-      <span className="text-[11px] font-black uppercase tracking-[0.2em]">
+      {/* Label - Smaller font & tighter tracking on mobile */}
+      <span className="text-[8px] md:text-[11px] font-black uppercase tracking-wider md:tracking-[0.2em] truncate w-full text-center">
         {status}
       </span>
 
-      {/* Tab Count Badge */}
+      {/* Tab Count Badge - Smaller size & font on mobile */}
       <span
         className={`
-          absolute -top-2 -right-2 w-6 h-6 text-[10px] flex items-center justify-center font-black rounded-full shadow-sm transition-colors
+          absolute flex items-center justify-center font-black rounded-full shadow-sm transition-colors
+          /* Mobile: Small 16px badge | Desktop: Original 24px badge */
+          w-4 h-4 text-[8px] -top-1 -right-1
+          md:w-6 md:h-6 md:text-[10px] md:-top-2 md:-right-2
           ${isActive ? "bg-card-bg text-text" : "bg-primary text-card-bg"}
         `}
       >

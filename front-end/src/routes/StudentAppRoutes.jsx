@@ -1,32 +1,22 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from '../components/student/common/ProtectedRoute';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "../components/student/common/ProtectedRoute";
 
-// Auth Pages
-import LoginPage from '../pages/student/auth/LoginPage';
-import SignupPage from '../pages/student/auth/SignupPage';
+// Student Pages (Auth pages removed)
+import StudentDashboard from "../pages/student/StudentDashboard";
+import AppointmentsPage from "../pages/student/AppointmentsPage";
+import SearchBoardingsPage from "../pages/student/SearchBoardingsPage";
+import BoardingDetailsPage from "../pages/student/BoardingDetailsPage";
+import MyBoardingsPage from "../pages/student/MyBoardingsPage";
+import BillingPage from "../pages/student/BillingPage";
+import MaintenancePage from "../pages/student/MaintenancePage";
+import ReportsPage from "../pages/student/ReportsPage";
+import ProfilePage from "../pages/student/ProfilePage";
 
-// Student Pages
-import StudentDashboard from '../pages/student/StudentDashboard';
-import AppointmentsPage from '../pages/student/AppointmentsPage';
-import SearchBoardingsPage from '../pages/student/SearchBoardingsPage';
-import BoardingDetailsPage from '../pages/student/BoardingDetailsPage';
-import MyBoardingsPage from '../pages/student/MyBoardingsPage';
-import BillingPage from '../pages/student/BillingPage';
-import MaintenancePage from '../pages/student/MaintenancePage';
-import ReportsPage from '../pages/student/ReportsPage';
-import ProfilePage from '../pages/student/ProfilePage';
-
-const AppRoutes = () => {
+const StudentAppRoutes = () => {
   return (
     <Routes>
-      {/* ==================== PUBLIC ROUTES ==================== */}
-      <Route path="login" element={<LoginPage />} />
-      <Route path="signup" element={<SignupPage />} />
-
       {/* ==================== PROTECTED ROUTES ==================== */}
-      
-
       <Route
         path="/"
         element={
@@ -109,9 +99,10 @@ const AppRoutes = () => {
       />
 
       {/* ==================== FALLBACK ROUTE ==================== */}
+      {/* Redirects to global login if user tries to access invalid student path */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };
 
-export default AppRoutes;
+export default StudentAppRoutes;

@@ -4,26 +4,27 @@ import { motion, AnimatePresence } from "framer-motion";
 const ManageModal = ({ isOpen, onClose, property, onUpdate, onDelete }) => {
   const [formData, setFormData] = useState({ ...property });
 
-  // Sync internal state when the property prop changes
   useEffect(() => {
-    if (property) setFormData({ ...property });
+    if (property) {
+      setFormData({
+        ...property,
+        // If rent is "LKR 15,000", convert to "15000" for the input field
+        rent: property.rent ? property.rent.replace(/[^0-9]/g, "") : "",
+      });
+    }
   }, [property]);
 
   // -- Animation Variants --
-  const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  };
-
+  const backdropVariants = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.9, y: 30 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      y: 0, 
-      transition: { type: "spring", bounce: 0.3, duration: 0.5 } 
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { type: "spring", bounce: 0.3, duration: 0.5 },
     },
-    exit: { opacity: 0, scale: 0.9, y: 30, transition: { duration: 0.2 } }
+    exit: { opacity: 0, scale: 0.9, y: 30, transition: { duration: 0.2 } },
   };
 
   return (
@@ -45,11 +46,16 @@ const ManageModal = ({ isOpen, onClose, property, onUpdate, onDelete }) => {
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
+            {/* Header */}
             <div className="p-6 border-b border-light flex justify-between items-center bg-light/30">
-              <h3 className="text-xl font-black text-primary tracking-tight uppercase">
-                Quick Manage
-              </h3>
+              <div>
+                <h3 className="text-xl font-black text-primary tracking-tight uppercase">
+                  Quick Manage
+                </h3>
+                <p className="text-[10px] text-muted font-bold uppercase tracking-wider">
+                  {property.name}
+                </p>
+              </div>
               <button
                 onClick={onClose}
                 className="text-muted hover:text-text transition-colors p-2"
@@ -58,22 +64,22 @@ const ManageModal = ({ isOpen, onClose, property, onUpdate, onDelete }) => {
               </button>
             </div>
 
-            {/* Modal Form */}
+            {/* Form */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                onUpdate(formData);
+                onUpdate({ ...formData, id: property.id });
               }}
               className="p-8 space-y-6"
             >
               {/* Rent Input */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-black text-muted uppercase tracking-[0.2em]">
-                  Monthly Rent
+                  Monthly Rent (LKR)
                 </label>
                 <input
-                  type="text"
-                  value={formData.rent || ""}
+                  type="number"
+                  value={formData.rent}
                   onChange={(e) =>
                     setFormData({ ...formData, rent: e.target.value })
                   }
@@ -132,12 +138,13 @@ const ManageModal = ({ isOpen, onClose, property, onUpdate, onDelete }) => {
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => {
-                    if (window.confirm("Delete property permanently?")) 
+                    if (window.confirm("Delete property permanently?"))
                       onDelete(property.id);
                   }}
                   className="w-full py-3 text-error text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-transparent hover:border-error/20 flex items-center justify-center gap-2"
                 >
-                  <i className="fas fa-trash-alt"></i> Delete Property Permanently
+                  <i className="fas fa-trash-alt"></i> Delete Property
+                  Permanently
                 </motion.button>
               </div>
             </form>

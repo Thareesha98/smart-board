@@ -71,11 +71,19 @@ const CreateAdPage = () => {
   return (
     <div className="space-y-8 pb-12 bg-light min-h-screen">
       <HeaderBar
-        title="Create New Boarding Ad"
-        subtitle={"Fill in the details below to create your ad."}
-        navBtnText="Back to My Ads"
-        navBtnPath="/owner/myAds"
-      />
+        title="Create New Ad"
+        subtitle="List a new boarding space"
+        userAvatar={ownerData.avatar}
+        notificationCount={3}
+        userName={ownerData.firstName}
+      >
+        <button
+          className="px-6 py-3 bg-accent text-white rounded-full font-black text-[10px] uppercase tracking-widest shadow-md hover:shadow-xl hover:-translate-y-1 transition-all active:scale-95"
+          onClick={() => navigate("../myAds")}
+        >
+          <i className="fas fa-arrow-left mr-2"></i> Back to Ads
+        </button>
+      </HeaderBar>
 
       <form
         onSubmit={handleSubmit}

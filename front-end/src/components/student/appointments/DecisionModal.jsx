@@ -55,7 +55,7 @@ const DecisionModal = ({ isOpen, onClose, content }) => {
           </div>
         </div>
         
-        <style>{`
+        <style jsx>{`
             .btn-primary {
                 @apply px-6 py-3 rounded-large font-semibold transition-transform duration-300 shadow-lg hover:-translate-y-0.5 w-full flex items-center justify-center;
             }

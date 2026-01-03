@@ -153,7 +153,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Hide scrollbar styling */}
-      <style>{`
+      <style jsx>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }

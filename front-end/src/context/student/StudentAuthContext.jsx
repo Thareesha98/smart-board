@@ -1,150 +1,148 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import api from "../../api/api";
 
-const AuthContext = createContext(null);
+const StudentAuthContext = createContext(null);
 
 export const StudentAuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentStudent, setCurrentStudent] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // 1. Check for logged-in user on load
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('smartboad_user');
-        const storedCredentials = localStorage.getItem('smartboad_credentials');
-        
-        if (storedUser && storedCredentials) {
-          const userData = JSON.parse(storedUser);
-          setCurrentUser(userData);
-          setIsAuthenticated(true);
-        } else {
-          setCurrentUser(null);
-          setIsAuthenticated(false);
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user_data");
+
+      if (token && savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+
+          // 🔒 Security Check: Ensure the saved user is a STUDENT
+          if (user.role === "STUDENT") {
+            setCurrentStudent(user);
+            setIsAuthenticated(true);
+          } else {
+            setIsAuthenticated(false);
+            setCurrentStudent(null);
+          }
+        } catch (e) {
+          console.error("Failed to parse user data", e);
+          localStorage.removeItem("user_data");
+          localStorage.removeItem("token");
         }
-      } catch (error) {
-        console.error('Error loading user data:', error);
-        localStorage.removeItem('smartboad_user');
-        localStorage.removeItem('smartboad_credentials');
-        setCurrentUser(null);
-        setIsAuthenticated(false);
-      } finally {
-        // Ensure loading completes
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
-    checkAuth();
+    initializeAuth();
   }, []);
 
-  // Signup function
-  const signup = (userData) => {
-    const newUser = {
-      ...userData,
-      avatar: userData.avatar || 'https://randomuser.me/api/portraits/women/50.jpg',
-      joinDate: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
-      preferences: {
-        emailNotifications: true,
-        smsNotifications: false,
-        marketingEmails: false,
-      },
-    };
-    
-    setCurrentUser(newUser);
-    setIsAuthenticated(true);
-    localStorage.setItem('smartboad_user', JSON.stringify(newUser));
-    
-    // Store credentials for login
-    const credentials = {
-      email: userData.email,
-      password: userData.password,
-    };
-    localStorage.setItem('smartboad_credentials', JSON.stringify(credentials));
-    
-    return { success: true };
-  };
+  // 2. Login
+  const login = async (email, password) => {
+    try {
+      const response = await api.post("/auth/login", { email, password });
+      const { token, refreshToken, user } = response.data;
 
-  // Login function
-  const login = (email, password) => {
-    const storedCredentials = localStorage.getItem('smartboad_credentials');
-    const storedUser = localStorage.getItem('smartboad_user');
-    
-    if (storedCredentials && storedUser) {
-      try {
-        const credentials = JSON.parse(storedCredentials);
-        if (credentials.email === email && credentials.password === password) {
-          const userData = JSON.parse(storedUser);
-          userData.lastLogin = new Date().toISOString();
-          
-          setCurrentUser(userData);
-          setIsAuthenticated(true);
-          localStorage.setItem('smartboad_user', JSON.stringify(userData));
-          
-          return { success: true };
-        }
-      } catch (error) {
-        console.error('Error during login:', error);
+      if (user.role !== "STUDENT") {
+        return {
+          success: false,
+          message: "Access Denied: This account is not registered as a Student.",
+        };
       }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_data", JSON.stringify(user));
+
+      setCurrentStudent(user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      console.error("Login Error:", error);
+      const msg = error.response?.status === 401 ? "Invalid credentials" : "Login failed";
+      return { success: false, message: msg };
     }
-    
-    return { success: false, message: 'Invalid email or password' };
   };
 
-  // Logout function
+  // 3. Signup Step 1: Request OTP
+  const signup = async (userData) => {
+    try {
+      const payload = {
+        ...userData,
+        role: 'STUDENT'
+      };
+
+      // 🚀 CRITICAL FIX: Force Authorization header to undefined
+      // This ensures the request is sent as "Public" even if an old token exists
+      const config = {
+        headers: {
+          Authorization: undefined 
+        }
+      };
+
+      // ✅ Using the endpoint you confirmed: /auth/register/request
+      const response = await api.post('/auth/register/request', payload, config); 
+      
+      return { success: true, message: response.data?.message || "OTP sent successfully!" };
+
+    } catch (error) {
+      console.error('Signup Error:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Registration failed.' 
+      };
+    }
+  };
+
+  // 4. Verify OTP
+  const verifyRegistration = async (email, otp) => {
+    try {
+      const response = await api.post("/auth/register/verify", { email, otp });
+      const { token, refreshToken, user } = response.data;
+
+      if (user.role !== "STUDENT") {
+        return { success: false, message: "Role mismatch during verification." };
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_data", JSON.stringify(user));
+
+      setCurrentStudent(user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.response?.data || "Invalid OTP Code" };
+    }
+  };
+
   const logout = () => {
-    setCurrentUser(null);
+    localStorage.clear();
+    setCurrentStudent(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('smartboad_user');
-    localStorage.removeItem('smartboad_credentials');
-  };
-
-  // Update profile function
-  const updateProfile = (updatedData) => {
-    const updated = { ...currentUser, ...updatedData };
-    setCurrentUser(updated);
-    localStorage.setItem('smartboad_user', JSON.stringify(updated));
-  };
-
-  // Update avatar function
-  const updateAvatar = (avatarUrl) => {
-    const updated = { ...currentUser, avatar: avatarUrl };
-    setCurrentUser(updated);
-    localStorage.setItem('smartboad_user', JSON.stringify(updated));
-  };
-
-  // Update preferences function
-  const updatePreferences = (preference, value) => {
-    const updated = {
-      ...currentUser,
-      preferences: {
-        ...currentUser.preferences,
-        [preference]: value,
-      },
-    };
-    setCurrentUser(updated);
-    localStorage.setItem('smartboad_user', JSON.stringify(updated));
+    window.location.href = "/login";
   };
 
   const value = {
-    currentUser,
+    currentStudent,
     isAuthenticated,
     isLoading,
-    signup,
     login,
     logout,
-    updateProfile,
-    updateAvatar,
-    updatePreferences,
+    signup,
+    verifyRegistration,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <StudentAuthContext.Provider value={value}>
+      {children}
+    </StudentAuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  const context = useContext(StudentAuthContext);
+  if (!context) throw new Error("useAuth must be used within a StudentAuthProvider");
   return context;
 };

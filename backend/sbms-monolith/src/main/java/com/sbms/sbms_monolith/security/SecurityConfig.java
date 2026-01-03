@@ -48,7 +48,9 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/api/auth/**",
                         "/api/boardings",
-                        "/api/boardings/**" , 
+                        "/api/boardings/**" ,
+
+                        "/api/users/public/**",
                         
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
@@ -64,6 +66,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
 
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
+                
 
                 .anyRequest().authenticated()
             )

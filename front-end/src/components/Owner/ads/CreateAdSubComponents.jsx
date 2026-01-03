@@ -64,7 +64,6 @@ export const PhotoUploader = ({ onImageSelect, previews, onRemove }) => {
           </span>
           <input
             type="file"
-            type="file"
             accept="image/*"
             multiple
             className="hidden"
