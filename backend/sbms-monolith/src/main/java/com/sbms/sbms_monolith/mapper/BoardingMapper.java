@@ -6,6 +6,7 @@ import com.sbms.sbms_monolith.dto.boarding.BoardingDetailDTO;
 import com.sbms.sbms_monolith.dto.boarding.BoardingSummaryDTO;
 import com.sbms.sbms_monolith.dto.boarding.OwnerBoardingResponseDTO;
 import com.sbms.sbms_monolith.model.Boarding;
+import com.sbms.sbms_monolith.model.Review;
 import com.sbms.sbms_monolith.model.enums.Status;
 
 
@@ -54,6 +55,22 @@ public class BoardingMapper {
 
         dto.setBosted(b.isBosted());
         dto.setBoostEndDate(b.getBoostEndDate());
+
+        if (b.getReviews() != null && !b.getReviews().isEmpty()) {
+            dto.setReviewCount(b.getReviews().size());
+
+            // Calculate Average
+            double average = b.getReviews().stream()
+                    .mapToInt(Review::getRating)
+                    .average()
+                    .orElse(0.0);
+
+            // Round to 1 decimal place (e.g. 4.5)
+            dto.setRating(Math.round(average * 10.0) / 10.0);
+        } else {
+            dto.setReviewCount(0);
+            dto.setRating(0.0);
+        }
 
         if (b.getOwner() != null) {
             BoardingDetailDTO.OwnerDto ownerDto = new BoardingDetailDTO.OwnerDto();
