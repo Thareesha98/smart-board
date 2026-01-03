@@ -7,6 +7,8 @@ const useAppointmentsLogic = () => {
   const [appointments, setAppointments] = useState([]);
   const [activeCategory, setActiveCategory] = useState('upcoming');
 
+  const [loading, setLoading] = useState(false);
+
   // Load Data
   useEffect(() => {
     if (currentUser?.id) {
@@ -15,6 +17,7 @@ const useAppointmentsLogic = () => {
   }, [currentUser]);
 
   const loadAppointments = async () => {
+    setLoading(true);
     try {
       const data = await StudentService.getMyAppointments(currentUser.id);
       
@@ -22,7 +25,9 @@ const useAppointmentsLogic = () => {
         id: app.id,
         boardingId: app.boardingId,
         boardingName: app.boardingTitle,
-        address: app.boardingAddress,
+
+        address: app.boardingAddress || "Address details unavailable",
+        distance: app.distance || app.distanceFromInstitute || "N/A",
 
         date: app.requestedStartTime ? app.requestedStartTime.split('T')[0] : '',
         time: app.requestedStartTime ? app.requestedStartTime.split('T')[1].substring(0, 5) : '',
