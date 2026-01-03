@@ -2,21 +2,36 @@ package com.sbms.sbms_monolith.mapper;
 
 import com.sbms.sbms_monolith.dto.appointment.AppointmentResponseDTO;
 import com.sbms.sbms_monolith.model.Appointment;
+import com.sbms.sbms_monolith.model.Boarding;
+import com.sbms.sbms_monolith.model.User;
 
 public class AppointmentMapper {
 
     public static AppointmentResponseDTO toDto(Appointment a) {
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
+        Boarding b = a.getBoarding();
+        User s = a.getStudent();
 
         dto.setId(a.getId());
 
-        dto.setBoardingId(a.getBoarding().getId());
-        dto.setBoardingTitle(a.getBoarding().getTitle());
-        dto.setBoardingAddress(a.getBoarding().getAddress());
+        dto.setBoardingId(b.getId());
+        dto.setBoardingTitle(b.getTitle());
+        dto.setBoardingAddress(b.getAddress());
 
-        dto.setStudentId(a.getStudent().getId());
-        dto.setStudentName(a.getStudent().getFullName());
-        dto.setStudentEmail(a.getStudent().getEmail());
+        if (b.getImageUrls() != null && !b.getImageUrls().isEmpty()) {
+            dto.setBoardingImage(b.getImageUrls().getFirst());
+        }
+
+        dto.setStudentId(s.getId());
+        dto.setStudentName(s.getFullName());
+        dto.setStudentEmail(s.getEmail());
+
+        if (b.getOwner() != null) {
+            dto.setOwnerId(b.getOwner().getId());
+            dto.setOwnerName(b.getOwner().getFullName());
+            dto.setOwnerContact(b.getOwner().getPhone());
+        }
+
 
         dto.setNumberOfStudents(a.getNumberOfStudents());
 
