@@ -76,6 +76,31 @@ const BoardingDetailsPage = () => {
   );
 
   useEffect(() => {
+    const fetchFullDetails = async () => {
+        if (!id) return;
+        try {
+            const data = await StudentService.getBoardingDetails(id);
+            if (data) {
+                setCurrentBoarding(prev => ({
+                    ...prev,
+                    ...data,
+                    // If backend sends 'amenities' as string list, map them
+                    amenities: data.amenities && typeof data.amenities[0] === 'string'
+                        ? mapAmenitiesWithIcons(data.amenities)
+                        : (data.amenities || prev.amenities),
+                    // Ensure owner data is preserved/updated
+                    owner: data.owner || prev.owner || {}
+                }));
+            }
+        } catch (error) {
+            console.error("Failed to fetch full boarding details", error);
+        }
+    };
+
+    fetchFullDetails();
+  }, [id]);
+
+  useEffect(() => {
     if (passedBoarding) {
       setCurrentBoarding({
         ...passedBoarding,
