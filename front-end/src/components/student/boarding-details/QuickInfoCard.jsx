@@ -97,7 +97,7 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
 
       {/* 5. Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <motion.button
+        {/* <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onBookVisit}
@@ -105,7 +105,7 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
         >
           <FaCalendarCheck />
           Book Visit
-        </motion.button>
+        </motion.button> */}
 
         <div className="flex flex-1 gap-3">
           {/* Save Button */}
