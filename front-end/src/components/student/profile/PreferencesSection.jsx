@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FaSlidersH, FaCog } from 'react-icons/fa';
 
-const PreferencesSection = ({ preferences = {}, onPreferenceChange, onSettings }) => {
+const PreferencesSection = ({ preferences, onPreferenceChange, onSettings }) => {
   const preferenceItems = [
     {
       id: 'emailNotifications',

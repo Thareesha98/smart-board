@@ -4,6 +4,8 @@ export const useAppointmentForm = () => {
   const [formData, setFormData] = useState({
     date: '',
     time: '',
+    name: 'Priya S.',
+    phone: '',
     notes: ''
   });
 

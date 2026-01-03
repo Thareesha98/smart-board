@@ -57,106 +57,11 @@ export function getDurationText(duration) {
 
 // Sample Appointments Data (Modified to be exported)
 export const sampleAppointments = [
-    { 
-        id: 1, 
-        boardingName: "Sunshine Hostel", 
-        boardingId: "sunshine-hostel", 
-        image: getRandomBoardingImage(), 
-        date: getFutureDate(2), 
-        time: "14:00", 
-        status: "upcoming", 
-        contact: "+94 77 123 4567", 
-        owner: "Themiya Kaluarachchi", // Updated name to match ID 4
-        ownerId: 4, // ✅ ADDED: Real ID (Themiya)
-        address: "123 University Avenue, Matara", 
-        registered: false 
-    },
-    { 
-        id: 2, 
-        boardingName: "City View Apartments", 
-        boardingId: "city-view", 
-        image: getRandomBoardingImage(), 
-        date: getFutureDate(5), 
-        time: "10:00", 
-        status: "upcoming", 
-        contact: "+94 76 234 5678", 
-        owner: "Thareesha Marasinghe", // Updated name to match ID 1
-        ownerId: 1, // ✅ ADDED: Real ID (Thareesha)
-        address: "456 Galle Road, Matara", 
-        registered: false 
-    },
-    { 
-        id: 7, 
-        boardingName: "Garden View Rooms", 
-        boardingId: "garden-view", 
-        image: getRandomBoardingImage(), 
-        date: getPastDate(1), 
-        time: "15:00", 
-        status: "visited", 
-        contact: "+94 71 345 6789", 
-        owner: "Mayura Herath", // Updated name to match ID 3
-        ownerId: 3, // ✅ ADDED: Real ID (Mayura)
-        address: "789 Kamburugamuwa, Matara", 
-        registered: false 
-    },
-    { 
-        id: 8, 
-        boardingName: "Ocean Breeze Hostel", 
-        boardingId: "ocean-breeze", 
-        image: getRandomBoardingImage(), 
-        date: getPastDate(2), 
-        time: "16:00", 
-        status: "visited", 
-        contact: "+94 72 567 8901", 
-        owner: "Dhananjaya Jayaweera", // Updated name to match ID 6
-        ownerId: 6, // ✅ ADDED: Real ID (Dhananjaya)
-        address: "654 Beach Road, Matara", 
-        registered: false 
-    },
-    { 
-        id: 12, 
-        boardingName: "University Heights", 
-        boardingId: "university-heights", 
-        image: getRandomBoardingImage(), 
-        date: getPastDate(3), 
-        time: "11:00", 
-        status: "selected", 
-        contact: "+94 70 456 7890", 
-        owner: "Mrs. Jayasinghe", 
-        ownerId: 4, // ✅ ADDED: Reusing ID 4 for testing
-        address: "321 Campus Road, Matara", 
-        registered: false 
-    },
-    { 
-        id: 14, 
-        boardingName: "Budget Stay Hostel", 
-        boardingId: "budget-stay", 
-        image: getRandomBoardingImage(), 
-        date: getPastDate(7), 
-        time: "09:00", 
-        status: "selected", 
-        contact: "+94 77 121 2121", 
-        owner: "Ms. Kumari", 
-        ownerId: 1, // ✅ ADDED: Reusing ID 1 for testing
-        address: "111 Budget Street, Matara", 
-        registered: true, 
-        moveInDate: getFutureDate(5), 
-        contractDuration: "6", 
-        emergencyContact: "Rohan Kumari", 
-        emergencyPhone: "+94 77 999 8888" 
-    },
-    { 
-        id: 15, 
-        boardingName: "Campus Comfort", 
-        boardingId: "campus-comfort", 
-        image: getRandomBoardingImage(), 
-        date: getPastDate(4), 
-        time: "09:00", 
-        status: "cancelled", 
-        contact: "+94 78 678 9012", 
-        owner: "Ms. Rathnayake", 
-        ownerId: 3, // ✅ ADDED: Reusing ID 3 for testing
-        address: "987 University Lane, Matara", 
-        registered: false 
-    },
+    { id: 1, boardingName: "Sunshine Hostel", boardingId: "sunshine-hostel", image: getRandomBoardingImage(), date: getFutureDate(2), time: "14:00", status: "upcoming", contact: "+94 77 123 4567", owner: "Mr. Silva", address: "123 University Avenue, Matara", registered: false },
+    { id: 2, boardingName: "City View Apartments", boardingId: "city-view", image: getRandomBoardingImage(), date: getFutureDate(5), time: "10:00", status: "upcoming", contact: "+94 76 234 5678", owner: "Ms. Perera", address: "456 Galle Road, Matara", registered: false },
+    { id: 7, boardingName: "Garden View Rooms", boardingId: "garden-view", image: getRandomBoardingImage(), date: getPastDate(1), time: "15:00", status: "visited", contact: "+94 71 345 6789", owner: "Mr. Fernando", address: "789 Kamburugamuwa, Matara", registered: false },
+    { id: 8, boardingName: "Ocean Breeze Hostel", boardingId: "ocean-breeze", image: getRandomBoardingImage(), date: getPastDate(2), time: "16:00", status: "visited", contact: "+94 72 567 8901", owner: "Mr. De Silva", address: "654 Beach Road, Matara", registered: false },
+    { id: 12, boardingName: "University Heights", boardingId: "university-heights", image: getRandomBoardingImage(), date: getPastDate(3), time: "11:00", status: "selected", contact: "+94 70 456 7890", owner: "Mrs. Jayasinghe", address: "321 Campus Road, Matara", registered: false },
+    { id: 14, boardingName: "Budget Stay Hostel", boardingId: "budget-stay", image: getRandomBoardingImage(), date: getPastDate(7), time: "09:00", status: "selected", contact: "+94 77 121 2121", owner: "Ms. Kumari", address: "111 Budget Street, Matara", registered: true, moveInDate: getFutureDate(5), contractDuration: "6", emergencyContact: "Rohan Kumari", emergencyPhone: "+94 77 999 8888" },
+    { id: 15, boardingName: "Campus Comfort", boardingId: "campus-comfort", image: getRandomBoardingImage(), date: getPastDate(4), time: "09:00", status: "cancelled", contact: "+94 78 678 9012", owner: "Ms. Rathnayake", address: "987 University Lane, Matara", registered: false },
 ];

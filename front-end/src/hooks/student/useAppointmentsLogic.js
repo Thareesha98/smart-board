@@ -1,6 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../context/student/StudentAuthContext'; // Ensure correct path
-import StudentService from '../../api/student/StudentService';
+import { useState, useMemo, useEffect } from 'react';
+import { 
+  sampleAppointments, 
+  getRandomBoardingImage, 
+  getRandomContact, 
+  getRandomOwner, 
+  getRandomAddress,
+} from '../../data/student/appointmentsData.js'; 
+
+// Helper to simulate unique ID generation
+const generateId = () => Date.now() + Math.floor(Math.random() * 1000);
 
 const useAppointmentsLogic = () => {
   const { currentUser } = useAuth(); // Logged in user
@@ -94,7 +102,11 @@ const useAppointmentsLogic = () => {
 
   // Categorization Logic
   const { categorizedAppointments, counts } = useMemo(() => {
-    const categorized = { upcoming: [], visited: [], selected: [], cancelled: [], rejected: [] };
+    const categorized = appointments.reduce((acc, app) => {
+      acc[app.status] = acc[app.status] || [];
+      acc[app.status].push(app);
+      return acc;
+    }, { upcoming: [], visited: [], selected: [], cancelled: [] });
     
     appointments.forEach(app => {
         // Ensure status key exists in our categories, fallback to 'upcoming' if unknown
@@ -102,7 +114,6 @@ const useAppointmentsLogic = () => {
         categorized[key].push(app);
     });
 
-    const counts = Object.fromEntries(Object.keys(categorized).map(k => [k, categorized[k].length]));
     return { categorizedAppointments: categorized, counts };
   }, [appointments]);
 
@@ -125,6 +136,7 @@ const useAppointmentsLogic = () => {
     loading,
     counts,
     categorizedAppointments,
+    getAppointmentById,
     setActiveCategory,
     handleStatusChange,
     handleScheduleSubmit,

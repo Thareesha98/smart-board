@@ -43,7 +43,6 @@ const amenityIcons = {
 };
 
 const mapAmenitiesWithIcons = (amenities) => {
-  if (!amenities || !Array.isArray(amenities)) return [];
   const amenityIconMap = {
     wifi: "wifi",
     ac: "snowflake",
@@ -53,8 +52,7 @@ const mapAmenitiesWithIcons = (amenities) => {
     parking: "bicycle",
   };
   return amenities.map((amenity) => {
-    if (typeof amenity === 'object' && amenity.icon) return amenity;
-    const amenityLower = String(amenity).toLowerCase();
+    const amenityLower = amenity.toLowerCase();
     const iconKey = amenityIconMap[amenityLower] || "wifi";
     return { icon: iconKey, label: amenity };
   });
@@ -69,52 +67,23 @@ const BoardingDetailsPage = () => {
   
   // 1. Initial State (Loads Mock/Passed Data instantly for speed)
   const [currentBoarding, setCurrentBoarding] = useState(
-    passedBoarding || defaultBoardingDetails || { 
-        images: [], 
-        owner: {}, 
-        location: {}, 
-        amenities: [], 
-        description: [],
-        nearbyPlaces: [],
-        reviewsSummary: null 
-    }
+    passedBoarding || defaultBoardingDetails
   );
 
-  // 2. Fetch Real Data & OVERWRITE Mock Data
   useEffect(() => {
-    const fetchFullDetails = async () => {
-        if (!id) return;
-        try {
-            const data = await StudentService.getBoardingDetails(id);
-            if (data) {
-                setCurrentBoarding(prev => ({
-                    // Keep existing images/location if backend misses them
-                    ...prev,
-                    // Overwrite with Backend Data
-                    ...data,
-                    
-                    // Fix Amenities Format
-                    amenities: mapAmenitiesWithIcons(data.amenities || prev.amenities),
-                    
-                    // Fix Owner (Backend might send null, use empty object)
-                    owner: data.owner || {},
-
-                    // ✅ CRITICAL FIX: Ensure Backend Rating Overwrites Mock Rating
-                    rating: data.rating !== undefined ? data.rating : 0.0,
-                    reviewCount: data.reviewCount !== undefined ? data.reviewCount : 0,
-
-                    // ✅ CRITICAL FIX: DELETE the Mock Data 'reviewsSummary' 
-                    // This forces the UI to look at 'data.rating' instead
-                    reviewsSummary: null 
-                }));
-            }
-        } catch (error) {
-            console.error("Failed to fetch full boarding details", error);
-        }
-    };
-
-    fetchFullDetails();
-  }, [id]);
+    if (passedBoarding) {
+      setCurrentBoarding({
+        ...passedBoarding,
+        location: {
+          address: passedBoarding.location,
+          distance: `${passedBoarding.distance} km from University of Ruhuna`,
+        },
+        amenities: passedBoarding.amenities[0]?.icon
+          ? passedBoarding.amenities
+          : mapAmenitiesWithIcons(passedBoarding.amenities),
+      });
+    }
+  }, [passedBoarding]);
 
   // ✅ FIX: Removed the second useEffect that was re-injecting 'passedBoarding' mock data
   
@@ -122,6 +91,7 @@ const BoardingDetailsPage = () => {
   const { currentIndex, nextImage, prevImage, selectImage } = useImageGallery(galleryImages);
   const { formData, updateField,  isSubmitting, isSuccess, setSubmitting, setSuccess } = useAppointmentForm();
 
+  // ✅ UPDATED: Submit handler without redirect
   const handleScheduleSubmit = async () => {
 
     if (!currentUser) {
@@ -162,12 +132,15 @@ const BoardingDetailsPage = () => {
   };
 
   const handleBookVisit = () => {
-    document.getElementById("appointment-form")?.scrollIntoView({ behavior: "smooth" });
+    document
+      .getElementById("appointment-form")
+      ?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleContact = (type) => {
+    // Optional: You can implement specific actions here or leave as placeholder alert
     if (type === 'message') {
-        alert(`Message feature for ${currentBoarding?.owner?.email} coming soon!`);
+        alert(`Message feature for ${currentBoarding.owner.email} coming soon!`);
     }
   };
 
@@ -184,20 +157,9 @@ const BoardingDetailsPage = () => {
     </Link>
   );
 
-  if (!currentBoarding) return <div>Loading...</div>;
-
-  const safeDescription = Array.isArray(currentBoarding.description) 
-    ? currentBoarding.description 
-    : (currentBoarding.description ? [currentBoarding.description] : []);
-    
-  const safeAmenities = currentBoarding.amenities || [];
-  
-  // ✅ FIX: Don't read 'breakdown' from Mock Data if it's not from backend
-  const safeBreakdown = currentBoarding.reviewsSummary?.breakdown || [];
-
   return (
     <StudentLayout
-      title={currentBoarding.name || currentBoarding.title || "Boarding Details"}
+      title={currentBoarding.name}
       subtitle="Boarding Details"
       headerRightContent={headerRightContent}
     >
@@ -205,17 +167,23 @@ const BoardingDetailsPage = () => {
         {/* --- LEFT COLUMN: CONTENT --- */}
         <div className="min-[1400px]:col-span-2 w-full space-y-6">
           <ImageGallery
-            images={galleryImages}
+            images={currentBoarding.images}
             currentIndex={currentIndex}
             onPrev={prevImage}
             onNext={nextImage}
             onSelect={selectImage}
-            badge={currentBoarding.isBosted ? "Featured" : null}
+            badge={currentBoarding.badge}
           />
 
           <div className="flex flex-col gap-4 min-[1400px]:hidden">
-            <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
-            <OwnerCard owner={currentBoarding.owner || {}} onContact={handleContact} />
+            <QuickInfoCard
+              boarding={currentBoarding}
+              onBookVisit={handleBookVisit}
+            />
+            <OwnerCard
+              owner={currentBoarding.owner}
+              onContact={handleContact}
+            />
           </div>
 
           <motion.section
@@ -224,15 +192,14 @@ const BoardingDetailsPage = () => {
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
             <h2 className="text-xl font-bold text-primary mb-3">Description</h2>
-            {safeDescription.length > 0 ? (
-                safeDescription.map((para, idx) => (
-                  <p key={idx} className="text-text-muted mb-3 leading-relaxed text-sm sm:text-base last:mb-0">
-                    {para}
-                  </p>
-                ))
-            ) : (
-                <p className="text-text-muted">No description available.</p>
-            )}
+            {currentBoarding.description.map((para, idx) => (
+              <p
+                key={idx}
+                className="text-text-muted mb-3 leading-relaxed text-sm sm:text-base last:mb-0"
+              >
+                {para}
+              </p>
+            ))}
           </motion.section>
 
           <motion.section
@@ -242,12 +209,17 @@ const BoardingDetailsPage = () => {
           >
             <h2 className="text-xl font-bold text-primary mb-4">Amenities</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {safeAmenities.map((amenity, idx) => {
+              {currentBoarding.amenities.map((amenity, idx) => {
                 const Icon = amenityIcons[amenity.icon] || FaWifi;
                 return (
-                  <div key={idx} className="flex flex-col items-center justify-center p-3 bg-background-light rounded-xl hover:bg-gray-100 transition-colors text-center gap-2">
+                  <div
+                    key={idx}
+                    className="flex flex-col items-center justify-center p-3 bg-background-light rounded-xl hover:bg-gray-100 transition-colors text-center gap-2"
+                  >
                     <Icon className="text-2xl text-accent" />
-                    <span className="text-sm font-medium text-text-dark">{amenity.label}</span>
+                    <span className="text-sm font-medium text-text-dark">
+                      {amenity.label}
+                    </span>
                   </div>
                 );
               })}
@@ -265,23 +237,19 @@ const BoardingDetailsPage = () => {
               <FaMapMarkedAlt className="text-5xl text-accent mb-2 transform group-hover:scale-110 transition-transform" />
               <p className="text-text-dark font-bold z-10">View on Map</p>
               <p className="text-sm text-text-muted z-10 text-center px-4 mt-1">
-                {currentBoarding?.location?.address || currentBoarding.address || "Address not available"}
+                {currentBoarding.location.address}
               </p>
             </div>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {currentBoarding.nearbyPlaces && (
-                 Array.isArray(currentBoarding.nearbyPlaces) 
-                 ? currentBoarding.nearbyPlaces.map((place, idx) => (
-                    <li key={idx} className="text-sm text-text-muted flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> {place}
-                    </li>
-                   ))
-                 : Object.entries(currentBoarding.nearbyPlaces).map(([place, dist], idx) => (
-                    <li key={idx} className="text-sm text-text-muted flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> {place} ({dist} km)
-                    </li>
-                   ))
-              )}
+              {currentBoarding.nearbyPlaces.map((place, idx) => (
+                <li
+                  key={idx}
+                  className="text-sm text-text-muted flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>{" "}
+                  {place}
+                </li>
+              ))}
             </ul>
           </motion.section>
 
@@ -290,52 +258,55 @@ const BoardingDetailsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
-            {/* ✅ UPDATED: Use backend 'reviewCount' */}
             <h2 className="text-xl font-bold text-primary mb-6">
-              Reviews ({currentBoarding.reviewCount || 0})
+              Reviews ({currentBoarding.reviewCount})
             </h2>
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center justify-center bg-background-light rounded-2xl p-6 sm:w-40 text-center flex-shrink-0">
-                
-                {/* ✅ UPDATED: FORCE use of backend Rating (which is 0.0), ignore mock 'overall' */}
                 <div className="text-4xl font-bold text-text-dark">
-                  {currentBoarding.rating !== undefined ? currentBoarding.rating : 0}
+                  {currentBoarding.reviewsSummary?.overall ||
+                    currentBoarding.rating}
                 </div>
-                
                 <div className="text-yellow-400 text-sm my-1">
-                  {"★".repeat(Math.round(currentBoarding.rating || 0))}
+                  {"★".repeat(5)}
                 </div>
                 <div className="text-xs font-bold text-text-muted uppercase">
                   Overall
                 </div>
               </div>
-              
               <div className="flex-1 space-y-2">
-                {/* Only render Breakdown if we explicitly have it (mock data removed, so this should hide until backend supports it) */}
-                {safeBreakdown.length > 0 ? safeBreakdown.map((item, idx) => (
+                {currentBoarding.reviewsSummary?.breakdown.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-text-muted w-10">{item.stars} ★</span>
+                    <span className="text-xs font-bold text-text-muted w-10">
+                      {item.stars} ★
+                    </span>
                     <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-accent rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                      <div
+                        className="h-full bg-accent rounded-full"
+                        style={{ width: `${item.percentage}%` }}
+                      ></div>
                     </div>
-                    <span className="text-xs font-bold text-text-dark w-8 text-right">{item.percentage}%</span>
+                    <span className="text-xs font-bold text-text-dark w-8 text-right">
+                      {item.percentage}%
+                    </span>
                   </div>
-                )) : (
-                  <div className="flex items-center justify-center h-full text-text-muted text-sm italic">
-                    {currentBoarding.reviewCount > 0 ? "Breakdown loading..." : "No reviews yet"}
-                  </div>
-                )}
+                ))}
               </div>
             </div>
-            
-            <ReviewsList boardingId={currentBoarding.id || id} />
+            <ReviewsList
+              boardingId={currentBoarding.id || id || "default-boarding-id"}
+            />
           </motion.section>
         </div>
 
         {/* --- RIGHT COLUMN: SIDEBAR --- */}
         <div className="hidden min-[1400px]:block w-full space-y-6">
-          <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
-          <OwnerCard owner={currentBoarding.owner || {}} onContact={handleContact} />
+          <QuickInfoCard
+            boarding={currentBoarding}
+            onBookVisit={handleBookVisit}
+          />
+          <OwnerCard owner={currentBoarding.owner} onContact={handleContact} />
+          
           <div id="appointment-form">
             <AppointmentForm
                formData={formData}
@@ -346,12 +317,21 @@ const BoardingDetailsPage = () => {
                timeSlots={timeSlots} 
             />
           </div>
+
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
-            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase"><FaShieldAlt /> Safety Tips</h4>
+            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase">
+              <FaShieldAlt /> Safety Tips
+            </h4>
             <ul className="space-y-2">
-              {safetyTips && safetyTips.map((tip, idx) => (
-                <li key={idx} className="text-xs text-text-dark/80 pl-4 relative">
-                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">•</span> {tip}
+              {safetyTips.map((tip, idx) => (
+                <li
+                  key={idx}
+                  className="text-xs text-text-dark/80 pl-4 relative"
+                >
+                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">
+                    •
+                  </span>{" "}
+                  {tip}
                 </li>
               ))}
             </ul>
@@ -371,11 +351,19 @@ const BoardingDetailsPage = () => {
             />
           </div>
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
-            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase"><FaShieldAlt /> Safety Tips</h4>
+            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase">
+              <FaShieldAlt /> Safety Tips
+            </h4>
             <ul className="space-y-2">
-              {safetyTips && safetyTips.map((tip, idx) => (
-                <li key={idx} className="text-xs text-text-dark/80 pl-4 relative">
-                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">•</span> {tip}
+              {safetyTips.map((tip, idx) => (
+                <li
+                  key={idx}
+                  className="text-xs text-text-dark/80 pl-4 relative"
+                >
+                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">
+                    •
+                  </span>{" "}
+                  {tip}
                 </li>
               ))}
             </ul>
@@ -384,7 +372,12 @@ const BoardingDetailsPage = () => {
       </div>
 
       <Link to="/student/search-boardings">
-        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="fixed bottom-8 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors" aria-label="Back to Search">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="fixed bottom-8 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+          aria-label="Back to Search"
+        >
           <FaArrowLeft size={24} />
         </motion.button>
       </Link>

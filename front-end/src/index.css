@@ -1,13 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-
+body {
+  @apply font-sans bg-light text-text leading-relaxed min-h-screen;
+}
 
 body {
   @apply font-sans text-text-dark bg-background-light leading-relaxed min-h-screen;

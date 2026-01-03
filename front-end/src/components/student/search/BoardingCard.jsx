@@ -101,7 +101,7 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
 
         {/* Push buttons to the bottom using mt-auto */}
         <div className="flex gap-3 mt-auto">
-          {/* <motion.button
+          <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={(e) => { e.stopPropagation(); onBook(boarding.id); }}
@@ -109,7 +109,7 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
           >
             <FaCalendarCheck />
             Book Visit
-          </motion.button> */}
+          </motion.button>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

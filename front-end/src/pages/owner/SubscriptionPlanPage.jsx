@@ -140,12 +140,12 @@ export default function SubscriptionPlanPage() {
   return (
     <div className="pt-4 space-y-8 min-h-screen bg-light pb-12">
       <HeaderBar
-        title="Boost & Subscription"
-        subtitle={`Select a plan to boost Ad ID: #${adId}`}
-        notificationCount={0}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
+        title="Choose Your Subscription Plan"
+        subtitle="Select a plan to boost your ad visibility and attract more students."
+        navBtnText="Back to My Ads"
+        navBtnPath="/owner/myAds"
       />
+        
 
       {/* Why Boost Section */}
       <section className="mx-4 p-8 rounded-report bg-card-bg shadow-custom border border-light text-center max-w-4xl lg:mx-auto">
