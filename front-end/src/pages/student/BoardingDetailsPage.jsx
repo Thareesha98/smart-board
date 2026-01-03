@@ -51,6 +51,7 @@ const mapAmenitiesWithIcons = (amenities) => {
     parking: "bicycle",
   };
   return amenities.map((amenity) => {
+    if (typeof amenity === 'object' && amenity.icon) return amenity;
     const amenityLower = amenity.toLowerCase();
     const iconKey = amenityIconMap[amenityLower] || "wifi";
     return { icon: iconKey, label: amenity };
@@ -84,12 +85,13 @@ const BoardingDetailsPage = () => {
                 setCurrentBoarding(prev => ({
                     ...prev,
                     ...data,
-                    // If backend sends 'amenities' as string list, map them
-                    amenities: data.amenities && typeof data.amenities[0] === 'string'
-                        ? mapAmenitiesWithIcons(data.amenities)
-                        : (data.amenities || prev.amenities),
-                    // Ensure owner data is preserved/updated
-                    owner: data.owner || prev.owner || {}
+                    // Ensure amenities are mapped correctly (Backend sends strings)
+                    amenities: mapAmenitiesWithIcons(data.amenities || prev.amenities),
+                    
+                    // ✅ CRITICAL: Ensure Owner & Review Stats are taken from Backend
+                    owner: data.owner || prev.owner || {},
+                    reviewCount: data.reviewCount !== undefined ? data.reviewCount : prev.reviewCount,
+                    rating: data.rating !== undefined ? data.rating : prev.rating
                 }));
             }
         } catch (error) {
@@ -300,11 +302,10 @@ const BoardingDetailsPage = () => {
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center justify-center bg-background-light rounded-2xl p-6 sm:w-40 text-center flex-shrink-0">
                 <div className="text-4xl font-bold text-text-dark">
-                  {currentBoarding.reviewsSummary?.overall ||
-                    currentBoarding.rating || 0}
+                  {currentBoarding.rating || 0}
                 </div>
                 <div className="text-yellow-400 text-sm my-1">
-                  {"★".repeat(5)}
+                  {"★".repeat(Math.round(currentBoarding.rating || 0))}
                 </div>
                 <div className="text-xs font-bold text-text-muted uppercase">
                   Overall
