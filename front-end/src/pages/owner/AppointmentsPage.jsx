@@ -5,9 +5,10 @@ import StatusTab from "../../components/Owner/common/StatusTab";
 import AppointmentRow from "../../components/Owner/appointments/AppointmentRow";
 import SkeletonAppointmentRow from "../../components/Owner/appointments/SkeletonAppointmentRow";
 import useAppointmentsLogic from "../../hooks/owner/useAppointmentsLogic";
+import { Toaster } from "react-hot-toast";
+import { FaSearch, FaSortAmountDown } from "react-icons/fa";
 
 const AppointmentsPage = () => {
-  // Use the Custom Hook
   const {
     filteredAppointments,
     counts,
@@ -18,11 +19,15 @@ const AppointmentsPage = () => {
     formatDate,
     formatTime,
     getStatusStyle,
-    loading, 
-    error,   
+    loading,
+    error,
+    // ✅ Destructure new tools
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
   } = useAppointmentsLogic();
 
-  // Error State can remain full screen or be a toast
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-light">
@@ -44,6 +49,23 @@ const AppointmentsPage = () => {
 
   return (
     <div className="pt-4 space-y-8 min-h-screen bg-light pb-10">
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            border: "1px solid #E5E7EB",
+            padding: "12px 16px",
+            color: "#1F2937",
+            fontSize: "14px",
+            fontWeight: "600",
+            borderRadius: "12px",
+            background: "#FFFFFF",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+          },
+        }}
+      />
+
       <HeaderBar
         title="Appointments"
         subtitle="Manage student visit requests and track arrivals."
@@ -59,7 +81,7 @@ const AppointmentsPage = () => {
             <StatusTab
               key={status}
               status={status}
-              count={counts[status]} // This will be 0 initially, which is fine
+              count={counts[status]}
               currentFilter={filter}
               setFilter={setFilter}
               config={getStatusStyle(status)}
@@ -70,17 +92,61 @@ const AppointmentsPage = () => {
 
       {/* Appointments List */}
       <section className="space-y-4 px-2">
-        <motion.h3
-          layout
-          className="text-2xl font-black text-primary uppercase tracking-tight ml-2"
-        >
-          {filter} Requests
-        </motion.h3>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 ml-2 mr-2">
+          <motion.h3
+            layout
+            className="text-2xl font-black text-primary uppercase tracking-tight"
+          >
+            {filter} Requests
+          </motion.h3>
+
+          {/* 🔍 ✅ SEARCH & SORT TOOLBAR */}
+          <div className="flex flex-col md:flex-row gap-2 md:gap-4 w-full md:w-auto">
+            {/* Search Input */}
+            <div className="relative flex-1 md:w-64">
+              <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-xs" />
+              <input
+                type="text"
+                placeholder="Search student or property..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 rounded-full border border-light bg-white text-xs font-bold text-text focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm placeholder:text-muted/70"
+              />
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="relative md:w-48">
+              <FaSortAmountDown className="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-xs" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full pl-9 pr-8 py-2.5 rounded-full border border-light bg-white text-xs font-bold text-text focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none shadow-sm cursor-pointer"
+              >
+                <option value="nearest">Nearest Date First</option>
+                <option value="furthest">Furthest Date First</option>
+              </select>
+              {/* Custom Arrow for Select */}
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg
+                  className="w-2.5 h-2.5 text-muted"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="3"
+                    d="M19 9l-7 7-7-7"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="flex flex-col gap-4">
-          {/* ✅ SKELETON LOADING LOGIC */}
           {loading ? (
-            // Show 3 skeletons while loading
             <>
               <SkeletonAppointmentRow />
               <SkeletonAppointmentRow />
@@ -100,14 +166,13 @@ const AppointmentsPage = () => {
                   />
                 ))
               ) : (
-                // Empty State
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="py-12 text-center text-muted font-bold uppercase tracking-widest text-xs"
                 >
-                  No {filter} appointments found.
+                  No appointments found matching your filters.
                 </motion.div>
               )}
             </AnimatePresence>

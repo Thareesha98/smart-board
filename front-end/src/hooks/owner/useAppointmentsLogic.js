@@ -11,7 +11,6 @@ import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 import { ownerData as mockOwnerData } from "../../data/mockData";
 
 const useAppointmentsLogic = () => {
-  // ✅ Get the real logged-in owner
   const { currentOwner } = useOwnerAuth();
 
   const [appointments, setAppointments] = useState([]);
@@ -19,14 +18,15 @@ const useAppointmentsLogic = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ NEW: Search & Sort State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("nearest"); // Default to Nearest
+
   // --- 1. Fetch & Map Data ---
   const fetchAppointments = useCallback(async () => {
-    // If auth isn't ready yet, don't fetch
     if (!currentOwner || !currentOwner.id) return;
-
     setLoading(true);
     try {
-      // ✅ Use dynamic ID from Context
       const data = await getOwnerAppointments(currentOwner.id);
 
       const mappedData = data.map((dto) => ({
@@ -52,31 +52,27 @@ const useAppointmentsLogic = () => {
       setError(null);
     } catch (err) {
       setError("Failed to load appointments.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [currentOwner]); // Re-run if user changes
+  }, [currentOwner]);
 
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
 
-  // --- 2. Handle Actions (Confirm / Reject) ---
+  // --- 2. Action Handlers ---
   const handleAction = async (id, actionType) => {
     if (!currentOwner) return;
 
     const currentApp = appointments.find((app) => app.id === id);
     if (!currentApp) return;
 
-    // Handle "Visited" gracefully without breaking the app
     if (actionType === "visited") {
       toast("This feature is coming soon!", {
         icon: "🚧",
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
+        style: { borderRadius: "10px", background: "#333", color: "#fff" },
       });
       return;
     }
@@ -98,32 +94,54 @@ const useAppointmentsLogic = () => {
       decisionDTO.ownerNote = "Slot unavailable.";
     }
 
-    // Optimistic Update
     const previousState = [...appointments];
     setAppointments((prev) =>
       prev.map((app) => (app.id === id ? { ...app, status: actionType } : app))
     );
 
-    // ✅ Toast: Loading State
     const toastId = toast.loading("Updating status...");
 
     try {
       await updateAppointmentStatus(currentOwner.id, id, decisionDTO);
-
-      // ✅ Toast: Success
-      toast.success("Status updated successfully!", {
-        id: toastId, // Replaces the loading toast
-        duration: 3000,
-      });
+      toast.success("Status updated successfully!", { id: toastId });
     } catch (err) {
       setAppointments(previousState);
-
-      // ✅ Toast: Error
-      toast.error("Failed to update status. Please try again.", {
-        id: toastId,
-      });
+      toast.error("Failed to update status.", { id: toastId });
     }
   };
+
+  // --- 3. Filtering & Sorting Logic ---
+  const filteredAppointments = useMemo(() => {
+    // 1. Filter by Status Tab (Pending, Confirmed, etc.)
+    let result = appointments.filter((app) => app.status === filter);
+
+    // 2. Filter by Search Query (Name or Boarding)
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(
+        (app) =>
+          app.student.toLowerCase().includes(lowerQuery) ||
+          app.boardingName.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    // 3. Sort by Date
+    result.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+
+      if (sortBy === "nearest") {
+        // Ascending (Earliest date first)
+        return dateA - dateB;
+      } else if (sortBy === "furthest") {
+        // Descending (Latest date first)
+        return dateB - dateA;
+      }
+      return 0;
+    });
+
+    return result;
+  }, [appointments, filter, searchQuery, sortBy]);
 
   // --- Helpers ---
   const mapBackendStatusToFrontend = (backendStatus) => {
@@ -152,10 +170,6 @@ const useAppointmentsLogic = () => {
       { pending: 0, confirmed: 0, visited: 0, cancelled: 0, rejected: 0 }
     );
   }, [appointments]);
-
-  const filteredAppointments = useMemo(() => {
-    return appointments.filter((app) => app.status === filter);
-  }, [appointments, filter]);
 
   const formatDate = (d) => {
     if (!d) return "N/A";
@@ -208,20 +222,16 @@ const useAppointmentsLogic = () => {
     return styles[status] || styles.pending;
   };
 
-  // ✅ Combine Real Auth Data with Mock Fallbacks
-  // This ensures your HeaderBar shows the real name, but keeps the avatar if backend sends null
   const activeOwnerData = {
-    ...mockOwnerData, // Fallback
-    ...currentOwner, // Overwrite with real data (e.g. firstName, email)
-    // If your auth context uses 'username' but UI expects 'firstName', map it manually:
-    // firstName: currentOwner?.firstName || currentOwner?.username || "Owner",
+    ...mockOwnerData,
+    ...currentOwner,
   };
 
   return {
     appointments,
     filteredAppointments,
     counts,
-    ownerData: activeOwnerData, // Return the merged data
+    ownerData: activeOwnerData,
     filter,
     setFilter,
     handleAction,
@@ -230,6 +240,11 @@ const useAppointmentsLogic = () => {
     getStatusStyle,
     loading,
     error,
+    // ✅ Export Search & Sort State
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
   };
 };
 
