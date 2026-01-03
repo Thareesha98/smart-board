@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import StatusTab from "../../components/Owner/common/StatusTab";
 import AppointmentRow from "../../components/Owner/appointments/AppointmentRow";
+import SkeletonAppointmentRow from "../../components/Owner/appointments/SkeletonAppointmentRow";
 import useAppointmentsLogic from "../../hooks/owner/useAppointmentsLogic";
 
 const AppointmentsPage = () => {
@@ -18,6 +19,26 @@ const AppointmentsPage = () => {
     formatTime,
     getStatusStyle,
   } = useAppointmentsLogic();
+
+  // Error State can remain full screen or be a toast
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-light">
+        <div className="text-center p-6 bg-white rounded-lg shadow-lg">
+          <h3 className="text-error font-black text-xl mb-2">
+            Connection Error
+          </h3>
+          <p className="text-muted mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-white rounded font-bold"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-4 space-y-8 min-h-screen bg-light pb-10">
