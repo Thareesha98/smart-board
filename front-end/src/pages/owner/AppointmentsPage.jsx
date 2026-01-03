@@ -18,6 +18,8 @@ const AppointmentsPage = () => {
     formatDate,
     formatTime,
     getStatusStyle,
+    loading, 
+    error,   
   } = useAppointmentsLogic();
 
   // Error State can remain full screen or be a toast
@@ -57,7 +59,7 @@ const AppointmentsPage = () => {
             <StatusTab
               key={status}
               status={status}
-              count={counts[status]}
+              count={counts[status]} // This will be 0 initially, which is fine
               currentFilter={filter}
               setFilter={setFilter}
               config={getStatusStyle(status)}
@@ -75,32 +77,42 @@ const AppointmentsPage = () => {
           {filter} Requests
         </motion.h3>
 
-        <motion.div layout className="flex flex-col gap-4">
-          <AnimatePresence mode="popLayout">
-            {filteredAppointments.length > 0 ? (
-              filteredAppointments.map((app) => (
-                <AppointmentRow
-                  key={app.id}
-                  appointment={app}
-                  config={getStatusStyle(app.status)}
-                  onAction={handleAction}
-                  formatDate={formatDate}
-                  formatTime={formatTime}
-                />
-              ))
-            ) : (
-              // Empty State Animation
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="py-12 text-center text-muted font-bold uppercase tracking-widest text-xs"
-              >
-                No {filter} appointments found.
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+        <div className="flex flex-col gap-4">
+          {/* ✅ SKELETON LOADING LOGIC */}
+          {loading ? (
+            // Show 3 skeletons while loading
+            <>
+              <SkeletonAppointmentRow />
+              <SkeletonAppointmentRow />
+              <SkeletonAppointmentRow />
+            </>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {filteredAppointments.length > 0 ? (
+                filteredAppointments.map((app) => (
+                  <AppointmentRow
+                    key={app.id}
+                    appointment={app}
+                    config={getStatusStyle(app.status)}
+                    onAction={handleAction}
+                    formatDate={formatDate}
+                    formatTime={formatTime}
+                  />
+                ))
+              ) : (
+                // Empty State
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="py-12 text-center text-muted font-bold uppercase tracking-widest text-xs"
+                >
+                  No {filter} appointments found.
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+        </div>
       </section>
     </div>
   );
