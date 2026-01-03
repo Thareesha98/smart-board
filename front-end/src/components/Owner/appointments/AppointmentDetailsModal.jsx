@@ -1,8 +1,21 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTimes, FaUser, FaBuilding, FaClock, FaStickyNote, FaEnvelope, FaUsers } from "react-icons/fa";
+import {
+  FaTimes,
+  FaBuilding,
+  FaClock,
+  FaStickyNote,
+  FaEnvelope,
+  FaUsers,
+} from "react-icons/fa";
 
-const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, formatTime }) => {
+const AppointmentDetailsModal = ({
+  isOpen,
+  onClose,
+  appointment,
+  formatDate,
+  formatTime,
+}) => {
   if (!isOpen || !appointment) return null;
 
   // Animation variants
@@ -16,6 +29,17 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
     visible: { opacity: 1, y: 0, scale: 1 },
   };
 
+  // ✅ Helper: Get Initials
+  const getInitials = (name) => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -25,7 +49,7 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
           initial="hidden"
           animate="visible"
           exit="hidden"
-          onClick={onClose} // Close when clicking background
+          onClick={onClose}
         >
           <motion.div
             className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
@@ -33,7 +57,7 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
             initial="hidden"
             animate="visible"
             exit="hidden"
-            onClick={(e) => e.stopPropagation()} // Prevent close when clicking modal
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="bg-primary p-6 flex justify-between items-start">
@@ -55,41 +79,56 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
 
             {/* Scrollable Content */}
             <div className="p-6 overflow-y-auto space-y-6">
-              
               {/* Status Section */}
               <div className="flex items-center justify-between p-4 bg-light rounded-xl border border-gray-200">
-                <span className="text-xs font-black text-muted uppercase tracking-widest">Current Status</span>
-                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                  appointment.status === 'confirmed' ? 'bg-success text-white' :
-                  appointment.status === 'rejected' ? 'bg-error text-white' :
-                  'bg-accent text-white'
-                }`}>
+                <span className="text-xs font-black text-muted uppercase tracking-widest">
+                  Current Status
+                </span>
+                <span
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    appointment.status === "confirmed"
+                      ? "bg-success text-white"
+                      : appointment.status === "rejected"
+                      ? "bg-error text-white"
+                      : "bg-accent text-white"
+                  }`}
+                >
                   {appointment.status}
                 </span>
               </div>
 
-              {/* 1. Student Info */}
+              {/* 1. Student Info - ✅ UPDATED WITH AVATAR */}
               <div className="space-y-3">
                 <h4 className="text-xs font-black text-muted uppercase tracking-widest border-b border-light pb-2">
                   Student Information
                 </h4>
                 <div className="grid grid-cols-1 gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <FaUser size={12} />
+                  {/* Name Row with Large Avatar */}
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white flex items-center justify-center font-black text-sm shadow-md border-2 border-white ring-1 ring-light">
+                      {getInitials(appointment.student)}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-text">{appointment.student}</p>
-                      <p className="text-[10px] text-muted font-bold uppercase">Name</p>
+                      <p className="text-lg font-black text-text uppercase leading-none">
+                        {appointment.student}
+                      </p>
+                      <p className="text-[10px] text-muted font-bold uppercase mt-1">
+                        Applicant
+                      </p>
                     </div>
                   </div>
+
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-info/10 flex items-center justify-center text-info">
                       <FaEnvelope size={12} />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-text">{appointment.studentEmail || appointment.contact}</p>
-                      <p className="text-[10px] text-muted font-bold uppercase">Contact Email</p>
+                      <p className="text-sm font-bold text-text">
+                        {appointment.studentEmail || appointment.contact}
+                      </p>
+                      <p className="text-[10px] text-muted font-bold uppercase">
+                        Contact Email
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -97,8 +136,12 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
                       <FaUsers size={12} />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-text">{appointment.numberOfStudents || 1} Student(s)</p>
-                      <p className="text-[10px] text-muted font-bold uppercase">Group Size</p>
+                      <p className="text-sm font-bold text-text">
+                        {appointment.numberOfStudents || 1} Student(s)
+                      </p>
+                      <p className="text-[10px] text-muted font-bold uppercase">
+                        Group Size
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -110,13 +153,17 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
                   Boarding Request
                 </h4>
                 <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center text-warning shrink-0">
-                      <FaBuilding size={12} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-text leading-tight">{appointment.boardingName}</p>
-                      <p className="text-[10px] text-muted mt-1">{appointment.boardingAddress || "Address not provided"}</p>
-                    </div>
+                  <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center text-warning shrink-0">
+                    <FaBuilding size={12} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-text leading-tight">
+                      {appointment.boardingName}
+                    </p>
+                    <p className="text-[10px] text-muted mt-1">
+                      {appointment.boardingAddress || "Address not provided"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -126,29 +173,42 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
                   Timing
                 </h4>
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center text-success">
-                      <FaClock size={12} />
+                  <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center text-success">
+                    <FaClock size={12} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <span className="text-[10px] font-bold text-muted uppercase">
+                        Requested Date
+                      </span>
+                      <span className="text-xs font-bold text-text">
+                        {formatDate(appointment.date)}
+                      </span>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between">
-                         <span className="text-[10px] font-bold text-muted uppercase">Requested Date</span>
-                         <span className="text-xs font-bold text-text">{formatDate(appointment.date)}</span>
-                      </div>
-                      <div className="flex justify-between mt-1">
-                         <span className="text-[10px] font-bold text-muted uppercase">Requested Time</span>
-                         <span className="text-xs font-bold text-text">{formatTime(appointment.time)}</span>
-                      </div>
-                      
-                      {/* Show Owner Assigned Time if Accepted */}
-                      {appointment.status === 'confirmed' && appointment.ownerStartTime && (
+                    <div className="flex justify-between mt-1">
+                      <span className="text-[10px] font-bold text-muted uppercase">
+                        Requested Time
+                      </span>
+                      <span className="text-xs font-bold text-text">
+                        {formatTime(appointment.time)}
+                      </span>
+                    </div>
+
+                    {appointment.status === "confirmed" &&
+                      appointment.ownerStartTime && (
                         <div className="mt-2 pt-2 border-t border-dashed border-gray-200">
-                          <p className="text-[10px] font-black text-success uppercase">Confirmed Slot:</p>
-                           <p className="text-xs font-bold text-text">
-                              {formatDate(appointment.ownerStartTime)} @ {formatTime(appointment.ownerStartTime.split("T")[1])}
-                           </p>
+                          <p className="text-[10px] font-black text-success uppercase">
+                            Confirmed Slot:
+                          </p>
+                          <p className="text-xs font-bold text-text">
+                            {formatDate(appointment.ownerStartTime)} @{" "}
+                            {formatTime(
+                              appointment.ownerStartTime.split("T")[1]
+                            )}
+                          </p>
                         </div>
                       )}
-                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -157,24 +217,28 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
                 <h4 className="text-xs font-black text-muted uppercase tracking-widest border-b border-light pb-2">
                   Notes
                 </h4>
-                
+
                 {/* Student Note */}
                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                   <div className="flex items-center gap-2 mb-1">
-                      <FaStickyNote className="text-muted text-[10px]" />
-                      <span className="text-[10px] font-black uppercase text-muted">Student's Note</span>
-                   </div>
-                   <p className="text-xs text-text italic">
-                     "{appointment.notes || "No notes provided."}"
-                   </p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <FaStickyNote className="text-muted text-[10px]" />
+                    <span className="text-[10px] font-black uppercase text-muted">
+                      Student's Note
+                    </span>
+                  </div>
+                  <p className="text-xs text-text italic">
+                    "{appointment.notes || "No notes provided."}"
+                  </p>
                 </div>
 
-                {/* Owner Note (if exists) */}
+                {/* Owner Note */}
                 {appointment.ownerNote && (
                   <div className="bg-primary/5 p-3 rounded-lg border border-primary/10">
                     <div className="flex items-center gap-2 mb-1">
-                        <FaStickyNote className="text-primary text-[10px]" />
-                        <span className="text-[10px] font-black uppercase text-primary">Your Response</span>
+                      <FaStickyNote className="text-primary text-[10px]" />
+                      <span className="text-[10px] font-black uppercase text-primary">
+                        Your Response
+                      </span>
                     </div>
                     <p className="text-xs text-text italic">
                       "{appointment.ownerNote}"
@@ -182,7 +246,6 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment, formatDate, for
                   </div>
                 )}
               </div>
-
             </div>
 
             {/* Footer */}

@@ -1,14 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  FaBuilding,
-  FaPhone,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaEye,
-  FaInfoCircle,
-} from "react-icons/fa";
-import AppointmentDetailsModal from "./AppointmentDetailsModal"; // Import the modal
+import { FaBuilding, FaPhone, FaCheckCircle, FaTimesCircle, FaEye, FaInfoCircle } from "react-icons/fa";
+import AppointmentDetailsModal from "./AppointmentDetailsModal";
 
 const AppointmentRow = ({
   appointment,
@@ -18,9 +11,20 @@ const AppointmentRow = ({
   formatTime,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  
   const isPending = appointment.status === "pending";
   const isConfirmed = appointment.status === "confirmed";
+
+  // ✅ Helper: Get Initials (e.g. "John Doe" -> "JD")
+  const getInitials = (name) => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+  };
 
   return (
     <>
@@ -34,17 +38,30 @@ const AppointmentRow = ({
         {/* 1. Student & Property Details */}
         <div className="flex flex-col flex-1 gap-1">
           <div className="flex justify-between items-start md:block">
-            <h4 className="font-black text-base md:text-lg text-text tracking-tight uppercase">
-              {appointment.student}
-            </h4>
-            {/* Mobile Only: Status Badge */}
-            <span
-              className={`md:hidden px-3 py-1 text-[8px] font-black uppercase tracking-widest rounded-full ${config.bgClass} ${config.textClass}`}
-            >
-              {appointment.status}
-            </span>
+            
+            {/* ✅ NEW: Avatar Layout */}
+            <div className="flex items-center gap-3">
+              {/* Avatar Circle */}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white flex items-center justify-center font-black text-xs shadow-sm border-2 border-white ring-1 ring-light shrink-0">
+                {getInitials(appointment.student)}
+              </div>
+              
+              {/* Name & Status */}
+              <div>
+                <h4 className="font-black text-base md:text-lg text-text tracking-tight uppercase leading-none">
+                  {appointment.student}
+                </h4>
+                {/* Mobile Status Badge */}
+                <span className={`md:hidden inline-block mt-1 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-full ${config.bgClass} ${config.textClass}`}>
+                  {appointment.status}
+                </span>
+              </div>
+            </div>
+
           </div>
-          <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-muted">
+          
+          {/* Boarding Name (pushed slightly to align with text) */}
+          <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-muted md:ml-[52px] mt-1">
             <FaBuilding className="text-accent" />
             <span className="truncate">{appointment.boardingName}</span>
           </div>
@@ -78,7 +95,8 @@ const AppointmentRow = ({
         {/* 3. Actions */}
         <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 mt-2 md:mt-0">
           <div className="flex gap-2 w-full md:w-auto">
-            {/* 🆕 DETAIL BUTTON (Available for ALL statuses) */}
+            
+            {/* Detail Button */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -134,7 +152,7 @@ const AppointmentRow = ({
             )}
           </div>
 
-          {/* Desktop Only Status Badge */}
+          {/* Desktop Status Badge */}
           <span
             className={`hidden md:block px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] rounded-full shadow-inner shrink-0 ${config.bgClass} ${config.textClass}`}
           >
@@ -143,9 +161,9 @@ const AppointmentRow = ({
         </div>
       </motion.div>
 
-      {/* Render Modal outside the motion div to avoid layout issues */}
-      <AppointmentDetailsModal
-        isOpen={isModalOpen}
+      {/* Render Modal */}
+      <AppointmentDetailsModal 
+        isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
         appointment={appointment}
         formatDate={formatDate}
