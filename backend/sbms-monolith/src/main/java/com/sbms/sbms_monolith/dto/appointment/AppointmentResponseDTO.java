@@ -13,6 +13,7 @@ public class AppointmentResponseDTO {
     private Long boardingId;
     private String boardingTitle;
     private String boardingAddress;
+    private String distance;
 
     private String boardingImage;
 
