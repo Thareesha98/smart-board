@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import toast from "react-hot-toast";
 // 1. Service Imports
 import {
   getOwnerAppointments,
@@ -67,7 +68,19 @@ const useAppointmentsLogic = () => {
     const currentApp = appointments.find((app) => app.id === id);
     if (!currentApp) return;
 
-    // Prepare DTO
+    // Handle "Visited" gracefully without breaking the app
+    if (actionType === "visited") {
+      toast("This feature is coming soon!", {
+        icon: "🚧",
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+      });
+      return;
+    }
+
     let decisionDTO = {
       status: null,
       ownerStartTime: null,
@@ -83,11 +96,6 @@ const useAppointmentsLogic = () => {
     } else if (actionType === "rejected") {
       decisionDTO.status = "DECLINED";
       decisionDTO.ownerNote = "Slot unavailable.";
-    } else if (actionType === "visited") {
-      alert(
-        "Backend update required: 'VISITED' status is not yet supported in Java."
-      );
-      return;
     }
 
     // Optimistic Update
@@ -96,12 +104,24 @@ const useAppointmentsLogic = () => {
       prev.map((app) => (app.id === id ? { ...app, status: actionType } : app))
     );
 
+    // ✅ Toast: Loading State
+    const toastId = toast.loading("Updating status...");
+
     try {
-      // ✅ Use dynamic ID from Context
       await updateAppointmentStatus(currentOwner.id, id, decisionDTO);
+
+      // ✅ Toast: Success
+      toast.success("Status updated successfully!", {
+        id: toastId, // Replaces the loading toast
+        duration: 3000,
+      });
     } catch (err) {
       setAppointments(previousState);
-      alert("Failed to update status. Please try again.");
+
+      // ✅ Toast: Error
+      toast.error("Failed to update status. Please try again.", {
+        id: toastId,
+      });
     }
   };
 
