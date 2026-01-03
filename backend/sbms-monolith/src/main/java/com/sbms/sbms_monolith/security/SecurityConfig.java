@@ -3,7 +3,7 @@ package com.sbms.sbms_monolith.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,46 +38,55 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(sm ->
-                    sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
+    	http
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .sessionManagement(sm ->
+            sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers(
-                        "/api/auth/**",
-                        "/api/boardings",
-                        "/api/boardings/**" , 
-                        
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
-                ).permitAll()
+            // 🔓 Public APIs
+            .requestMatchers(
+                "/api/auth/**",
+                "/api/boardings",
+                "/api/boardings/**",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html"
+            ).permitAll()
 
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            // 🔓 WebSocket handshake (Expo-safe)
+            .requestMatchers("/ws/**").permitAll()
 
-                .requestMatchers("/api/owner/**").hasRole("OWNER")
-                .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
+            // 🔐 Chat APIs (MUST be authenticated)
+            .requestMatchers("/api/chats/**")
+                .hasAnyRole("STUDENT", "OWNER")
 
-                .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
+            // 🔐 Role-based APIs
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/owner/**").hasRole("OWNER")
+            .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
 
-                .requestMatchers("/api/student/**").hasRole("STUDENT")
+            .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/reports/**")
+                .hasAnyRole("STUDENT", "OWNER")
 
-                .anyRequest().authenticated()
-            )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .requestMatchers("/api/student/**").hasRole("STUDENT")
 
-        return http.build();
+            // 🔒 Everything else
+            .anyRequest().authenticated()
+        )
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
 
-        // 🔥 NEW constructor (Spring Security 6.3)
+        // NEW constructor (Spring Security 6.3)
         DaoAuthenticationProvider provider =
                 new DaoAuthenticationProvider(customUserDetailsService);
 
@@ -84,6 +94,8 @@ public class SecurityConfig {
 
         return provider;
     }
+    
+   
 
   
     @Bean
@@ -97,19 +109,33 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    
+    
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
+      /*  config.setAllowedOrigins(List.of(
         		"https://smartboard.thareesha.software",
                 "http://13.233.34.226:8086",
                 "http://localhost:5173"
-        		));
+        		)); */
+        config.setAllowedOriginPatterns(List.of("*"));
+
+        
+        
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+       
         config.setAllowedHeaders(List.of("*"));
+        
+     /*   config.setAllowedHeaders(List.of(
+        	    "Authorization",
+        	    "Content-Type"
+        	));
+*/
+        
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
