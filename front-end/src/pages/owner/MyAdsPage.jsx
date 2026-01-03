@@ -1,88 +1,253 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import HeaderBar from "../../components/Owner/common/HeaderBar";
-import AdCard from "../../components/Owner/ads/AdCard";
-import {
-  StatusTab,
-  EmptyState,
-  STATUS_CONFIG,
-} from "../../components/Owner/ads/MyAdsComponents";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import useMyAdsLogic from "../../hooks/owner/useMyAdsLogic";
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; // ✅ Import Context
+import HeaderBar from "../../components/Owner/common/HeaderBar";
+import FormGroup from "../../components/Owner/forms/FormGroup";
 
-export default function MyAdsPage() {
-  const {
-    filter,
-    setFilter,
-    filteredAds,
-    counts,
-    isNestedRoute,
-    handleCreate,
-    handleEdit,
-    handleBoostRedirect,
-    getStatusBadgeStyle,
-  } = useMyAdsLogic();
+import {
+  AdStatusBadge,
+  AmenityItem,
+  ImagePreview,
+  ImageUploader,
+  LoadingSpinner,
+} from "../../components/Owner/ads/EditAdSubComponents";
 
-  // If showing a nested route (e.g. Create/Edit), render that instead
-  if (isNestedRoute) return <Outlet />;
+const availableAmenities = [
+  { label: "Attached Bathroom", icon: "fa-bath" },
+  { label: "Wi-Fi", icon: "fa-wifi" },
+  { label: "Kitchen Access", icon: "fa-utensils" },
+  { label: "Parking", icon: "fa-car" },
+  { label: "Laundry", icon: "fa-washing-machine" },
+];
+
+const EditAdPage = () => {
+  const { adId } = useParams();
+  const navigate = useNavigate();
+
+  // ✅ Get Current Owner from Context
+  const { currentOwner } = useOwnerAuth();
+
+  const { fetchSingleAd, updateAd, isLoading } = useMyAdsLogic();
+
+  const [formData, setFormData] = useState(null);
+  const [newImageFiles, setNewImageFiles] = useState([]);
+  const [newImagePreviews, setNewImagePreviews] = useState([]);
+
+  // --- 1. Load Data ---
+  useEffect(() => {
+    const loadAdData = async () => {
+      const data = await fetchSingleAd(adId);
+      if (data) {
+        setFormData({
+          ...data,
+          rent: data.rent || "",
+          deposit: data.deposit || "",
+          amenities: data.amenities || [],
+          currentImages: data.currentImages || [],
+          adStatus: data.status || "Draft",
+        });
+      }
+    };
+    loadAdData();
+  }, [adId, fetchSingleAd]);
+
+  // --- 2. Handlers ---
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox") {
+      setFormData((prev) => ({
+        ...prev,
+        amenities: checked
+          ? [...prev.amenities, value]
+          : prev.amenities.filter((item) => item !== value),
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setNewImageFiles((prev) => [...prev, ...files]);
+      const newPreviews = files.map((file) => URL.createObjectURL(file));
+      setNewImagePreviews((prev) => [...prev, ...newPreviews]);
+    }
+  };
+
+  const handleRemoveNewImage = (index) => {
+    setNewImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewImagePreviews((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleRemoveExistingImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      currentImages: prev.currentImages.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await updateAd(adId, formData, newImageFiles, formData.currentImages);
+  };
+
+  if (isLoading && !formData) return <LoadingSpinner id={adId} />;
+  if (!formData)
+    return <div className="p-8 text-center text-error">Ad not found.</div>;
 
   return (
-    <div className="pt-4 space-y-6 bg-light min-h-screen">
+    <div className="pt-4 space-y-8 bg-light min-h-screen pb-12">
+      {/* ✅ Updated HeaderBar with Context Data */}
       <HeaderBar
-        title="My Listings"
-        subtitle="Manage your boarding house advertisements"
-        navBtnText="Create New Listing"
-        navBtnPath="/owner/myAds/createAd"
+        title={`Edit Ad: ${adId}`}
+        subtitle={`Editing details for **${formData.title}**`}
+        userAvatar={currentOwner?.avatar}
+        userName={currentOwner?.firstName}
       />
 
-      {/* Filter Section */}
-      <section className="px-4 md:px-0">
-        {/* 🔥 UPDATED LAYOUT: 
-            - Mobile: 'grid grid-cols-2' (2x2 Box)
-            - Desktop: 'md:grid-cols-4' (1 Row) 
-            - Removed: 'flex overflow-x-auto' (No more scrolling)
-        */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 p-4 md:p-6 rounded-report shadow-custom bg-card-bg border border-light">
-          {Object.keys(STATUS_CONFIG).map((status) => (
-            <div key={status} className="min-w-[140px] md:min-w-0 flex-shrink-0">
-              <StatusTab
-                status={status}
-                count={counts[status] || 0}
-                currentFilter={filter}
-                setFilter={setFilter}
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-8 px-4 max-w-6xl mx-auto"
+      >
+        {/* Ad Information */}
+        <div className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+          <div className="flex justify-between items-center mb-6 pb-4 border-b border-light">
+            <h2 className="text-xl font-black text-primary uppercase tracking-tight">
+              Ad Information
+            </h2>
+            <AdStatusBadge
+              status={formData.adStatus}
+              className={
+                formData.adStatus === "Active"
+                  ? "bg-success text-white"
+                  : formData.adStatus === "Pending"
+                  ? "bg-accent text-white"
+                  : "bg-muted text-white"
+              }
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <FormGroup
+              label="Title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+            />
+            <FormGroup
+              label="Address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+            />
+            <FormGroup
+              label="Monthly Rent (LKR)"
+              name="rent"
+              value={formData.rent}
+              onChange={handleChange}
+              type="number"
+            />
+            <FormGroup
+              label="Security Deposit (LKR)"
+              name="deposit"
+              value={formData.deposit}
+              onChange={handleChange}
+              type="number"
+            />
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold uppercase text-muted tracking-wider mb-2">
+                Description
+              </label>
+              <textarea
+                name="description"
+                rows="3"
+                value={formData.description}
+                onChange={handleChange}
+                className="w-full p-3 border border-light rounded-xl bg-white/50 focus:border-accent"
               />
             </div>
-          ))}
+          </div>
         </div>
-      </section>
 
-      {/* Ads Section */}
-      <section className="px-4 md:px-0 pb-10">
-        <motion.h2 
-          layout
-          className="text-xl md:text-2xl font-black mb-4 text-primary tracking-tight"
-        >
-          {filter} Listings ({filteredAds.length})
-        </motion.h2>
+        {/* Features & Media */}
+        <div className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+          <h2 className="text-xl font-black mb-6 pb-4 border-b border-light text-primary uppercase tracking-tight">
+            Features & Media
+          </h2>
 
-        <motion.div layout className="space-y-4 md:space-y-6">
-          <AnimatePresence mode="popLayout">
-            {filteredAds.length > 0 ? (
-              filteredAds.map((ad) => (
-                <AdCard
-                  key={ad.id}
-                  ad={ad}
-                  onEdit={handleEdit}
-                  onBoostRedirect={handleBoostRedirect}
-                  getStatusBadgeStyle={getStatusBadgeStyle}
+          <div className="mb-10">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-4">
+              Amenities
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {availableAmenities.map((item) => (
+                <AmenityItem
+                  key={item.label}
+                  item={item}
+                  isChecked={formData.amenities.includes(item.label)}
+                  onChange={handleChange}
                 />
-              ))
-            ) : (
-              <EmptyState filter={filter} onCreate={handleCreate} />
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </section>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-4">
+              Photos
+            </h4>
+            <div className="flex flex-wrap gap-4">
+              {formData.currentImages.map((src, idx) => (
+                <ImagePreview
+                  key={`curr-${idx}`}
+                  src={src}
+                  onRemove={() => handleRemoveExistingImage(idx)}
+                />
+              ))}
+              {newImagePreviews.map((src, idx) => (
+                <ImagePreview
+                  key={`new-${idx}`}
+                  src={src}
+                  isNew={true}
+                  onRemove={() => handleRemoveNewImage(idx)}
+                />
+              ))}
+              <ImageUploader onImageSelect={handleImageSelect} />
+            </div>
+          </div>
+        </div>
+
+        {/* Submit Actions */}
+        <div className="flex justify-end pt-4 space-x-4">
+          <button
+            type="button"
+            onClick={() => navigate("/owner/myAds")}
+            className="px-8 py-3 font-black text-[10px] uppercase tracking-widest rounded-full border-2 border-primary text-primary transition-all hover:bg-primary hover:text-white"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`
+                px-10 py-3 font-black text-[10px] uppercase tracking-widest rounded-full shadow-lg text-white transition-all 
+                ${
+                  isLoading
+                    ? "bg-muted cursor-not-allowed"
+                    : "bg-accent hover:shadow-xl hover:-translate-y-1 active:scale-95"
+                }
+            `}
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </form>
     </div>
   );
-}
+};
+
+export default EditAdPage;
