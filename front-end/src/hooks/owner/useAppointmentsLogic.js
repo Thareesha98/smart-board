@@ -63,7 +63,7 @@ const useAppointmentsLogic = () => {
   }, [fetchAppointments]);
 
   // --- 2. Action Handlers ---
-  const handleAction = async (id, actionType) => {
+  const handleAction = async (id, actionType, decisionData = null) => {
     if (!currentOwner) return;
 
     const currentApp = appointments.find((app) => app.id === id);
@@ -77,6 +77,7 @@ const useAppointmentsLogic = () => {
       return;
     }
 
+    // Prepare DTO based on the decisionData passed from Modal
     let decisionDTO = {
       status: null,
       ownerStartTime: null,
@@ -86,14 +87,18 @@ const useAppointmentsLogic = () => {
 
     if (actionType === "confirmed") {
       decisionDTO.status = "ACCEPTED";
-      decisionDTO.ownerStartTime = currentApp.originalStart;
-      decisionDTO.ownerEndTime = currentApp.originalEnd;
-      decisionDTO.ownerNote = "Request accepted.";
+      // ✅ Use the edited time from modal, or fallback to original
+      decisionDTO.ownerStartTime =
+        decisionData?.startTime || currentApp.originalStart;
+      decisionDTO.ownerEndTime =
+        decisionData?.endTime || currentApp.originalEnd;
+      decisionDTO.ownerNote = decisionData?.note || "Request accepted.";
     } else if (actionType === "rejected") {
       decisionDTO.status = "DECLINED";
-      decisionDTO.ownerNote = "Slot unavailable.";
+      decisionDTO.ownerNote = decisionData?.note || "Slot unavailable.";
     }
 
+    // Optimistic Update
     const previousState = [...appointments];
     setAppointments((prev) =>
       prev.map((app) => (app.id === id ? { ...app, status: actionType } : app))

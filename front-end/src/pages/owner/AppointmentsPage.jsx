@@ -4,6 +4,7 @@ import HeaderBar from "../../components/Owner/common/HeaderBar";
 import StatusTab from "../../components/Owner/common/StatusTab";
 import AppointmentRow from "../../components/Owner/appointments/AppointmentRow";
 import SkeletonAppointmentRow from "../../components/Owner/appointments/SkeletonAppointmentRow";
+import DecisionModal from "../../components/Owner/appointments/DecisionModal";
 import useAppointmentsLogic from "../../hooks/owner/useAppointmentsLogic";
 import { Toaster } from "react-hot-toast";
 import { FaSearch, FaSortAmountDown } from "react-icons/fa";
