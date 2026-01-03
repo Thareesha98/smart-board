@@ -32,7 +32,7 @@ const PublicBoardingCard = ({ boarding }) => {
                         </p>
                     </div>
                     <button 
-                        onClick={() => navigate(`/boarding/${boarding.id}`)}
+                        onClick={() => navigate(`/student/boarding-details/${boarding.id}`)}
                         className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
                     >
                         <FaArrowRight size={12} />
