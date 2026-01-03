@@ -1,36 +1,39 @@
-import { useState, useEffect, useCallback } from 'react';
-import StudentService from '../../api/student/StudentService';
+import { useState, useEffect, useCallback } from "react";
+import StudentService from "../../api/student/StudentService";
 
 export const useSearchFilters = () => {
   const [filteredBoardings, setFilteredBoardings] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [filters, setFilters] = useState({
-    searchQuery: '',
+    searchQuery: "",
     minPrice: 0,
     maxPrice: 50000,
-    distance: '10',
-    gender: 'any',
+    distance: "10",
+    gender: "any",
     amenities: [],
-    roomTypes: []
+    roomTypes: [],
   });
 
   const fetchBoardings = async () => {
     setLoading(true);
     try {
       const result = await StudentService.searchBoardings(filters);
-      
+
       // Map Backend DTO to Frontend UI Structure
-      const mapped = result.content.map(b => ({
+      const mapped = result.content.map((b) => ({
         id: b.id,
         name: b.title,
-        image: b.imageUrls?.[0] || 'https://via.placeholder.com/300', // Fallback image
+        image: b.imageUrls?.[0] || "https://via.placeholder.com/300",
         price: b.pricePerMonth,
         location: b.address,
-        rating: 4.5, // Placeholder until rating is added to SummaryDTO
-        reviewCount: 0,
-        amenities: [], // SummaryDTO might need this added later
-        badge: b.status === 'APPROVED' ? 'Verified' : 'New'
+
+        // ✅ FIX: Read real values from Backend DTO
+        rating: b.rating || 0,
+        reviewCount: b.reviewCount || 0,
+
+        amenities: b.amenities || [], // If your DTO sends amenities, use them too!
+        badge: b.status === "APPROVED" ? "Verified" : "New",
       }));
 
       setFilteredBoardings(mapped);
@@ -44,10 +47,10 @@ export const useSearchFilters = () => {
   // Fetch on mount and when filters change (Debouncing suggested for production)
   useEffect(() => {
     fetchBoardings();
-  }, []); 
+  }, []);
 
   const handleFilterChange = useCallback((key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   }, []);
 
   const applyFilters = () => {
@@ -56,13 +59,13 @@ export const useSearchFilters = () => {
 
   const clearAllFilters = useCallback(() => {
     setFilters({
-      searchQuery: '',
+      searchQuery: "",
       minPrice: 0,
       maxPrice: 50000,
-      distance: '10',
-      gender: 'any',
+      distance: "10",
+      gender: "any",
       amenities: [],
-      roomTypes: []
+      roomTypes: [],
     });
     // fetchBoardings(); // Uncomment to auto-refresh on clear
   }, []);
@@ -74,6 +77,6 @@ export const useSearchFilters = () => {
     handleFilterChange,
     applyFilters,
     clearAllFilters,
-    setFilteredBoardings
+    setFilteredBoardings,
   };
 };
