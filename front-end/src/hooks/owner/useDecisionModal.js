@@ -1,28 +1,37 @@
-// hooks/ui/useDecisionModal.js
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
-export const useDecisionModal = () => {
+const useDecisionModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [actionType, setActionType] = useState(null);
 
-  const openModal = (item, action) => {
+  /**
+   * Opens the modal with the specific item and action.
+   * @param {Object} item - The data object (e.g., appointment)
+   * @param {String} action - The action string (e.g., 'confirmed', 'rejected')
+   */
+  const openModal = useCallback((item, action) => {
     setSelectedItem(item);
     setActionType(action);
     setIsOpen(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  /**
+   * Closes the modal and resets the state.
+   */
+  const closeModal = useCallback(() => {
     setIsOpen(false);
     setSelectedItem(null);
     setActionType(null);
-  };
+  }, []);
 
   return {
     isOpen,
     selectedItem,
     actionType,
     openModal,
-    closeModal
+    closeModal,
   };
 };
+
+export default useDecisionModal;

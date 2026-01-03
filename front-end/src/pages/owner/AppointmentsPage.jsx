@@ -5,6 +5,7 @@ import StatusTab from "../../components/Owner/common/StatusTab";
 import AppointmentRow from "../../components/Owner/appointments/AppointmentRow";
 import SkeletonAppointmentRow from "../../components/Owner/appointments/SkeletonAppointmentRow";
 import DecisionModal from "../../components/Owner/appointments/DecisionModal";
+import useDecisionModal from "../../hooks/owner/useDecisionModal";
 import useAppointmentsLogic from "../../hooks/owner/useAppointmentsLogic";
 import { Toaster } from "react-hot-toast";
 import { FaSearch, FaSortAmountDown } from "react-icons/fa";
@@ -29,6 +30,25 @@ const AppointmentsPage = () => {
     setSortBy,
   } = useAppointmentsLogic();
 
+  const { isOpen, selectedItem, actionType, openModal, closeModal } =
+    useDecisionModal();
+
+  // 3. Handler to determine if we need the modal or not
+  const handleModalTrigger = (id, action) => {
+    // Case A: Immediate Action (Visited) - No Modal needed yet
+    if (action === "visited") {
+      handleAction(id, action);
+      return;
+    }
+
+    // Case B: Actions requiring Modal (Confirm/Reject)
+    const app = filteredAppointments.find((a) => a.id === id);
+    if (app) {
+      openModal(app, action); // ✅ Use the hook's open function
+    }
+  };
+
+  // 4. Error State
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-light">
@@ -50,6 +70,7 @@ const AppointmentsPage = () => {
 
   return (
     <>
+      {/* Notification Toaster */}
       <Toaster
         position="top-center"
         reverseOrder={false}
@@ -66,7 +87,9 @@ const AppointmentsPage = () => {
           },
         }}
       />
-      <div className="space-y-6 md:space-y-8 pt-4 pb-10 bg-light min-h-screen">
+
+      {/* Main Content */}
+      <div className="pt-4 space-y-8 min-h-screen bg-light pb-10">
         <HeaderBar
           title="Appointments"
           subtitle="Manage student visit requests and track arrivals."
@@ -91,8 +114,9 @@ const AppointmentsPage = () => {
           </div>
         </section>
 
-        {/* Appointments List */}
+        {/* List Section */}
         <section className="space-y-4 px-2">
+          {/* Toolbar */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 ml-2 mr-2">
             <motion.h3
               layout
@@ -101,9 +125,8 @@ const AppointmentsPage = () => {
               {filter} Requests
             </motion.h3>
 
-            {/* 🔍 ✅ SEARCH & SORT TOOLBAR */}
             <div className="flex flex-col md:flex-row gap-2 md:gap-4 w-full md:w-auto">
-              {/* Search Input */}
+              {/* Search */}
               <div className="relative flex-1 md:w-64">
                 <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-xs" />
                 <input
@@ -115,7 +138,7 @@ const AppointmentsPage = () => {
                 />
               </div>
 
-              {/* Sort Dropdown */}
+              {/* Sort */}
               <div className="relative md:w-48">
                 <FaSortAmountDown className="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-xs" />
                 <select
@@ -126,7 +149,6 @@ const AppointmentsPage = () => {
                   <option value="nearest">Nearest Date First</option>
                   <option value="furthest">Furthest Date First</option>
                 </select>
-                {/* Custom Arrow for Select */}
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                   <svg
                     className="w-2.5 h-2.5 text-muted"
@@ -146,6 +168,7 @@ const AppointmentsPage = () => {
             </div>
           </div>
 
+          {/* Rows */}
           <div className="flex flex-col gap-4">
             {loading ? (
               <>
@@ -161,7 +184,7 @@ const AppointmentsPage = () => {
                       key={app.id}
                       appointment={app}
                       config={getStatusStyle(app.status)}
-                      onAction={handleAction}
+                      onAction={handleModalTrigger} // ✅ Pass the trigger
                       formatDate={formatDate}
                       formatTime={formatTime}
                     />
@@ -181,6 +204,15 @@ const AppointmentsPage = () => {
           </div>
         </section>
       </div>
+
+      {/* ✅ Decision Modal - Controlled by Hook */}
+      <DecisionModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        actionType={actionType}
+        appointment={selectedItem}
+        onConfirm={handleAction} // Logic Hook handles the API Call
+      />
     </>
   );
 };
