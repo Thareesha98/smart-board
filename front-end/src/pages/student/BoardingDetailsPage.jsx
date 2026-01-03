@@ -20,6 +20,7 @@ import QuickInfoCard from "../../components/student/boarding-details/QuickInfoCa
 import OwnerCard from "../../components/student/boarding-details/OwnerCard";
 import AppointmentForm from "../../components/student/boarding-details/AppointmentForm";
 import ReviewsList from "../../components/student/boarding-details/ReviewsList";
+import StudentService from "../../api/student/StudentService";
 
 import {
   boardingDetails as defaultBoardingDetails,
@@ -52,7 +53,7 @@ const mapAmenitiesWithIcons = (amenities) => {
   };
   return amenities.map((amenity) => {
     if (typeof amenity === 'object' && amenity.icon) return amenity;
-    const amenityLower = amenity.toLowerCase();
+    const amenityLower = String(amenity).toLowerCase();
     const iconKey = amenityIconMap[amenityLower] || "wifi";
     return { icon: iconKey, label: amenity };
   });
@@ -63,7 +64,7 @@ const BoardingDetailsPage = () => {
   const { id } = useParams();
   const passedBoarding = location.state?.boarding;
   
-  // Safe initialization with fallback defaults
+  // 1. Initial State (Loads Mock/Passed Data instantly for speed)
   const [currentBoarding, setCurrentBoarding] = useState(
     passedBoarding || defaultBoardingDetails || { 
         images: [], 
@@ -72,10 +73,11 @@ const BoardingDetailsPage = () => {
         amenities: [], 
         description: [],
         nearbyPlaces: [],
-        reviewsSummary: { breakdown: [] }
+        reviewsSummary: null 
     }
   );
 
+  // 2. Fetch Real Data & OVERWRITE Mock Data
   useEffect(() => {
     const fetchFullDetails = async () => {
         if (!id) return;
@@ -83,15 +85,24 @@ const BoardingDetailsPage = () => {
             const data = await StudentService.getBoardingDetails(id);
             if (data) {
                 setCurrentBoarding(prev => ({
+                    // Keep existing images/location if backend misses them
                     ...prev,
+                    // Overwrite with Backend Data
                     ...data,
-                    // Ensure amenities are mapped correctly (Backend sends strings)
+                    
+                    // Fix Amenities Format
                     amenities: mapAmenitiesWithIcons(data.amenities || prev.amenities),
                     
-                    // ✅ CRITICAL: Ensure Owner & Review Stats are taken from Backend
-                    owner: data.owner || prev.owner || {},
-                    reviewCount: data.reviewCount !== undefined ? data.reviewCount : prev.reviewCount,
-                    rating: data.rating !== undefined ? data.rating : prev.rating
+                    // Fix Owner (Backend might send null, use empty object)
+                    owner: data.owner || {},
+
+                    // ✅ CRITICAL FIX: Ensure Backend Rating Overwrites Mock Rating
+                    rating: data.rating !== undefined ? data.rating : 0.0,
+                    reviewCount: data.reviewCount !== undefined ? data.reviewCount : 0,
+
+                    // ✅ CRITICAL FIX: DELETE the Mock Data 'reviewsSummary' 
+                    // This forces the UI to look at 'data.rating' instead
+                    reviewsSummary: null 
                 }));
             }
         } catch (error) {
@@ -102,31 +113,11 @@ const BoardingDetailsPage = () => {
     fetchFullDetails();
   }, [id]);
 
-  useEffect(() => {
-    if (passedBoarding) {
-      setCurrentBoarding({
-        ...passedBoarding,
-        location: {
-          address: passedBoarding.location || "Location not available",
-          distance: `${passedBoarding.distance || 0} km from University of Ruhuna`,
-        },
-        amenities: passedBoarding.amenities && passedBoarding.amenities[0]?.icon
-          ? passedBoarding.amenities
-          : mapAmenitiesWithIcons(passedBoarding.amenities || []),
-        // Ensure arrays exist
-        description: passedBoarding.description || [],
-        nearbyPlaces: passedBoarding.nearbyPlaces || [],
-        images: passedBoarding.images || []
-      });
-    }
-  }, [passedBoarding]);
-
-  const galleryImages = currentBoarding?.images || [];
-  const { currentIndex, nextImage, prevImage, selectImage } =
-    useImageGallery(galleryImages);
-    
-  const { formData, updateField, submitAppointment, isSubmitting, isSuccess } =
-    useAppointmentForm();
+  // ✅ FIX: Removed the second useEffect that was re-injecting 'passedBoarding' mock data
+  
+  const galleryImages = currentBoarding?.imageUrls || currentBoarding?.images || [];
+  const { currentIndex, nextImage, prevImage, selectImage } = useImageGallery(galleryImages);
+  const { formData, updateField, submitAppointment, isSubmitting, isSuccess } = useAppointmentForm();
 
   const handleScheduleSubmit = async () => {
     const result = await submitAppointment();
@@ -138,12 +129,12 @@ const BoardingDetailsPage = () => {
       const newAppointment = {
         id: Date.now(),
         boardingId: currentBoarding.id,
-        boardingName: currentBoarding.name,
+        boardingName: currentBoarding.name || currentBoarding.title,
         image: galleryImages.length > 0 ? galleryImages[0] : "", 
         owner: currentBoarding?.owner?.name || "Unknown Owner",
         contact: ownerPhone,
         email: ownerEmail,
-        address: currentBoarding?.location?.address,
+        address: currentBoarding?.location?.address || currentBoarding.address,
         date: formData.date,
         time: formData.time,
         notes: formData.notes,
@@ -158,9 +149,7 @@ const BoardingDetailsPage = () => {
   };
 
   const handleBookVisit = () => {
-    document
-      .getElementById("appointment-form")
-      ?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("appointment-form")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleContact = (type) => {
@@ -184,15 +173,18 @@ const BoardingDetailsPage = () => {
 
   if (!currentBoarding) return <div>Loading...</div>;
 
-  // Helper to safely get array
-  const safeDescription = currentBoarding.description || [];
+  const safeDescription = Array.isArray(currentBoarding.description) 
+    ? currentBoarding.description 
+    : (currentBoarding.description ? [currentBoarding.description] : []);
+    
   const safeAmenities = currentBoarding.amenities || [];
-  const safeNearby = currentBoarding.nearbyPlaces || [];
+  
+  // ✅ FIX: Don't read 'breakdown' from Mock Data if it's not from backend
   const safeBreakdown = currentBoarding.reviewsSummary?.breakdown || [];
 
   return (
     <StudentLayout
-      title={currentBoarding.name || "Boarding Details"}
+      title={currentBoarding.name || currentBoarding.title || "Boarding Details"}
       subtitle="Boarding Details"
       headerRightContent={headerRightContent}
     >
@@ -205,21 +197,14 @@ const BoardingDetailsPage = () => {
             onPrev={prevImage}
             onNext={nextImage}
             onSelect={selectImage}
-            badge={currentBoarding.badge}
+            badge={currentBoarding.isBosted ? "Featured" : null}
           />
 
           <div className="flex flex-col gap-4 min-[1400px]:hidden">
-            <QuickInfoCard
-              boarding={currentBoarding}
-              onBookVisit={handleBookVisit}
-            />
-            <OwnerCard
-              owner={currentBoarding.owner || {}}
-              onContact={handleContact}
-            />
+            <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
+            <OwnerCard owner={currentBoarding.owner || {}} onContact={handleContact} />
           </div>
 
-          {/* DESCRIPTION SECTION - FIXED MAP ERROR */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -237,7 +222,6 @@ const BoardingDetailsPage = () => {
             )}
           </motion.section>
 
-          {/* AMENITIES SECTION - FIXED MAP ERROR */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -248,21 +232,15 @@ const BoardingDetailsPage = () => {
               {safeAmenities.map((amenity, idx) => {
                 const Icon = amenityIcons[amenity.icon] || FaWifi;
                 return (
-                  <div
-                    key={idx}
-                    className="flex flex-col items-center justify-center p-3 bg-background-light rounded-xl hover:bg-gray-100 transition-colors text-center gap-2"
-                  >
+                  <div key={idx} className="flex flex-col items-center justify-center p-3 bg-background-light rounded-xl hover:bg-gray-100 transition-colors text-center gap-2">
                     <Icon className="text-2xl text-accent" />
-                    <span className="text-sm font-medium text-text-dark">
-                      {amenity.label}
-                    </span>
+                    <span className="text-sm font-medium text-text-dark">{amenity.label}</span>
                   </div>
                 );
               })}
             </div>
           </motion.section>
 
-          {/* LOCATION SECTION - FIXED MAP ERROR */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -274,36 +252,43 @@ const BoardingDetailsPage = () => {
               <FaMapMarkedAlt className="text-5xl text-accent mb-2 transform group-hover:scale-110 transition-transform" />
               <p className="text-text-dark font-bold z-10">View on Map</p>
               <p className="text-sm text-text-muted z-10 text-center px-4 mt-1">
-                {currentBoarding?.location?.address || "Address not available"}
+                {currentBoarding?.location?.address || currentBoarding.address || "Address not available"}
               </p>
             </div>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {safeNearby.map((place, idx) => (
-                <li
-                  key={idx}
-                  className="text-sm text-text-muted flex items-center gap-2"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>{" "}
-                  {place}
-                </li>
-              ))}
+              {currentBoarding.nearbyPlaces && (
+                 Array.isArray(currentBoarding.nearbyPlaces) 
+                 ? currentBoarding.nearbyPlaces.map((place, idx) => (
+                    <li key={idx} className="text-sm text-text-muted flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> {place}
+                    </li>
+                   ))
+                 : Object.entries(currentBoarding.nearbyPlaces).map(([place, dist], idx) => (
+                    <li key={idx} className="text-sm text-text-muted flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent"></span> {place} ({dist} km)
+                    </li>
+                   ))
+              )}
             </ul>
           </motion.section>
 
-          {/* REVIEWS SECTION - FIXED MAP ERROR */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
+            {/* ✅ UPDATED: Use backend 'reviewCount' */}
             <h2 className="text-xl font-bold text-primary mb-6">
               Reviews ({currentBoarding.reviewCount || 0})
             </h2>
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center justify-center bg-background-light rounded-2xl p-6 sm:w-40 text-center flex-shrink-0">
+                
+                {/* ✅ UPDATED: FORCE use of backend Rating (which is 0.0), ignore mock 'overall' */}
                 <div className="text-4xl font-bold text-text-dark">
-                  {currentBoarding.rating || 0}
+                  {currentBoarding.rating !== undefined ? currentBoarding.rating : 0}
                 </div>
+                
                 <div className="text-yellow-400 text-sm my-1">
                   {"★".repeat(Math.round(currentBoarding.rating || 0))}
                 </div>
@@ -311,64 +296,42 @@ const BoardingDetailsPage = () => {
                   Overall
                 </div>
               </div>
+              
               <div className="flex-1 space-y-2">
-                {safeBreakdown.map((item, idx) => (
+                {/* Only render Breakdown if we explicitly have it (mock data removed, so this should hide until backend supports it) */}
+                {safeBreakdown.length > 0 ? safeBreakdown.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-text-muted w-10">
-                      {item.stars} ★
-                    </span>
+                    <span className="text-xs font-bold text-text-muted w-10">{item.stars} ★</span>
                     <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-accent rounded-full"
-                        style={{ width: `${item.percentage}%` }}
-                      ></div>
+                      <div className="h-full bg-accent rounded-full" style={{ width: `${item.percentage}%` }}></div>
                     </div>
-                    <span className="text-xs font-bold text-text-dark w-8 text-right">
-                      {item.percentage}%
-                    </span>
+                    <span className="text-xs font-bold text-text-dark w-8 text-right">{item.percentage}%</span>
                   </div>
-                ))}
+                )) : (
+                  <div className="flex items-center justify-center h-full text-text-muted text-sm italic">
+                    {currentBoarding.reviewCount > 0 ? "Breakdown loading..." : "No reviews yet"}
+                  </div>
+                )}
               </div>
             </div>
-            <ReviewsList
-              boardingId={currentBoarding.id || id || "default-boarding-id"}
-            />
+            
+            <ReviewsList boardingId={currentBoarding.id || id} />
           </motion.section>
         </div>
 
         {/* --- RIGHT COLUMN: SIDEBAR --- */}
         <div className="hidden min-[1400px]:block w-full space-y-6">
-          <QuickInfoCard
-            boarding={currentBoarding}
-            onBookVisit={handleBookVisit}
-          />
+          <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
           <OwnerCard owner={currentBoarding.owner || {}} onContact={handleContact} />
-          
           <div id="appointment-form">
-            <AppointmentForm
-              formData={formData}
-              updateField={updateField}
-              onSubmit={handleScheduleSubmit} 
-              isSubmitting={isSubmitting}
-              isSuccess={isSuccess}
-              timeSlots={timeSlots}
-            />
+            <AppointmentForm formData={formData} updateField={updateField} onSubmit={handleScheduleSubmit} isSubmitting={isSubmitting} isSuccess={isSuccess} timeSlots={timeSlots} />
           </div>
-
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
-            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase">
-              <FaShieldAlt /> Safety Tips
-            </h4>
+            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase"><FaShieldAlt /> Safety Tips</h4>
             <ul className="space-y-2">
               {safetyTips && safetyTips.map((tip, idx) => (
-                <li
-                  key={idx}
-                  className="text-xs text-text-dark/80 pl-4 relative"
-                >
-                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">
-                    •
-                  </span>{" "}
-                  {tip}
+                <li key={idx} className="text-xs text-text-dark/80 pl-4 relative">
+                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">•</span> {tip}
                 </li>
               ))}
             </ul>
@@ -378,29 +341,14 @@ const BoardingDetailsPage = () => {
         {/* --- BOTTOM SECTION (< 1400px) --- */}
         <div className="block min-[1400px]:hidden w-full space-y-6">
           <div id="appointment-form">
-            <AppointmentForm
-              formData={formData}
-              updateField={updateField}
-              onSubmit={handleScheduleSubmit}
-              isSubmitting={isSubmitting}
-              isSuccess={isSuccess}
-              timeSlots={timeSlots}
-            />
+            <AppointmentForm formData={formData} updateField={updateField} onSubmit={handleScheduleSubmit} isSubmitting={isSubmitting} isSuccess={isSuccess} timeSlots={timeSlots} />
           </div>
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
-            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase">
-              <FaShieldAlt /> Safety Tips
-            </h4>
+            <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase"><FaShieldAlt /> Safety Tips</h4>
             <ul className="space-y-2">
               {safetyTips && safetyTips.map((tip, idx) => (
-                <li
-                  key={idx}
-                  className="text-xs text-text-dark/80 pl-4 relative"
-                >
-                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">
-                    •
-                  </span>{" "}
-                  {tip}
+                <li key={idx} className="text-xs text-text-dark/80 pl-4 relative">
+                  <span className="absolute left-0 top-0.5 text-red-500 font-bold">•</span> {tip}
                 </li>
               ))}
             </ul>
@@ -409,12 +357,7 @@ const BoardingDetailsPage = () => {
       </div>
 
       <Link to="/student/search-boardings">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="fixed bottom-8 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
-          aria-label="Back to Search"
-        >
+        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className="fixed bottom-8 right-8 h-12 w-12 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors" aria-label="Back to Search">
           <FaArrowLeft size={24} />
         </motion.button>
       </Link>
