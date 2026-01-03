@@ -143,3 +143,32 @@ export const updateMaintenanceStatus = async (requestId, newStatus, ownerNote = 
     throw error;
   }
 };
+
+// =================================================================
+// 🗓️ APPOINTMENT SERVICES
+// =================================================================
+
+// 1. Get all appointments for a specific owner
+// Matches Java: @GetMapping("/owner/{ownerId}")
+export const getOwnerAppointments = async (ownerId) => {
+  try {
+    const response = await api.get(`/appointments/owner/${ownerId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+    throw error;
+  }
+};
+
+// 2. Respond to an appointment (Accept/Decline)
+// Matches Java: @PutMapping("/owner/{ownerId}/{appointmentId}")
+// Expects AppointmentOwnerDecisionDTO body
+export const updateAppointmentStatus = async (ownerId, appointmentId, decisionData) => {
+  try {
+    const response = await api.put(`/appointments/owner/${ownerId}/${appointmentId}`, decisionData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating appointment status:", error);
+    throw error;
+  }
+};
