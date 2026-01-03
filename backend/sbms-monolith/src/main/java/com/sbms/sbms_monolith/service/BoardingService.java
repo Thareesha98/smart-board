@@ -7,6 +7,7 @@ import com.sbms.sbms_monolith.mapper.BoardingMapper;
 import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.enums.Status;
 import com.sbms.sbms_monolith.repository.BoardingRepository;
+import com.sbms.sbms_monolith.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ public class BoardingService {
 
     @Autowired
     private BoardingRepository boardingRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     public Page<BoardingSummaryDTO> searchBoardings(BoardingSearchRequest request) {
 
@@ -106,7 +110,13 @@ public class BoardingService {
             throw new RuntimeException("Boarding is not approved yet");
         }
 
-        return BoardingMapper.toDetail(b);
+        BoardingDetailDTO dto = BoardingMapper.toDetail(b);
+
+        dto.setReviewCount(reviewRepository.countByBoardingId(id));
+        Double avg = reviewRepository.getAverageRatingForBoarding(id);
+        dto.setRating(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0);
+
+        return dto;
     }
 
     private Page<BoardingSummaryDTO> toPagedResult(BoardingSearchRequest request,
@@ -122,7 +132,17 @@ public class BoardingService {
         }
 
         List<BoardingSummaryDTO> content = filtered.subList(from, to).stream()
-                .map(BoardingMapper::toSummary)
+                .map(boarding -> {
+                    // 1. Convert to DTO
+                    BoardingSummaryDTO dto = BoardingMapper.toSummary(boarding);
+
+                    // 2. ✅ Fetch & Set Real Rating Data
+                    dto.setReviewCount(reviewRepository.countByBoardingId(boarding.getId()));
+                    Double avg = reviewRepository.getAverageRatingForBoarding(boarding.getId());
+                    dto.setRating(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0);
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
         Pageable pageable = PageRequest.of(page, size);
