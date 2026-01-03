@@ -58,7 +58,7 @@ public class BoardingMapper {
         if (b.getOwner() != null) {
             BoardingDetailDTO.OwnerDto ownerDto = new BoardingDetailDTO.OwnerDto();
             ownerDto.setId(b.getOwner().getId());
-            ownerDto.setName(b.getOwner().getFullName());
+            ownerDto.setName(b.getOwner().getFullName() != null ? b.getOwner().getFullName() : "Owner");
             ownerDto.setContact(b.getOwner().getPhone());
             ownerDto.setEmail(b.getOwner().getEmail());
             ownerDto.setImage(b.getOwner().getProfileImageUrl());
