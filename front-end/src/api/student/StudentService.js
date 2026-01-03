@@ -75,20 +75,32 @@ const StudentService = {
 
   // Matches AppointmentController: @PostMapping("/api/appointments/student/{id}")
   createAppointment: async (studentId, appointmentData) => {
-    // Helper to format date/time
-    const formatDateTime = (date, time) => {
-        const cleanTime = time.length === 5 ? `${time}:00` : time;
-        return `${date}T${cleanTime}`;
+    
+    // 1. Construct Start Date object safely
+    // appointmentData.visitDate is "2025-05-20"
+    // appointmentData.visitTime is "09:00" or "14:30"
+    const start = new Date(`${appointmentData.visitDate}T${appointmentData.visitTime}`);
+    
+    // 2. Calculate End Date (Start + 1 Hour)
+    const end = new Date(start.getTime() + 60 * 60 * 1000); 
+
+    // 3. Helper to format to ISO string "yyyy-MM-ddTHH:mm:ss" without timezone issues
+    const toIsoString = (date) => {
+        const pad = (num) => String(num).padStart(2, '0');
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        const seconds = '00';
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     };
 
     const payload = {
       boardingId: appointmentData.boardingId,
       numberOfStudents: 1, 
-      requestedStartTime: formatDateTime(appointmentData.visitDate, appointmentData.visitTime),
-      // Simple logic: End time = Start + 1hr
-      requestedEndTime: formatDateTime(appointmentData.visitDate, 
-        `${parseInt(appointmentData.visitTime.split(':')[0]) + 1}:${appointmentData.visitTime.split(':')[1]}`
-      ),
+      requestedStartTime: toIsoString(start), 
+      requestedEndTime: toIsoString(end),     
       studentNote: appointmentData.visitNotes
     };
 
