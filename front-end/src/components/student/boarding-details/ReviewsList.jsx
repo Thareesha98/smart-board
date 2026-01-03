@@ -86,20 +86,22 @@ const ReviewsList = ({ boardingId }) => {
   const formatDate = (dateString) => {
     if (!dateString) return 'Recently';
 
-    // 1. Check if it's the Java string format "yyyy-MM-dd HH:mm"
-    if (typeof dateString === 'string' && dateString.includes(' ')) {
-        const isoString = dateString.replace(' ', 'T');
-        const date = new Date(isoString);
-        if (!isNaN(date.getTime())) {
-             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
+    // Try standard parsing first
+    let date = new Date(dateString);
+
+    // If invalid, try fixing the "space" issue from Java LocalDateTime
+    if (isNaN(date.getTime()) && typeof dateString === 'string') {
+        const fixedDateString = dateString.replace(" ", "T");
+        date = new Date(fixedDateString);
     }
 
-    // 2. Standard fallback
-    const date = new Date(dateString);
-    return isNaN(date.getTime()) 
-        ? 'Recently' 
-        : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (isNaN(date.getTime())) return 'Recently';
+
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric'
+    });
   };
 
   if (loading) return <div className="text-sm text-text-muted mt-4">Loading reviews...</div>;
@@ -136,9 +138,13 @@ const ReviewsList = ({ boardingId }) => {
                 )}
                 <div>
                   <p className="font-semibold text-text-dark text-sm sm:text-base">
-                    {review.userName || 'Anonymous User'}
+                    {/* ✅ Check both possible field names from backend */}
+                    {review.userName || review.studentName || 'Anonymous User'}
                   </p>
-                  <p className="text-xs text-text-muted">{formatDate(review.date || review.timestamp)}</p>
+                  <p className="text-xs text-text-muted">
+                    {/* ✅ Uses createdAt and new formatter */}
+                    {formatDate(review.createdAt || review.date)}
+                  </p>
                 </div>
               </div>
               
