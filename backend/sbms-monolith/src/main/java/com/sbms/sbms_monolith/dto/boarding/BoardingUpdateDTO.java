@@ -31,4 +31,6 @@ public class BoardingUpdateDTO {
     private List<String> amenities;
 
     private Map<String, Double> nearbyPlaces;
+
+    private Status status;
 }
