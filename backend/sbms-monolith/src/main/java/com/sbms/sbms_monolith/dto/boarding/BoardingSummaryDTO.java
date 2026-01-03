@@ -29,6 +29,9 @@ public class BoardingSummaryDTO {
     private List<String> imageUrls;
 
     private int availableSlots;         // mapped from available_slots
+
+    private double rating;
+    private int reviewCount;
 }
 
 
