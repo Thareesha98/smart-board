@@ -14,9 +14,15 @@ public class AppointmentResponseDTO {
     private String boardingTitle;
     private String boardingAddress;
 
+    private String boardingImage;
+
     private Long studentId;
     private String studentName;
     private String studentEmail;
+
+    private Long ownerId;
+    private String ownerName;
+    private String ownerContact;
 
     private int numberOfStudents;
 
