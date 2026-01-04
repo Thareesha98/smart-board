@@ -34,12 +34,21 @@ const getStatusClasses = (status) => {
 };
 
 const AppointmentCard = ({ appointment, onAction }) => {
-  const { id, boardingName, image, owner, ownerId, address, contact, date, time, status, registered } = appointment;
+  const { id, boardingId, boardingName, image, owner, ownerId, address, contact, date, time, status, registered } = appointment;
   const { badge } = getStatusClasses(status); 
   const shortAddress = address.split(',')[0];
   const isRegistered = status === 'selected' && registered;
   
   const navigate = useNavigate();
+
+  const handleBoardingClick = (e) => {
+    e.stopPropagation(); // Prevent bubbling
+    if (boardingId) {
+      navigate(`/student/boarding-details/${boardingId}`);
+    } else {
+      console.warn("Boarding ID is missing");
+    }
+  };
 
   const handleProfileClick = (e) => {
     e.stopPropagation();
@@ -151,7 +160,10 @@ const AppointmentCard = ({ appointment, onAction }) => {
     ">
       
       {/* 1. IMAGE */}
-      <div className="relative group">
+      <div 
+        className="relative group cursor-pointer"
+        onClick={handleBoardingClick}
+      >
         <img
           src={image}
           alt={boardingName}
@@ -168,7 +180,12 @@ const AppointmentCard = ({ appointment, onAction }) => {
         
         {/* Name & Owner */}
         <div className="flex flex-col justify-center">
-          <h4 className="text-lg font-bold text-gray-800 mb-1">{boardingName}</h4>
+          <h4 
+            onClick={handleBoardingClick}
+            className="text-lg font-bold text-gray-800 mb-1 cursor-pointer hover:text-orange-500 hover:underline transition-all"
+          >
+            {boardingName}
+          </h4>
           
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-gray-500 text-sm">
             <div 

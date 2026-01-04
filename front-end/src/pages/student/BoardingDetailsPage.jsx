@@ -21,6 +21,7 @@ import OwnerCard from "../../components/student/boarding-details/OwnerCard";
 import AppointmentForm from "../../components/student/boarding-details/AppointmentForm";
 import ReviewsList from "../../components/student/boarding-details/ReviewsList";
 import StudentService from "../../api/student/StudentService";
+import { useAuth } from "../../context/student/StudentAuthContext.jsx";
 
 import {
   boardingDetails as defaultBoardingDetails,
@@ -63,6 +64,8 @@ const BoardingDetailsPage = () => {
   const location = useLocation();
   const { id } = useParams();
   const passedBoarding = location.state?.boarding;
+
+  const { currentUser } = useAuth();
   
   // 1. Initial State (Loads Mock/Passed Data instantly for speed)
   const [currentBoarding, setCurrentBoarding] = useState(
@@ -117,35 +120,45 @@ const BoardingDetailsPage = () => {
   
   const galleryImages = currentBoarding?.imageUrls || currentBoarding?.images || [];
   const { currentIndex, nextImage, prevImage, selectImage } = useImageGallery(galleryImages);
-  const { formData, updateField, submitAppointment, isSubmitting, isSuccess } = useAppointmentForm();
+  const { formData, updateField,  isSubmitting, isSuccess, setSubmitting, setSuccess } = useAppointmentForm();
 
   const handleScheduleSubmit = async () => {
-    const result = await submitAppointment();
 
-    if (result.success) {
-      const ownerPhone = currentBoarding?.owner?.contact || "+94 77 123 4567";
-      const ownerEmail = currentBoarding?.owner?.email || "owner@example.com"; 
-
-      const newAppointment = {
-        id: Date.now(),
-        boardingId: currentBoarding.id,
-        boardingName: currentBoarding.name || currentBoarding.title,
-        image: galleryImages.length > 0 ? galleryImages[0] : "", 
-        owner: currentBoarding?.owner?.name || "Unknown Owner",
-        contact: ownerPhone,
-        email: ownerEmail,
-        address: currentBoarding?.location?.address || currentBoarding.address,
-        date: formData.date,
-        time: formData.time,
-        notes: formData.notes,
-        status: 'upcoming', 
-        registered: false
-      };
-
-      const existingAppointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-      localStorage.setItem('appointments', JSON.stringify([...existingAppointments, newAppointment]));
+    if (!currentUser) {
+        alert("You must be logged in to schedule a visit.");
+        return;
     }
-    return result;
+    if (!formData.date || !formData.time) {
+        alert("Please select a date and time.");
+        return;
+    }
+
+    setSubmitting(true);
+
+    try {
+        // Prepare Data for API
+        const appointmentData = {
+            boardingId: currentBoarding.id,
+            visitDate: formData.date,
+            visitTime: formData.time,
+            visitNotes: formData.notes
+        };
+
+        //  Call API
+        await StudentService.createAppointment(currentUser.id, appointmentData);
+
+        //  Success
+        setSuccess(true);
+        
+        // Optional: Reset after delay
+        setTimeout(() => setSuccess(false), 3000);
+
+    } catch (error) {
+        console.error("Booking Error:", error);
+        alert("Failed to book appointment. Please try again.");
+    } finally {
+        setSubmitting(false);
+    }
   };
 
   const handleBookVisit = () => {
@@ -324,7 +337,14 @@ const BoardingDetailsPage = () => {
           <QuickInfoCard boarding={currentBoarding} onBookVisit={handleBookVisit} />
           <OwnerCard owner={currentBoarding.owner || {}} onContact={handleContact} />
           <div id="appointment-form">
-            <AppointmentForm formData={formData} updateField={updateField} onSubmit={handleScheduleSubmit} isSubmitting={isSubmitting} isSuccess={isSuccess} timeSlots={timeSlots} />
+            <AppointmentForm
+               formData={formData}
+               updateField={updateField}
+               onSubmit={handleScheduleSubmit} 
+               isSubmitting={isSubmitting} 
+               isSuccess={isSuccess} 
+               timeSlots={timeSlots} 
+            />
           </div>
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
             <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase"><FaShieldAlt /> Safety Tips</h4>
@@ -341,7 +361,14 @@ const BoardingDetailsPage = () => {
         {/* --- BOTTOM SECTION (< 1400px) --- */}
         <div className="block min-[1400px]:hidden w-full space-y-6">
           <div id="appointment-form">
-            <AppointmentForm formData={formData} updateField={updateField} onSubmit={handleScheduleSubmit} isSubmitting={isSubmitting} isSuccess={isSuccess} timeSlots={timeSlots} />
+            <AppointmentForm 
+              formData={formData} 
+              updateField={updateField} 
+              onSubmit={handleScheduleSubmit} 
+              isSubmitting={isSubmitting} 
+              isSuccess={isSuccess} 
+              timeSlots={timeSlots} 
+            />
           </div>
           <div className="bg-red-50/50 rounded-2xl p-5 border border-red-100">
             <h4 className="font-bold text-red-700 mb-3 flex items-center gap-2 text-sm uppercase"><FaShieldAlt /> Safety Tips</h4>

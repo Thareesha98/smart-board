@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 export const useAppointmentForm = () => {
   const [formData, setFormData] = useState({
-    boardingId: '', // Added: Required for backend
     date: '',
     time: '',
     notes: ''
@@ -15,28 +14,18 @@ export const useAppointmentForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // The actual submission is handled by the parent component (BoardingDetailsPage)
-  // passing the data to the Service. This hook manages the form state.
-  const submitAppointment = async () => {
-    if (!formData.date || !formData.time) {
-      return { success: false, message: 'Please select date and time' };
-    }
-
-    setIsSubmitting(true);
-    // Mimic delay for UI feedback, actual API call happens in parent
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    
-    return { success: true };
-  };
+  // Helper to trigger loading state from parent
+  const setSubmitting = (state) => setIsSubmitting(state);
+  
+  // Helper to trigger success state from parent
+  const setSuccess = (state) => setIsSuccess(state);
 
   return {
     formData,
     updateField,
-    submitAppointment,
     isSubmitting,
-    isSuccess
+    isSuccess,
+    setSubmitting,
+    setSuccess
   };
 };

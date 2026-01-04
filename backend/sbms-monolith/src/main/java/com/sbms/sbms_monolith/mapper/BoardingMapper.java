@@ -29,6 +29,18 @@ public class BoardingMapper {
         dto.setImageUrls(b.getImageUrls());
         dto.setAvailableSlots(b.getAvailable_slots());
 
+        if (b.getReviews() != null && !b.getReviews().isEmpty()) {
+            dto.setReviewCount(b.getReviews().size());
+            double average = b.getReviews().stream()
+                    .mapToInt(Review::getRating)
+                    .average()
+                    .orElse(0.0);
+            dto.setRating(Math.round(average * 10.0) / 10.0);
+        } else {
+            dto.setReviewCount(0);
+            dto.setRating(0.0);
+        }
+
         return dto;
     }
 
