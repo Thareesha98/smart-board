@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; 
 import { 
   getOwnerBoardings, 
@@ -92,6 +93,9 @@ const useMyAdsLogic = () => {
   
   const createAd = async (formData, rawFiles) => {
     setIsLoading(true);
+
+    const toastId = toast.loading("Publishing your ad...");
+
     try {
       let uploadedUrls = [];
       if (rawFiles.length > 0) {
@@ -113,12 +117,13 @@ const useMyAdsLogic = () => {
         imageUrls: uploadedUrls,
       };
 
+
       await createBoarding(payload);
-      alert("Ad created successfully!");
+      toast.success("Ad published successfully!", { id: toastId });
       navigate("/owner/myAds");
     } catch (err) {
       console.error(err);
-      alert("Failed to create ad.");
+      toast.error("Failed to publish ad. Please try again.", { id: toastId });
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +131,8 @@ const useMyAdsLogic = () => {
 
   const updateAd = async (id, formData, newFiles, existingImages) => {
     setIsLoading(true);
+    const toastId = toast.loading("Updating your ad...");
+
     try {
       // 1. Upload new images if any
       let newUrls = [];
@@ -158,12 +165,12 @@ const useMyAdsLogic = () => {
       // 3. Send to Backend
       await updateBoarding(id, payload);
       
-      alert("Ad updated and sent for review!");
+      toast.success("Changes saved! Ad is now under review.", { id: toastId });
       navigate("/owner/myAds");
       
     } catch (err) {
       console.error(err);
-      alert("Failed to update ad.");
+      toast.error("Failed to update ad.", { id: toastId });
     } finally {
       setIsLoading(false);
     }
