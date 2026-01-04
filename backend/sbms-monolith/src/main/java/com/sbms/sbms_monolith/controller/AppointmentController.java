@@ -45,6 +45,16 @@ public class AppointmentController {
         return appointmentService.cancelAppointment(studentId, appointmentId);
     }
 
+    @PutMapping("/student/{studentId}/{appointmentId}/visit")
+    @PreAuthorize("hasRole('STUDENT')")
+    public AppointmentResponseDTO markAsVisited(
+            @PathVariable Long studentId,
+            @PathVariable Long appointmentId
+    ) {
+        // You need to create this method in your AppointmentService!
+        return appointmentService.markAsVisited(studentId, appointmentId);
+    }
+
    
     @GetMapping("/owner/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
