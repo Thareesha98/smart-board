@@ -34,7 +34,7 @@ const getStatusClasses = (status) => {
 };
 
 const AppointmentCard = ({ appointment, onAction }) => {
-  const { id, boardingName, image, owner, ownerId, address, contact, date, time, status, registered } = appointment;
+  const { id, boardingId, boardingName, image, owner, ownerId, address, contact, date, time, status, registered } = appointment;
   const { badge } = getStatusClasses(status); 
   const shortAddress = address.split(',')[0];
   const isRegistered = status === 'selected' && registered;
@@ -182,7 +182,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
         <div className="flex flex-col justify-center">
           <h4 
             onClick={handleBoardingClick}
-            className="text-lg font-bold text-gray-800 mb-1 cursor-pointer hover:text-blue-600 hover:underline transition-all"
+            className="text-lg font-bold text-gray-800 mb-1 cursor-pointer hover:text-orange-500 hover:underline transition-all"
           >
             {boardingName}
           </h4>
