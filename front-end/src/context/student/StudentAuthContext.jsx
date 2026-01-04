@@ -40,13 +40,22 @@ export const StudentAuthProvider = ({ children }) => {
   // 2. Login
   const login = async (email, password) => {
     try {
-      const response = await api.post("/auth/login", { email, password });
+      const response = await api.post(
+        "/auth/login",
+        { email, password },
+        {
+          headers: {
+            Authorization: undefined,
+          },
+        }
+      );
       const { token, refreshToken, user } = response.data;
 
       if (user.role !== "STUDENT") {
         return {
           success: false,
-          message: "Access Denied: This account is not registered as a Student.",
+          message:
+            "Access Denied: This account is not registered as a Student.",
         };
       }
 
@@ -59,7 +68,8 @@ export const StudentAuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error("Login Error:", error);
-      const msg = error.response?.status === 401 ? "Invalid credentials" : "Login failed";
+      const msg =
+        error.response?.status === 401 ? "Invalid credentials" : "Login failed";
       return { success: false, message: msg };
     }
   };
@@ -69,27 +79,33 @@ export const StudentAuthProvider = ({ children }) => {
     try {
       const payload = {
         ...userData,
-        role: 'STUDENT'
+        role: "STUDENT",
       };
 
       // 🚀 CRITICAL FIX: Force Authorization header to undefined
       // This ensures the request is sent as "Public" even if an old token exists
       const config = {
         headers: {
-          Authorization: undefined 
-        }
+          Authorization: undefined,
+        },
       };
 
       // ✅ Using the endpoint you confirmed: /auth/register/request
-      const response = await api.post('/auth/register/request', payload, config); 
-      
-      return { success: true, message: response.data?.message || "OTP sent successfully!" };
+      const response = await api.post(
+        "/auth/register/request",
+        payload,
+        config
+      );
 
+      return {
+        success: true,
+        message: response.data?.message || "OTP sent successfully!",
+      };
     } catch (error) {
-      console.error('Signup Error:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed.' 
+      console.error("Signup Error:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Registration failed.",
       };
     }
   };
@@ -101,7 +117,10 @@ export const StudentAuthProvider = ({ children }) => {
       const { token, refreshToken, user } = response.data;
 
       if (user.role !== "STUDENT") {
-        return { success: false, message: "Role mismatch during verification." };
+        return {
+          success: false,
+          message: "Role mismatch during verification.",
+        };
       }
 
       localStorage.setItem("token", token);
@@ -112,7 +131,10 @@ export const StudentAuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.response?.data || "Invalid OTP Code" };
+      return {
+        success: false,
+        message: error.response?.data || "Invalid OTP Code",
+      };
     }
   };
 
@@ -131,8 +153,11 @@ export const StudentAuthProvider = ({ children }) => {
       if (!currentUser?.id) return { success: false };
 
       // 1. Call Backend
-      const responseUser = await StudentService.updateProfile(currentUser.id, updatedData);
-      
+      const responseUser = await StudentService.updateProfile(
+        currentUser.id,
+        updatedData
+      );
+
       // 2. Merge response with current user state (Backend should return updated user object)
       const newUser = { ...currentUser, ...responseUser };
 
@@ -150,42 +175,45 @@ export const StudentAuthProvider = ({ children }) => {
   // Update Avatar
   const updateAvatar = async (fileOrUrl) => {
     try {
-        let newAvatarUrl;
+      let newAvatarUrl;
 
-        // Check if it's a file (for upload) or a string (gallery selection)
-        if (typeof fileOrUrl === 'object') {
-             // It's a File object, upload to backend
-             const response = await StudentService.updateAvatar(currentUser.id, fileOrUrl);
-             newAvatarUrl = response.avatarUrl; // Assuming backend returns { avatarUrl: "..." }
-        } else {
-             // It's a string from the gallery, just update profile directly
-             newAvatarUrl = fileOrUrl;
-             // Optional: Call updateProfile here to save the gallery URL choice to backend
-             await updateProfile({ ...currentUser, avatar: newAvatarUrl });
-        }
+      // Check if it's a file (for upload) or a string (gallery selection)
+      if (typeof fileOrUrl === "object") {
+        // It's a File object, upload to backend
+        const response = await StudentService.updateAvatar(
+          currentUser.id,
+          fileOrUrl
+        );
+        newAvatarUrl = response.avatarUrl; // Assuming backend returns { avatarUrl: "..." }
+      } else {
+        // It's a string from the gallery, just update profile directly
+        newAvatarUrl = fileOrUrl;
+        // Optional: Call updateProfile here to save the gallery URL choice to backend
+        await updateProfile({ ...currentUser, avatar: newAvatarUrl });
+      }
 
-        // Update State
-        const newUserState = { ...currentUser, avatar: newAvatarUrl };
-        localStorage.setItem("user_data", JSON.stringify(newUserState));
-        setCurrentUser(newUserState);
-        
-        return { success: true };
+      // Update State
+      const newUserState = { ...currentUser, avatar: newAvatarUrl };
+      localStorage.setItem("user_data", JSON.stringify(newUserState));
+      setCurrentUser(newUserState);
+
+      return { success: true };
     } catch (error) {
-        console.error("Avatar Update Failed", error);
-        return { success: false };
+      console.error("Avatar Update Failed", error);
+      return { success: false };
     }
   };
 
   // Update Preferences (Mock implementation if no backend endpoint yet)
   const updatePreferences = (key, value) => {
-      const newPreferences = { ...(currentUser.preferences || {}), [key]: value };
-      const newUserState = { ...currentUser, preferences: newPreferences };
-      
-      // Update Local & State
-      localStorage.setItem("user_data", JSON.stringify(newUserState));
-      setCurrentUser(newUserState);
-      
-      // Ideally call backend API here to save preference
+    const newPreferences = { ...(currentUser.preferences || {}), [key]: value };
+    const newUserState = { ...currentUser, preferences: newPreferences };
+
+    // Update Local & State
+    localStorage.setItem("user_data", JSON.stringify(newUserState));
+    setCurrentUser(newUserState);
+
+    // Ideally call backend API here to save preference
   };
 
   const value = {
@@ -198,7 +226,7 @@ export const StudentAuthProvider = ({ children }) => {
     verifyRegistration,
     updateProfile,
     updateAvatar,
-    updatePreferences
+    updatePreferences,
   };
 
   return (
@@ -210,6 +238,7 @@ export const StudentAuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(StudentAuthContext);
-  if (!context) throw new Error("useAuth must be used within a StudentAuthProvider");
+  if (!context)
+    throw new Error("useAuth must be used within a StudentAuthProvider");
   return context;
 };
