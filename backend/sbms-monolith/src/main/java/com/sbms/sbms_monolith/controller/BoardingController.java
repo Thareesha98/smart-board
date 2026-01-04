@@ -90,14 +90,14 @@ public class BoardingController {
             try {
                 req.setGenderType(Gender.valueOf(genderType.toUpperCase()));
             } catch (IllegalArgumentException e) {
-                // Ignore
+                System.err.println("Invalid Gender: " + genderType);
             }
         }
         if (boardingType != null && !boardingType.isBlank()) {
             try {
                 req.setBoardingType(BoardingType.valueOf(boardingType.toUpperCase()));
             } catch (IllegalArgumentException e) {
-                // Ignore
+                System.err.println("Invalid BoardingType: " + boardingType);
             }
         }
 
