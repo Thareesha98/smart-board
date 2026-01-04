@@ -7,6 +7,7 @@ export const STATUS_CONFIG = {
   Active: { colorClass: "bg-success", icon: <FaCheckCircle /> },
   Pending: { colorClass: "bg-info", icon: <FaClock /> },
   Draft: { colorClass: "bg-muted", icon: <FaFileAlt /> },
+  Inactive : { colorClass: "bg-warning", icon: <FaTimesCircle /> },
   
 };
 

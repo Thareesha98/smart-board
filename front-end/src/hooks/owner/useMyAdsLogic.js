@@ -43,8 +43,39 @@ const useMyAdsLogic = () => {
       return "Draft";
     }
 
+    // 4. Inactive Ads -> "Inactive" Tab
+    if (status === "INACTIVE") {
+      return "Inactive";
+    }
+
     // Fallback default
     return "Draft";
+  };
+
+  const toggleAdStatus = async (id, currentStatus) => {
+    const isCurrentlyActive = currentStatus === "Active";
+    const newStatus = isCurrentlyActive ? "INACTIVE" : "PENDING"; // Active -> Inactive, Inactive -> Pending
+    
+    const confirmMsg = isCurrentlyActive 
+      ? "Deactivate this ad? It will move to the Inactive tab." 
+      : "Activate this ad? It will move to Pending for approval.";
+
+    if (!window.confirm(confirmMsg)) return;
+
+    const toastId = toast.loading("Updating status...");
+    try {
+      // Assuming you have an API endpoint to patch status, 
+      // OR use updateBoarding with a partial payload if your backend supports it.
+      // For now, let's assume a specific status update call:
+      await updateBoarding(id, { status: newStatus }); 
+
+      // Refresh UI
+      fetchAds(); 
+      toast.success(`Ad marked as ${newStatus}`, { id: toastId });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status", { id: toastId });
+    }
   };
 
   // --- 2. Fetch Data (From Backend) ---
@@ -134,7 +165,7 @@ const useMyAdsLogic = () => {
     }
   };
 
-  const updateAd = async (id, formData, newFiles, existingImages) => {
+  const updateAd = async (id, formData, newFiles, existingImages, currentStatus) => {
     setIsLoading(true);
     const toastId = toast.loading("Updating your ad...");
 
@@ -163,8 +194,7 @@ const useMyAdsLogic = () => {
         nearbyPlaces: {}, 
         imageUrls: finalImages,
         
-        // 🚨 NEW: Force status to PENDING on edit
-        status: "PENDING" 
+        status: currentStatus === "Inactive" ? "INACTIVE" : "PENDING" 
       };
 
       // 3. Send to Backend
@@ -270,11 +300,11 @@ const useMyAdsLogic = () => {
     fetchSingleAd,
     createAd,
     updateAd,
-    handleDelete,
-    handleCreate,
     handleEdit,
+    handleCreate,
     handleBoostRedirect,
     getStatusBadgeStyle,
+    toggleAdStatus
   };
 };
 

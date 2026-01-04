@@ -23,7 +23,7 @@ export default function MyAdsPage() {
     isNestedRoute,
     handleCreate,
     handleEdit,
-    handleDelete,
+    toggleAdStatus,
     handleBoostRedirect,
     getStatusBadgeStyle,
     isLoading,
@@ -103,7 +103,7 @@ export default function MyAdsPage() {
                     key={ad.id}
                     ad={ad}
                     onEdit={handleEdit}
-                    onDelete={handleDelete}
+                    onToggleStatus={toggleAdStatus}
                     onBoostRedirect={handleBoostRedirect}
                     getStatusBadgeStyle={getStatusBadgeStyle}
                   />

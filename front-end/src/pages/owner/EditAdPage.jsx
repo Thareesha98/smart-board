@@ -93,7 +93,7 @@ const EditAdPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateAd(adId, formData, newImageFiles, formData.currentImages);
+    await updateAd(adId, formData, newImageFiles, formData.currentImages,fetchedData.status);
   };
 
   if (isLoading && !formData) return <LoadingSpinner id={adId} />;

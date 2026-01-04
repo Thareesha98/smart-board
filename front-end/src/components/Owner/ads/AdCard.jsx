@@ -11,7 +11,8 @@ import {
   FaVenus,
   FaVenusMars,
   FaMoneyBillWave,
-  FaTrash
+  FaPause,
+  FaPlay
 } from "react-icons/fa";
 
 // --- Sub-Component: Feature Chip ---
@@ -26,7 +27,7 @@ const FeatureChip = ({ icon, label, subLabel, colorClass }) => (
   </div>
 );
 
-const AdCard = ({ ad, onEdit, onDelete, onBoostRedirect, getStatusBadgeStyle }) => {
+const AdCard = ({ ad, onEdit, onToggleStatus, onBoostRedirect, getStatusBadgeStyle }) => {
   const isBoosted = ad.isBoosted || false;
 
   // Helper: Gender Icon Logic
@@ -136,15 +137,23 @@ const AdCard = ({ ad, onEdit, onDelete, onBoostRedirect, getStatusBadgeStyle }) 
 
         {/* 4. Footer Actions - Pushed to bottom */}
         <div className="mt-auto flex gap-3">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => onDelete(ad.id)}
-            className="flex-none w-12 h-12 flex items-center justify-center rounded-xl border-2 border-red-100 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm"
-            title="Delete Ad"
-          >
-            <FaTrash />
-          </motion.button>
+          {(ad.status === "Active" || ad.status === "Inactive") && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => onToggleStatus(ad.id, ad.status)}
+              className={`
+                flex-none w-12 h-12 flex items-center justify-center rounded-xl border-2 transition-all shadow-sm
+                ${ad.status === "Active" 
+                    ? "border-orange-100 text-orange-500 hover:bg-orange-500 hover:text-white" // Style for Deactivate
+                    : "border-green-100 text-green-500 hover:bg-green-500 hover:text-white"     // Style for Activate
+                }
+              `}
+              title={ad.status === "Active" ? "Deactivate Ad" : "Activate Ad"}
+            >
+              {ad.status === "Active" ? <FaPause /> : <FaPlay />}
+            </motion.button>
+        )}
           {ad.status !== "Pending" && (
             <motion.button
               whileHover={{ scale: 1.02 }}
