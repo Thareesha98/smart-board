@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion"; // ✅ Import Framer Motion
 import useMyAdsLogic from "../../hooks/owner/useMyAdsLogic"; 
-import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; // ✅ Import Auth Context
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; 
 import FormGroup from "../../components/Owner/forms/FormGroup";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import {
@@ -20,11 +21,26 @@ const availableAmenities = [
   { label: "Laundry", icon: "fa-washing-machine" },
 ];
 
+// Animation Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { staggerChildren: 0.1 } // Stagger effect for children
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" }
+  }
+};
+
 const CreateAdPage = () => {
-  // ✅ Get Current Owner from Context
   const { currentOwner } = useOwnerAuth();
-  
-  // Destructure Logic Hook
   const { createAd, isLoading } = useMyAdsLogic();
 
   // --- Local Form State ---
@@ -45,12 +61,9 @@ const CreateAdPage = () => {
   const [previews, setPreviews] = useState([]);
 
   // --- Handlers ---
-
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files);
     setSelectedFiles((prev) => [...prev, ...files]);
-    
-    // Generate previews for UI
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviews((prev) => [...prev, ...newPreviews]);
   };
@@ -65,7 +78,6 @@ const CreateAdPage = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox"
@@ -83,20 +95,29 @@ const CreateAdPage = () => {
 
   return (
     <div className="space-y-8 pb-12 bg-light min-h-screen">
-      {/* ✅ Updated HeaderBar with currentOwner data */}
       <HeaderBar
         title="Create New Boarding Ad"
         subtitle="Fill in the details below to create your ad."
         navBtnText="Back to My Ads"
         navBtnPath="/owner/myAds"
-        userAvatar={currentOwner?.avatar}   // Pass avatar if available
-        userName={currentOwner?.firstName}  // Pass name if available
+        userAvatar={currentOwner?.avatar}
+        userName={currentOwner?.firstName}
       />
 
-      <form onSubmit={handleSubmit} className="space-y-8 px-4 max-w-6xl mx-auto">
+      {/* ✅ Animated Container Form */}
+      <motion.form 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        onSubmit={handleSubmit} 
+        className="space-y-8 px-4 max-w-6xl mx-auto"
+      >
         
-        {/* Section 1: Details */}
-        <section className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+        {/* Section 1: Details (Animated) */}
+        <motion.section 
+          variants={itemVariants} 
+          className="bg-card-bg p-8 rounded-report shadow-custom border border-light"
+        >
           <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
             Boarding Details
           </h2>
@@ -131,7 +152,7 @@ const CreateAdPage = () => {
               onChange={handleChange}
             />
             
-            {/* Dropdowns for Backend Enums */}
+            {/* Dropdowns */}
             <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold uppercase text-muted tracking-wider">
                     Gender Preference
@@ -190,11 +211,14 @@ const CreateAdPage = () => {
               required
             />
           </div>
-        </section>
+        </motion.section>
 
-        {/* Section 2: Amenities & Media */}
+        {/* Section 2: Amenities & Media (Animated) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <section className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+          <motion.section 
+            variants={itemVariants}
+            className="bg-card-bg p-8 rounded-report shadow-custom border border-light"
+          >
             <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
               Features & Amenities
             </h2>
@@ -208,9 +232,12 @@ const CreateAdPage = () => {
                 />
               ))}
             </div>
-          </section>
+          </motion.section>
 
-          <section className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+          <motion.section 
+            variants={itemVariants}
+            className="bg-card-bg p-8 rounded-report shadow-custom border border-light"
+          >
             <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
               Media Gallery
             </h2>
@@ -219,36 +246,39 @@ const CreateAdPage = () => {
               previews={previews}
               onRemove={handleRemoveImage}
             />
-          </section>
+          </motion.section>
         </div>
 
-        {/* Submit Action */}
+        {/* ✅ Submit Button with Micro-Interaction */}
         <div className="flex justify-end pt-6">
-          <button
+          <motion.button
+            variants={itemVariants}
+            whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
+            whileTap={{ scale: 0.95 }}
             type="submit"
             disabled={isLoading}
             className={`
-              px-12 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all
-              ${
-                isLoading
-                  ? "bg-muted text-white cursor-not-allowed"
-                  : "bg-accent text-white hover:shadow-xl hover:-translate-y-1 active:scale-95"
+              px-12 py-4 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center gap-3
+              ${isLoading 
+                  ? "bg-muted text-white cursor-not-allowed" 
+                  : "bg-accent text-white"
               }
             `}
           >
             {isLoading ? (
-              <span className="flex items-center">
-                <i className="fas fa-circle-notch fa-spin mr-3"></i>{" "}
-                Publishing...
-              </span>
+              <>
+                <i className="fas fa-circle-notch fa-spin"></i>
+                <span>Publishing...</span>
+              </>
             ) : (
-              <span className="flex items-center">
-                <i className="fas fa-bullhorn mr-3"></i> Publish Ad
-              </span>
+              <>
+                <i className="fas fa-bullhorn"></i> 
+                <span>Publish Ad</span>
+              </>
             )}
-          </button>
+          </motion.button>
         </div>
-      </form>
+      </motion.form>
     </div>
   );
 };
