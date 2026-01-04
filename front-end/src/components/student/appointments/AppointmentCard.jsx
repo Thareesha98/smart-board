@@ -25,7 +25,7 @@ const formatTime = (timeString) =>
     hour12: true,
   });
 
-const getStatusClasses = (status) => {
+const getStatusClasses = (status, backendStatus) => {
   // ✅ Special styling for Confirmed (Accepted) appointments
   if (status === "upcoming" && backendStatus === "ACCEPTED") {
     return { badge: "bg-green-100 text-green-700 border border-green-300" };
@@ -60,9 +60,10 @@ const AppointmentCard = ({ appointment, onAction }) => {
     date,
     time,
     status,
-    registered,
+    backendStatus,
+    registered
   } = appointment;
-  const { badge } = getStatusClasses(status);
+  const { badge } = getStatusClasses(status, backendStatus);
   const shortAddress = address.split(",")[0];
   const isRegistered = status === "selected" && registered;
   const isConfirmed = backendStatus === "ACCEPTED";

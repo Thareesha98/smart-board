@@ -76,7 +76,7 @@ const useAppointmentsLogic = () => {
         } 
         else if (action === 'markVisited') {
             // Call the new backend endpoint
-            await api.put(`/appointments/student/${currentUser.id}/${id}/visit`);
+            await StudentService.markAsVisited(currentUser.id, id);
         }
         // Refresh to move the card to the correct tab
         await loadAppointments(); 
