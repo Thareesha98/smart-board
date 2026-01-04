@@ -50,8 +50,14 @@ const StudentService = {
     // ✅ FIX: Map 'roomTypes' array (Frontend) to 'boardingType' string (Backend)
     let backendBoardingType = null;
     if (filters.roomTypes && filters.roomTypes.length > 0) {
-        // Convert "single" -> "SINGLE" (Ensure this matches your Java Enum)
-        backendBoardingType = filters.roomTypes[0].toUpperCase(); 
+        const selected = filters.roomTypes[0].toLowerCase();
+        
+        if (selected === 'apartment') {
+            backendBoardingType = 'ANEX'; // Map 'apartment' -> 'ANEX'
+        } else if (selected === 'single' || selected === 'shared') {
+            backendBoardingType = 'ROOM'; // Map 'single/shared' -> 'ROOM'
+        }
+        // If neither, send null or handle accordingly
     }
 
     // ✅ FIX: Map 'gender' correctly
