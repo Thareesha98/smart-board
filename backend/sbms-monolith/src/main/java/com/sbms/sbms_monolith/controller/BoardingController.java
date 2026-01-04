@@ -104,8 +104,8 @@ public class BoardingController {
         req.setMinPrice(minPrice);
         req.setMaxPrice(maxPrice);
 
-        req.setMinPrice(minKeyMoney);
-        req.setMaxPrice(maxKeyMoney);
+        req.setMinKeyMoney(minKeyMoney);
+        req.setMaxKeyMoney(maxKeyMoney);
 
         req.setAddressKeyword(addressKeyword);
         req.setPage(page);
