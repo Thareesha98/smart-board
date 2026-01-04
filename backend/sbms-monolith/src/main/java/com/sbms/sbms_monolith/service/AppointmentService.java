@@ -170,4 +170,25 @@ public class AppointmentService {
         Appointment saved = appointmentRepository.save(appointment);
         return AppointmentMapper.toDto(saved);
     }
+
+    public AppointmentResponseDTO markAsVisited(Long studentId, Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // 1. Verify it belongs to the student
+        if (!appointment.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("You are not allowed to mark this appointment");
+        }
+
+        // 2. Verify it is currently ACCEPTED (Confirmed)
+        if (appointment.getStatus() == AppointmentStatus.ACCEPTED) {
+            throw new RuntimeException("Only confirmed appointments can be marked as visited");
+        }
+
+        // 3. Update Status
+        appointment.setStatus(AppointmentStatus.VISITED);
+
+        Appointment saved = appointmentRepository.save(appointment);
+        return AppointmentMapper.toDto(saved);
+    }
 }
