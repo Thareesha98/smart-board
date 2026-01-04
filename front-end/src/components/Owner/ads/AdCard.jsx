@@ -136,14 +136,16 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
 
         {/* 4. Footer Actions - Pushed to bottom */}
         <div className="mt-auto flex gap-3">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onEdit(ad.id)}
-            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-light text-primary font-bold text-xs uppercase tracking-widest hover:border-primary hover:bg-primary hover:text-white transition-all"
-          >
-            <FaEdit /> Edit Details
-          </motion.button>
+          {ad.status !== "Pending" && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onEdit(ad.id)}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-light text-primary font-bold text-xs uppercase tracking-widest hover:border-primary hover:bg-primary hover:text-white transition-all"
+            >
+              <FaEdit /> Edit Details
+            </motion.button>
+          )}
 
           {/* Show Boost Button only if Active */}
           {ad.status === "Active" && (
