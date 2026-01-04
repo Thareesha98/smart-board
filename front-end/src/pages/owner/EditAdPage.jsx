@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useMyAdsLogic from "../../hooks/owner/useMyAdsLogic";
-import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; // ✅ Import Context
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import FormGroup from "../../components/Owner/forms/FormGroup";
 
@@ -24,10 +24,7 @@ const availableAmenities = [
 const EditAdPage = () => {
   const { adId } = useParams();
   const navigate = useNavigate();
-
-  // ✅ Get Current Owner from Context
   const { currentOwner } = useOwnerAuth();
-
   const { fetchSingleAd, updateAd, isLoading } = useMyAdsLogic();
 
   const [formData, setFormData] = useState(null);
@@ -93,7 +90,14 @@ const EditAdPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateAd(adId, formData, newImageFiles, formData.currentImages,fetchedData.status);
+    // ✅ FIX: Replaced 'fetchedData.status' with 'formData.adStatus'
+    await updateAd(
+      adId,
+      formData,
+      newImageFiles,
+      formData.currentImages,
+      formData.adStatus
+    );
   };
 
   if (isLoading && !formData) return <LoadingSpinner id={adId} />;
@@ -101,8 +105,11 @@ const EditAdPage = () => {
     return <div className="p-8 text-center text-error">Ad not found.</div>;
 
   return (
+    // ✅ NO 'sticky' classes here. The header is part of the normal flow.
     <div className="pt-4 space-y-8 bg-light min-h-screen pb-12">
-      {/* ✅ Updated HeaderBar with Context Data */}
+      {/* This HeaderBar is NOT wrapped in a sticky div.
+         It will render at the top, and when you scroll down, it will go up and disappear.
+      */}
       <HeaderBar
         title={`Edit Ad: ${adId}`}
         subtitle={`Editing details for **${formData.title}**`}
