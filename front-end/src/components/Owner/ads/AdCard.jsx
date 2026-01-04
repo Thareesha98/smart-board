@@ -11,7 +11,7 @@ import {
   FaVenus,
   FaVenusMars,
   FaMoneyBillWave,
-  FaCheckCircle
+  FaTrash
 } from "react-icons/fa";
 
 // --- Sub-Component: Feature Chip ---
@@ -26,7 +26,7 @@ const FeatureChip = ({ icon, label, subLabel, colorClass }) => (
   </div>
 );
 
-const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
+const AdCard = ({ ad, onEdit, onDelete, onBoostRedirect, getStatusBadgeStyle }) => {
   const isBoosted = ad.isBoosted || false;
 
   // Helper: Gender Icon Logic
@@ -136,6 +136,15 @@ const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
 
         {/* 4. Footer Actions - Pushed to bottom */}
         <div className="mt-auto flex gap-3">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => onDelete(ad.id)}
+            className="flex-none w-12 h-12 flex items-center justify-center rounded-xl border-2 border-red-100 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm"
+            title="Delete Ad"
+          >
+            <FaTrash />
+          </motion.button>
           {ad.status !== "Pending" && (
             <motion.button
               whileHover={{ scale: 1.02 }}
