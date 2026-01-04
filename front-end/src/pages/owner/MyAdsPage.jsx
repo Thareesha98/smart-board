@@ -56,16 +56,18 @@ export default function MyAdsPage() {
       />
 
       {/* 2. Filter Tabs are ALWAYS visible */}
+      {/* 2. Filter Tabs are ALWAYS visible */}
       <section className="px-4 md:px-0">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 p-4 md:p-6 rounded-report shadow-custom bg-card-bg border border-light">
+        <div className="flex overflow-x-auto gap-3 md:gap-4 p-4 md:p-6 rounded-report shadow-custom bg-card-bg border border-light no-scrollbar">
           {Object.keys(STATUS_CONFIG).map((status) => (
             <div
               key={status}
-              className="min-w-[140px] md:min-w-0 flex-shrink-0"
+              // flex-1 makes them fill space on desktop
+              // min-w-[120px] ensures they don't get squished on mobile
+              className="flex-1 min-w-[120px] md:min-w-0 flex-shrink-0" 
             >
               <StatusTab
                 status={status}
-                // Show '-' if loading, otherwise show real count
                 count={isLoading ? "-" : counts[status] || 0}
                 currentFilter={filter}
                 setFilter={setFilter}
