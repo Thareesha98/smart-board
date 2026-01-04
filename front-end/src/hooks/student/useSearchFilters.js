@@ -46,8 +46,15 @@ export const useSearchFilters = () => {
 
   // Fetch on mount and when filters change (Debouncing suggested for production)
   useEffect(() => {
-    fetchBoardings();
-  }, []);
+    // 1. Create a timer that waits 500ms
+    const debounceTimer = setTimeout(() => {
+      fetchBoardings();
+    }, 500);
+
+    // 2. If user types again before 500ms, clear the timer (don't search yet)
+    return () => clearTimeout(debounceTimer);
+    
+  }, [filters]);
 
   const handleFilterChange = useCallback((key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
