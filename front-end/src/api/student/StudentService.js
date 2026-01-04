@@ -46,6 +46,20 @@ const StudentService = {
 
   // Matches BoardingController: @GetMapping("/api/boardings/search")
   searchBoardings: async (filters) => {
+
+    // ✅ FIX: Map 'roomTypes' array (Frontend) to 'boardingType' string (Backend)
+    let backendBoardingType = null;
+    if (filters.roomTypes && filters.roomTypes.length > 0) {
+        // Convert "single" -> "SINGLE" (Ensure this matches your Java Enum)
+        backendBoardingType = filters.roomTypes[0].toUpperCase(); 
+    }
+
+    // ✅ FIX: Map 'gender' correctly
+    let backendGender = null;
+    if (filters.gender && filters.gender !== 'any') {
+        backendGender = filters.gender.toUpperCase(); // "male" -> "MALE"
+    }
+
     const params = {
       addressKeyword: filters.searchQuery || null,
       minPrice: filters.minPrice > 0 ? filters.minPrice : null,
