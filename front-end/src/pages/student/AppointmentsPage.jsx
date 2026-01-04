@@ -36,15 +36,42 @@ const AppointmentsPage = () => {
     if (!appointment) return;
 
     setCurrentAppointmentId(id);
+
+    let title, message, actionLabel, isSuccess;
+
+    if (decision === 'markVisited') {
+        title = "Confirm Visit";
+        message = `Have you visited **${appointment.boardingName}**? This will move it to your 'Visited' tab.`;
+        actionLabel = "Yes, Mark as Visited";
+        isSuccess = true; // ✅ Makes it GREEN
+    } else if (decision === 'select') {
+        title = "Confirm Selection";
+        message = `Are you sure you want to select **${appointment.boardingName}**?`;
+        actionLabel = "Yes, Select";
+        isSuccess = true; // ✅ Makes it GREEN
+    } else if (decision === 'reject') {
+        title = "Confirm Rejection";
+        message = `Are you sure you want to reject **${appointment.boardingName}**?`;
+        actionLabel = "Yes, Reject";
+        isSuccess = false; // ✅ Makes it RED
+    } else {
+        // Fallback
+        title = "Confirm Action";
+        message = "Are you sure?";
+        actionLabel = "Yes";
+        isSuccess = false;
+    }
+
     setModalContent({
-      title: decision === "select" ? "Confirm Selection" : "Confirm Rejection",
-      message: `Are you sure you want to ${decision} **${appointment.boardingName}**?`,
-      actionLabel: `Yes, ${decision}`,
-      action: () => {
-        handleStatusChange(id, decision);
+      title,
+      message,
+      actionLabel,
+      // ✅ Connects to handleStatusChange from the hook
+      action: async () => {
+        await handleStatusChange(id, decision);
         setIsDecisionModalOpen(false);
       },
-      isSuccess: decision === "select",
+      isSuccess,
     });
     setIsDecisionModalOpen(true);
   };
