@@ -140,6 +140,11 @@ const StudentService = {
     return response.data;
   },
 
+  markAsVisited: async (studentId, appointmentId) => {
+    const response = await api.put(`/appointments/student/${studentId}/${appointmentId}/visit`);
+    return response.data;
+  },
+
   // ==========================================
   // 5. REVIEWS (Ratings)
   // ==========================================
