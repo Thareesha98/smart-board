@@ -175,19 +175,21 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        // 1. Verify it belongs to the student
+        // Debug Print
+        System.out.println("--- MARK VISITED DEBUG ---");
+        System.out.println("Appointment ID: " + appointmentId);
+        System.out.println("Current Status in DB: " + appointment.getStatus());
+
         if (!appointment.getStudent().getId().equals(studentId)) {
-            throw new RuntimeException("You are not allowed to mark this appointment");
+            throw new RuntimeException("You are not allowed to update this appointment");
         }
 
-        // 2. Verify it is currently ACCEPTED (Confirmed)
-        if (appointment.getStatus() == AppointmentStatus.ACCEPTED) {
-            throw new RuntimeException("Only confirmed appointments can be marked as visited");
+        if (appointment.getStatus() != AppointmentStatus.ACCEPTED) {
+            // Include actual status in error message
+            throw new RuntimeException("Current status is " + appointment.getStatus() + ". Only ACCEPTED appointments can be marked as visited.");
         }
 
-        // 3. Update Status
         appointment.setStatus(AppointmentStatus.VISITED);
-
         Appointment saved = appointmentRepository.save(appointment);
         return AppointmentMapper.toDto(saved);
     }
