@@ -6,7 +6,8 @@ import {
   getOwnerBoardings, 
   createBoarding, 
   getBoardingById, 
-  updateBoarding, 
+  updateBoarding,
+  deleteBoarding,
   uploadBoardingImages 
 } from "../../api/owner/service"; 
 
@@ -180,6 +181,28 @@ const useMyAdsLogic = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    // 1. Confirm with user
+    if (!window.confirm("Are you sure you want to delete this ad? This action cannot be undone.")) {
+      return;
+    }
+
+    const toastId = toast.loading("Deleting ad...");
+
+    try {
+      // 2. Call Backend
+      await deleteBoarding(id);
+
+      // 3. Optimistic Update (Remove from UI immediately)
+      setAds((prevAds) => prevAds.filter((ad) => ad.id !== id));
+
+      toast.success("Ad deleted successfully", { id: toastId });
+    } catch (err) {
+      console.error("Delete failed", err);
+      toast.error("Failed to delete ad", { id: toastId });
+    }
+  };
+
   const fetchSingleAd = useCallback(async (id) => {
     try {
       setIsLoading(true);
@@ -247,6 +270,7 @@ const useMyAdsLogic = () => {
     fetchSingleAd,
     createAd,
     updateAd,
+    handleDelete,
     handleCreate,
     handleEdit,
     handleBoostRedirect,
