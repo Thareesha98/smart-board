@@ -60,6 +60,10 @@ const useMyAdsLogic = () => {
         address: item.address,
         rent: item.pricePerMonth, 
         deposit: item.keyMoney,
+        genderType: item.genderType,
+        boardingType: item.boardingType,
+        availableSlots: item.availableSlots,
+        maxOccupants: item.maxOccupants,
         
         // ✅ Apply the mapping here
         status: normalizeStatus(item.status), 
