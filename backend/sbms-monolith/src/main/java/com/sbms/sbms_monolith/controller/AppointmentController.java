@@ -35,14 +35,16 @@ public class AppointmentController {
         return appointmentService.getAppointmentsForStudent(studentId);
     }
 
-   
+
     @PutMapping("/student/{studentId}/{appointmentId}/cancel")
     @PreAuthorize("hasRole('STUDENT')")
     public AppointmentResponseDTO cancelAppointment(
             @PathVariable Long studentId,
-            @PathVariable Long appointmentId
+            @PathVariable Long appointmentId,
+            @RequestBody(required = false) java.util.Map<String, String> payload // ✅ Accept JSON Body
     ) {
-        return appointmentService.cancelAppointment(studentId, appointmentId);
+        String reason = (payload != null) ? payload.get("reason") : null;
+        return appointmentService.cancelAppointment(studentId, appointmentId, reason);
     }
 
     @PutMapping("/student/{studentId}/{appointmentId}/visit")
