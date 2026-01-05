@@ -10,11 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =============================
+      # CHECKOUT
+      # =============================
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # BACKEND BUILD
-      # -----------------------------
+      # =============================
+      # BACKEND BUILD (SPRING BOOT)
+      # =============================
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -28,20 +32,18 @@ jobs:
       - name: Debug backend artifact
         run: ls backend/sbms-monolith/target
 
-      # -----------------------------
-      # FRONTEND BUILD
-      # -----------------------------
+      # =============================
+      # FRONTEND BUILD (REACT)
+      # =============================
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # Install dependencies
       - name: Install frontend dependencies
         working-directory: front-end
         run: npm install
 
-      # PROOF: Tailwind exists during CI build
       - name: Debug Tailwind installation
         working-directory: front-end
         run: |
@@ -49,7 +51,6 @@ jobs:
           npm list postcss
           npm list autoprefixer
 
-      # Build frontend
       - name: Build frontend
         working-directory: front-end
         run: npm run build
@@ -57,9 +58,9 @@ jobs:
       - name: Debug frontend artifact
         run: ls front-end/dist
 
-      # -----------------------------
+      # =============================
       # SSH TEST
-      # -----------------------------
+      # =============================
       - name: Test SSH connection
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -68,9 +69,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: echo "SSH CONNECTED SUCCESSFULLY"
 
-      # -----------------------------
+      # =============================
       # DEPLOY BACKEND
-      # -----------------------------
+      # =============================
       - name: Upload backend jar
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -81,9 +82,9 @@ jobs:
           target: /opt/sbms/tmp/backend
           strip_components: 3
 
-      # -----------------------------
+      # =============================
       # DEPLOY FRONTEND
-      # -----------------------------
+      # =============================
       - name: Upload frontend
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -93,9 +94,21 @@ jobs:
           source: front-end/dist/**
           target: /opt/sbms/tmp/frontend
 
-      # -----------------------------
+      # =============================
+      # DEPLOY ML INTENT SERVICE (PYTHON)
+      # =============================
+      - name: Upload ML Intent Service
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: backend/ml-intent-service/**
+          target: /opt/sbms/tmp/ml-intent-service
+
+      # =============================
       # RESTART SERVICES
-      # -----------------------------
+      # =============================
       - name: Restart services
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -114,3 +127,20 @@ jobs:
             sudo rm -rf /opt/sbms/frontend/*
             sudo mv /opt/sbms/tmp/frontend/* /opt/sbms/frontend/
             sudo systemctl reload nginx
+
+            echo "Deploying ML Intent Service..."
+            sudo mkdir -p /opt/sbms/ml-intent-service
+            sudo rsync -av --delete /opt/sbms/tmp/ml-intent-service/ /opt/sbms/ml-intent-service/
+
+            cd /opt/sbms/ml-intent-service
+
+            if [ ! -d "venv" ]; then
+              echo "Creating Python virtual environment..."
+              python3 -m venv venv
+            fi
+
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+
+            sudo systemctl restart sbms-ml-intent || true
