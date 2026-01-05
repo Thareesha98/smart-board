@@ -7,6 +7,7 @@ export const STATUS_CONFIG = {
   Active: { colorClass: "bg-success", icon: <FaCheckCircle /> },
   Pending: { colorClass: "bg-info", icon: <FaClock /> },
   Draft: { colorClass: "bg-muted", icon: <FaFileAlt /> },
+  Inactive : { colorClass: "bg-warning", icon: <FaTimesCircle /> },
   
 };
 
@@ -62,31 +63,69 @@ export const StatusTab = ({ status, count, currentFilter, setFilter }) => {
   );
 };
 
-export const EmptyState = ({ filter, onCreate }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.5 }}
-    className="text-center p-12 rounded-report shadow-custom bg-card-bg border border-light"
-  >
-    <div className="flex justify-center mb-4">
-        <FaClipboardList className="text-6xl text-muted" />
-    </div>
-    <h3 className="text-2xl font-black mb-2 text-text tracking-tight">
-      No {filter} Listings Found
-    </h3>
-    <p className="text-base mb-6 text-muted italic">
-      {filter === "All"
-        ? "It looks like you haven't created any boarding advertisements yet. Start now!"
-        : `You currently have no listings in the ${filter} status.`}
-    </p>
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      className="px-8 py-3 font-black rounded-full shadow-md bg-primary text-card-bg uppercase tracking-widest text-xs flex items-center justify-center gap-2 mx-auto"
-      onClick={onCreate}
+export const EmptyState = ({ filter, onCreate }) => {
+  // Dynamic text based on the current filter
+  const messages = {
+    All: {
+      title: "No Properties Listed",
+      desc: "You haven't added any boarding places yet. Start your journey by creating your first ad!",
+      btnText: "Create First Listing"
+    },
+    Active: {
+      title: "No Active Ads",
+      desc: "Your ads are either pending approval or have been saved as drafts.",
+      btnText: "Create New Ad"
+    },
+    Pending: {
+      title: "All Caught Up!",
+      desc: "You have no ads waiting for admin approval right now.",
+      btnText: null // No button needed here usually, but consistent UI is good
+    },
+    Draft: {
+      title: "No Drafts Found",
+      desc: "Great job! All your rejected or draft ads have been handled.",
+      btnText: "Create New Ad"
+    }
+  };
+
+  const content = messages[filter] || messages["All"];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-3xl border-2 border-dashed border-gray-200"
     >
-      <FaPlus /> Create Your First Ad
-    </motion.button>
-  </motion.div>
-);
+      {/* Inline SVG Illustration (House Search) */}
+      <div className="bg-blue-50 p-6 rounded-full mb-6">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21.21 15.89A10 10 0 1 1 8 2.83" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M22 22L17.66 17.66" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M11.5 13.5C11.5 13.5 14 11 14 8C14 5 11.5 3.5 10 3.5" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M9 11L9 11.01" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+
+      <h3 className="text-xl md:text-2xl font-black text-primary tracking-tight mb-2">
+        {content.title}
+      </h3>
+      
+      <p className="text-muted text-sm md:text-base max-w-sm mb-8 leading-relaxed">
+        {content.desc}
+      </p>
+
+      {/* Primary Action Button */}
+      {content.btnText && (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onCreate}
+          className="px-8 py-3 rounded-full bg-accent text-white font-black text-xs uppercase tracking-widest shadow-lg hover:shadow-xl hover:bg-accent-dark transition-all flex items-center gap-2"
+        >
+          <i className="fas fa-plus"></i>
+          {content.btnText}
+        </motion.button>
+      )}
+    </motion.div>
+  );
+};

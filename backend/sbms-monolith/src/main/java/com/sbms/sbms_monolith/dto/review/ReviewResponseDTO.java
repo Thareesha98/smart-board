@@ -9,6 +9,7 @@ public class ReviewResponseDTO {
     private String comment;
     private String createdAt;
 
-    private String studentName;
-    private String studentProfileImage;
+    private Long userId;
+    private String userName;
+    private String userAvatar;
 }

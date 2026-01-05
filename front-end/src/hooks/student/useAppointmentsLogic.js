@@ -1,163 +1,155 @@
-import { useState, useMemo, useEffect } from 'react';
-import { 
-  sampleAppointments, 
-  getRandomBoardingImage, 
-  getRandomContact, 
-  getRandomOwner, 
-  getRandomAddress,
-} from '../../data/student/appointmentsData.js'; 
-
-// Helper to simulate unique ID generation
-const generateId = () => Date.now() + Math.floor(Math.random() * 1000);
+import { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '../../context/student/StudentAuthContext'; // Ensure correct path
+import StudentService from '../../api/student/StudentService';
 
 const useAppointmentsLogic = () => {
-  // 1. Initial State
+  const { currentUser } = useAuth(); // Logged in user
   const [appointments, setAppointments] = useState([]);
   const [activeCategory, setActiveCategory] = useState('upcoming');
 
-  // --- 2. Load Data from LocalStorage on Mount ---
+  const [loading, setLoading] = useState(false);
+
+  // Load Data
   useEffect(() => {
-    // Read from storage
-    const storedData = JSON.parse(localStorage.getItem('appointments') || '[]');
-    
-    // Merge stored data with sample data (avoiding duplicates based on ID)
-    const combinedAppointments = [...sampleAppointments];
-    
-    storedData.forEach(newApp => {
-        if (!combinedAppointments.find(a => a.id === newApp.id)) {
-            combinedAppointments.push(newApp);
-        }
-    });
+    if (currentUser?.id) {
+      loadAppointments();
+    }
+  }, [currentUser]);
 
-    // Check dates to auto-move expired upcoming visits to "visited"
-    const today = new Date().toISOString().split('T')[0];
-    const processedAppointments = combinedAppointments.map(app => {
-        if (app.status === 'upcoming' && app.date < today) {
-            return { ...app, status: 'visited' };
-        }
-        return app;
-    });
+  const loadAppointments = async () => {
+    setLoading(true);
+    try {
+      const data = await StudentService.getMyAppointments(currentUser.id);
+      
+      const mapped = data.map(app => ({
+        id: app.id,
+        boardingId: app.boardingId,
+        boardingName: app.boardingTitle,
 
-    setAppointments(processedAppointments);
-  }, []);
+        address: app.boardingAddress || "Address details unavailable",
+        distance: app.distance || app.distanceFromInstitute || "N/A",
 
-  // --- 3. Helper to Update State AND LocalStorage ---
-  const updateAppointments = (updatedList) => {
-    setAppointments(updatedList);
-    const newOnly = updatedList.filter(a => !sampleAppointments.find(s => s.id === a.id));
-    localStorage.setItem('appointments', JSON.stringify(newOnly));
+        date: app.requestedStartTime ? app.requestedStartTime.split('T')[0] : '',
+        time: app.requestedStartTime ? app.requestedStartTime.split('T')[1].substring(0, 5) : '',
+        
+        status: mapBackendStatus(app.status),
+        backendStatus: app.status,
+
+        owner: app.ownerName || "Boarding Owner",
+        ownerId: app.ownerId,
+        contact: app.ownerContact || "N/A",
+        image: app.boardingImage || "https://via.placeholder.com/150",
+
+        registered: false,
+
+        studentNote: app.studentNote,
+        ownerNote: app.ownerNote
+      }));
+      
+      setAppointments(mapped);
+    } catch (error) {
+      console.error("Failed to load appointments", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // --- 4. Categorization (Memoized) ---
-  const { categorizedAppointments, counts } = useMemo(() => {
-    const categorized = appointments.reduce((acc, app) => {
-      acc[app.status] = acc[app.status] || [];
-      acc[app.status].push(app);
-      return acc;
-    }, { upcoming: [], visited: [], selected: [], cancelled: [] });
-    
-    const counts = Object.fromEntries(
-      Object.entries(categorized).map(([key, list]) => [key, list.length])
-    );
+  // Handle New Booking or Reschedule
+  const handleScheduleSubmit = async (formData, appointmentId) => {
+    try {
+        if (!currentUser?.id) return { success: false, message: "Please login" };
+        
+        // If rescheduling, you might want to cancel the old one first or use an update endpoint
+        // For now, let's assume creating a new one is the flow 
+        
+        await StudentService.createAppointment(currentUser.id, formData);
+        
+        await loadAppointments(); // Refresh list
+        return { success: true };
+    } catch (error) {
+        console.error("Booking error", error);
+        return { success: false, message: "Booking failed" };
+    }
+  };
 
+  const handleStatusChange = async (id, action, note = "") => {
+      try {
+        if (action === 'cancel') {
+            await StudentService.cancelAppointment(currentUser.id, id, note);
+        } 
+        else if (action === 'markVisited') {
+            // Call the new backend endpoint
+            await StudentService.markAsVisited(currentUser.id, id);
+            setActiveCategory('visited');
+        }
+        else if (action === 'select') {
+            await StudentService.selectBoarding(currentUser.id, id);
+            setActiveCategory('selected');
+        }
+        else if (action === 'reject') {
+            await StudentService.rejectBoarding(currentUser.id, id);
+            setActiveCategory('cancelled'); // Moves to Cancelled tab
+        }
+        // Refresh to move the card to the correct tab
+        await loadAppointments(); 
+      } catch (error) {
+          console.error(`Action ${action} failed`, error);
+      }
+  };
+
+  // Mock function for Registration (since backend logic for this isn't built yet)
+  const handleRegistrationSubmit = (appointmentId, regData) => {
+        // Optimistically update local state for demo purposes
+        const app = appointments.find(a => a.id === appointmentId);
+        if(app) {
+            const updated = { ...app, status: 'selected', registered: true, ...regData };
+            // In real app: await StudentService.registerBoarding(...)
+            return updated;
+        }
+        return null;
+  };
+
+  // Categorization Logic
+  const { categorizedAppointments, counts } = useMemo(() => {
+    const categorized = { upcoming: [], visited: [], selected: [], cancelled: [], rejected: [] };
+    
+    appointments.forEach(app => {
+        // Ensure status key exists in our categories, fallback to 'upcoming' if unknown
+        const key = categorized[app.status] ? app.status : 'upcoming';
+        categorized[key].push(app);
+    });
+
+    const counts = Object.fromEntries(Object.keys(categorized).map(k => [k, categorized[k].length]));
     return { categorizedAppointments: categorized, counts };
   }, [appointments]);
 
-  const getAppointmentById = (id) => appointments.find(a => a.id === id);
-
-  // --- 5. CRUD Logic ---
-
-  // ✅ UPDATED: Prevents navigation when cancelling/rejecting
-  const handleStatusChange = (id, decision) => {
-    const updatedList = appointments.map(a => {
-      if (a.id === id) {
-        if (decision === 'select') {
-          return { ...a, status: 'selected', registered: false };
-        } else if (decision === 'reject' || decision === 'cancel') {
-          return { ...a, status: 'cancelled' };
-        }
+  // Map Backend Enum Strings to Frontend Categories
+  const mapBackendStatus = (status) => {
+      if (!status) return 'upcoming';
+      switch(status) {
+          case 'PENDING': return 'upcoming';
+          case 'ACCEPTED': return 'upcoming'; // Could move to 'visited' based on date logic later
+          case 'VISITED': return 'visited';
+          case 'SELECTED': return 'selected';
+          case 'CANCELLED': return 'cancelled';
+          case 'NOT_SELECTED': return 'cancelled';
+          case 'DECLINED': return 'rejected';
+          // case 'COMPLETED': return 'visited'; // Example future status
+          default: return 'upcoming';
       }
-      return a;
-    });
-    
-    updateAppointments(updatedList);
-
-    // Only switch tabs if the user SELECTED a boarding.
-    // If they Cancelled or Rejected, we do NOTHING (user stays on current tab).
-    if (decision === 'select') {
-        setActiveCategory('selected');
-    }
-  };
-
-  const handleScheduleSubmit = (formData, appointmentId = null) => {
-    let updatedList;
-
-    if (appointmentId) {
-      // RESCHEDULE
-      updatedList = appointments.map(a => {
-        if (a.id === appointmentId) {
-          return {
-            ...a,
-            date: formData.visitDate,
-            time: formData.visitTime,
-            notes: formData.visitNotes || a.notes,
-            status: 'upcoming', 
-          };
-        }
-        return a;
-      });
-    } else {
-      // NEW SCHEDULE
-      const newAppointment = {
-        id: generateId(),
-        boardingName: formData.boardingName, 
-        boardingId: formData.boardingId,
-        image: getRandomBoardingImage(),
-        date: formData.visitDate,
-        time: formData.visitTime,
-        status: 'upcoming',
-        contact: getRandomContact(),
-        owner: getRandomOwner(),
-        address: getRandomAddress(),
-        notes: formData.visitNotes || 'No additional notes',
-        createdAt: new Date().toISOString().split('T')[0],
-        registered: false
-      };
-      updatedList = [...appointments, newAppointment];
-    }
-
-    updateAppointments(updatedList);
-    setActiveCategory('upcoming');
-  };
-
-  const handleRegistrationSubmit = (id, regData) => {
-    let registeredAppointment = null;
-    const updatedList = appointments.map(a => {
-      if (a.id === id) {
-        registeredAppointment = {
-          ...a,
-          ...regData,
-          registered: true,
-          registrationDate: new Date().toISOString().split('T')[0]
-        };
-        return registeredAppointment;
-      }
-      return a;
-    });
-    updateAppointments(updatedList);
-    return registeredAppointment; 
   };
 
   return {
     appointments,
     activeCategory,
+    loading,
     counts,
     categorizedAppointments,
-    getAppointmentById,
     setActiveCategory,
     handleStatusChange,
     handleScheduleSubmit,
     handleRegistrationSubmit,
+    getAppointmentById: (id) => appointments.find(a => a.id === id)
   };
 };
 

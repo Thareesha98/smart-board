@@ -20,9 +20,6 @@ public class BoardingController {
 	@Autowired
     private BoardingService boardingService;
 
-   
-
-   
     @GetMapping
     public Page<BoardingSummaryDTO> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -48,16 +45,26 @@ public class BoardingController {
         BoardingSearchRequest req = new BoardingSearchRequest();
 
         if (genderType != null && !genderType.isBlank()) {
-            req.setGenderType(Gender.valueOf(genderType.toUpperCase()));
+            try {
+                req.setGenderType(Gender.valueOf(genderType.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid enum
+            }
         }
         if (boardingType != null && !boardingType.isBlank()) {
-            req.setBoardingType(BoardingType.valueOf(boardingType.toUpperCase()));
+            try {
+                req.setBoardingType(BoardingType.valueOf(boardingType.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Ignore invalid enum
+            }
         }
 
         req.setMinPrice(minPrice);
         req.setMaxPrice(maxPrice);
-        req.setMinKeyMoney(minPrice);
-        req.setMaxKeyMoney(maxPrice);
+
+        req.setMinKeyMoney(minKeyMoney);
+        req.setMaxKeyMoney(maxKeyMoney);
+
         req.setPage(page);
         req.setSize(size);
 
@@ -80,16 +87,26 @@ public class BoardingController {
         BoardingSearchRequest req = new BoardingSearchRequest();
 
         if (genderType != null && !genderType.isBlank()) {
-            req.setGenderType(Gender.valueOf(genderType.toUpperCase()));
+            try {
+                req.setGenderType(Gender.valueOf(genderType.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid Gender: " + genderType);
+            }
         }
         if (boardingType != null && !boardingType.isBlank()) {
-            req.setBoardingType(BoardingType.valueOf(boardingType.toUpperCase()));
+            try {
+                req.setBoardingType(BoardingType.valueOf(boardingType.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid BoardingType: " + boardingType);
+            }
         }
 
         req.setMinPrice(minPrice);
         req.setMaxPrice(maxPrice);
-        req.setMinPrice(minKeyMoney);
-        req.setMaxPrice(maxKeyMoney);
+
+        req.setMinKeyMoney(minKeyMoney);
+        req.setMaxKeyMoney(maxKeyMoney);
+
         req.setAddressKeyword(addressKeyword);
         req.setPage(page);
         req.setSize(size);

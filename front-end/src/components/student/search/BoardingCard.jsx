@@ -1,7 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkerAlt, FaCalendarCheck, FaEye } from 'react-icons/fa';
+import { 
+  FaMapMarkerAlt,
+  FaEye, 
+  FaStar,
+  FaStarHalfAlt,
+  FaRegStar
+} from 'react-icons/fa';
 
 const BoardingCard = ({ boarding, onBook, viewMode }) => {
   const navigate = useNavigate();
@@ -11,6 +17,23 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
     navigate(`/student/boarding-details/${boarding.id}`, { 
       state: { boarding } 
     });
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        // Full Star
+        stars.push(<FaStar key={i} className="text-yellow-500" />);
+      } else if (i === Math.ceil(rating) && !Number.isInteger(rating)) {
+        // Half Star
+        stars.push(<FaStarHalfAlt key={i} className="text-yellow-500" />);
+      } else {
+        // Empty Star
+        stars.push(<FaRegStar key={i} className="text-gray-300" />);
+      }
+    }
+    return stars;
   };
 
   const isListView = viewMode === 'list';
@@ -43,10 +66,16 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
         <div className="flex justify-between items-start mb-3">
           <div className="flex-1">
             <h3 className="text-lg font-bold text-text-dark mb-1">{boarding.name}</h3>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-yellow-500">{'⭐'.repeat(Math.floor(boarding.rating))}</span>
-              <span className="text-text-muted">{boarding.rating} ({boarding.reviewCount} reviews)</span>
+            
+            <div className="flex items-center gap-1.5 text-sm mb-1">
+              <div className="flex">
+                {renderStars(boarding.rating || 0)}
+              </div>
+              <span className="text-text-muted font-medium ml-1">
+                {boarding.rating} ({boarding.reviewCount || 0} reviews)
+              </span>
             </div>
+            
           </div>
           <div className="text-right">
             <div className="text-2xl font-bold text-accent">LKR {boarding.price}</div>
@@ -72,7 +101,7 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
 
         {/* Push buttons to the bottom using mt-auto */}
         <div className="flex gap-3 mt-auto">
-          <motion.button
+          {/* <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={(e) => { e.stopPropagation(); onBook(boarding.id); }}
@@ -80,7 +109,7 @@ const BoardingCard = ({ boarding, onBook, viewMode }) => {
           >
             <FaCalendarCheck />
             Book Visit
-          </motion.button>
+          </motion.button> */}
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

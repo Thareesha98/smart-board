@@ -38,49 +38,43 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-    	http
-        .csrf(csrf -> csrf.disable())
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .sessionManagement(sm ->
-            sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        )
-        .authorizeHttpRequests(auth -> auth
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(sm ->
+                    sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(auth -> auth
 
-            // 🔓 Public APIs
-            .requestMatchers(
-                "/api/auth/**",
-                "/api/boardings",
-                "/api/boardings/**",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html"
-            ).permitAll()
+                .requestMatchers(
+                        "/api/auth/**",
+                        "/api/boardings",
+                        "/api/boardings/**" ,
 
-            // 🔓 WebSocket handshake (Expo-safe)
-            .requestMatchers("/ws/**").permitAll()
+                        "/api/users/public/**",
+                        
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                ).permitAll()
 
-            // 🔐 Chat APIs (MUST be authenticated)
-            .requestMatchers("/api/chats/**")
-                .hasAnyRole("STUDENT", "OWNER")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-            // 🔐 Role-based APIs
-            .requestMatchers("/api/admin/**").hasRole("ADMIN")
-            .requestMatchers("/api/owner/**").hasRole("OWNER")
-            .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
+                .requestMatchers("/api/owner/**").hasRole("OWNER")
+                .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
 
-            .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
-            .requestMatchers("/api/reports/**")
-                .hasAnyRole("STUDENT", "OWNER")
+                .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
 
-            .requestMatchers("/api/student/**").hasRole("STUDENT")
+                .requestMatchers("/api/student/**").hasRole("STUDENT")
+                
 
-            // 🔒 Everything else
-            .anyRequest().authenticated()
-        )
-        .authenticationProvider(authenticationProvider())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .anyRequest().authenticated()
+            )
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
+        return http.build();
     }
 
     @Bean

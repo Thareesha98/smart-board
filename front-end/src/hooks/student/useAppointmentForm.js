@@ -4,8 +4,6 @@ export const useAppointmentForm = () => {
   const [formData, setFormData] = useState({
     date: '',
     time: '',
-    name: 'Priya S.',
-    phone: '',
     notes: ''
   });
 
@@ -16,42 +14,18 @@ export const useAppointmentForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const resetForm = () => {
-    setFormData({
-      date: '',
-      time: '',
-      name: 'Priya S.',
-      phone: '',
-      notes: ''
-    });
-    setIsSuccess(false);
-  };
-
-  const submitAppointment = async () => {
-    if (!formData.date || !formData.time) {
-      return { success: false, message: 'Please select both date and time' };
-    }
-
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    
-    return { 
-      success: true, 
-      message: `Appointment scheduled for ${formData.date} at ${formData.time}` 
-    };
-  };
+  // Helper to trigger loading state from parent
+  const setSubmitting = (state) => setIsSubmitting(state);
+  
+  // Helper to trigger success state from parent
+  const setSuccess = (state) => setIsSuccess(state);
 
   return {
     formData,
     updateField,
-    resetForm,
-    submitAppointment,
     isSubmitting,
-    isSuccess
+    isSuccess,
+    setSubmitting,
+    setSuccess
   };
 };

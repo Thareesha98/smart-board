@@ -1,26 +1,14 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaUserCircle, FaChevronRight } from "react-icons/fa";
 
 const TenantModal = ({
   isOpen,
   onClose,
   propertyName,
   tenants = [],
-  // onRemoveTenant, // Removed as per request
-  onMessageTenant, // New prop for messaging logic
+  onViewTenant, // NEW: Function to handle viewing tenant details
 }) => {
-  
-  // Placeholder handler if no prop is passed
-  const handleMessageClick = (tenantId, tenantName) => {
-    if (onMessageTenant) {
-      onMessageTenant(tenantId);
-    } else {
-      console.log(`Open chat for ${tenantName}`);
-      // You can implement your chat modal logic here later
-      alert(`Opening chat with ${tenantName}...`); 
-    }
-  };
-
   // --- Animation Variants ---
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -29,26 +17,26 @@ const TenantModal = ({
 
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      y: 0, 
-      transition: { type: "spring", bounce: 0.4, duration: 0.5 } 
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { type: "spring", bounce: 0.4, duration: 0.5 },
     },
-    exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2 } }
+    exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2 } },
   };
 
   const listVariants = {
     hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1, 
-      transition: { staggerChildren: 0.1 } 
-    }
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0 }
+    visible: { opacity: 1, x: 0 },
   };
 
   return (
@@ -91,8 +79,8 @@ const TenantModal = ({
             {/* Modal Content - Tenant List */}
             <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
               {tenants && tenants.length > 0 ? (
-                <motion.div 
-                  className="space-y-4"
+                <motion.div
+                  className="space-y-3"
                   variants={listVariants}
                   initial="hidden"
                   animate="visible"
@@ -101,41 +89,38 @@ const TenantModal = ({
                     <motion.div
                       key={tenant.id}
                       variants={itemVariants}
-                      className="flex items-center justify-between p-4 rounded-2xl border border-light bg-white/50 hover:bg-white transition-colors"
+                      className="flex items-center justify-between p-4 rounded-2xl border border-light bg-white/50 hover:bg-white transition-all group"
                     >
                       <div className="flex items-center gap-4">
                         {/* Tenant Avatar */}
-                        <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-white font-black text-lg shadow-sm">
-                          {tenant.name.charAt(0)}
+                        <div className="w-10 h-10 rounded-full bg-light/50 text-muted flex items-center justify-center text-xl">
+                          <FaUserCircle />
                         </div>
                         <div>
-                          <p className="font-black text-text">{tenant.name}</p>
-                          <p className="text-[9px] font-black uppercase text-muted tracking-widest">
+                          <p className="font-black text-text text-sm">
+                            {tenant.name}
+                          </p>
+                          <p className="text-[9px] font-bold uppercase text-muted tracking-widest">
                             Joined: {tenant.joinedDate}
                           </p>
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex gap-2">
-                        {/* Call Button */}
-                        <button
-                          onClick={() => (window.location.href = `tel:${tenant.phone}`)}
-                          className="w-10 h-10 rounded-xl bg-info/10 text-info flex items-center justify-center hover:bg-info hover:text-white transition-all shadow-sm active:scale-95"
-                          title="Call Tenant"
-                        >
-                          <i className="fas fa-phone-alt"></i>
-                        </button>
+                      {/* NEW: View Profile Button */}
+                      <button
+                        onClick={() => onViewTenant(tenant)}
+                        className="px-4 py-2 bg-white border border-light rounded-full text-[10px] font-black uppercase tracking-widest text-primary shadow-sm hover:bg-primary hover:text-white hover:border-primary transition-all flex items-center gap-2 group-hover:translate-x-0 translate-x-2 opacity-0 group-hover:opacity-100"
+                      >
+                        View Profile <FaChevronRight className="text-[8px]" />
+                      </button>
 
-                        {/* NEW: Message Button (Replaces Remove) */}
-                        <button
-                          onClick={() => handleMessageClick(tenant.id, tenant.name)}
-                          className="w-10 h-10 rounded-xl bg-success/10 text-success flex items-center justify-center hover:bg-success hover:text-white transition-all shadow-sm active:scale-95"
-                          title="Message Tenant"
-                        >
-                          <i className="fas fa-comment-dots"></i>
-                        </button>
-                      </div>
+                      {/* Mobile Fallback (Always visible on small screens if hover doesn't work well) */}
+                      <button
+                        onClick={() => onViewTenant(tenant)}
+                        className="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-light/30 text-primary"
+                      >
+                        <FaChevronRight />
+                      </button>
                     </motion.div>
                   ))}
                 </motion.div>

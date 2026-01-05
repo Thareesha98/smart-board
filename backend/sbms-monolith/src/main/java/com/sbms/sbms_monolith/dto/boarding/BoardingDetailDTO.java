@@ -45,4 +45,18 @@ public class BoardingDetailDTO {
 
     private boolean bosted;             // from isBosted
     private LocalDateTime boostEndDate;
+
+    private int reviewCount;
+    private double rating;
+
+    private OwnerDto owner;
+
+    @Data
+    public static class OwnerDto {
+        private Long id;
+        private String name;
+        private String contact;
+        private String email;
+        private String image;
+    }
 }

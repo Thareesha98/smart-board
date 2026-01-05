@@ -10,6 +10,19 @@ const SearchHero = ({
   onSearch, 
   isSearching 
 }) => {
+
+  // ✅ Helper to update state correctly
+  const handleInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // ✅ Allow pressing "Enter" to search
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      onSearch();
+    }
+  };
+  
   return (
     <motion.section
       initial={{ opacity: 0, y: -20 }}

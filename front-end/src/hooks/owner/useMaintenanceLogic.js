@@ -1,6 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { useOwnerAuth } from "../../context/owner/OwnerAuthContext.jsx";
-import api from "../../api/api";
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
+import {
+  getOwnerMaintenanceRequests,
+  updateMaintenanceStatus,
+} from "../../api/owner/service";
 
 const useMaintenanceLogic = () => {
   // --- STATE ---
@@ -14,30 +17,34 @@ const useMaintenanceLogic = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // --- DATA MAPPING (Java DTO -> React Props) ---
-  const ownerData = useMemo(
-    () => ({
-      firstName: currentOwner?.fullName
-        ? currentOwner.fullName.split(" ")[0]
-        : "Owner",
-      avatar:
-        currentOwner?.profileImageUrl ||
-        `https://ui-avatars.com/api/?name=${currentOwner?.fullName || "Owner"}`,
-      id: currentOwner?.id,
-    }),
-    [currentOwner]
-  );
-
   // --- API CALLS ---
   useEffect(() => {
     const fetchRequests = async () => {
-      if (!ownerData.id) return;
+      // We don't need currentOwner.id for the API call anymore (handled by token),
+      // but we still check if auth is ready.
+      if (!currentOwner) return;
 
       try {
         setLoading(true);
-        // Assuming your backend endpoint is: GET /api/maintenance/owner/{id}
-        const response = await api.get(`/maintenance/owner/${ownerData.id}`);
-        setRequests(response.data);
+        const rawData = await getOwnerMaintenanceRequests();
+
+        // 🔄 MAPPER: Convert Java DTO keys to Frontend keys
+        // Java: title, boardingTitle, imageUrls, maintenanceUrgency
+        // UI:   issueType, boardingName, image, urgency
+        const mappedData = (rawData || []).map((item) => ({
+          id: item.id,
+          issueType: item.title, // Map 'title' -> 'issueType'
+          description: item.description,
+          boardingName: item.boardingTitle, // Map 'boardingTitle' -> 'boardingName'
+          studentName: item.studentName,
+          status: item.status,
+          urgency: item.maintenanceUrgency, // Map 'maintenanceUrgency' -> 'urgency'
+          image: item.imageUrls || [], // Map 'imageUrls' -> 'image'
+          roomNumber: item.roomNumber,
+          date: item.createdDate, 
+        }));
+
+        setRequests(mappedData);
         setError(null);
       } catch (err) {
         console.error("Fetch error:", err);
@@ -48,78 +55,72 @@ const useMaintenanceLogic = () => {
     };
 
     fetchRequests();
-  }, [ownerData.id]);
+  }, [currentOwner]);
 
   const handleStatusUpdate = async (id, newStatus) => {
-    // Optimistic Update
+    // 1. Optimistic Update
     const originalRequests = [...requests];
+    const statusToSend = newStatus.toUpperCase();
+
     setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
+      prev.map((req) =>
+        req.id === id ? { ...req, status: statusToSend } : req
+      )
     );
 
     try {
-      // Assuming endpoint: PATCH /api/maintenance/{id}/status?status=COMPLETED
-      await api.patch(`/maintenance/${id}/status`, null, {
-        params: { status: newStatus },
-      });
+      // 2. Send to Backend
+      // Passing empty note "" for now as UI doesn't have a note input yet
+      await updateMaintenanceStatus(id, statusToSend, "");
     } catch (err) {
       console.error("Update failed:", err);
       setRequests(originalRequests); // Revert on error
-      alert("Failed to update status.");
+      alert("Failed to update status. Please try again.");
     }
   };
 
   // --- FILTERING & SORTING ---
   const filteredRequests = useMemo(() => {
     let result = requests.filter((req) => {
-      // Tab Filter
+      const reqStatus = req.status ? req.status.toLowerCase() : "pending";
+
       const isPendingTab = activeTab === "pending";
-      const isReqPending =
-        req.status === "pending" || req.status === "in-progress";
-      const isReqCompleted = req.status === "completed";
+      // Allow "pending", "in_progress", and "in-progress" for the first tab
+      const isReqPending = ["pending", "in_progress", "in-progress"].includes(
+        reqStatus
+      );
+      const isReqCompleted = ["completed", "resolved"].includes(reqStatus);
 
       if (isPendingTab && !isReqPending) return false;
       if (!isPendingTab && !isReqCompleted) return false;
 
-      // Search Filter
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
+
       return (
-        req.title?.toLowerCase().includes(q) ||
-        req.roomNumber?.toString().includes(q) ||
-        req.boardingName?.toLowerCase().includes(q)
+        (req.issueType && req.issueType.toLowerCase().includes(q)) ||
+        (req.boardingName && req.boardingName.toLowerCase().includes(q))
       );
     });
 
-    // Sort: Newest First
-    return result.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Sort by ID descending (newest first) since Date is missing in DTO
+    return result.sort((a, b) => b.id - a.id);
   }, [requests, activeTab, searchQuery]);
 
   // --- PAGINATION ---
-  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage) || 1;
   const paginatedRequests = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredRequests.slice(start, start + itemsPerPage);
   }, [filteredRequests, currentPage]);
 
-  // Reset page when filter changes
   useEffect(() => setCurrentPage(1), [activeTab, searchQuery]);
-
-  // --- COUNTS ---
-  const counts = {
-    pending: requests.filter(
-      (r) => r.status === "pending" || r.status === "in-progress"
-    ).length,
-    completed: requests.filter((r) => r.status === "completed").length,
-  };
 
   return {
     paginatedRequests,
     activeTab,
     setActiveTab,
     handleStatusUpdate,
-    counts,
-    ownerData,
     searchQuery,
     setSearchQuery,
     currentPage,
