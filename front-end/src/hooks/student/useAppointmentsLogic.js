@@ -33,13 +33,17 @@ const useAppointmentsLogic = () => {
         time: app.requestedStartTime ? app.requestedStartTime.split('T')[1].substring(0, 5) : '',
         
         status: mapBackendStatus(app.status),
+        backendStatus: app.status,
 
         owner: app.ownerName || "Boarding Owner",
         ownerId: app.ownerId,
         contact: app.ownerContact || "N/A",
         image: app.boardingImage || "https://via.placeholder.com/150",
 
-        registered: false
+        registered: false,
+
+        studentNote: app.studentNote,
+        ownerNote: app.ownerNote
       }));
       
       setAppointments(mapped);
@@ -68,16 +72,29 @@ const useAppointmentsLogic = () => {
     }
   };
 
-  const handleStatusChange = async (id, newStatus) => {
-      if (newStatus === 'cancel' || newStatus === 'cancelled') {
-          try {
-              await StudentService.cancelAppointment(currentUser.id, id);
-              await loadAppointments(); // Refresh to see status change
-          } catch (error) {
-              console.error("Cancel failed", error);
-          }
+  const handleStatusChange = async (id, action, note = "") => {
+      try {
+        if (action === 'cancel') {
+            await StudentService.cancelAppointment(currentUser.id, id, note);
+        } 
+        else if (action === 'markVisited') {
+            // Call the new backend endpoint
+            await StudentService.markAsVisited(currentUser.id, id);
+            setActiveCategory('visited');
+        }
+        else if (action === 'select') {
+            await StudentService.selectBoarding(currentUser.id, id);
+            setActiveCategory('selected');
+        }
+        else if (action === 'reject') {
+            await StudentService.rejectBoarding(currentUser.id, id);
+            setActiveCategory('cancelled'); // Moves to Cancelled tab
+        }
+        // Refresh to move the card to the correct tab
+        await loadAppointments(); 
+      } catch (error) {
+          console.error(`Action ${action} failed`, error);
       }
-      // Add other status logic here if needed (e.g. confirming a selection)
   };
 
   // Mock function for Registration (since backend logic for this isn't built yet)
@@ -112,8 +129,11 @@ const useAppointmentsLogic = () => {
       switch(status) {
           case 'PENDING': return 'upcoming';
           case 'ACCEPTED': return 'upcoming'; // Could move to 'visited' based on date logic later
-          case 'DECLINED': return 'rejected';
+          case 'VISITED': return 'visited';
+          case 'SELECTED': return 'selected';
           case 'CANCELLED': return 'cancelled';
+          case 'NOT_SELECTED': return 'cancelled';
+          case 'DECLINED': return 'rejected';
           // case 'COMPLETED': return 'visited'; // Example future status
           default: return 'upcoming';
       }

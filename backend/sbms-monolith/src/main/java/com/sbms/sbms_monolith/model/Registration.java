@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Entity
 @Data
 public class Registration extends BaseEntity{
@@ -36,6 +38,12 @@ public class Registration extends BaseEntity{
     
     @Column
     private String paymentTransactionRef;
+
+    private LocalDate moveInDate;
+    private String contractDuration;
+    private String emergencyContactName;
+    private String emergencyContactPhone;
+    private String specialRequirements;
 
     
     
