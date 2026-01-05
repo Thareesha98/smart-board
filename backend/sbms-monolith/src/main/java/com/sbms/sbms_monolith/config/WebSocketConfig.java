@@ -77,7 +77,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             )
             .addInterceptors(new WebSocketHandshakeInterceptor())
             .setAllowedOriginPatterns("*")
-            .withSockJS();
+            .withSockJS()
+        .setSessionCookieNeeded(false);
+
     }
 
     @Override
