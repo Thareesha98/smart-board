@@ -1,4 +1,4 @@
-package com.sbms.sbms_monolith.security;
+/*package com.sbms.sbms_monolith.security;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,3 +28,49 @@ public class WebSocketPrincipalHandshakeHandler extends DefaultHandshakeHandler 
         return () -> UUID.randomUUID().toString();
     }
 }
+*/
+
+
+
+
+package com.sbms.sbms_monolith.security;
+
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
+
+import java.security.Principal;
+import java.util.Map;
+
+public class WebSocketPrincipalHandshakeHandler extends DefaultHandshakeHandler {
+
+    private final JwtService jwtService;
+
+    public WebSocketPrincipalHandshakeHandler(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
+
+    @Override
+    protected Principal determineUser(
+            ServerHttpRequest request,
+            WebSocketHandler wsHandler,
+            Map<String, Object> attributes
+    ) {
+
+        String token = (String) attributes.get("token");
+
+        if (token == null || token.isBlank()) {
+            return null; // ❌ block unauthenticated socket
+        }
+
+        String email = jwtService.extractUsername(token);
+
+        if (email == null) {
+            return null;
+        }
+
+        // ✅ Principal name = email
+        return () -> email;
+    }
+}
+
