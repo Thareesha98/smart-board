@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../../context/student/AuthContext.jsx';
+import { useAuth } from '../../../context/student/StudentAuthContext.jsx';
 import LoginForm from '../../../components/student/auth/LoginForm';
 import backgroundImage from '../../../assets/s5.jpg';
 import logo from '../../../assets/logo.png';

@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom"; // 1. Import Hook
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -39,9 +40,8 @@ const ReportRow = ({ report, config, onViewDetails }) => {
       {/* 1. Header Area */}
       <div className="flex justify-between items-start md:items-center md:flex-1">
         <div className="flex flex-col gap-1">
-          
           {/* --- CLICKABLE STUDENT NAME --- */}
-          <h4 
+          <h4
             onClick={handleStudentClick}
             className="font-black text-base md:text-lg text-text tracking-tight uppercase cursor-pointer hover:text-accent hover:underline decoration-2 underline-offset-2 transition-all"
             title="View Student Profile"

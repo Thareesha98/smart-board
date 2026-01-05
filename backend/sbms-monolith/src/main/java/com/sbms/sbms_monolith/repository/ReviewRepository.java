@@ -17,12 +17,13 @@ public interface ReviewRepository extends JpaRepository<Review,Long> {
     // Find a specific review by a student for a specific property
     Optional<Review> findByStudentIdAndBoardingId(Long studentId, Long boardingId);
 
-    // Calculate the average rating for a boarding house
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.boarding.id = :boardingId")
-    Double getAverageRatingForBoarding(Long boardingId);
-
     // Check if a student has already reviewed this boarding (to prevent duplicates)
     boolean existsByStudentIdAndBoardingId(Long studentId, Long boardingId);
 
+    int countByBoardingId(Long boardingId);
+
+    // Calculate the average rating for a boarding house
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.boarding.id = :boardingId")
+    Double getAverageRatingForBoarding(Long boardingId);
 
 }

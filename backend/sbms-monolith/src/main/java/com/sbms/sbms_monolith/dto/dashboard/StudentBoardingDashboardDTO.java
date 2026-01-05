@@ -5,6 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
 
@@ -33,4 +34,15 @@ public class StudentBoardingDashboardDTO {
 
     private Double averageRating;
     private boolean yourReviewSubmitted;
+
+    private List<MemberDTO> members;
+
+    @Data
+    public static class MemberDTO {
+        private Long id;
+        private String name;
+        private String phone; // Added phone per your request
+        private String joinedDate;
+        private String avatar;
+    }
 }
