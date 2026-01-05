@@ -130,57 +130,44 @@ const AppointmentCard = ({ appointment, onAction }) => {
           </>
         );
 
-      case "visited":
+      case 'visited':
         return (
           <>
             <button 
               className={`${BASE_BTN} text-green-600 border-green-600 hover:bg-green-600 hover:text-white`} 
-              onClick={(e) => handleBtnClick(e, 'register')} // Changed from 'select' to 'register' based on your request
+              onClick={(e) => handleBtnClick(e, 'select')} 
             >
-              <FaHome /> Select & Register
+              <FaCheck /> Select
+            </button>
+            <button 
+              className={`${BASE_BTN} text-red-500 border-red-500 hover:bg-red-500 hover:text-white`} 
+              onClick={(e) => handleBtnClick(e, 'reject')} 
+            >
+              <FaTimes /> Reject
             </button>
             <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
               Visited
             </span>
           </>
         );
-      case "selected":
+      case 'selected':
         return isRegistered ? (
           <>
-            <button
-              className={`${BASE_BTN} text-green-700 border-green-700 hover:bg-green-700 hover:text-white`}
-              onClick={(e) => handleBtnClick(e, "view")}
-            >
-              <FaEye /> View Details
-            </button>
-            <span
-              className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}
-            >
-              Registered
-            </span>
+            <button className={`${BASE_BTN} text-green-700 border-green-700 hover:bg-green-700 hover:text-white`} onClick={(e) => handleBtnClick(e, 'view')}><FaEye /> View Details</button>
+            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>Registered</span>
           </>
         ) : (
           <>
-            <button
-              className={`bg-green-600 text-white hover:bg-green-700 ${BASE_BTN} border-green-600`}
-              onClick={(e) => handleBtnClick(e, "register")}
-            >
-              <FaHome /> Add to My Boardings
-            </button>
-            <span
-              className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}
-            >
-              Selected
-            </span>
+            <button className={`bg-green-600 text-white hover:bg-green-700 ${BASE_BTN} border-green-600`} onClick={(e) => handleBtnClick(e, 'register')}><FaHome /> Add to My Boardings</button>
+            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>Selected</span>
           </>
         );
-      case "cancelled":
+      case 'cancelled':
         return (
-          <span
-            className={`w-full text-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}
-          >
-            Cancelled
-          </span>
+            // ✅ Show different label if rejected after visit
+            <span className={`w-full text-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+                {backendStatus === 'NOT_SELECTED' ? 'Rejected by You' : 'Cancelled'}
+            </span>
         );
       case "rejected":
         return (
