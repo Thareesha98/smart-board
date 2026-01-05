@@ -79,6 +79,14 @@ const useAppointmentsLogic = () => {
             await StudentService.markAsVisited(currentUser.id, id);
             setActiveCategory('visited');
         }
+        else if (action === 'select') {
+            await StudentService.selectBoarding(currentUser.id, id);
+            setActiveCategory('selected');
+        }
+        else if (action === 'reject') {
+            await StudentService.rejectBoarding(currentUser.id, id);
+            setActiveCategory('cancelled'); // Moves to Cancelled tab
+        }
         // Refresh to move the card to the correct tab
         await loadAppointments(); 
       } catch (error) {
@@ -119,8 +127,10 @@ const useAppointmentsLogic = () => {
           case 'PENDING': return 'upcoming';
           case 'ACCEPTED': return 'upcoming'; // Could move to 'visited' based on date logic later
           case 'VISITED': return 'visited';
-          case 'DECLINED': return 'rejected';
+          case 'SELECTED': return 'selected';
           case 'CANCELLED': return 'cancelled';
+          case 'NOT_SELECTED': return 'cancelled';
+          case 'DECLINED': return 'rejected';
           // case 'COMPLETED': return 'visited'; // Example future status
           default: return 'upcoming';
       }
