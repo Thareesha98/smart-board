@@ -95,7 +95,7 @@ const AppointmentsPage = () => {
     } else if (action === "cancel") {
       if (!appointment) return;
       if (window.confirm(`Confirm cancellation for ${appointment.boardingName}?`)) {
-          handleStatusChange(id, 'cancelled');
+          handleStatusChange(id, 'cancel');
           setCurrentAppointmentId(null);
       }
     } else {
