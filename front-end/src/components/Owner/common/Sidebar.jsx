@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../../../assets/logo.png"; // Ensure this path is correct
+import logo from "../../../assets/logo.png";
 import {
   FaHome,
   FaBullhorn,
@@ -14,7 +14,6 @@ import {
 } from "react-icons/fa";
 import { useOwnerAuth } from "../../../context/owner/OwnerAuthContext.jsx";
 
-// Mapped your previous navigation items to the new structure
 const navItems = [
   {
     path: "/owner/dashboard",
@@ -52,7 +51,6 @@ const navItems = [
 ];
 
 const SidebarItem = ({ path, Icon, label, currentPath }) => {
-  // Checks if the current path starts with the item path (active state)
   const isActive =
     currentPath === path.replace(/^\/|\/$/g, "").toLowerCase() ||
     currentPath.startsWith(path.replace(/^\/|\/$/g, "").toLowerCase());
@@ -60,16 +58,18 @@ const SidebarItem = ({ path, Icon, label, currentPath }) => {
   return (
     <Link
       to={path}
+      // CHANGED: Reduced padding (p-2) and vertical margin (my-0.5)
       className={`
-        flex items-center gap-3 p-3 mx-3 my-1 rounded-btn transition-all duration-300
+        flex items-center gap-3 p-2 mx-2 my-0.5 rounded-btn transition-all duration-300
         ${
           isActive
-            ? "bg-card-bg text-primary shadow-lg transform scale-[1.01]"
+            ? "bg-card-bg text-primary shadow-md transform scale-[1.01]"
             : "text-white hover:bg-white/20"
         }
       `}
     >
-      <Icon className="w-5 text-center text-xl" />
+      {/* CHANGED: Slightly smaller icon size */}
+      <Icon className="w-4 h-4 text-center text-lg" />
       <span className="text-sm font-medium">{label}</span>
     </Link>
   );
@@ -77,30 +77,26 @@ const SidebarItem = ({ path, Icon, label, currentPath }) => {
 
 const Sidebar = () => {
   const location = useLocation();
-  const { currentOwner, logout } = useOwnerAuth(); 
+  const { currentOwner, logout } = useOwnerAuth();
 
   const getLastName = () => {
     if (!currentOwner?.fullName) return null;
     const parts = currentOwner.fullName.split(" ");
-    return parts[parts.length - 1]; // Gets the last word (e.g., "Jayaweera")
+    return parts[parts.length - 1];
   };
 
   const displayLastName = getLastName();
-
   const currentPath = location.pathname.replace(/^\/|\/$/g, "").toLowerCase();
-
   const mobileNavRef = useRef(null);
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       logout();
-      // Redirect handled by AuthContext or Router usually
     }
   };
 
   const isProfileActive = currentPath.includes("profile");
 
-  // Auto-scroll active item into view on mobile
   useEffect(() => {
     if (mobileNavRef.current) {
       const activeLink = mobileNavRef.current.querySelector(".mobile-active");
@@ -117,32 +113,39 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col flex-shrink-0 bg-primary w-70 text-white p-6 rounded-large m-6 shadow-custom sticky top-6 h-[calc(100vh-3rem)]  z-20">
-        <div className="pb-6 mb-4 border-b border-white/10">
+      {/* CHANGED: Reduced outer padding from p-6 to p-4 */}
+      <aside className="hidden lg:flex flex-col flex-shrink-0 bg-primary w-64 text-white p-4 rounded-large m-4 shadow-custom sticky top-4 h-[calc(100vh-2rem)] z-20">
+        {/* LOGO HEADER */}
+        {/* CHANGED: Reduced bottom margin/padding */}
+        <div className="pb-3 mb-2 border-b border-white/10 flex-shrink-0">
           <Link
             to="/owner/dashboard"
             className="flex items-center gap-3 text-white"
           >
+            {/* CHANGED: Smaller Logo (50px instead of 70px) */}
             <img
               src={logo}
               alt="SmartBoAD Logo"
-              className="w-[70px] h-[70px] rounded-lg object-cover"
+              className="w-[50px] h-[50px] rounded-lg object-cover"
             />
             <div className="flex flex-col">
-              <strong className="text-xl font-bold leading-tight">
+              <strong className="text-lg font-bold leading-tight">
                 SmartBoAD
               </strong>
-              <small className="text-xs opacity-80 mt-0.5">
+              <small className="text-[10px] opacity-80 mt-0.5">
                 Owner Dashboard
               </small>
             </div>
           </Link>
         </div>
 
-        <nav className="flex-1">
-          <h3 className="px-6 pb-2 pt-1 uppercase text-sm tracking-wider text-orange-200 border-b border-white/10 mb-2 font-semibold">
+        {/* NAVIGATION AREA */}
+        <nav className="flex-1 overflow-y-auto custom-scrollbar flex flex-col justify-start">
+          {/* CHANGED: Reduced section header padding */}
+          <h3 className="px-4 pb-1 pt-1 uppercase text-[11px] tracking-wider text-orange-200 border-b border-white/10 mb-1 font-semibold opacity-90">
             MAIN NAVIGATION
           </h3>
+
           {navItems.map((item) => (
             <SidebarItem
               key={item.key}
@@ -152,20 +155,26 @@ const Sidebar = () => {
               label={item.label}
             />
           ))}
-        </nav>
 
-        <div className="pt-4 mt-auto border-t border-white/10">
+          {/* Visual Divider - CHANGED: Reduced margin */}
+          <div className="my-2 border-t border-white/10 mx-2"></div>
+
+          <h3 className="px-4 pb-1 uppercase text-[11px] tracking-wider text-orange-200 font-semibold opacity-90">
+            ACCOUNT
+          </h3>
+
+          {/* Profile Link */}
           <Link
             to="/owner/profile"
-            className={`flex items-center gap-3 p-3 rounded-btn transition-all duration-300 ${
+            // CHANGED: Compact padding/margin to match items
+            className={`flex items-center gap-3 p-2 mx-2 my-0.5 rounded-btn transition-all duration-300 ${
               isProfileActive
-                ? "bg-card-bg text-primary shadow-lg transform scale-[1.01]"
-                : "text-white hover:bg-white/10"
+                ? "bg-card-bg text-primary shadow-md"
+                : "text-white hover:bg-white/20"
             }`}
           >
-            {/* Fallback avatar if currentUser is null or has no avatar */}
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center bg-white/20 border-2 transition-colors duration-300 ${
+              className={`w-5 h-5 rounded-full flex items-center justify-center bg-white/20 border-2 transition-colors duration-300 ${
                 isProfileActive
                   ? "border-primary text-primary bg-white"
                   : "border-accent text-white"
@@ -178,27 +187,26 @@ const Sidebar = () => {
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <FaUser className="text-sm" />
+                <FaUser className="text-[10px]" />
               )}
             </div>
-            <span className="font-medium truncate">
-              {/* Check if currentOwner exists AND has a lastName */}
-              {displayLastName
-                ? `Mr. ${displayLastName}`
-                : "Owner"}
+            <span className="text-sm font-medium truncate">
+              {displayLastName ? `Mr. ${displayLastName}` : "Profile"}
             </span>
           </Link>
+
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 p-3 rounded-btn text-accent hover:bg-white/10 transition-colors duration-300 mt-1 w-full text-left"
+            className="flex items-center gap-3 p-2 mx-2 my-0.5 w-[calc(100%-1rem)] rounded-btn text-white hover:bg-red-500/20 hover:text-red-200 transition-all duration-300 text-left"
           >
-            <FaSignOutAlt className="text-xl" />
-            <span className="font-medium">Logout</span>
+            <FaSignOutAlt className="w-4 text-center text-lg" />
+            <span className="text-sm font-medium">Logout</span>
           </button>
-        </div>
+        </nav>
       </aside>
 
-      {/* Mobile/Tablet Navigation (Horizontal Scroll) */}
+      {/* Mobile/Tablet Navigation (Kept exactly the same) */}
       <nav
         ref={mobileNavRef}
         className="lg:hidden w-full bg-primary text-white shadow-lg fixed bottom-0 left-0 z-50 overflow-x-auto scrollbar-hide"
@@ -240,11 +248,12 @@ const Sidebar = () => {
         </div>
       </nav>
 
-      {/* Hide scrollbar styling */}
       <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
       `}</style>
     </>
   );

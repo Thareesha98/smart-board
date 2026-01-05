@@ -23,7 +23,7 @@ const EmptyState = () => {
       <motion.button
         whileHover={{ scale: 1.05, y: -2 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => window.location.href = '/search-boardings'}
+        onClick={() => window.location.href = 'student/search-boardings'}
         className="flex items-center justify-center gap-2 px-8 py-4 rounded-large font-semibold bg-accent text-white hover:bg-primary transition-all duration-300 shadow-md mx-auto"
       >
         <FaSearch />

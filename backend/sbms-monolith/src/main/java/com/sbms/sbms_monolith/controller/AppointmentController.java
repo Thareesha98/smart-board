@@ -35,14 +35,44 @@ public class AppointmentController {
         return appointmentService.getAppointmentsForStudent(studentId);
     }
 
-   
+
     @PutMapping("/student/{studentId}/{appointmentId}/cancel")
     @PreAuthorize("hasRole('STUDENT')")
     public AppointmentResponseDTO cancelAppointment(
             @PathVariable Long studentId,
+            @PathVariable Long appointmentId,
+            @RequestBody(required = false) java.util.Map<String, String> payload // ✅ Accept JSON Body
+    ) {
+        String reason = (payload != null) ? payload.get("reason") : null;
+        return appointmentService.cancelAppointment(studentId, appointmentId, reason);
+    }
+
+    @PutMapping("/student/{studentId}/{appointmentId}/visit")
+    @PreAuthorize("hasRole('STUDENT')")
+    public AppointmentResponseDTO markAsVisited(
+            @PathVariable Long studentId,
             @PathVariable Long appointmentId
     ) {
-        return appointmentService.cancelAppointment(studentId, appointmentId);
+        // You need to create this method in your AppointmentService!
+        return appointmentService.markAsVisited(studentId, appointmentId);
+    }
+
+    @PutMapping("/student/{studentId}/{appointmentId}/select")
+    @PreAuthorize("hasRole('STUDENT')")
+    public AppointmentResponseDTO selectBoarding(
+            @PathVariable Long studentId,
+            @PathVariable Long appointmentId
+    ) {
+        return appointmentService.selectBoarding(studentId, appointmentId);
+    }
+
+    @PutMapping("/student/{studentId}/{appointmentId}/reject")
+    @PreAuthorize("hasRole('STUDENT')")
+    public AppointmentResponseDTO rejectBoarding(
+            @PathVariable Long studentId,
+            @PathVariable Long appointmentId
+    ) {
+        return appointmentService.rejectBoarding(studentId, appointmentId);
     }
 
    

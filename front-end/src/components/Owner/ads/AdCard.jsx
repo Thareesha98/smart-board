@@ -1,106 +1,178 @@
 import React from "react";
 import { motion } from "framer-motion";
 import BoostButton from "./BoostButton";
-import { FaEye, FaCalendarAlt, FaCheckCircle, FaMapMarkerAlt, FaRocket, FaEdit } from "react-icons/fa";
+import { 
+  FaMapMarkerAlt, 
+  FaRocket, 
+  FaEdit,
+  FaBed,
+  FaUserFriends,
+  FaMars,
+  FaVenus,
+  FaVenusMars,
+  FaMoneyBillWave,
+  FaPause,
+  FaPlay
+} from "react-icons/fa";
 
-const StatBox = ({ icon, label, value, textColorClass }) => (
-  <div className="flex flex-col items-center text-center px-1">
-    <div className={`${textColorClass} text-lg md:text-xl mb-1`}>{icon}</div>
-    <strong className="text-lg md:text-xl font-bold text-text leading-tight">{value}</strong>
-    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-muted mt-0.5">
-      {label}
-    </span>
+// --- Sub-Component: Feature Chip ---
+// A clean, pill-shaped badge for key features
+const FeatureChip = ({ icon, label, subLabel, colorClass }) => (
+  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${colorClass} bg-opacity-10 border-opacity-20`}>
+    <div className="text-sm">{icon}</div>
+    <div className="flex flex-col leading-none">
+      <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">{label}</span>
+      <span className="text-xs font-black">{subLabel}</span>
+    </div>
   </div>
 );
 
-const AdCard = ({ ad, onEdit, onBoostRedirect, getStatusBadgeStyle }) => {
+const AdCard = ({ ad, onEdit, onToggleStatus, onBoostRedirect, getStatusBadgeStyle }) => {
   const isBoosted = ad.isBoosted || false;
+
+  // Helper: Gender Icon Logic
+  const getGenderIcon = (type) => {
+    switch (type?.toUpperCase()) {
+      case "MALE": return <FaMars />;
+      case "FEMALE": return <FaVenus />;
+      default: return <FaVenusMars />;
+    }
+  };
 
   return (
     <motion.div
-      layout // 🔥 Enables smooth layout transitions during filtering
-      initial={{ opacity: 0, y: 0 }}
-      animate={{ opacity: 1, y: 2 }}
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.3 }}
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
       className={`
-        flex flex-col md:flex-row p-4 md:p-6 rounded-report transition-colors duration-300 
-        bg-card-bg shadow-custom border-2 relative
-        ${isBoosted ? "border-primary" : "border-transparent"}
+        group relative flex flex-col md:flex-row bg-card-bg rounded-2xl overflow-hidden
+        border transition-all duration-300
+        ${isBoosted ? "border-accent ring-1 ring-accent/20 shadow-lg" : "border-light shadow-sm"}
       `}
     >
-      {/* 1. Image & Status Section */}
-      <div className="shrink-0 w-full md:w-48 lg:w-56 h-48 md:h-52 relative mb-5 md:mb-0">
+      {/* ================= LEFT: IMAGE SECTION ================= */}
+      <div className="w-full md:w-72 h-56 md:h-auto relative shrink-0 overflow-hidden">
         <img
-          src={ad.image || "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=400&q=80"}
+          src={ad.image || "https://via.placeholder.com/400x300?text=No+Image"}
           alt={ad.title}
-          className="w-full h-full object-cover rounded-2xl shadow-inner"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
+        
+        {/* Status Badge */}
+        <div className="absolute top-3 left-3">
+             <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full shadow-md backdrop-blur-md border border-white/20 ${getStatusBadgeStyle(ad.status)}`}>
+                {ad.status}
+             </span>
+        </div>
 
-        <span
-          className="absolute top-3 right-3 px-3 py-1 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg backdrop-blur-sm"
-          style={getStatusBadgeStyle(ad.status)}
-        >
-          {ad.status}
-        </span>
-
+        {/* Boosted Strip */}
         {isBoosted && (
-          <span className="absolute bottom-3 left-3 px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-full bg-primary text-white shadow-lg animate-pulse flex items-center gap-1">
-            <FaRocket /> BOOSTED
-          </span>
+          <div className="absolute bottom-0 w-full bg-accent/95 backdrop-blur-sm text-white py-2 flex justify-center items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] shadow-inner">
+            <FaRocket /> Boosted Listing
+          </div>
         )}
       </div>
 
-      {/* 2. Details Section */}
-      <div className="grow md:pl-8 flex flex-col justify-between">
-        <div className="space-y-1">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1">
-            <h3 className="text-xl md:text-2xl font-black text-primary tracking-tight leading-tight">
+      {/* ================= RIGHT: CONTENT SECTION ================= */}
+      <div className="flex-1 p-5 md:p-7 flex flex-col">
+        
+        {/* 1. Header: Title & Rent */}
+        <div className="flex justify-between items-start gap-4 mb-2">
+          <div className="space-y-1">
+            <h3 className="text-xl font-black text-primary tracking-tight leading-tight line-clamp-1 group-hover:text-accent transition-colors">
               {ad.title}
             </h3>
-            
-            <div className="text-2xl md:text-3xl font-black text-accent tracking-tighter">
-              LKR {ad.rent.toLocaleString()}
-              <span className="text-[10px] md:text-sm font-bold ml-1 text-muted lowercase tracking-normal">
-                /mo
-              </span>
+            <div className="flex items-center text-xs text-muted font-bold tracking-wide">
+              <FaMapMarkerAlt className="mr-1.5 text-accent/80" />
+              <span className="truncate max-w-[220px]">{ad.address}</span>
             </div>
           </div>
 
-          <p className="flex items-center text-xs md:text-sm text-muted font-medium italic mb-4">
-            <FaMapMarkerAlt className="mr-2 text-accent shrink-0" />
-            <span className="truncate">{ad.address}</span>
-          </p>
-        </div>
-
-        {/* 3. Performance Stats */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4 py-4 my-4 border-y border-light bg-light/5 rounded-xl md:bg-transparent md:rounded-none">
-          <StatBox icon={<FaEye />} label="Views" value={ad.views.toLocaleString()} textColorClass="text-info" />
-          <StatBox icon={<FaCalendarAlt />} label="Appts" value={ad.appointments} textColorClass="text-accent" />
-          <StatBox icon={<FaCheckCircle />} label="Selected" value={ad.selected} textColorClass="text-success" />
-        </div>
-
-        {/* 4. Actions Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-2">
-          <div className="w-full sm:w-auto">
-            {ad.status === "Active" && (
-              <BoostButton isBoosted={isBoosted} onBoostClick={() => onBoostRedirect(ad.id)} />
-            )}
-          </div>
-
-          <div className="flex gap-2 w-full sm:w-auto">
-            {ad.status !== "Pending" && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex-1 sm:flex-none px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-full bg-accent text-card-bg shadow-md flex items-center justify-center gap-2"
-                onClick={() => onEdit(ad.id)}
-              >
-                <FaEdit /> Edit Listing
-              </motion.button>
-            )}
+          <div className="text-right shrink-0">
+            <div className="text-2xl font-black text-accent tracking-tighter">
+              <span className="text-xs text-muted font-bold mr-1">LKR</span>
+              {ad.rent?.toLocaleString()} 
+            </div>
+            <div className="text-[10px] text-muted font-bold uppercase tracking-wider text-right">/ Month</div>
           </div>
         </div>
+
+        <hr className="border-light my-4 opacity-50" />
+
+        {/* 2. Key Features Grid (Replaces the Stats) */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+           {/* Feature 1: Gender */}
+           <FeatureChip 
+              icon={getGenderIcon(ad.genderType)}
+              label="Gender"
+              subLabel={ad.genderType || "Mixed"}
+              colorClass="bg-blue-50 border-blue-100 text-blue-600"
+           />
+           
+           {/* Feature 2: Type */}
+           <FeatureChip 
+              icon={<FaBed />}
+              label="Type"
+              subLabel={ad.boardingType || "Room"}
+              colorClass="bg-purple-50 border-purple-100 text-purple-600"
+           />
+
+           {/* Feature 3: Slots */}
+           <FeatureChip 
+              icon={<FaUserFriends />}
+              label="Availability"
+              subLabel={`${ad.availableSlots || 0}/${ad.maxOccupants || 0} Open`}
+              colorClass={ad.availableSlots > 0 ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-red-50 border-red-100 text-red-600"}
+           />
+        </div>
+
+        {/* 3. Extra Info (Deposit) */}
+        {ad.deposit > 0 && (
+            <div className="flex items-center gap-2 mb-6 text-xs text-muted font-medium bg-light/50 p-2 rounded-lg w-fit">
+                <FaMoneyBillWave className="text-gray-400"/> 
+                <span>Security Deposit: <strong className="text-primary">LKR {ad.deposit.toLocaleString()}</strong></span>
+            </div>
+        )}
+
+        {/* 4. Footer Actions - Pushed to bottom */}
+        <div className="mt-auto flex gap-3">
+          {(ad.status === "Active" || ad.status === "Inactive") && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => onToggleStatus(ad.id, ad.status)}
+              className={`
+                flex-none w-12 h-12 flex items-center justify-center rounded-xl border-2 transition-all shadow-sm
+                ${ad.status === "Active" 
+                    ? "border-orange-100 text-orange-500 hover:bg-orange-500 hover:text-white" // Style for Deactivate
+                    : "border-green-100 text-green-500 hover:bg-green-500 hover:text-white"     // Style for Activate
+                }
+              `}
+              title={ad.status === "Active" ? "Deactivate Ad" : "Activate Ad"}
+            >
+              {ad.status === "Active" ? <FaPause /> : <FaPlay />}
+            </motion.button>
+        )}
+          {ad.status !== "Pending" && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onEdit(ad.id)}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-light text-primary font-bold text-xs uppercase tracking-widest hover:border-primary hover:bg-primary hover:text-white transition-all"
+            >
+              <FaEdit /> Edit Details
+            </motion.button>
+          )}
+
+          {/* Show Boost Button only if Active */}
+          {ad.status === "Active" && (
+             <div className="flex-1">
+                <BoostButton isBoosted={isBoosted} onBoostClick={() => onBoostRedirect(ad.id)} />
+             </div>
+          )}
+        </div>
+
       </div>
     </motion.div>
   );

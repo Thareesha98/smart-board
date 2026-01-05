@@ -93,6 +93,10 @@ public class UserService {
         user.setAccNo(dto.getAccNo());
         user.setNicNumber(dto.getNicNumber());
 
+        if(dto.getProfileImageUrl() != null) {
+            user.setProfileImageUrl(dto.getProfileImageUrl());
+        }
+
         User saved = userRepository.save(user);
         return UserMapper.toUserResponse(saved);
     }

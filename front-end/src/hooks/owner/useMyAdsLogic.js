@@ -1,74 +1,310 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { mockAds } from "../../data/mockData"; // Adjust path if necessary
+import { toast } from "react-hot-toast";
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; 
+import { 
+  getOwnerBoardings, 
+  createBoarding, 
+  getBoardingById, 
+  updateBoarding,
+  deleteBoarding,
+  uploadBoardingImages 
+} from "../../api/owner/service"; 
 
 const useMyAdsLogic = () => {
+  const [ads, setAds] = useState([]); // Store backend data
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState("All");
+
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentOwner } = useOwnerAuth();
 
-  // 1. Data Processing
-  const liveAds = useMemo(() => {
-    // Check session storage for boosted ads (simulating persistence)
-    const boostedIds = JSON.parse(sessionStorage.getItem("boostedAds") || "[]");
-    return mockAds.map((ad) => ({
-      ...ad,
-      isBoosted: boostedIds.includes(ad.id) || ad.isBoosted || false,
-    }));
+  // --- 1. Helper: Status Mapping Logic ---
+  // Maps Backend Enums to Frontend Tabs (Active, Pending, Draft)
+  const normalizeStatus = (backendStatus) => {
+    if (!backendStatus) return "Draft";
+    
+    const status = backendStatus.toUpperCase();
+
+    // 1. Approved Ads -> "Active" Tab
+    if (status === "ACTIVE" || status === "APPROVED") {
+      return "Active";
+    }
+    
+    // 2. New Ads -> "Pending" Tab
+    if (status === "PENDING" || status === "REVIEW") {
+      return "Pending";
+    }
+
+    // 3. Rejected Ads -> "Draft" Tab (As per your requirement)
+    if (status === "REJECTED" || status === "DENIED" || status === "DRAFT") {
+      return "Draft";
+    }
+
+    // 4. Inactive Ads -> "Inactive" Tab
+    if (status === "INACTIVE") {
+      return "Inactive";
+    }
+
+    // Fallback default
+    return "Draft";
+  };
+
+  const toggleAdStatus = async (id, currentStatus) => {
+    const isCurrentlyActive = currentStatus === "Active";
+    const newStatus = isCurrentlyActive ? "INACTIVE" : "PENDING"; // Active -> Inactive, Inactive -> Pending
+    
+    const confirmMsg = isCurrentlyActive 
+      ? "Deactivate this ad? It will move to the Inactive tab." 
+      : "Activate this ad? It will move to Pending for approval.";
+
+    if (!window.confirm(confirmMsg)) return;
+
+    const toastId = toast.loading("Updating status...");
+    try {
+      // Assuming you have an API endpoint to patch status, 
+      // OR use updateBoarding with a partial payload if your backend supports it.
+      // For now, let's assume a specific status update call:
+      await updateBoarding(id, { status: newStatus }); 
+
+      // Refresh UI
+      fetchAds(); 
+      toast.success(`Ad marked as ${newStatus}`, { id: toastId });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status", { id: toastId });
+    }
+  };
+
+  // --- 2. Fetch Data (From Backend) ---
+  const fetchAds = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await getOwnerBoardings(); 
+      
+      const rawList = Array.isArray(data) ? data : (data.content || []);
+
+      const formattedAds = rawList.map((item) => ({
+        id: item.id,
+        title: item.title,
+        address: item.address,
+        rent: item.pricePerMonth, 
+        deposit: item.keyMoney,
+        genderType: item.genderType,
+        boardingType: item.boardingType,
+        availableSlots: item.availableSlots,
+        maxOccupants: item.maxOccupants,
+        
+        // ✅ Apply the mapping here
+        status: normalizeStatus(item.status), 
+        
+        image: item.imageUrls && item.imageUrls.length > 0 
+          ? item.imageUrls[0] 
+          : "https://via.placeholder.com/400x300?text=No+Image",
+        isBoosted: item.isBoosted || false, 
+        
+        // Mock stats (since backend doesn't send them yet)
+        views: 0, 
+        appointments: 0, 
+        selected: 0
+      }));
+
+      setAds(formattedAds);
+    } catch (err) {
+      console.error("Failed to load ads", err);
+      setError("Could not load your listings.");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
+  // Fetch on mount
+  useEffect(() => {
+    fetchAds();
+  }, [fetchAds]);
+
+  // --- 3. Client-Side Actions ---
+  
+  const createAd = async (formData, rawFiles) => {
+    setIsLoading(true);
+
+    const toastId = toast.loading("Publishing your ad...");
+
+    try {
+      let uploadedUrls = [];
+      if (rawFiles.length > 0) {
+        uploadedUrls = await uploadBoardingImages(rawFiles);
+      }
+
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        address: formData.address,
+        pricePerMonth: parseFloat(formData.rent),
+        keyMoney: parseFloat(formData.deposit) || 0,
+        genderType: formData.genderType || "MIXED",
+        boardingType: formData.boardingType || "ROOM",
+        availableSlots: parseInt(formData.availableSlots || 1),
+        maxOccupants: parseInt(formData.maxOccupants || 1),
+        amenities: formData.amenities,
+        nearbyPlaces: {}, 
+        imageUrls: uploadedUrls,
+      };
+
+
+      await createBoarding(payload);
+      toast.success("Ad published successfully!", { id: toastId });
+      navigate("/owner/myAds");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to publish ad. Please try again.", { id: toastId });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateAd = async (id, formData, newFiles, existingImages, currentStatus) => {
+    setIsLoading(true);
+    const toastId = toast.loading("Updating your ad...");
+
+    try {
+      // 1. Upload new images if any
+      let newUrls = [];
+      if (newFiles.length > 0) {
+        newUrls = await uploadBoardingImages(newFiles);
+      }
+      
+      // Combine old and new images
+      const finalImages = [...existingImages, ...newUrls];
+
+      // 2. Prepare Payload
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        address: formData.address,
+        pricePerMonth: parseFloat(formData.rent),
+        keyMoney: parseFloat(formData.deposit) || 0,
+        genderType: formData.genderType,
+        boardingType: formData.boardingType,
+        availableSlots: parseInt(formData.availableSlots),
+        maxOccupants: parseInt(formData.maxOccupants),
+        amenities: formData.amenities,
+        nearbyPlaces: {}, 
+        imageUrls: finalImages,
+        
+        status: currentStatus === "Inactive" ? "INACTIVE" : "PENDING" 
+      };
+
+      // 3. Send to Backend
+      await updateBoarding(id, payload);
+      
+      toast.success("Changes saved! Ad is now under review.", { id: toastId });
+      navigate("/owner/myAds");
+      
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update ad.", { id: toastId });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    // 1. Confirm with user
+    if (!window.confirm("Are you sure you want to delete this ad? This action cannot be undone.")) {
+      return;
+    }
+
+    const toastId = toast.loading("Deleting ad...");
+
+    try {
+      // 2. Call Backend
+      await deleteBoarding(id);
+
+      // 3. Optimistic Update (Remove from UI immediately)
+      setAds((prevAds) => prevAds.filter((ad) => ad.id !== id));
+
+      toast.success("Ad deleted successfully", { id: toastId });
+    } catch (err) {
+      console.error("Delete failed", err);
+      toast.error("Failed to delete ad", { id: toastId });
+    }
+  };
+
+  const fetchSingleAd = useCallback(async (id) => {
+    try {
+      setIsLoading(true);
+      const data = await getBoardingById(id);
+      return {
+        ...data,
+        rent: data.pricePerMonth,
+        deposit: data.keyMoney,
+        currentImages: data.imageUrls || [],
+        status: normalizeStatus(data.status)
+      };
+    } catch (err) {
+      console.error(err);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // --- 4. Filtering Logic ---
+  // Calculates counts for tabs
   const counts = useMemo(() => {
-    const acc = liveAds.reduce((a, ad) => {
-      a[ad.status] = (a[ad.status] || 0) + 1;
+    const acc = ads.reduce((a, ad) => {
+      const statusKey = ad.status; 
+      a[statusKey] = (a[statusKey] || 0) + 1;
       return a;
     }, {});
-    acc["All"] = liveAds.length;
+    acc["All"] = ads.length;
     return acc;
-  }, [liveAds]);
+  }, [ads]);
 
+  // Filters the list based on selected tab
   const filteredAds = useMemo(() => {
-    return liveAds.filter((ad) => filter === "All" || ad.status === filter);
-  }, [liveAds, filter]);
+    return ads.filter((ad) => filter === "All" || ad.status === filter);
+  }, [ads, filter]);
 
-  // 2. Handlers
+  // --- 5. Navigation Handlers ---
   const handleCreate = () => navigate("createAd");
   const handleEdit = (id) => navigate(`editAd/${id}`);
   const handleBoostRedirect = (id) => navigate(`/owner/subscriptions/${id}`);
   
-  // Helper for badge styling
   const getStatusBadgeStyle = (status) => {
     const statusColors = {
-      Active: "var(--success)", // Ensure these CSS vars exist or use hex codes
-      Pending: "var(--info)",
-      Draft: "var(--muted)",
-      Inactive: "var(--error)",
-    };
-    // Fallback if vars aren't set
-    const fallbackColors = {
-      Active: "#10B981", 
-      Pending: "#3B82F6",
-      Draft: "#6B7280",
-      Inactive: "#EF4444",
+      Active: { backgroundColor: "var(--success)", color: "white" }, 
+      Pending: { backgroundColor: "var(--info)", color: "white" },
+      Draft: { backgroundColor: "var(--error)", color: "white" },   
     };
     
-    return {
-      backgroundColor: statusColors[status] || fallbackColors[status] || "#6B7280",
-      color: "white",
-    };
+    // Return an OBJECT, not a string
+    return statusColors[status] || { backgroundColor: "#6B7280", color: "white" };
   };
 
   const isNestedRoute = location.pathname !== "/owner/myAds";
 
   return {
+    ads,
     filter,
     setFilter,
     filteredAds,
     counts,
+    isLoading,
+    error,
     isNestedRoute,
-    handleCreate,
+    fetchAds,
+    fetchSingleAd,
+    createAd,
+    updateAd,
     handleEdit,
+    handleCreate,
     handleBoostRedirect,
     getStatusBadgeStyle,
+    toggleAdStatus
   };
 };
 

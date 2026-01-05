@@ -31,8 +31,8 @@ const BoardingCard = ({
         <div className="px-4 py-2 rounded-full bg-gradient-to-r from-success to-success/80 text-white font-semibold text-sm uppercase tracking-wider">
           Current Boarding
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
-          <motion.button
+        {/* <div className="flex gap-3 w-full md:w-auto"> */}
+          {/* <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onViewDetails}
@@ -40,8 +40,8 @@ const BoardingCard = ({
           >
             <FaEye />
             View Details
-          </motion.button>
-          <motion.button
+          </motion.button> */}
+          {/* <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onManage}
@@ -49,8 +49,8 @@ const BoardingCard = ({
           >
             <FaCog />
             Manage
-          </motion.button>
-        </div>
+          </motion.button> */}
+        {/* </div> */}
       </div>
 
       {/* Content */}
@@ -97,7 +97,7 @@ const BoardingCard = ({
           <div className="flex gap-8 border-t border-gray-100 pt-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-accent flex items-center gap-1">
-                {boarding.rating} <FaStar className="text-yellow-500 text-lg" />
+                {boarding.rating || 0} <FaStar className="text-yellow-500 text-lg" />
               </div>
               <span className="text-sm text-text-muted">Rating</span>
             </div>
@@ -151,7 +151,7 @@ const BoardingCard = ({
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-3 justify-center lg:justify-end">
             <ActionButton icon={FaTools} label="Maintenance" onClick={onRequestMaintenance} />
-            <ActionButton icon={FaEnvelope} label="Contact Owner" onClick={onContactOwner} />
+            {/* <ActionButton icon={FaEnvelope} label="Contact Owner" onClick={onContactOwner} /> */}
             <ActionButton icon={FaFileContract} label="Documents" onClick={onViewDocuments} />
           </div>
         </div>
