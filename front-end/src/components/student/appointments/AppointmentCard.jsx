@@ -74,6 +74,18 @@ const AppointmentCard = ({ appointment, onAction }) => {
   const isRegistered = status === "selected" && registered;
   const isConfirmed = backendStatus === "ACCEPTED";
 
+  // ✅ LOGIC TO SPLIT NOTES
+  // The backend saves it like: "Original note\n\n[Cancelled]: reason"
+  let displayStudentNote = studentNote || "";
+  let cancellationReason = "";
+
+  if (displayStudentNote.includes("[Cancelled]:")) {
+      const parts = displayStudentNote.split("[Cancelled]:");
+      displayStudentNote = parts[0].trim(); // The original request note
+      cancellationReason = parts[1].trim(); // The reason for cancellation
+  }
+
+
   // ✅ State for Expanding the Card
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
@@ -288,25 +300,41 @@ const AppointmentCard = ({ appointment, onAction }) => {
 
       {/* ✅ UNWRAPPED SECTION: NOTES */}
       {isExpanded && (
-        <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex flex-col md:flex-row gap-6 animate-fadeIn">
-            {/* Student Note */}
-            <div className="flex-1">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">My Request Note</span>
-                <div className="flex gap-3">
-                    <FaQuoteLeft className="text-gray-300 flex-shrink-0 mt-1" size={12}/>
-                    <p className="text-gray-600 text-sm italic">
-                        {studentNote || "No note provided."}
-                    </p>
+        <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex flex-col gap-4 animate-fadeIn">
+            
+            <div className="flex flex-col md:flex-row gap-6">
+                {/* 1. Student Request Note */}
+                <div className="flex-1">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">My Request Note</span>
+                    <div className="flex gap-3">
+                        <FaQuoteLeft className="text-gray-300 flex-shrink-0 mt-1" size={12}/>
+                        <p className="text-gray-600 text-sm italic">
+                            {displayStudentNote || "No request note provided."}
+                        </p>
+                    </div>
                 </div>
+
+                {/* 2. Owner Response (If exists) */}
+                {ownerNote && (
+                    <div className="flex-1 border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
+                        <span className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-2 block">Owner's Response</span>
+                        <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <p className="text-gray-700 text-sm font-medium">
+                                {ownerNote}
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Owner Note (Only if present) */}
-            {ownerNote && (
-                <div className="flex-1 border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
-                    <span className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-2 block">Owner's Response</span>
-                    <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                        <p className="text-gray-700 text-sm font-medium">
-                            {ownerNote}
+            {/* 3. ✅ CANCELLATION REASON (Show only if exists) */}
+            {cancellationReason && (
+                <div className="bg-red-50 p-3 rounded-lg border border-red-100 mt-2 flex items-start gap-3">
+                    <FaExclamationCircle className="text-red-500 mt-0.5" />
+                    <div>
+                        <span className="text-xs font-bold text-red-600 uppercase tracking-wider block mb-1">Cancellation Reason</span>
+                        <p className="text-red-800 text-sm font-medium">
+                            {cancellationReason}
                         </p>
                     </div>
                 </div>
