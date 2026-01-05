@@ -60,7 +60,7 @@ const HeaderBar = ({ title, subtitle, rightContent, navBtnText, navBtnPath,onNav
       className="
       flex flex-col md:flex-row justify-between items-center 
       mb-8 bg-white/70 backdrop-blur-sm p-6 rounded-large 
-      shadow-custom sticky top-7 z-10 transition-all duration-500
+      shadow-custom  transition-all duration-500
       hover:shadow-xl
     "
     >
@@ -129,7 +129,7 @@ const HeaderBar = ({ title, subtitle, rightContent, navBtnText, navBtnPath,onNav
             </div>
           )}
           <span className="font-semibold text-sm">
-            {firstName} {lastInitial}
+              Mr. {lastName || "Partner"}
           </span>
         </div>
       </div>

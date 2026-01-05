@@ -1,140 +1,219 @@
-import React, { useState } from "react";
-import { mockAppointments, ownerData } from "../../data/mockData";
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import StatusTab from "../../components/Owner/common/StatusTab";
 import AppointmentRow from "../../components/Owner/appointments/AppointmentRow";
-
-const UTILS = {
-  formatDate: (d) =>
-    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-  formatTime: (t) =>
-    new Date(`2000-01-01T${t}`).toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    }),
-  // ✅ UPDATED COLOR SCHEME
-  getStatusStyle: (status) => {
-    const styles = {
-      // Orange (Pending/Upcoming)
-      pending: { 
-        colorClass: "bg-orange-500", 
-        textClass: "text-orange-600", 
-        bgClass: "bg-orange-100 border-orange-200", 
-        icon: "fas fa-clock",
-        label: "Upcoming" 
-      },
-      // Green (Confirmed/Selected)
-      confirmed: { 
-        colorClass: "bg-green-600", 
-        textClass: "text-green-600", 
-        bgClass: "bg-green-100 border-green-200", 
-        icon: "fas fa-check-circle",
-        label: "Confirmed" 
-      },
-      // Blue (Visited)
-      visited: { 
-        colorClass: "bg-blue-600", 
-        textClass: "text-blue-600", 
-        bgClass: "bg-blue-100 border-blue-200", 
-        icon: "fas fa-eye",
-        label: "Visited"
-      },
-      // Red (Cancelled by Student)
-      cancelled: { 
-        colorClass: "bg-red-500", 
-        textClass: "text-red-500", 
-        bgClass: "bg-red-50 border-red-200", 
-        icon: "fas fa-times",
-        label: "Cancelled" 
-      },
-      // Dark Red (Rejected by Owner)
-      rejected: { 
-        colorClass: "bg-red-900", 
-        textClass: "text-red-900", 
-        bgClass: "bg-red-200 border-red-800", 
-        icon: "fas fa-ban",
-        label: "Rejected" 
-      },
-    };
-    return styles[status] || {};
-  },
-};
+import SkeletonAppointmentRow from "../../components/Owner/appointments/SkeletonAppointmentRow";
+import DecisionModal from "../../components/Owner/appointments/DecisionModal";
+import useDecisionModal from "../../hooks/owner/useDecisionModal";
+import useAppointmentsLogic from "../../hooks/owner/useAppointmentsLogic";
+import { Toaster } from "react-hot-toast";
+import { FaSearch, FaSortAmountDown } from "react-icons/fa";
 
 const AppointmentsPage = () => {
-  const [appointments, setAppointments] = useState(mockAppointments);
-  const [filter, setFilter] = useState("pending");
+  const {
+    filteredAppointments,
+    counts,
+    ownerData,
+    filter,
+    setFilter,
+    handleAction,
+    formatDate,
+    formatTime,
+    getStatusStyle,
+    loading,
+    error,
+    // ✅ Destructure new tools
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
+  } = useAppointmentsLogic();
 
-  const handleAction = (id, newStatus) => {
-    // Logic: Updates state.
-    // If student rescheduled, it would likely come in as a status reset to 'pending' from backend.
-    setAppointments((prev) =>
-      prev.map((app) => (app.id === id ? { ...app, status: newStatus } : app))
-    );
+  const { isOpen, selectedItem, actionType, openModal, closeModal } =
+    useDecisionModal();
+
+  // 3. Handler to determine if we need the modal or not
+  const handleModalTrigger = (id, action) => {
+    // Case A: Immediate Action (Visited) - No Modal needed yet
+    if (action === "visited") {
+      handleAction(id, action);
+      return;
+    }
+
+    // Case B: Actions requiring Modal (Confirm/Reject)
+    const app = filteredAppointments.find((a) => a.id === id);
+    if (app) {
+      openModal(app, action); // ✅ Use the hook's open function
+    }
   };
 
-  const counts = appointments.reduce(
-    (acc, app) => {
-      acc[app.status] = (acc[app.status] || 0) + 1;
-      return acc;
-    },
-    { pending: 0, confirmed: 0, visited: 0, cancelled: 0, rejected: 0 }
-  );
-
-  // Tabs list to ensure order
-  const tabs = ['pending', 'confirmed', 'visited', 'cancelled', 'rejected'];
+  // 4. Error State
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-light">
+        <div className="text-center p-6 bg-white rounded-lg shadow-lg">
+          <h3 className="text-error font-black text-xl mb-2">
+            Connection Error
+          </h3>
+          <p className="text-muted mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-white rounded font-bold"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="pt-4 space-y-8 min-h-screen bg-light pb-10">
-      <HeaderBar
-        title="Appointments"
-        subtitle="Manage student visit requests and track arrivals."
-        notificationCount={counts.pending}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
+    <>
+      {/* Notification Toaster */}
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            border: "1px solid #E5E7EB",
+            padding: "12px 16px",
+            color: "#1F2937",
+            fontSize: "14px",
+            fontWeight: "600",
+            borderRadius: "12px",
+            background: "#FFFFFF",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+          },
+        }}
       />
 
-      {/* Filter Tabs */}
-      <section className="p-2 md:p-6 rounded-report shadow-custom bg-card-bg border border-light mx-2">
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-4">
-          {Object.keys(counts).map((status) => (
-            <StatusTab
-              key={status}
-              status={status}
-              count={counts[status]}
-              currentFilter={filter}
-              setFilter={setFilter}
-              config={UTILS.getStatusStyle(status)}
-            />
-          ))}
-        </div>
-      </section>
+      {/* Main Content */}
+      <div className="pt-4 space-y-8 min-h-screen bg-light pb-10">
+        <HeaderBar
+          title="Appointments"
+          subtitle="Manage student visit requests and track arrivals."
+          notificationCount={counts.pending}
+          userAvatar={ownerData.avatar}
+          userName={ownerData.firstName}
+        />
 
-      <section className="space-y-4 px-2">
-        <h3 className="text-2xl font-black text-primary uppercase tracking-tight ml-2">
-          {filter} Requests
-        </h3>
-
-        <div className="flex flex-col gap-4">
-          {appointments
-            .filter((app) => app.status === filter)
-            .map((app) => (
-              <AppointmentRow
-                key={app.id}
-                appointment={app}
-                config={UTILS.getStatusStyle(app.status)}
-                onAction={handleAction}
-                formatDate={UTILS.formatDate}
-                formatTime={UTILS.formatTime}
+        {/* Filter Tabs */}
+        <section className="p-2 md:p-6 rounded-report shadow-custom bg-card-bg border border-light mx-2">
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-4">
+            {Object.keys(counts).map((status) => (
+              <StatusTab
+                key={status}
+                status={status}
+                count={counts[status]}
+                currentFilter={filter}
+                setFilter={setFilter}
+                config={getStatusStyle(status)}
               />
             ))}
-            
-            {appointments.filter((app) => app.status === filter).length === 0 && (
-                <div className="text-center py-8 text-gray-400 italic">No appointments found in this category.</div>
+          </div>
+        </section>
+
+        {/* List Section */}
+        <section className="space-y-4 px-2">
+          {/* Toolbar */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 ml-2 mr-2">
+            <motion.h3
+              layout
+              className="text-2xl font-black text-primary uppercase tracking-tight"
+            >
+              {filter} Requests
+            </motion.h3>
+
+            <div className="flex flex-col md:flex-row gap-2 md:gap-4 w-full md:w-auto">
+              {/* Search */}
+              <div className="relative flex-1 md:w-64">
+                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-xs" />
+                <input
+                  type="text"
+                  placeholder="Search student or property..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-full border border-light bg-white text-xs font-bold text-text focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm placeholder:text-muted/70"
+                />
+              </div>
+
+              {/* Sort */}
+              <div className="relative md:w-48">
+                <FaSortAmountDown className="absolute left-4 top-1/2 -translate-y-1/2 text-muted text-xs" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2.5 rounded-full border border-light bg-white text-xs font-bold text-text focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none shadow-sm cursor-pointer"
+                >
+                  <option value="nearest">Nearest Date First</option>
+                  <option value="furthest">Furthest Date First</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg
+                    className="w-2.5 h-2.5 text-muted"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="3"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Rows */}
+          <div className="flex flex-col gap-4">
+            {loading ? (
+              <>
+                <SkeletonAppointmentRow />
+                <SkeletonAppointmentRow />
+                <SkeletonAppointmentRow />
+              </>
+            ) : (
+              <AnimatePresence mode="popLayout">
+                {filteredAppointments.length > 0 ? (
+                  filteredAppointments.map((app) => (
+                    <AppointmentRow
+                      key={app.id}
+                      appointment={app}
+                      config={getStatusStyle(app.status)}
+                      onAction={handleModalTrigger} // ✅ Pass the trigger
+                      formatDate={formatDate}
+                      formatTime={formatTime}
+                    />
+                  ))
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="py-12 text-center text-muted font-bold uppercase tracking-widest text-xs"
+                  >
+                    No appointments found matching your filters.
+                  </motion.div>
+                )}
+              </AnimatePresence>
             )}
-        </div>
-      </section>
-    </div>
+          </div>
+        </section>
+      </div>
+
+      {/* ✅ Decision Modal - Controlled by Hook */}
+      <DecisionModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        actionType={actionType}
+        appointment={selectedItem}
+        onConfirm={handleAction} // Logic Hook handles the API Call
+      />
+    </>
   );
 };
 

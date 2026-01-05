@@ -1,15 +1,21 @@
 import React from "react";
+import { motion } from "framer-motion";
+import { FaMapMarkerAlt, FaStar, FaUsers, FaCog } from "react-icons/fa";
 
 const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
-  // Using standard Tailwind classes for status
+  // Status Color Mapping
   const statusColors = {
     active: "bg-success",
     inactive: "bg-muted",
   };
 
   return (
-    <div
-      className={`bg-card-bg rounded-boarding shadow-custom hover:shadow-xl transition-all duration-300 overflow-hidden flex border border-light ${
+    <motion.div
+      layout // 🔥 Automagically animates between Grid and List view
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }} // Lift effect on hover
+      className={`bg-card-bg rounded-boarding shadow-custom hover:shadow-xl transition-shadow duration-300 overflow-hidden flex border border-light ${
         viewMode === "list" ? "flex-row h-60" : "flex-col"
       }`}
     >
@@ -32,12 +38,20 @@ const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
       {/* Details & Action Buttons */}
       <div className="p-6 flex flex-col justify-between flex-1">
         <div>
-          <h3 className="text-xl font-black text-text tracking-tight">
-            {property.name}
-          </h3>
-          <p className="text-muted text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mb-4">
-            <i className="fas fa-map-marker-alt text-accent"></i>{" "}
-            {property.address}
+          <div className="flex justify-between items-start">
+            <h3 className="text-xl font-black text-text tracking-tight line-clamp-1">
+              {property.name}
+            </h3>
+            {viewMode === "list" && (
+              <div className="font-bold text-accent flex items-center gap-1 text-sm">
+                {property.rating} <FaStar className="text-[10px]" />
+              </div>
+            )}
+          </div>
+
+          <p className="text-muted text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mb-4 mt-1">
+            <FaMapMarkerAlt className="text-accent" />
+            <span className="truncate">{property.address}</span>
           </p>
 
           <div className="grid grid-cols-3 gap-2 border-t border-light pt-4">
@@ -45,7 +59,7 @@ const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
               <p className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">
                 Rent
               </p>
-              <p className="font-bold text-text">{property.rent}</p>
+              <p className="font-bold text-text truncate">{property.rent}</p>
             </div>
             <div className="text-center border-r border-light">
               <p className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">
@@ -57,8 +71,8 @@ const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
               <p className="text-[9px] font-black text-muted uppercase tracking-[0.1em]">
                 Rating
               </p>
-              <p className="font-bold text-accent">
-                {property.rating} <i className="fas fa-star text-[8px]"></i>
+              <p className="font-bold text-accent flex justify-center items-center gap-1">
+                {property.rating} <FaStar className="text-[8px]" />
               </p>
             </div>
           </div>
@@ -66,25 +80,28 @@ const BoardingCard = ({ property, viewMode, onManage, onViewTenants }) => {
 
         <div className="flex gap-3 mt-6">
           {/* View Tenants Button */}
-          <button
+          <motion.button
+            whileHover={property.totalTenants > 0 ? { scale: 1.05 } : {}}
+            whileTap={property.totalTenants > 0 ? { scale: 0.95 } : {}}
             disabled={property.totalTenants === 0}
             onClick={() => onViewTenants(property.id)}
-            className="flex-1 border-2 border-accent text-accent py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest transition-all hover:bg-accent hover:text-white disabled:opacity-20 disabled:border-muted disabled:text-muted"
+            className="flex-1 border-2 border-accent text-accent py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest transition-colors hover:bg-accent hover:text-white disabled:opacity-30 disabled:border-muted disabled:text-muted disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            <i className="fas fa-users mr-1"></i> {property.totalTenants || "0"}{" "}
-            Tenants
-          </button>
+            <FaUsers /> {property.totalTenants || "0"} Tenants
+          </motion.button>
 
           {/* Manage Button */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => onManage(property.id)}
-            className="flex-1 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest text-white transition-all bg-accent shadow-md hover:shadow-lg active:scale-95"
+            className="flex-1 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest text-white transition-colors bg-accent shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
-            <i className="fas fa-cog mr-1"></i> Manage
-          </button>
+            <FaCog /> Manage
+          </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import ScrollToTop from "./ScrollToTop";
 import Home from "./Home.jsx";
 
@@ -24,6 +25,17 @@ function App() {
       <StudentAuthProvider>
         <OwnerAuthProvider>
           <ScrollToTop />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: "#333",
+                color: "#fff",
+                borderRadius: "10px",
+                fontSize: "14px",
+              },
+            }}
+          />
           <Routes>
             {/* ==================== GLOBAL AUTH ROUTES ==================== */}
             <Route path="/login" element={<LoginPage />} />
@@ -36,7 +48,7 @@ function App() {
             {/* Owner routes (Dashboard, My Ads, etc.) */}
             <Route path="/owner/*" element={<OwnerAppRoutes />} />
 
-            {/* Public Profile view */}
+             {/* Public Profile view */}
             <Route path="/profile/view/:id" element={<PublicProfileView />} />
 
             {/* ==================== LANDING PAGE ==================== */}
