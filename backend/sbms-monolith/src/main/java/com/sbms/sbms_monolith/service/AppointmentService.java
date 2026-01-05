@@ -152,9 +152,8 @@ public class AppointmentService {
         return AppointmentMapper.toDto(saved);
     }
 
-   
-    public AppointmentResponseDTO cancelAppointment(Long studentId, Long appointmentId) {
 
+    public AppointmentResponseDTO cancelAppointment(Long studentId, Long appointmentId, String reason) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
@@ -162,11 +161,14 @@ public class AppointmentService {
             throw new RuntimeException("You are not allowed to cancel this appointment");
         }
 
-        if (appointment.getStatus() == AppointmentStatus.ACCEPTED) {
+        // ✅ Append cancellation reason to the existing note
+        if (reason != null && !reason.isBlank()) {
+            String oldNote = appointment.getStudentNote();
+            String newNote = (oldNote == null ? "" : oldNote + "\n\n") + "[Cancelled]: " + reason;
+            appointment.setStudentNote(newNote);
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
-
         Appointment saved = appointmentRepository.save(appointment);
         return AppointmentMapper.toDto(saved);
     }
