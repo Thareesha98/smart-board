@@ -40,7 +40,10 @@ const useAppointmentsLogic = () => {
         contact: app.ownerContact || "N/A",
         image: app.boardingImage || "https://via.placeholder.com/150",
 
-        registered: false
+        registered: false,
+
+        studentNote: app.studentNote,
+        ownerNote: app.ownerNote
       }));
       
       setAppointments(mapped);
@@ -69,10 +72,10 @@ const useAppointmentsLogic = () => {
     }
   };
 
-  const handleStatusChange = async (id, action) => {
+  const handleStatusChange = async (id, action, note = "") => {
       try {
         if (action === 'cancel') {
-            await StudentService.cancelAppointment(currentUser.id, id);
+            await StudentService.cancelAppointment(currentUser.id, id, note);
         } 
         else if (action === 'markVisited') {
             // Call the new backend endpoint
