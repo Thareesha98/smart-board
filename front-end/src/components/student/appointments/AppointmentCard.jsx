@@ -12,7 +12,7 @@ import {
   FaBan,
   FaChevronDown,
   FaChevronUp,
-  FaQuoteLeft
+  FaQuoteLeft,
 } from "react-icons/fa";
 
 // Helper to format date and time
@@ -66,7 +66,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
     backendStatus,
     registered,
     studentNote, // ✅ Extract Student Note
-    ownerNote    // ✅ Extract Owner Note
+    ownerNote, // ✅ Extract Owner Note
   } = appointment;
 
   const { badge } = getStatusClasses(status, backendStatus);
@@ -80,11 +80,10 @@ const AppointmentCard = ({ appointment, onAction }) => {
   let cancellationReason = "";
 
   if (displayStudentNote.includes("[Cancelled]:")) {
-      const parts = displayStudentNote.split("[Cancelled]:");
-      displayStudentNote = parts[0].trim(); // The original request note
-      cancellationReason = parts[1].trim(); // The reason for cancellation
+    const parts = displayStudentNote.split("[Cancelled]:");
+    displayStudentNote = parts[0].trim(); // The original request note
+    cancellationReason = parts[1].trim(); // The reason for cancellation
   }
-
 
   // ✅ State for Expanding the Card
   const [isExpanded, setIsExpanded] = useState(false);
@@ -152,43 +151,65 @@ const AppointmentCard = ({ appointment, onAction }) => {
           </>
         );
 
-      case 'visited':
+      case "visited":
         return (
           <>
-            <button 
-              className={`${BASE_BTN} text-green-600 border-green-600 hover:bg-green-600 hover:text-white`} 
-              onClick={(e) => handleBtnClick(e, 'select')} 
+            <button
+              className={`${BASE_BTN} text-green-600 border-green-600 hover:bg-green-600 hover:text-white`}
+              onClick={(e) => handleBtnClick(e, "select")}
             >
               <FaCheck /> Select
             </button>
-            <button 
-              className={`${BASE_BTN} text-red-500 border-red-500 hover:bg-red-500 hover:text-white`} 
-              onClick={(e) => handleBtnClick(e, 'reject')} 
+            <button
+              className={`${BASE_BTN} text-red-500 border-red-500 hover:bg-red-500 hover:text-white`}
+              onClick={(e) => handleBtnClick(e, "reject")}
             >
               <FaTimes /> Reject
             </button>
-            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
+            <span
+              className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}
+            >
               Visited
             </span>
           </>
         );
-      case 'selected':
+      case "selected":
         return isRegistered ? (
           <>
-            <button className={`${BASE_BTN} text-green-700 border-green-700 hover:bg-green-700 hover:text-white`} onClick={(e) => handleBtnClick(e, 'view')}><FaEye /> View Details</button>
-            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>Registered</span>
+            <button
+              className={`${BASE_BTN} text-green-700 border-green-700 hover:bg-green-700 hover:text-white`}
+              onClick={(e) => handleBtnClick(e, "view")}
+            >
+              <FaEye /> View Details
+            </button>
+            <span
+              className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}
+            >
+              Registered
+            </span>
           </>
         ) : (
           <>
-            <button className={`bg-green-600 text-white hover:bg-green-700 ${BASE_BTN} border-green-600`} onClick={(e) => handleBtnClick(e, 'register')}><FaHome /> Add to My Boardings</button>
-            <span className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>Selected</span>
+            <button
+              className={`bg-green-600 text-white hover:bg-green-700 ${BASE_BTN} border-green-600`}
+              onClick={(e) => handleBtnClick(e, "register")}
+            >
+              <FaHome /> Add to My Boardings
+            </button>
+            <span
+              className={`hidden min-[1400px]:inline-block px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}
+            >
+              Selected
+            </span>
           </>
         );
-      case 'cancelled':
+      case "cancelled":
         return (
-            <span className={`w-full text-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}>
-                {backendStatus === 'NOT_SELECTED' ? 'Rejected by You' : 'Cancelled'}
-            </span>
+          <span
+            className={`w-full text-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider border ${badge}`}
+          >
+            {backendStatus === "NOT_SELECTED" ? "Rejected by You" : "Cancelled"}
+          </span>
         );
       case "rejected":
         return (
@@ -211,12 +232,11 @@ const AppointmentCard = ({ appointment, onAction }) => {
         bg-white rounded-2xl shadow-sm border border-gray-100
         transition-all duration-300 hover:shadow-lg
         flex flex-col relative cursor-pointer overflow-hidden
-        ${isExpanded ? 'ring-2 ring-orange-100' : ''}
+        ${isExpanded ? "ring-2 ring-orange-100" : ""}
       `}
     >
       {/* Top Section (Row) */}
       <div className="p-6 flex flex-col md:flex-row items-center gap-6">
-        
         {/* 1. IMAGE */}
         <div className="relative group" onClick={handleBoardingClick}>
           <img
@@ -230,7 +250,7 @@ const AppointmentCard = ({ appointment, onAction }) => {
           <div
             className={`min-[1400px]:hidden absolute -bottom-2 -right-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white border shadow-sm ${badge}`}
           >
-            {isConfirmed && status === 'upcoming' ? 'Confirmed' : status}
+            {isConfirmed && status === "upcoming" ? "Confirmed" : status}
           </div>
         </div>
 
@@ -294,51 +314,59 @@ const AppointmentCard = ({ appointment, onAction }) => {
 
         {/* Expand Icon */}
         <div className="absolute top-4 right-4 md:static md:ml-2 text-gray-300">
-            {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+          {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
         </div>
       </div>
 
       {/* ✅ UNWRAPPED SECTION: NOTES */}
       {isExpanded && (
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex flex-col gap-4 animate-fadeIn">
-            
-            <div className="flex flex-col md:flex-row gap-6">
-                {/* 1. Student Request Note */}
-                <div className="flex-1">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">My Request Note</span>
-                    <div className="flex gap-3">
-                        <FaQuoteLeft className="text-gray-300 flex-shrink-0 mt-1" size={12}/>
-                        <p className="text-gray-600 text-sm italic">
-                            {displayStudentNote || "No request note provided."}
-                        </p>
-                    </div>
-                </div>
-
-                {/* 2. Owner Response (If exists) */}
-                {ownerNote && (
-                    <div className="flex-1 border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
-                        <span className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-2 block">Owner's Response</span>
-                        <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                            <p className="text-gray-700 text-sm font-medium">
-                                {ownerNote}
-                            </p>
-                        </div>
-                    </div>
-                )}
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* 1. Student Request Note */}
+            <div className="flex-1">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                My Request Note
+              </span>
+              <div className="flex gap-3">
+                <FaQuoteLeft
+                  className="text-gray-300 flex-shrink-0 mt-1"
+                  size={12}
+                />
+                <p className="text-gray-600 text-sm italic">
+                  {displayStudentNote || "No request note provided."}
+                </p>
+              </div>
             </div>
 
-            {/* 3. ✅ CANCELLATION REASON (Show only if exists) */}
-            {cancellationReason && (
-                <div className="bg-red-50 p-3 rounded-lg border border-red-100 mt-2 flex items-start gap-3">
-                    <FaExclamationCircle className="text-red-500 mt-0.5" />
-                    <div>
-                        <span className="text-xs font-bold text-red-600 uppercase tracking-wider block mb-1">Cancellation Reason</span>
-                        <p className="text-red-800 text-sm font-medium">
-                            {cancellationReason}
-                        </p>
-                    </div>
+            {/* 2. Owner Response (If exists) */}
+            {ownerNote && (
+              <div className="flex-1 border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
+                <span className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-2 block">
+                  Owner's Response
+                </span>
+                <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                  <p className="text-gray-700 text-sm font-medium">
+                    {ownerNote}
+                  </p>
                 </div>
+              </div>
             )}
+          </div>
+
+          {/* 3. ✅ CANCELLATION REASON (Show only if exists) */}
+          {cancellationReason && (
+            <div className="bg-red-50 p-3 rounded-lg border border-red-100 mt-2 flex items-start gap-3">
+              <FaExclamationCircle className="text-red-500 mt-0.5" />
+              <div>
+                <span className="text-xs font-bold text-red-600 uppercase tracking-wider block mb-1">
+                  Cancellation Reason
+                </span>
+                <p className="text-red-800 text-sm font-medium">
+                  {cancellationReason}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

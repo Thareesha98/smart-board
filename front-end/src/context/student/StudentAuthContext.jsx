@@ -1,40 +1,40 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import api from "../../api/api";
+import StudentService from "../../api/student/StudentService";
 
-const AuthContext = createContext(null);
+const StudentAuthContext = createContext(null);
 
 export const StudentAuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // 1. Check for logged-in user on load
   useEffect(() => {
-    const checkAuth = () => {
-      try {
-        const storedUser = localStorage.getItem('smartboad_user');
-        const storedCredentials = localStorage.getItem('smartboad_credentials');
-        
-        if (storedUser && storedCredentials) {
-          const userData = JSON.parse(storedUser);
-          setCurrentUser(userData);
-          setIsAuthenticated(true);
-        } else {
-          setCurrentUser(null);
-          setIsAuthenticated(false);
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user_data");
+
+      if (token && savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+
+          // 🔒 Security Check: Ensure the saved user is a STUDENT
+          if (user.role === "STUDENT") {
+            setCurrentUser(user);
+            setIsAuthenticated(true);
+          } else {
+            localStorage.clear();
+          }
+        } catch (e) {
+          console.error("Failed to parse user data", e);
+          localStorage.clear();
         }
-      } catch (error) {
-        console.error('Error loading user data:', error);
-        localStorage.removeItem('smartboad_user');
-        localStorage.removeItem('smartboad_credentials');
-        setCurrentUser(null);
-        setIsAuthenticated(false);
-      } finally {
-        // Ensure loading completes
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
-    checkAuth();
+    initializeAuth();
   }, []);
 
   // 2. Login
@@ -136,16 +136,13 @@ export const StudentAuthProvider = ({ children }) => {
         message: error.response?.data || "Invalid OTP Code",
       };
     }
-    
-    return { success: false, message: 'Invalid email or password' };
   };
 
-  // Logout function
   const logout = () => {
+    localStorage.clear();
     setCurrentUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('smartboad_user');
-    localStorage.removeItem('smartboad_credentials');
+    window.location.href = "/login";
   };
 
   // --- 3. PROFILE UPDATE ACTIONS (Connects Sidebar/Header/Profile) ---
@@ -223,15 +220,20 @@ export const StudentAuthProvider = ({ children }) => {
     currentUser,
     isAuthenticated,
     isLoading,
-    signup,
     login,
     logout,
+    signup,
+    verifyRegistration,
     updateProfile,
     updateAvatar,
     updatePreferences,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <StudentAuthContext.Provider value={value}>
+      {children}
+    </StudentAuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

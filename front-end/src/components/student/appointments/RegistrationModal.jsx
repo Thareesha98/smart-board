@@ -203,7 +203,7 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
         </div>
 
         {/* Custom Form Styling */}
-        <style>{`
+        <style jsx>{`
           .form-input {
             @apply w-full p-3 border border-gray-200 rounded-btn text-text-dark transition-colors duration-200 focus:border-accent focus:outline-none;
           }

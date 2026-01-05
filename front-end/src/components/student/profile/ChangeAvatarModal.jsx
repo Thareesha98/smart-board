@@ -12,26 +12,27 @@ const galleryAvatars = [
 const ChangeAvatarModal = ({ isOpen, onClose, currentAvatar, onSubmit }) => {
   const [previewAvatar, setPreviewAvatar] = useState(currentAvatar);
 
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size should be less than 5MB');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => setPreviewAvatar(e.target.result);
-      reader.readAsDataURL(file);
-    }
-  };
+  const file = e.target.files[0];
+  if (file) {
+    // ... validation ...
+    setSelectedFile(file); // <--- SAVE THE FILE
+    const reader = new FileReader();
+    reader.onload = (e) => setPreviewAvatar(e.target.result);
+    reader.readAsDataURL(file);
+  }
+};
 
   const handleSave = () => {
-    onSubmit(previewAvatar);
-  };
+   // If a file was uploaded, send the file. If gallery selected, send the URL string.
+   if (selectedFile) {
+      onSubmit(selectedFile); 
+   } else {
+      onSubmit(previewAvatar);
+   }
+};
 
   return (
     <AnimatePresence>
