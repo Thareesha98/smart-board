@@ -94,8 +94,11 @@ const AppointmentsPage = () => {
       setIsScheduleModalOpen(true); 
     } else if (action === "cancel") {
       if (!appointment) return;
-      if (window.confirm(`Confirm cancellation for ${appointment.boardingName}?`)) {
-          handleStatusChange(id, 'cancel');
+      if (window.confirm(`Are you sure you want to cancel the visit to ${appointment.boardingName}?`)) {
+          const reason = window.prompt("Optional: Add a note to the owner (e.g., 'Sorry we couldn't come today')", "");
+          
+          // Pass the reason to the hook
+          handleStatusChange(id, 'cancel', reason || "No reason provided."); 
           setCurrentAppointmentId(null);
       }
     } else {
