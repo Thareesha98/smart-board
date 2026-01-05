@@ -35,6 +35,7 @@ public class BoardingMapper {
         BoardingDetailDTO dto = new BoardingDetailDTO();
 
         dto.setId(b.getId());
+        dto.setOwnerId(b.getOwner().getId());
         dto.setTitle(b.getTitle());
         dto.setDescription(b.getDescription());
         dto.setAddress(b.getAddress());
