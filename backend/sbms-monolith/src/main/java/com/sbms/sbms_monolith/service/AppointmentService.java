@@ -193,4 +193,39 @@ public class AppointmentService {
         Appointment saved = appointmentRepository.save(appointment);
         return AppointmentMapper.toDto(saved);
     }
+
+    public AppointmentResponseDTO selectBoarding(Long studentId, Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (!appointment.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("You are not allowed to update this appointment");
+        }
+
+        if (appointment.getStatus() != AppointmentStatus.VISITED) {
+            throw new RuntimeException("You must visit the boarding before selecting it.");
+        }
+
+        appointment.setStatus(AppointmentStatus.SELECTED);
+        Appointment saved = appointmentRepository.save(appointment);
+        return AppointmentMapper.toDto(saved);
+    }
+
+
+    public AppointmentResponseDTO rejectBoarding(Long studentId, Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (!appointment.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("You are not allowed to update this appointment");
+        }
+
+        if (appointment.getStatus() != AppointmentStatus.VISITED) {
+            throw new RuntimeException("You can only reject appointments you have marked as visited.");
+        }
+
+        appointment.setStatus(AppointmentStatus.NOT_SELECTED);
+        Appointment saved = appointmentRepository.save(appointment);
+        return AppointmentMapper.toDto(saved);
+    }
 }
