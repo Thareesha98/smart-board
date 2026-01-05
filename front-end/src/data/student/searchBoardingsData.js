@@ -4,7 +4,7 @@ export const sampleBoardings = [
     name: "Sunshine Hostel",
     price: 350,
     priceNote: "Utilities included",
-    rating: 4.5,
+    // rating: 4.5,
     reviewCount: 23,
     location: "1.2 km from campus",
     distance: 1.2,
@@ -43,7 +43,7 @@ export const sampleBoardings = [
       "Hospital - 2.1km"
     ],
     reviewsSummary: {
-      overall: 4.5,
+      // overall: 4.5,
       breakdown: [
         { stars: 5, percentage: 60 },
         { stars: 4, percentage: 25 },
@@ -126,7 +126,7 @@ export const sampleBoardings = [
       name: "Nimal Silva",
       avatar: "https://randomuser.me/api/portraits/men/45.jpg",
       verified: true,
-      rating: 4.5,
+      // rating: 4.5,
       reviewCount: 32,
       // ✅ Added Contact Info
       contact: "071-9876543",

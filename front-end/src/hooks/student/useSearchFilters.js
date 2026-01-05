@@ -1,19 +1,63 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
+import StudentService from "../../api/student/StudentService";
 
-export const useSearchFilters = (initialBoardings) => {
+export const useSearchFilters = () => {
+  const [filteredBoardings, setFilteredBoardings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [filters, setFilters] = useState({
+    searchQuery: "",
     minPrice: 0,
-    maxPrice: 1000,
-    distance: '10',
-    gender: 'any',
+    maxPrice: 50000,
+    distance: "10",
+    gender: "any",
     amenities: [],
-    roomTypes: []
+    roomTypes: [],
   });
 
-  const [filteredBoardings, setFilteredBoardings] = useState(initialBoardings);
+  const fetchBoardings = async () => {
+    setLoading(true);
+    try {
+      const result = await StudentService.searchBoardings(filters);
+
+      // Map Backend DTO to Frontend UI Structure
+      const mapped = result.content.map((b) => ({
+        id: b.id,
+        name: b.title,
+        image: b.imageUrls?.[0] || "https://via.placeholder.com/300",
+        price: b.pricePerMonth,
+        location: b.address,
+
+        // ✅ FIX: Read real values from Backend DTO
+        rating: b.rating || 0,
+        reviewCount: b.reviewCount || 0,
+
+        amenities: b.amenities || [], // If your DTO sends amenities, use them too!
+        badge: b.status === "APPROVED" ? "Verified" : "New",
+      }));
+
+      setFilteredBoardings(mapped);
+    } catch (error) {
+      console.error("Search failed", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch on mount and when filters change (Debouncing suggested for production)
+  useEffect(() => {
+    // 1. Create a timer that waits 500ms
+    const debounceTimer = setTimeout(() => {
+      fetchBoardings();
+    }, 500);
+
+    // 2. If user types again before 500ms, clear the timer (don't search yet)
+    return () => clearTimeout(debounceTimer);
+    
+  }, [filters]);
 
   const handleFilterChange = useCallback((key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   }, []);
 
   const applyFilters = useCallback(() => {
@@ -54,12 +98,13 @@ export const useSearchFilters = (initialBoardings) => {
 
   const clearAllFilters = useCallback(() => {
     setFilters({
+      searchQuery: "",
       minPrice: 0,
-      maxPrice: 1000,
-      distance: '10',
-      gender: 'any',
+      maxPrice: 50000,
+      distance: "10",
+      gender: "any",
       amenities: [],
-      roomTypes: []
+      roomTypes: [],
     });
     setFilteredBoardings(initialBoardings);
   }, [initialBoardings]);
@@ -70,6 +115,6 @@ export const useSearchFilters = (initialBoardings) => {
     handleFilterChange,
     applyFilters,
     clearAllFilters,
-    setFilteredBoardings
+    setFilteredBoardings,
   };
 };

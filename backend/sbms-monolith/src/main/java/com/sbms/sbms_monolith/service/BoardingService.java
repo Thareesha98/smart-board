@@ -7,6 +7,7 @@ import com.sbms.sbms_monolith.mapper.BoardingMapper;
 import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.enums.Status;
 import com.sbms.sbms_monolith.repository.BoardingRepository;
+import com.sbms.sbms_monolith.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -21,43 +22,54 @@ public class BoardingService {
     @Autowired
     private BoardingRepository boardingRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
     public Page<BoardingSummaryDTO> searchBoardings(BoardingSearchRequest request) {
 
         List<Boarding> all = boardingRepository.findAll();
 
         List<Boarding> filtered = all.stream()
-                // Only approved boardings visible
-                .filter(b -> b.getStatus() == Status.APPROVED)
-                // Gender filter
+                // 1. Status Filter (Null Safe)
+                .filter(b -> b.getStatus() != null && b.getStatus() == Status.APPROVED)
+
+                // 2. Gender Filter (Null Safe)
                 .filter(b -> request.getGenderType() == null ||
-                             b.getGenderType() == request.getGenderType())
-                // Boarding type filter
+                        (b.getGenderType() != null && b.getGenderType() == request.getGenderType()))
+
+                // 3. Boarding Type Filter (Null Safe)
                 .filter(b -> request.getBoardingType() == null ||
-                             b.getBoardingType() == request.getBoardingType())
-                // Min price
+                        (b.getBoardingType() != null && b.getBoardingType() == request.getBoardingType()))
+
+                // 4. Min Price Filter (Null Safe - Fixes Crash)
                 .filter(b -> request.getMinPrice() == null ||
-                             b.getPricePerMonth().compareTo(request.getMinPrice()) >= 0)
-                // Max price
+                        (b.getPricePerMonth() != null && b.getPricePerMonth().compareTo(request.getMinPrice()) >= 0))
+
+                // 5. Max Price Filter (Null Safe - Fixes Crash)
                 .filter(b -> request.getMaxPrice() == null ||
-                             b.getPricePerMonth().compareTo(request.getMaxPrice()) <= 0)
-                // Search keyword (title + address)
-                
+                        (b.getPricePerMonth() != null && b.getPricePerMonth().compareTo(request.getMaxPrice()) <= 0))
+
+                // 6. Min KeyMoney (Null Safe)
                 .filter(b -> request.getMinKeyMoney() == null ||
-                b.getKeyMoney().compareTo(request.getMinKeyMoney()) <= 0)
-                
+                        (b.getKeyMoney() != null && b.getKeyMoney().compareTo(request.getMinKeyMoney()) >= 0))
+
+                // 7. Max KeyMoney (Null Safe)
                 .filter(b -> request.getMaxKeyMoney() == null ||
-                b.getKeyMoney().compareTo(request.getMaxKeyMoney()) <= 0)
-                
+                        (b.getKeyMoney() != null && b.getKeyMoney().compareTo(request.getMaxKeyMoney()) <= 0))
+
+                // 8. Keyword Search (Title OR Address)
                 .filter(b -> {
-                    if (request.getAddressKeyword() == null ||
-                        request.getAddressKeyword().isBlank()) {
+                    if (request.getAddressKeyword() == null || request.getAddressKeyword().isBlank()) {
                         return true;
                     }
                     String keyword = request.getAddressKeyword().toLowerCase(Locale.ROOT);
-                    return (b.getAddress() != null &&
-                            b.getAddress().toLowerCase(Locale.ROOT).contains(keyword))
-                        || (b.getTitle() != null &&
-                            b.getTitle().toLowerCase(Locale.ROOT).contains(keyword));
+
+                    boolean matchesAddress = b.getAddress() != null &&
+                            b.getAddress().toLowerCase(Locale.ROOT).contains(keyword);
+                    boolean matchesTitle = b.getTitle() != null &&
+                            b.getTitle().toLowerCase(Locale.ROOT).contains(keyword);
+
+                    return matchesAddress || matchesTitle;
                 })
                 .collect(Collectors.toList());
 
@@ -65,29 +77,31 @@ public class BoardingService {
     }
 
     public Page<BoardingSummaryDTO> getAllFiltered(BoardingSearchRequest request) {
-        List<Boarding> all = boardingRepository.findAll();
+//        List<Boarding> all = boardingRepository.findAll();
+//
+//        List<Boarding> filtered = all.stream()
+//                .filter(b -> b.getStatus() == Status.APPROVED)
+//                .filter(b -> request.getGenderType() == null ||
+//                             b.getGenderType() == request.getGenderType())
+//                .filter(b -> request.getBoardingType() == null ||
+//                             b.getBoardingType() == request.getBoardingType())
+//                .filter(b -> request.getMinPrice() == null ||
+//                             b.getPricePerMonth().compareTo(request.getMinPrice()) >= 0)
+//                .filter(b -> request.getMaxPrice() == null ||
+//                             b.getPricePerMonth().compareTo(request.getMaxPrice()) <= 0)
+//                .filter(b -> request.getMinKeyMoney() == null ||
+//                b.getKeyMoney().compareTo(request.getMinKeyMoney()) <= 0)
+//
+//                .filter(b -> request.getMaxKeyMoney() == null ||
+//                b.getKeyMoney().compareTo(request.getMaxKeyMoney()) <= 0)
+//                .collect(Collectors.toList());
+//
+//        return toPagedResult(request, filtered);
 
-        List<Boarding> filtered = all.stream()
-                .filter(b -> b.getStatus() == Status.APPROVED)
-                .filter(b -> request.getGenderType() == null ||
-                             b.getGenderType() == request.getGenderType())
-                .filter(b -> request.getBoardingType() == null ||
-                             b.getBoardingType() == request.getBoardingType())
-                .filter(b -> request.getMinPrice() == null ||
-                             b.getPricePerMonth().compareTo(request.getMinPrice()) >= 0)
-                .filter(b -> request.getMaxPrice() == null ||
-                             b.getPricePerMonth().compareTo(request.getMaxPrice()) <= 0)
-                .filter(b -> request.getMinKeyMoney() == null ||
-                b.getKeyMoney().compareTo(request.getMinKeyMoney()) <= 0)
-                
-                .filter(b -> request.getMaxKeyMoney() == null ||
-                b.getKeyMoney().compareTo(request.getMaxKeyMoney()) <= 0)
-                .collect(Collectors.toList());
-
-        return toPagedResult(request, filtered);
+        return searchBoardings(request);
     }
 
-   
+
     public Page<BoardingSummaryDTO> getAll(BoardingSearchRequest request) {
         List<Boarding> all = boardingRepository.findAll();
 
@@ -106,11 +120,16 @@ public class BoardingService {
             throw new RuntimeException("Boarding is not approved yet");
         }
 
-        return BoardingMapper.toDetail(b);
+        BoardingDetailDTO dto = BoardingMapper.toDetail(b);
+
+        dto.setReviewCount(reviewRepository.countByBoardingId(id));
+        Double avg = reviewRepository.getAverageRatingForBoarding(id);
+        dto.setRating(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0);
+
+        return dto;
     }
 
-    private Page<BoardingSummaryDTO> toPagedResult(BoardingSearchRequest request,
-                                                   List<Boarding> filtered) {
+    private Page<BoardingSummaryDTO> toPagedResult(BoardingSearchRequest request, List<Boarding> filtered) {
 
         int page = request.getPage();
         int size = request.getSize();
@@ -122,7 +141,17 @@ public class BoardingService {
         }
 
         List<BoardingSummaryDTO> content = filtered.subList(from, to).stream()
-                .map(BoardingMapper::toSummary)
+                .map(boarding -> {
+                    // 1. Convert to DTO
+                    BoardingSummaryDTO dto = BoardingMapper.toSummary(boarding);
+
+                    // 2. ✅ Fetch & Set Real Rating Data
+                    dto.setReviewCount(reviewRepository.countByBoardingId(boarding.getId()));
+                    Double avg = reviewRepository.getAverageRatingForBoarding(boarding.getId());
+                    dto.setRating(avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0);
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
         Pageable pageable = PageRequest.of(page, size);

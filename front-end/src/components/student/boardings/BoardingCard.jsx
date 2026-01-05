@@ -97,7 +97,7 @@ const BoardingCard = ({
           <div className="flex gap-8 border-t border-gray-100 pt-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-accent flex items-center gap-1">
-                {boarding.rating} <FaStar className="text-yellow-500 text-lg" />
+                {boarding.rating || 0} <FaStar className="text-yellow-500 text-lg" />
               </div>
               <span className="text-sm text-text-muted">Rating</span>
             </div>

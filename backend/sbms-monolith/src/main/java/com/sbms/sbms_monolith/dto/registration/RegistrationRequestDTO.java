@@ -2,6 +2,8 @@ package com.sbms.sbms_monolith.dto.registration;
 
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class RegistrationRequestDTO {
 
@@ -11,5 +13,12 @@ public class RegistrationRequestDTO {
 
     private String studentNote;
     
-    private boolean keyMoneyPaid; 
+    private boolean keyMoneyPaid;
+
+    private LocalDate moveInDate;
+    private String contractDuration;
+    private String emergencyContact;
+    private String emergencyPhone;
+    private String specialRequirements;
+    private String paymentMethod;
 }
