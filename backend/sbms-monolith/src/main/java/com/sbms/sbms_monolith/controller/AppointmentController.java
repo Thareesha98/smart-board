@@ -55,6 +55,24 @@ public class AppointmentController {
         return appointmentService.markAsVisited(studentId, appointmentId);
     }
 
+    @PutMapping("/student/{studentId}/{appointmentId}/select")
+    @PreAuthorize("hasRole('STUDENT')")
+    public AppointmentResponseDTO selectBoarding(
+            @PathVariable Long studentId,
+            @PathVariable Long appointmentId
+    ) {
+        return appointmentService.selectBoarding(studentId, appointmentId);
+    }
+
+    @PutMapping("/student/{studentId}/{appointmentId}/reject")
+    @PreAuthorize("hasRole('STUDENT')")
+    public AppointmentResponseDTO rejectBoarding(
+            @PathVariable Long studentId,
+            @PathVariable Long appointmentId
+    ) {
+        return appointmentService.rejectBoarding(studentId, appointmentId);
+    }
+
    
     @GetMapping("/owner/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
