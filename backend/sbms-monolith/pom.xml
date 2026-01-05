@@ -39,6 +39,7 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
+        
     </dependencyManagement>
 
     <dependencies>
@@ -103,6 +104,8 @@
 		    <groupId>org.springframework.security</groupId>
 		    <artifactId>spring-security-messaging</artifactId>
 		</dependency>
+		
+		
 
         <!-- JWT -->
         <dependency>
