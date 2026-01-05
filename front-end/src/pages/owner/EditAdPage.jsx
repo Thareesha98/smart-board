@@ -13,6 +13,10 @@ import {
   LoadingSpinner,
 } from "../../components/Owner/ads/EditAdSubComponents";
 
+// ✅ 1. Constants (Copied from CreateAdPage)
+const BOARDING_TYPES = ["ANNEX", "ROOM", "HOUSE"];
+const GENDER_TYPES = ["MALE", "FEMALE", "MIXED"];
+
 const availableAmenities = [
   { label: "Attached Bathroom", icon: "fa-bath" },
   { label: "Wi-Fi", icon: "fa-wifi" },
@@ -31,7 +35,7 @@ const EditAdPage = () => {
   const [newImageFiles, setNewImageFiles] = useState([]);
   const [newImagePreviews, setNewImagePreviews] = useState([]);
 
-  // --- 1. Load Data ---
+  // --- Load Data ---
   useEffect(() => {
     const loadAdData = async () => {
       const data = await fetchSingleAd(adId);
@@ -40,16 +44,23 @@ const EditAdPage = () => {
           ...data,
           rent: data.rent || "",
           deposit: data.deposit || "",
+          description: data.description || "",
           amenities: data.amenities || [],
           currentImages: data.currentImages || [],
           adStatus: data.status || "Draft",
+
+          // ✅ 2. Initialize new fields (with defaults if missing)
+          genderType: data.genderType || "MIXED",
+          boardingType: data.boardingType || "ROOM",
+          availableSlots: data.availableSlots || 1,
+          maxOccupants: data.maxOccupants || 1,
         });
       }
     };
     loadAdData();
   }, [adId, fetchSingleAd]);
 
-  // --- 2. Handlers ---
+  // --- Handlers ---
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
@@ -90,10 +101,9 @@ const EditAdPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // ✅ FIX: Replaced 'fetchedData.status' with 'formData.adStatus'
     await updateAd(
       adId,
-      formData,
+      formData, // Now contains gender, boarding type, slots, etc.
       newImageFiles,
       formData.currentImages,
       formData.adStatus
@@ -105,11 +115,7 @@ const EditAdPage = () => {
     return <div className="p-8 text-center text-error">Ad not found.</div>;
 
   return (
-    // ✅ NO 'sticky' classes here. The header is part of the normal flow.
     <div className="pt-4 space-y-8 bg-light min-h-screen pb-12">
-      {/* This HeaderBar is NOT wrapped in a sticky div.
-         It will render at the top, and when you scroll down, it will go up and disappear.
-      */}
       <HeaderBar
         title={`Edit Ad: ${adId}`}
         subtitle={`Editing details for **${formData.title}**`}
@@ -166,16 +172,71 @@ const EditAdPage = () => {
               onChange={handleChange}
               type="number"
             />
-            <div className="md:col-span-2">
+
+            {/* ✅ 3. Added Dropdowns (Gender & Boarding Type) */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase text-muted tracking-wider">
+                Gender Preference
+              </label>
+              <select
+                name="genderType"
+                value={formData.genderType}
+                onChange={handleChange}
+                className="p-3 border border-light rounded-xl bg-white/50 focus:border-accent font-medium text-text"
+              >
+                {GENDER_TYPES.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase text-muted tracking-wider">
+                Boarding Type
+              </label>
+              <select
+                name="boardingType"
+                value={formData.boardingType}
+                onChange={handleChange}
+                className="p-3 border border-light rounded-xl bg-white/50 focus:border-accent font-medium text-text"
+              >
+                {BOARDING_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* ✅ 4. Added Slot & Occupant Inputs */}
+            <FormGroup
+              label="Available Slots"
+              name="availableSlots"
+              type="number"
+              value={formData.availableSlots}
+              onChange={handleChange}
+            />
+            <FormGroup
+              label="Max Occupants"
+              name="maxOccupants"
+              type="number"
+              value={formData.maxOccupants}
+              onChange={handleChange}
+            />
+
+            {/* Description */}
+            <div className="md:col-span-2 mt-4">
               <label className="block text-xs font-bold uppercase text-muted tracking-wider mb-2">
                 Description
               </label>
               <textarea
                 name="description"
-                rows="3"
+                rows="4"
                 value={formData.description}
                 onChange={handleChange}
-                className="w-full p-3 border border-light rounded-xl bg-white/50 focus:border-accent"
+                className="w-full p-4 border border-light rounded-xl bg-white/50 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 transition-all text-text font-medium"
               />
             </div>
           </div>

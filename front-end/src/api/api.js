@@ -12,15 +12,10 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     
-    console.log("--- DEBUGGING AUTH HEADER ---");
-    console.log("Raw Token in Storage:", token);
-
     // 🔒 STRICT CHECK: Ensure token is real string and not "null"/"undefined" text
     if (token && token !== "null" && token !== "undefined" && token.length > 10) {
-      console.log("✅ Attaching Valid Token");
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-      console.log("⚠️ No Token / Bad Token found - REMOVING Header");
       // 🚀 CRITICAL: Delete the header to force a clean public request
       delete config.headers.Authorization;
       config.headers.Authorization = undefined; 
