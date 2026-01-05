@@ -1,75 +1,74 @@
-import React, { useState, useMemo } from "react";
-import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import React from "react";
+import { Outlet } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import AdCard from "../../components/Owner/ads/AdCard";
+import BoardingCardSkeleton from "../../components/Owner/ads/BoardingCardSkeleton"; // ✅ Imported
 import {
   StatusTab,
   EmptyState,
   STATUS_CONFIG,
 } from "../../components/Owner/ads/MyAdsComponents";
-import { mockAds, ownerData } from "../../data/mockData";
+import useMyAdsLogic from "../../hooks/owner/useMyAdsLogic";
 
 export default function MyAdsPage() {
-  const [filter, setFilter] = useState("All");
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { currentOwner } = useOwnerAuth();
 
-  // 1. Data Processing
-  const liveAds = useMemo(() => {
-    const boostedIds = JSON.parse(sessionStorage.getItem("boostedAds") || "[]");
-    return mockAds.map((ad) => ({
-      ...ad,
-      isBoosted: boostedIds.includes(ad.id) || ad.isBoosted || false,
-    }));
-  }, []);
-
-  const counts = useMemo(() => {
-    const acc = liveAds.reduce((a, ad) => {
-      a[ad.status] = (a[ad.status] || 0) + 1;
-      return a;
-    }, {});
-    acc["All"] = liveAds.length;
-    return acc;
-  }, [liveAds]);
-
-  const filteredAds = liveAds.filter(
-    (ad) => filter === "All" || ad.status === filter
-  );
-
-  const isNestedRoute = location.pathname !== "/owner/myAds";
-  const handleCreate = () => navigate("createAd");
+  const {
+    filter,
+    setFilter,
+    filteredAds,
+    counts,
+    isNestedRoute,
+    handleCreate,
+    handleEdit,
+    toggleAdStatus,
+    handleBoostRedirect,
+    getStatusBadgeStyle,
+    isLoading,
+    error,
+  } = useMyAdsLogic();
 
   if (isNestedRoute) return <Outlet />;
 
+  // Error State
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-light text-center">
+        <div className="text-xl font-black text-error mb-2">Oops!</div>
+        <p className="text-muted">{error}</p>
+      </div>
+    );
+  }
+
+  // ✅ MAIN RENDER (Handles both Loading & Success)
   return (
     <div className="pt-4 space-y-6 bg-light min-h-screen">
+      {/* 1. Header is ALWAYS visible (No flickering) */}
       <HeaderBar
-        title="My Boarding Ads"
-        subtitle="Manage and track your listings"
-        notificationCount={ownerData?.notifications || 3}
-        userAvatar={ownerData.avatar}
-        userName={ownerData.firstName}
-      >
-        {/* Responsive Button: Text hidden on mobile, full on tablet/desktop */}
-        <button
-          className="px-4 md:px-6 py-3 font-black rounded-full bg-accent text-card-bg shadow-md hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest text-[10px] md:text-xs"
-          onClick={handleCreate}
-        >
-          <i className="fas fa-plus md:mr-2" /> 
-          <span className="hidden md:inline">Create New Ad</span>
-        </button>
-      </HeaderBar>
+        title="My Listings"
+        subtitle="Manage your boarding house advertisements"
+        navBtnText="Create New Listing"
+        navBtnPath="/owner/myAds/createAd"
+        userAvatar={currentOwner?.avatar}
+        userName={currentOwner?.firstName}
+      />
 
-      {/* Filter Section: 
-          Uses horizontal scrolling on mobile (overflow-x-auto) 
-          and a 5-column grid on desktop (md:grid-cols-5) */}
+      {/* 2. Filter Tabs are ALWAYS visible */}
+      {/* 2. Filter Tabs are ALWAYS visible */}
       <section className="px-4 md:px-0">
-        <div className="flex overflow-x-auto md:grid md:grid-cols-5 gap-4 p-4 md:p-6 rounded-report shadow-custom bg-card-bg border border-light custom-scrollbar">
+        <div className="flex overflow-x-auto gap-3 md:gap-4 p-4 md:p-6 rounded-report shadow-custom bg-card-bg border border-light no-scrollbar">
           {Object.keys(STATUS_CONFIG).map((status) => (
-            <div key={status} className="min-w-[140px] md:min-w-0 flex-shrink-0">
+            <div
+              key={status}
+              // flex-1 makes them fill space on desktop
+              // min-w-[120px] ensures they don't get squished on mobile
+              className="flex-1 min-w-[120px] md:min-w-0 flex-shrink-0" 
+            >
               <StatusTab
                 status={status}
-                count={counts[status] || 0}
+                count={isLoading ? "-" : counts[status] || 0}
                 currentFilter={filter}
                 setFilter={setFilter}
               />
@@ -78,30 +77,43 @@ export default function MyAdsPage() {
         </div>
       </section>
 
-      {/* Ads Section: Padding added for mobile screens */}
+      {/* 3. Content Area: Switches between Skeletons and Real Ads */}
       <section className="px-4 md:px-0 pb-10">
-        <h2 className="text-xl md:text-2xl font-black mb-4 text-primary tracking-tight">
-          {filter} Listings ({filteredAds.length})
-        </h2>
+        <motion.h2
+          layout
+          className="text-xl md:text-2xl font-black mb-4 text-primary tracking-tight"
+        >
+          {isLoading
+            ? "Loading Properties..."
+            : `${filter} Listings (${filteredAds.length})`}
+        </motion.h2>
 
         <div className="space-y-4 md:space-y-6">
-          {filteredAds.length > 0 ? (
-            filteredAds.map((ad) => (
-              <AdCard
-                key={ad.id}
-                ad={ad}
-                onEdit={(id) => navigate(`editAd/${id}`)}
-                onBoostRedirect={(id) =>
-                  navigate(`/owner/subscriptions/${id}`)
-                }
-                getStatusBadgeStyle={(s) => ({
-                  backgroundColor: `var(--${s.toLowerCase()})`,
-                  color: 'white'
-                })}
-              />
-            ))
+          {isLoading ? (
+            // 💀 LOADING STATE: Show Skeletons
+            <div className="space-y-4 md:space-y-6">
+              {[1, 2, 3].map((n) => (
+                <BoardingCardSkeleton key={n} />
+              ))}
+            </div>
           ) : (
-            <EmptyState filter={filter} onCreate={handleCreate} />
+            // 🟢 LOADED STATE: Show Real Ads
+            <AnimatePresence mode="popLayout">
+              {filteredAds.length > 0 ? (
+                filteredAds.map((ad) => (
+                  <AdCard
+                    key={ad.id}
+                    ad={ad}
+                    onEdit={handleEdit}
+                    onToggleStatus={toggleAdStatus}
+                    onBoostRedirect={handleBoostRedirect}
+                    getStatusBadgeStyle={getStatusBadgeStyle}
+                  />
+                ))
+              ) : (
+                <EmptyState filter={filter} onCreate={handleCreate} />
+              )}
+            </AnimatePresence>
           )}
         </div>
       </section>

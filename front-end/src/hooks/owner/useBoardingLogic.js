@@ -73,7 +73,7 @@ const useBoardingLogic = () => {
       boardingType: b.boardingType,
 
       // Tenant logic (Placeholder until you link the getTenants API)
-      rating: 4.5,
+      // rating: 4.5,
       totalTenants: 0,
       tenantsList: [],
     }));

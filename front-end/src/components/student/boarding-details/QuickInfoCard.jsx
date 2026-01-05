@@ -17,6 +17,23 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
     users: FaUsers,
   };
 
+  // ✅ FIX: Ensure boarding exists before rendering
+  if (!boarding) return null;
+
+  // ✅ FIX: Safe access for quickStats to prevent .map() crash
+  const safeStats = boarding.quickStats || [];
+
+  const displayAddress = 
+    boarding.boardingAddress || 
+    boarding.address || 
+    boarding.location?.address || 
+    "Address not available";
+
+  const rawDistance = boarding.distance || boarding.location?.distance;
+  const displayDistance = rawDistance 
+    ? `${rawDistance} ${String(rawDistance).includes('km') ? '' : 'km'} from city` 
+    : "Distance info unavailable";  
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -44,10 +61,10 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
         <FaMapMarkerAlt className="text-accent mt-1 flex-shrink-0 text-lg" />
         <div>
           <p className="text-text-dark font-medium text-sm sm:text-base leading-snug">
-            {boarding.location.address}
+            {displayAddress}
           </p>
           <p className="text-xs sm:text-sm text-text-muted mt-1">
-            {boarding.location.distance}
+            {displayDistance}
           </p>
         </div>
       </div>
@@ -69,8 +86,8 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
 
       {/* 4. Stats Section */}
       <div className="grid grid-cols-3 gap-3">
-        {boarding.quickStats.map((stat, idx) => {
-          const Icon = iconMap[stat.icon];
+        {safeStats.map((stat, idx) => {
+          const Icon = iconMap[stat.icon] || FaBed;
           return (
             <div
               key={idx}

@@ -144,4 +144,101 @@ public class EmailService {
             throw new RuntimeException("Failed to send OTP email", e);
         }
     }
+    
+    
+    public void sendPaymentReceipt(
+            String toEmail,
+            String studentName,
+            byte[] pdfBytes,
+            String receiptNumber
+    ) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("✅ Payment Successful | Receipt #" + receiptNumber);
+
+            String html = """
+            <div style="font-family: 'Poppins', Arial, sans-serif;
+                        background:#eef2f7; padding:30px;">
+              
+              <div style="max-width:650px; margin:auto;
+                          background:#ffffff; border-radius:18px;
+                          overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.15);">
+                
+                <!-- Header -->
+                <div style="background:linear-gradient(135deg,#2563eb,#60a5fa);
+                            padding:28px; text-align:center;">
+                  <h1 style="color:white; margin:0; font-size:26px;">
+                    💳 Payment Successful
+                  </h1>
+                  <p style="color:#dbeafe; margin-top:6px;">
+                    Smart Boarding Management System
+                  </p>
+                </div>
+
+                <!-- Body -->
+                <div style="padding:30px; color:#1e293b; font-size:16px; line-height:1.7;">
+                  <p>Hi <strong>%s</strong>,</p>
+
+                  <p>
+                    Your payment has been <strong style="color:#22c55e;">successfully processed</strong>.
+                    Please find your official payment receipt attached to this email.
+                  </p>
+
+                  <div style="
+                      background:#f1f5f9;
+                      border-left:6px solid #22c55e;
+                      padding:16px;
+                      border-radius:10px;
+                      margin:20px 0;">
+                    <strong>Receipt No:</strong> %s<br/>
+                    <strong>Status:</strong> PAID ✅
+                  </div>
+
+                  <p>
+                    This receipt can be used for future reference or disputes.
+                  </p>
+
+                  <p>
+                    Thank you for choosing <strong>Smart Board</strong>.
+                  </p>
+
+                  <p style="margin-top:30px;">
+                    Regards,<br/>
+                    <strong>Smart Board Team</strong><br/>
+                    <span style="color:#64748b; font-size:14px;">
+                      Live Smarter. Manage Better.
+                    </span>
+                  </p>
+                </div>
+
+                <!-- Footer -->
+                <div style="background:#f8fafc;
+                            padding:18px; text-align:center;
+                            font-size:13px; color:#64748b;">
+                  © 2026 Smart Boarding Management System<br/>
+                  Spiral Softwares · Sri Lanka
+                </div>
+              </div>
+            </div>
+            """.formatted(studentName, receiptNumber);
+
+            helper.setText(html, true);
+
+            // 📎 Attach PDF
+            helper.addAttachment(
+                    "Payment-Receipt-" + receiptNumber + ".pdf",
+                    () -> new java.io.ByteArrayInputStream(pdfBytes)
+            );
+
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send payment receipt email", e);
+        }
+    }
 }

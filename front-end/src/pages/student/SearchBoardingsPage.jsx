@@ -18,7 +18,7 @@ import { useSearchFilters } from '../../hooks/student/useSearchFilters.js';
 import { useSortBoardings } from '../../hooks/student/useSortBoardings.js';
 
 const SearchBoardingsPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  // const [searchQuery, setSearchQuery] = useState('');
   const [moveInDate, setMoveInDate] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [isSearching, setIsSearching] = useState(false);
@@ -37,7 +37,7 @@ const SearchBoardingsPage = () => {
   const { sortBy, handleSort } = useSortBoardings();
 
   const handleSearch = () => {
-    if (!searchQuery.trim()) {
+    if (!filters.searchQuery || !filters.searchQuery.trim()) {
       alert('Please enter a location to search');
       return;
     }
@@ -45,7 +45,7 @@ const SearchBoardingsPage = () => {
     setTimeout(() => {
       applyFilters();
       setIsSearching(false);
-    }, 1000);
+    }, 500);
   };
 
   const handleBookAppointment = (id) => {
@@ -66,8 +66,8 @@ const SearchBoardingsPage = () => {
       {/* 1. Search Hero Section */}
       <div className="mb-6">
         <SearchHero 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          searchQuery={filters.searchQuery}
+          setSearchQuery={(val) => handleFilterChange('searchQuery', val)}
           moveInDate={moveInDate}
           setMoveInDate={setMoveInDate}
           onSearch={handleSearch}

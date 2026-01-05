@@ -1,6 +1,6 @@
 export const boardingDetails = {
   id: 1,
-  name: "Sunshine Hostel",
+  // name: "Sunshine Hostel",
   price: 350,
   priceNote: "Utilities included",
   rating: 4.8,

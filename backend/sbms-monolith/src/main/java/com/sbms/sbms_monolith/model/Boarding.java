@@ -19,7 +19,6 @@ import com.sbms.sbms_monolith.common.BaseEntity;
 @Table(name = "boardings")
 public class Boarding extends BaseEntity {
 
-	//ownerID
 	
 	@ManyToOne
 	@JoinColumn(name = "owner_id")
@@ -68,10 +67,10 @@ public class Boarding extends BaseEntity {
     
     private boolean isBosted = false;
     protected LocalDateTime boostEndDate;
-    
-    
 
-    
+    @OneToMany(mappedBy = "boarding", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Review> reviews;
+
 }
 
 

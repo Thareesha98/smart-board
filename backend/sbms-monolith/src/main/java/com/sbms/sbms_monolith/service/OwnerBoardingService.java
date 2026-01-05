@@ -58,7 +58,6 @@ public class OwnerBoardingService {
         b.setImageUrls(dto.getImageUrls());
         b.setNearbyPlaces(dto.getNearbyPlaces());
 
-
         Boarding saved = boardingRepository.save(b);
         return BoardingMapper.toOwnerResponse(saved);
     }

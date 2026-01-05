@@ -144,17 +144,28 @@ public class AppointmentService {
             appointment.setOwnerNote(dto.getOwnerNote());
             appointment.setStatus(AppointmentStatus.ACCEPTED);
 
+        } else if (dto.getStatus() == AppointmentStatus.VISITED) {
+        
+            if (appointment.getStatus() != AppointmentStatus.ACCEPTED) {
+                throw new RuntimeException("Only previously ACCEPTED appointments can be marked as VISITED.");
+            }
+
+            appointment.setStatus(AppointmentStatus.VISITED);
+            
+            if (dto.getOwnerNote() != null && !dto.getOwnerNote().isEmpty()) {
+                appointment.setOwnerNote(dto.getOwnerNote());
+            } 
+            
         } else {
-            throw new RuntimeException("Invalid status. Only ACCEPTED or DECLINED allowed");
+            throw new RuntimeException("Invalid status. Supported: ACCEPTED, DECLINED, VISITED");
         }
 
         Appointment saved = appointmentRepository.save(appointment);
         return AppointmentMapper.toDto(saved);
     }
 
-   
-    public AppointmentResponseDTO cancelAppointment(Long studentId, Long appointmentId) {
 
+    public AppointmentResponseDTO cancelAppointment(Long studentId, Long appointmentId, String reason) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
@@ -162,11 +173,72 @@ public class AppointmentService {
             throw new RuntimeException("You are not allowed to cancel this appointment");
         }
 
-        if (appointment.getStatus() == AppointmentStatus.ACCEPTED) {
+        // ✅ Append cancellation reason to the existing note
+        if (reason != null && !reason.isBlank()) {
+            String oldNote = appointment.getStudentNote();
+            String newNote = (oldNote == null ? "" : oldNote + "\n\n") + "[Cancelled]: " + reason;
+            appointment.setStudentNote(newNote);
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
+        Appointment saved = appointmentRepository.save(appointment);
+        return AppointmentMapper.toDto(saved);
+    }
 
+    public AppointmentResponseDTO markAsVisited(Long studentId, Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // Debug Print
+        System.out.println("--- MARK VISITED DEBUG ---");
+        System.out.println("Appointment ID: " + appointmentId);
+        System.out.println("Current Status in DB: " + appointment.getStatus());
+
+        if (!appointment.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("You are not allowed to update this appointment");
+        }
+
+        if (appointment.getStatus() != AppointmentStatus.ACCEPTED) {
+            // Include actual status in error message
+            throw new RuntimeException("Current status is " + appointment.getStatus() + ". Only ACCEPTED appointments can be marked as visited.");
+        }
+
+        appointment.setStatus(AppointmentStatus.VISITED);
+        Appointment saved = appointmentRepository.save(appointment);
+        return AppointmentMapper.toDto(saved);
+    }
+
+    public AppointmentResponseDTO selectBoarding(Long studentId, Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (!appointment.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("You are not allowed to update this appointment");
+        }
+
+        if (appointment.getStatus() != AppointmentStatus.VISITED) {
+            throw new RuntimeException("You must visit the boarding before selecting it.");
+        }
+
+        appointment.setStatus(AppointmentStatus.SELECTED);
+        Appointment saved = appointmentRepository.save(appointment);
+        return AppointmentMapper.toDto(saved);
+    }
+
+
+    public AppointmentResponseDTO rejectBoarding(Long studentId, Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (!appointment.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("You are not allowed to update this appointment");
+        }
+
+        if (appointment.getStatus() != AppointmentStatus.VISITED) {
+            throw new RuntimeException("You can only reject appointments you have marked as visited.");
+        }
+
+        appointment.setStatus(AppointmentStatus.NOT_SELECTED);
         Appointment saved = appointmentRepository.save(appointment);
         return AppointmentMapper.toDto(saved);
     }

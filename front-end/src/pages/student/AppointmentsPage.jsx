@@ -8,6 +8,8 @@ import AppointmentCard from "../../components/student/appointments/AppointmentCa
 import ScheduleModal from "../../components/student/appointments/ScheduleModal";
 import DecisionModal from "../../components/student/appointments/DecisionModal";
 import RegistrationModal from "../../components/student/appointments/RegistrationModal";
+import CancelModal from "../../components/student/appointments/CancelModal.jsx";
+
 import { FaPlus } from "react-icons/fa";
 
 const AppointmentsPage = () => {
@@ -26,8 +28,12 @@ const AppointmentsPage = () => {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isDecisionModalOpen, setIsDecisionModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  
   const [modalContent, setModalContent] = useState({});
   const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
+
+  const currentAppointment = getAppointmentById(currentAppointmentId);
 
   const categories = ['upcoming', 'visited', 'selected', 'cancelled', 'rejected'];
 
@@ -36,15 +42,42 @@ const AppointmentsPage = () => {
     if (!appointment) return;
 
     setCurrentAppointmentId(id);
+
+    let title, message, actionLabel, isSuccess;
+
+    if (decision === 'markVisited') {
+        title = "Confirm Visit";
+        message = `Have you visited **${appointment.boardingName}**? This will move it to your 'Visited' tab.`;
+        actionLabel = "Yes, Mark as Visited";
+        isSuccess = true; // ✅ Makes it GREEN
+    } else if (decision === 'select') {
+        title = "Confirm Selection";
+        message = `Are you sure you want to select **${appointment.boardingName}**?`;
+        actionLabel = "Yes, Select";
+        isSuccess = true; // ✅ Makes it GREEN
+    } else if (decision === 'reject') {
+        title = "Confirm Rejection";
+        message = `Are you sure you want to reject **${appointment.boardingName}**?`;
+        actionLabel = "Yes, Reject";
+        isSuccess = false; // ✅ Makes it RED
+    } else {
+        // Fallback
+        title = "Confirm Action";
+        message = "Are you sure?";
+        actionLabel = "Yes";
+        isSuccess = false;
+    }
+
     setModalContent({
-      title: decision === "select" ? "Confirm Selection" : "Confirm Rejection",
-      message: `Are you sure you want to ${decision} **${appointment.boardingName}**?`,
-      actionLabel: `Yes, ${decision}`,
-      action: () => {
-        handleStatusChange(id, decision);
+      title,
+      message,
+      actionLabel,
+      // ✅ Connects to handleStatusChange from the hook
+      action: async () => {
+        await handleStatusChange(id, decision);
         setIsDecisionModalOpen(false);
       },
-      isSuccess: decision === "select",
+      isSuccess,
     });
     setIsDecisionModalOpen(true);
   };
@@ -66,14 +99,20 @@ const AppointmentsPage = () => {
       setCurrentAppointmentId(id); 
       setIsScheduleModalOpen(true); 
     } else if (action === "cancel") {
+      // ✅ FIXED: Open Custom Modal instead of window.confirm
       if (!appointment) return;
-      if (window.confirm(`Confirm cancellation for ${appointment.boardingName}?`)) {
-          handleStatusChange(id, 'cancelled');
-          setCurrentAppointmentId(null);
-      }
+      setIsCancelModalOpen(true);
     } else {
       openDecisionConfirmation(id, action);
     }
+  };
+
+  const handleCancelConfirm = async (reason) => {
+      if (currentAppointmentId) {
+          await handleStatusChange(currentAppointmentId, 'cancel', reason || "No reason provided.");
+          setIsCancelModalOpen(false);
+          setCurrentAppointmentId(null);
+      }
   };
 
   const finalizeRegistration = (regData) => {
@@ -114,7 +153,7 @@ const AppointmentsPage = () => {
           <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
             No {category} Appointments
           </h3>
-          {(category !== "cancelled" && category !== "rejected") && (
+          {/* {(category !== "cancelled" && category !== "rejected") && (
             <button
               className="flex items-center gap-2 py-2 px-4 sm:py-3 sm:px-6 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 hover:-translate-y-0.5 mx-auto mt-4 text-sm sm:text-base"
               onClick={() => {
@@ -124,7 +163,7 @@ const AppointmentsPage = () => {
             >
               <FaPlus /> Schedule Your First Visit
             </button>
-          )}
+          )} */}
         </div>
       );
     }
@@ -146,20 +185,20 @@ const AppointmentsPage = () => {
     <StudentLayout
       title="My Appointments"
       subtitle="Manage your boarding visits and selections"
-      headerRightContent={
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 whitespace-nowrap"
-          onClick={() => {
-            setCurrentAppointmentId(null);
-            setIsScheduleModalOpen(true);
-          }}
-        >
-          <FaPlus />
-          Schedule Visit
-        </motion.button>
-      }
+      // headerRightContent={
+      //   <motion.button
+      //     whileHover={{ scale: 1.05 }}
+      //     whileTap={{ scale: 0.95 }}
+      //     className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-orange-600 text-white shadow-md hover:bg-orange-700 whitespace-nowrap"
+      //     onClick={() => {
+      //       setCurrentAppointmentId(null);
+      //       setIsScheduleModalOpen(true);
+      //     }}
+      //   >
+      //     <FaPlus />
+      //     Schedule Visit
+      //   </motion.button>
+      // }
     >
       {/* ✅ UPDATED TABS SECTION */}
       <section className="bg-white p-3 sm:p-6 rounded-2xl shadow-sm mb-6 sm:mb-8 border border-gray-100">
@@ -224,7 +263,7 @@ const AppointmentsPage = () => {
       </section>
       
       {/* Mobile Button and Modals */}
-       <motion.button
+       {/* <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => {
@@ -235,7 +274,7 @@ const AppointmentsPage = () => {
         aria-label="Schedule Visit"
       >
         <FaPlus size={24} />
-      </motion.button>
+      </motion.button> */}
 
       <ScheduleModal
         isOpen={isScheduleModalOpen}
@@ -249,6 +288,13 @@ const AppointmentsPage = () => {
         isOpen={isDecisionModalOpen}
         onClose={() => setIsDecisionModalOpen(false)}
         content={modalContent}
+      />
+
+      <CancelModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleCancelConfirm}
+        appointmentName={currentAppointment?.boardingName || "this appointment"}
       />
 
       <RegistrationModal
