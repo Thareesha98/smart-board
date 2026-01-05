@@ -50,6 +50,8 @@ public class SecurityConfig {
                         "/api/auth/**",
                         "/api/boardings",
                         "/api/boardings/**" ,
+                        
+                        "/ws/**",
 
                         "/api/users/public/**",
                         
