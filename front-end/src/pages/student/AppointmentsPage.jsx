@@ -8,6 +8,8 @@ import AppointmentCard from "../../components/student/appointments/AppointmentCa
 import ScheduleModal from "../../components/student/appointments/ScheduleModal";
 import DecisionModal from "../../components/student/appointments/DecisionModal";
 import RegistrationModal from "../../components/student/appointments/RegistrationModal";
+import CancelModal from "../../components/student/appointments/CancelModal.jsx";
+
 import { FaPlus } from "react-icons/fa";
 
 const AppointmentsPage = () => {
@@ -26,8 +28,12 @@ const AppointmentsPage = () => {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isDecisionModalOpen, setIsDecisionModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  
   const [modalContent, setModalContent] = useState({});
   const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
+
+  const currentAppointment = getAppointmentById(currentAppointmentId);
 
   const categories = ['upcoming', 'visited', 'selected', 'cancelled', 'rejected'];
 
@@ -93,17 +99,20 @@ const AppointmentsPage = () => {
       setCurrentAppointmentId(id); 
       setIsScheduleModalOpen(true); 
     } else if (action === "cancel") {
+      // ✅ FIXED: Open Custom Modal instead of window.confirm
       if (!appointment) return;
-      if (window.confirm(`Are you sure you want to cancel the visit to ${appointment.boardingName}?`)) {
-          const reason = window.prompt("Optional: Add a note to the owner (e.g., 'Sorry we couldn't come today')", "");
-          
-          // Pass the reason to the hook
-          handleStatusChange(id, 'cancel', reason || "No reason provided."); 
-          setCurrentAppointmentId(null);
-      }
+      setIsCancelModalOpen(true);
     } else {
       openDecisionConfirmation(id, action);
     }
+  };
+
+  const handleCancelConfirm = async (reason) => {
+      if (currentAppointmentId) {
+          await handleStatusChange(currentAppointmentId, 'cancel', reason || "No reason provided.");
+          setIsCancelModalOpen(false);
+          setCurrentAppointmentId(null);
+      }
   };
 
   const finalizeRegistration = (regData) => {
@@ -279,6 +288,13 @@ const AppointmentsPage = () => {
         isOpen={isDecisionModalOpen}
         onClose={() => setIsDecisionModalOpen(false)}
         content={modalContent}
+      />
+
+      <CancelModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleCancelConfirm}
+        appointmentName={currentAppointment?.boardingName || "this appointment"}
       />
 
       <RegistrationModal
