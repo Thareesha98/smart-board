@@ -5,5 +5,5 @@ public enum Status {
     APPROVED,
     REJECTED,
     ACTIVE,
-	INACTIVE
+	
 }
