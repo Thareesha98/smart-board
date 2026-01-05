@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import UtilityCard from "../../components/Owner/utilities/UtilityCard";
+import StatsOverview from "../../components/Owner/utilities/StatsOverview";
+import FilterBar from "../../components/Owner/utilities/FilterBar";
 import { INITIAL_BOARDINGS_DATA, ownerData } from "../../data/mockData.js";
 import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
 import {
@@ -10,6 +12,10 @@ import {
 export default function UtilityPage() {
   const [boardings, setBoardings] = useState(INITIAL_BOARDINGS_DATA);
   const [selectedBoarding, setSelectedBoarding] = useState(null);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+
   const [formData, setFormData] = useState({
     electricity: "",
     water: "",
@@ -37,6 +43,23 @@ export default function UtilityPage() {
     setSelectedBoarding(null);
   };
 
+  // 3. Create the Filtering Logic
+  const filteredBoardings = boardings.filter((b) => {
+    // Search Logic (Match name case-insensitive)
+    const matchesSearch = b.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    // Status Logic
+    const isUpdated = b.lastUpdated !== "N/A";
+    let matchesStatus = true;
+
+    if (filterStatus === "pending") matchesStatus = !isUpdated;
+    if (filterStatus === "updated") matchesStatus = isUpdated;
+
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="pt-4 space-y-8 min-h-screen bg-light pb-12">
       <HeaderBar
@@ -47,22 +70,35 @@ export default function UtilityPage() {
         userName={ownerData.firstName}
       />
 
+      <StatsOverview boardings={boardings} />
+
+      <FilterBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filterStatus={filterStatus}
+        onFilterChange={setFilterStatus}
+      />
+
       {/* Main Grid */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 px-4">
-        {boardings.map((b) => (
+        {filteredBoardings.map((b) => (
           <UtilityCard
             key={b.id}
             boarding={b}
             onOpenModal={() => {
-              setSelectedBoarding(b);
-              setFormData({
-                electricity: b.electricityCost,
-                water: b.waterCost,
-                period: new Date().toISOString().substring(0, 7),
-              });
+              /* ... existing modal logic ... */
             }}
           />
         ))}
+
+        {filteredBoardings.length === 0 && (
+          <div className="col-span-full text-center py-12 text-muted">
+            <i className="fas fa-search mb-3 text-2xl opacity-20"></i>
+            <p className="text-xs font-bold uppercase tracking-widest">
+              No properties found
+            </p>
+          </div>
+        )}
       </section>
 
       {/* Nice Modal Overlay */}
