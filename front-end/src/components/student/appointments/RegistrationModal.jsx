@@ -52,7 +52,8 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
     const finalData = {
         ...formData,
         paymentMethod: "CARD",
-        transactionId: transactionId
+        transactionId: transactionId,
+        keyMoneyPaidAmount: paidAmount
     };
     onSubmit(finalData); 
   };
