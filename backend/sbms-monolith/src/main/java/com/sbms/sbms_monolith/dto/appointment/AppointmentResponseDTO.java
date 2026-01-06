@@ -3,6 +3,7 @@ package com.sbms.sbms_monolith.dto.appointment;
 import com.sbms.sbms_monolith.model.enums.AppointmentStatus;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
