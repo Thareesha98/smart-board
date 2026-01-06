@@ -19,7 +19,9 @@ public class StudentBoardingDashboardDTO {
     private Long boardingId;
     private String boardingTitle;
     private String boardingAddress;
+    private String boardingImage;
     private String ownerName;
+    private Long ownerId;
 
     private BigDecimal keyMoney;
     private BigDecimal monthlyPrice;
