@@ -6,6 +6,8 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
   const { currentUser } = useAuth(); // Get logged-in user details
   const [step, setStep] = useState(1);
 
+  const keyMoneyAmount = appointment?.boarding?.keyMoney || appointment?.keyMoney || 0;
+
   const [formData, setFormData] = useState({
     studentName: "",
     studentPhone: "",
@@ -206,7 +208,7 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
       <PaymentGatewayModal 
         isOpen={step === 2}
         onClose={() => setStep(1)} // Go back to form
-        amount={50000} // This should ideally come from backend keyMoney
+        defaultAmount={keyMoneyAmount}
         onPaymentComplete={handlePaymentSuccess}
       />
     </>
