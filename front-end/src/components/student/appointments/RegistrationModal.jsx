@@ -76,11 +76,6 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
             <h3 className="text-2xl font-bold text-gray-800 mb-2">Register for {appointment.boardingName}</h3>
             <p className="text-gray-500 mb-6 text-sm">Fill in your details to generate your rental agreement.</p>
 
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg flex justify-between items-center">
-                <span className="text-blue-800 font-semibold text-sm">Required Key Money:</span>
-                <span className="text-blue-900 font-bold text-lg">LKR {keyMoneyAmount.toLocaleString()}</span>
-            </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               
               {/* ✅ NEW: Student Name */}
