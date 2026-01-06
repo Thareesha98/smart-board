@@ -160,6 +160,24 @@ const StudentService = {
     return response.data;
   },
 
+  registerBoarding: async (studentId, data) => {
+    const response = await api.post(`/registrations/student/${studentId}`, data);
+    return response.data;
+  },
+
+  downloadReceipt: async (regId) => {
+    const response = await api.get(`/registrations/${regId}/receipt`, {
+        responseType: 'blob'
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Receipt_${regId}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  },
+
   // ==========================================
   // 5. REVIEWS (Ratings)
   // ==========================================
