@@ -10,11 +10,15 @@ import DecisionModal from "../../components/student/appointments/DecisionModal";
 import RegistrationModal from "../../components/student/appointments/RegistrationModal";
 import CancelModal from "../../components/student/appointments/CancelModal.jsx";
 import StudentService from "../../api/student/StudentService";
+import { useAuth } from "../../context/student/StudentAuthContext";
 
 import { FaPlus } from "react-icons/fa";
 
 const AppointmentsPage = () => {
   const navigate = useNavigate();
+
+  const { currentUser } = useAuth();
+
   const {
     activeCategory,
     counts,
@@ -117,6 +121,12 @@ const AppointmentsPage = () => {
   };
 
   const finalizeRegistration = async (regData) => {
+
+    if (!currentUser?.id) {
+        alert("User session invalid. Please log in again.");
+        return;
+    }
+    
     try {
         const payload = {
             boardingId: currentAppointment.boardingId,
