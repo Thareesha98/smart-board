@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartBoAD - Smart Boarding Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="home-style.css" />
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand">
+        <img src="logo.jpg" alt="SmartBoAD Logo" class="nav-logo" />
+        <span class="brand-text">SmartBoAD</span>
+      </a>
+      
+      <div class="nav-menu" id="navMenu">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#users" class="nav-link">Users</a>
+        <a href="#ads-section" class="nav-link">Advertise</a>
+        <a href="#contact" class="nav-link">Contact</a>
+        
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-outline">Login</a>
+          <a href="#signup" class="btn btn-primary">Sign Up</a>
+        </div>
+      </div>
+      
+      <button class="nav-toggle" id="navToggle">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span><i class="fas fa-star"></i> #1 Boarding Platform</span>
+        </div>
+        <h1 class="hero-title">
+          Find Your Perfect Boarding<br>
+          <span class="highlight">Near Your University</span>
+        </h1>
+        <p class="hero-subtitle">
+          Join thousands of students who found their ideal boarding through our verified platform. Smart search, secure payments, and trusted reviews.
+        </p>
+        <div class="hero-stats">
+          <div class="stat">
+            <h3>2,500+</h3>
+            <p>Verified Boardings</p>
+          </div>
+          <div class="stat">
+            <h3>15,000+</h3>
+            <p>Happy Students</p>
+          </div>
+          <div class="stat">
+            <h3>98%</h3>
+            <p>Satisfaction Rate</p>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <a href="#search" class="btn btn-primary btn-large pulse">
+            <i class="fas fa-search"></i> Find Boarding Now
+          </a>
+          <a href="#ads-section" class="btn btn-accent btn-large">
+            <i class="fas fa-bullhorn"></i> Advertise Here
+          </a>
+        </div>
+      </div>
+      
+      <div class="hero-image">
+        <div class="image-container">
+          <img src="https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+               alt="Modern student accommodation" class="main-image" />
+          <div class="floating-card">
+            <i class="fas fa-shield-alt"></i>
+            <h4>100% Verified</h4>
+            <p>All listings are university-approved</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Stats Bar -->
+  <div class="stats-bar">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <i class="fas fa-home"></i>
+          <div>
+            <h4>2,500+</h4>
+            <p>Verified Properties</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-university"></i>
+          <div>
+            <h4>50+</h4>
+            <p>Partner Universities</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-star"></i>
+          <div>
+            <h4>4.8/5</h4>
+            <p>Average Rating</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-user-check"></i>
+          <div>
+            <h4>98%</h4>
+            <p>Verified Owners</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <section class="search-section" id="search">
+    <div class="container">
+      <div class="search-box">
+        <div class="section-header">
+          <h2 class="section-title">Find Your Perfect Boarding</h2>
+          <p class="section-subtitle">Discover verified, safe, and affordable boarding options near campus</p>
+        </div>
+        
+        <form class="search-form">
+          <div class="search-input-group">
+            <div class="search-input-with-icon">
+              <i class="fas fa-map-marker-alt"></i>
+              <input type="text" placeholder="Enter university or location..." class="search-input">
+            </div>
+            <button type="submit" class="btn btn-primary btn-search pulse">
+              <i class="fas fa-search"></i> Search Boardings
+            </button>
+          </div>
+          
+          <div class="search-filters">
+            <div class="filter-option">
+              <label for="price-range"><i class="fas fa-tag"></i> Price Range</label>
+              <select id="price-range" class="filter-select">
+                <option value="">Any Price</option>
+                <option value="low">$100 - $300/month</option>
+                <option value="medium">$300 - $600/month</option>
+                <option value="high">$600+/month</option>
+              </select>
+            </div>
+            
+            <div class="filter-option">
+              <label for="room-type"><i class="fas fa-bed"></i> Room Type</label>
+              <select id="room-type" class="filter-select">
+                <option value="">Any Type</option>
+                <option value="single">Single Room</option>
+                <option value="shared">Shared Room</option>
+                <option value="apartment">Apartment</option>
+              </select>
+            </div>
+            
+            <div class="filter-option">
+              <label for="amenities"><i class="fas fa-wifi"></i> Amenities</label>
+              <select id="amenities" class="filter-select">
+                <option value="">Any Amenities</option>
+                <option value="wifi">WiFi Included</option>
+                <option value="laundry">Laundry</option>
+                <option value="kitchen">Kitchen Access</option>
+                <option value="ac">Air Conditioning</option>
+              </select>
+            </div>
+          </div>
+        </form>
+        
+        <div class="popular-searches">
+          <p>Popular Searches:</p>
+          <div class="tags">
+            <span class="tag">University of Colombo</span>
+            <span class="tag">Kandy</span>
+            <span class="tag">Galle</span>
+            <span class="tag">Near Campus</span>
+            <span class="tag">Girls Only</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Why Choose Us</div>
+        <h2 class="section-title">Everything You Need for Perfect Boarding</h2>
+        <p class="section-subtitle">Smart tools designed for students, boarding owners, and university administrators</p>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>Smart Search</h3>
+          <p>Advanced filters by location, gender, price range, and amenities to find exactly what you need.</p>
+          <div class="feature-highlight">
+            <i class="fas fa-bolt"></i> Instant Results
+          </div>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>Secure Payments</h3>
+          <p>End-to-end encrypted payments with escrow protection for both students and owners.</p>
+          <div class="feature-highlight">
+            <i class="fas fa-lock"></i> 100% Secure
+          </div>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Owner Dashboard</h3>
+          <p>Complete management suite for owners with booking, payments, and analytics tools.</p>
+          <div class="feature-highlight">
+            <i class="fas fa-chart-bar"></i> Real-time Analytics
+          </div>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <h3>Verified Reviews</h3>
+          <p>Real reviews from verified students to help you make informed decisions.</p>
+          <div class="feature-highlight">
+            <i class="fas fa-check-circle"></i> Authentic Feedback
+          </div>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h3>Direct Messaging</h3>
+          <p>Communicate securely with owners or tenants through our encrypted messaging system.</p>
+          <div class="feature-highlight">
+            <i class="fas fa-comment-dots"></i> Live Chat
+          </div>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-headset"></i>
+          </div>
+          <h3>24/7 Support</h3>
+          <p>Round-the-clock customer support for all your boarding-related queries and issues.</p>
+          <div class="feature-highlight">
+            <i class="fas fa-clock"></i> Always Available
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Users Section -->
+  <section class="users-section" id="users">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Who We Serve</div>
+        <h2 class="section-title">Platform for Everyone</h2>
+        <p class="section-subtitle">Tailored solutions for all stakeholders in university boarding ecosystem</p>
+      </div>
+      
+      <div class="users-grid">
+        <div class="user-card">
+          <div class="user-icon">
+            <i class="fas fa-user-graduate"></i>
+          </div>
+          <div class="user-content">
+            <h3>Students</h3>
+            <p>Search, compare, and book verified boardings. View payment history, submit maintenance requests, and connect directly with owners.</p>
+            <ul class="user-features">
+              <li><i class="fas fa-check"></i> Smart Search & Filters</li>
+              <li><i class="fas fa-check"></i> Secure Online Payments</li>
+              <li><i class="fas fa-check"></i> Verified Reviews</li>
+            </ul>
+          </div>
+          <a href="student-login.html" class="btn btn-primary btn-block">
+            <i class="fas fa-sign-in-alt"></i> Student Login
+          </a>
+        </div>
+        
+        <div class="user-card">
+          <div class="user-icon">
+            <i class="fas fa-home"></i>
+          </div>
+          <div class="user-content">
+            <h3>Boarding Owners</h3>
+            <p>List and manage boardings efficiently. Accept/reject bookings, manage tenants, receive secure payments, and track performance.</p>
+            <ul class="user-features">
+              <li><i class="fas fa-check"></i> Property Management Dashboard</li>
+              <li><i class="fas fa-check"></i> Automated Booking System</li>
+              <li><i class="fas fa-check"></i> Financial Reports</li>
+            </ul>
+          </div>
+          <a href="owner-login.html" class="btn btn-primary btn-block">
+            <i class="fas fa-sign-in-alt"></i> Owner Login
+          </a>
+        </div>
+        
+        <div class="user-card">
+          <div class="user-icon">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <div class="user-content">
+            <h3>Administrators</h3>
+            <p>Verify boarding owners and listings. Oversee platform activity, resolve disputes, and ensure compliance with university policies.</p>
+            <ul class="user-features">
+              <li><i class="fas fa-check"></i> Verification Dashboard</li>
+              <li><i class="fas fa-check"></i> Dispute Resolution Tools</li>
+              <li><i class="fas fa-check"></i> Platform Analytics</li>
+            </ul>
+          </div>
+          <a href="admin-login.html" class="btn btn-primary btn-block">
+            <i class="fas fa-sign-in-alt"></i> Admin Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Advertise Section -->
+  <section class="ads-section" id="ads-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Promote Your Business</div>
+        <h2 class="section-title">Advertise on SmartBoAD</h2>
+        <p class="section-subtitle">Reach thousands of students and boarding owners with targeted advertising</p>
+      </div>
+      
+      <div class="ads-cta">
+        <div class="ads-content">
+          <h3>Get Your Ads Seen by Students</h3>
+          <p>Promote your services, products, or businesses to our engaged audience of students and boarding owners.</p>
+          <ul class="ads-benefits">
+            <li><i class="fas fa-check-circle"></i> Target specific universities</li>
+            <li><i class="fas fa-check-circle"></i> Reach students looking for boardings</li>
+            <li><i class="fas fa-check-circle"></i> Flexible ad durations</li>
+            <li><i class="fas fa-check-circle"></i> Performance analytics</li>
+          </ul>
+          <button class="btn btn-accent btn-large open-ads-modal">
+            <i class="fas fa-bullhorn"></i> Submit Your Ad Request
+          </button>
+        </div>
+        <div class="ads-image">
+          <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Advertising">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Simple Process</div>
+        <h2 class="section-title">How SmartBoAD Works</h2>
+        <p class="section-subtitle">A transparent, secure process designed for everyone involved</p>
+      </div>
+      
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Register & Verify</h3>
+            <p>Create your account and get verified by our university partnership team</p>
+          </div>
+          <div class="step-icon">
+            <i class="fas fa-user-check"></i>
+          </div>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Browse & Select</h3>
+            <p>Use smart filters to find boardings matching your preferences and budget</p>
+          </div>
+          <div class="step-icon">
+            <i class="fas fa-search"></i>
+          </div>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Book & Secure</h3>
+            <p>Book securely and make payments through our protected payment gateway</p>
+          </div>
+          <div class="step-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge">Student Reviews</div>
+        <h2 class="section-title">What Students Say</h2>
+        <p class="section-subtitle">Trusted by thousands of students across multiple universities</p>
+      </div>
+      
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"Found my perfect boarding in 2 days! The verification process gave me peace of mind."</p>
+          </div>
+          <div class="testimonial-author">
+            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Sarah">
+            <div>
+              <h4>Sarah Johnson</h4>
+              <p>University of Colombo</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"As a boarding owner, the dashboard made managing my properties so much easier."</p>
+          </div>
+          <div class="testimonial-author">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="David">
+            <div>
+              <h4>David Perera</h4>
+              <p>Boarding Owner</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-content">
+            <p>"The secure payment system protected my deposit. Highly recommended for all students!"</p>
+          </div>
+          <div class="testimonial-author">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Maya">
+            <div>
+              <h4>Maya Fernando</h4>
+              <p>University of Peradeniya</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Ready to Find Your Perfect Boarding?</h2>
+        <p>Join thousands of students who found their ideal accommodation through SmartBoAD</p>
+        <div class="cta-buttons">
+          <a href="#signup" class="btn btn-primary btn-large pulse">
+            <i class="fas fa-user-plus"></i> Sign Up Free
+          </a>
+          <a href="#ads-section" class="btn btn-outline btn-large">
+            <i class="fas fa-bullhorn"></i> Advertise With Us
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a href="index.html" class="footer-brand">
+            <img src="logo.jpg" alt="SmartBoAD Logo" class="footer-logo" />
+            <span class="brand-text">SmartBoAD</span>
+          </a>
+          <p class="footer-description">
+            The smart solution for university boarding management. Connecting students with quality, verified accommodations.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#users">Users</a></li>
+            <li><a href="#ads-section">Advertise</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul class="footer-links">
+            <li><a href="student-login.html">Student Login</a></li>
+            <li><a href="owner-login.html">Owner Login</a></li>
+            <li><a href="admin-login.html">Admin Login</a></li>
+            <li><a href="search-boardings.html">Search Boardings</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <ul class="footer-contact">
+            <li><i class="fas fa-map-marker-alt"></i> 123 University Road, Colombo</li>
+            <li><i class="fas fa-phone"></i> +94 11 234 5678</li>
+            <li><i class="fas fa-envelope"></i> info@smartboad.com</li>
+            <li><i class="fas fa-bullhorn"></i> ads@smartboad.com</li>
+          </ul>
+          <button class="btn btn-outline btn-sm open-ads-modal">
+            <i class="fas fa-ad"></i> Submit Ad Request
+          </button>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2024 SmartBoAD. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Ads Modal -->
+  <div class="modal" id="adsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-bullhorn"></i> Submit Your Ad Request</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <div class="pricing-header">
+              <h4>Basic Ad</h4>
+              <div class="price">$49<span>/month</span></div>
+            </div>
+            <ul class="pricing-features">
+              <li><i class="fas fa-check"></i> Sidebar Display</li>
+              <li><i class="fas fa-check"></i> 30 Days Duration</li>
+              <li><i class="fas fa-check"></i> Basic Analytics</li>
+              <li><i class="fas fa-times"></i> Featured Placement</li>
+            </ul>
+            <button class="btn btn-outline select-plan" data-plan="basic">Select Plan</button>
+          </div>
+          
+          <div class="pricing-card featured">
+            <div class="pricing-badge">Most Popular</div>
+            <div class="pricing-header">
+              <h4>Premium Ad</h4>
+              <div class="price">$99<span>/month</span></div>
+            </div>
+            <ul class="pricing-features">
+              <li><i class="fas fa-check"></i> Homepage Display</li>
+              <li><i class="fas fa-check"></i> 60 Days Duration</li>
+              <li><i class="fas fa-check"></i> Advanced Analytics</li>
+              <li><i class="fas fa-check"></i> Featured Placement</li>
+            </ul>
+            <button class="btn btn-primary select-plan" data-plan="premium">Select Plan</button>
+          </div>
+          
+          <div class="pricing-card">
+            <div class="pricing-header">
+              <h4>Enterprise</h4>
+              <div class="price">$199<span>/month</span></div>
+            </div>
+            <ul class="pricing-features">
+              <li><i class="fas fa-check"></i> Multiple Placements</li>
+              <li><i class="fas fa-check"></i> 90 Days Duration</li>
+              <li><i class="fas fa-check"></i> Full Analytics Suite</li>
+              <li><i class="fas fa-check"></i> Priority Support</li>
+            </ul>
+            <button class="btn btn-outline select-plan" data-plan="enterprise">Select Plan</button>
+          </div>
+        </div>
+        
+        <div class="ad-form" id="adForm">
+          <h4>Submit Your Ad Details</h4>
+          <form id="adSubmissionForm">
+            <div class="form-group">
+              <label for="adName"><i class="fas fa-user"></i> Your Name</label>
+              <input type="text" id="adName" placeholder="Enter your full name" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="adEmail"><i class="fas fa-envelope"></i> Email Address</label>
+              <input type="email" id="adEmail" placeholder="Enter your email" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="adPhone"><i class="fas fa-phone"></i> Phone Number</label>
+              <input type="tel" id="adPhone" placeholder="Enter your phone number" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="adType"><i class="fas fa-ad"></i> Selected Plan</label>
+              <input type="text" id="adType" readonly>
+            </div>
+            
+            <div class="form-group">
+              <label for="adMessage"><i class="fas fa-comment"></i> Ad Message</label>
+              <textarea id="adMessage" placeholder="Enter your ad content (max 250 characters)" maxlength="250" required></textarea>
+              <div class="char-count">Characters: <span id="charCount">0</span>/250</div>
+            </div>
+            
+            <div class="form-group">
+              <label for="adImage"><i class="fas fa-image"></i> Ad Image (Optional)</label>
+              <input type="file" id="adImage" accept="image/*">
+              <small>Max size: 2MB. Recommended: 1200x400px</small>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Submit Ad Request
+              </button>
+              <button type="button" class="btn btn-outline close-form">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="home-script.js"></script>
+</body>
+</html>
