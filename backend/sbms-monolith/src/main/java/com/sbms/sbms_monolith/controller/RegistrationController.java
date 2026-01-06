@@ -36,18 +36,11 @@ public class RegistrationController {
 
 
     @PostMapping("/student/{studentId}")
-    // @PreAuthorize("hasAuthority('STUDENT')") // ❌ COMMENT THIS OUT TEMPORARILY
+    @PreAuthorize("hasRole('STUDENT')")
     public RegistrationResponseDTO register(
             @PathVariable Long studentId,
-            @RequestBody RegistrationRequestDTO dto,
-            Authentication authentication // ✅ ADD THIS
+            @RequestBody RegistrationRequestDTO dto
     ) {
-        // ✅ DEBUG: Print the actual roles to the backend console
-        System.out.println("--- DEBUGGING AUTH ---");
-        System.out.println("User: " + authentication.getName());
-        System.out.println("Authorities: " + authentication.getAuthorities());
-        System.out.println("----------------------");
-
         return registrationService.register(studentId, dto);
     }
 
@@ -104,6 +97,7 @@ public class RegistrationController {
     }
 
     @GetMapping(value = "/{regId}/receipt", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long regId) {
         Registration reg = registrationRepo.findById(regId)
                 .orElseThrow(() -> new RuntimeException("Registration not found"));
