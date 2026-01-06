@@ -36,11 +36,18 @@ public class RegistrationController {
 
 
     @PostMapping("/student/{studentId}")
-    @PreAuthorize("hasRole('STUDENT')")
+    // @PreAuthorize("hasAuthority('STUDENT')") // ❌ COMMENT THIS OUT TEMPORARILY
     public RegistrationResponseDTO register(
             @PathVariable Long studentId,
-            @RequestBody RegistrationRequestDTO dto
+            @RequestBody RegistrationRequestDTO dto,
+            Authentication authentication // ✅ ADD THIS
     ) {
+        // ✅ DEBUG: Print the actual roles to the backend console
+        System.out.println("--- DEBUGGING AUTH ---");
+        System.out.println("User: " + authentication.getName());
+        System.out.println("Authorities: " + authentication.getAuthorities());
+        System.out.println("----------------------");
+
         return registrationService.register(studentId, dto);
     }
 
