@@ -6,6 +6,8 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
   const { currentUser } = useAuth(); // Get logged-in user details
   const [step, setStep] = useState(1);
 
+  const keyMoneyAmount = appointment?.boarding?.keyMoney || appointment?.keyMoney || 0;
+
   const [formData, setFormData] = useState({
     studentName: "",
     studentPhone: "",
