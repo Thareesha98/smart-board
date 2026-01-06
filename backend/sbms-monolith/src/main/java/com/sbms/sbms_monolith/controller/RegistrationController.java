@@ -97,6 +97,7 @@ public class RegistrationController {
     }
 
     @GetMapping(value = "/{regId}/receipt", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long regId) {
         Registration reg = registrationRepo.findById(regId)
                 .orElseThrow(() -> new RuntimeException("Registration not found"));

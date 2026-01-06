@@ -25,7 +25,7 @@ public class PaymentService {
     @Autowired
     private PaymentTransactionRepository transactionRepo;
 
-    @Autowired
+    @Autowired(required = false)
     private NotificationPublisher notificationPublisher;
 
     @Autowired
@@ -72,16 +72,22 @@ public class PaymentService {
 	         transactionRepo.save(tx);
 
             // 🔔 PAYMENT SUCCESS EVENT
-            notificationPublisher.publish(
-                    "payment.success",
-                    userId,
-                    tx.getTransactionRef(),
-                    Map.of(
-                            "amount", amount,
-                            "method", method.name(),
-                            "transactionRef", tx.getTransactionRef()
-                    )
-            );
+            if (notificationPublisher != null) {
+                try {
+                    notificationPublisher.publish(
+                            "payment.success",
+                            userId,
+                            tx.getTransactionRef(),
+                            Map.of(
+                                    "amount", amount,
+                                    "method", method.name(),
+                                    "transactionRef", tx.getTransactionRef()
+                            )
+                    );
+                } catch (Exception e) {
+                    System.err.println("⚠️ Warning: RabbitMQ is down. 'payment.success' notification skipped.");
+                }
+            }
 
             return new PaymentResult(
                     true,
@@ -95,16 +101,22 @@ public class PaymentService {
             transactionRepo.save(tx);
 
             // 🔔 PAYMENT FAILURE EVENT
-            notificationPublisher.publish(
-                    "payment.failed",
-                    userId,
-                    tx.getTransactionRef(),
-                    Map.of(
-                            "amount", amount,
-                            "method", method.name(),
-                            "reason", tx.getFailureReason()
-                    )
-            );
+            if (notificationPublisher != null) {
+                try {
+                    notificationPublisher.publish(
+                            "payment.failed",
+                            userId,
+                            tx.getTransactionRef(),
+                            Map.of(
+                                    "amount", amount,
+                                    "method", method.name(),
+                                    "reason", tx.getFailureReason()
+                            )
+                    );
+                } catch (Exception e) {
+                    System.err.println("⚠️ Warning: RabbitMQ is down. 'payment.failed' notification skipped.");
+                }
+            }
 
             return new PaymentResult(
                     false,
