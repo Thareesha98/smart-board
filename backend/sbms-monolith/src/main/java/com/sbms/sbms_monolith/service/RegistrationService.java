@@ -193,7 +193,7 @@ public class RegistrationService {
 
         List<StudentBoardingDashboardDTO.MemberDTO> members = activeRegistrations.stream()
                 .map(r -> {
-                    StudentBoardingDashboardDTO.MemberDTO m = new MemberDTO();
+                    StudentBoardingDashboardDTO.MemberDTO m = new StudentBoardingDashboardDTO.MemberDTO();
                     m.setId(r.getStudent().getId());
                     m.setName(r.getStudent().getFullName());
                     m.setPhone(r.getStudent().getPhone()); // Include Phone
