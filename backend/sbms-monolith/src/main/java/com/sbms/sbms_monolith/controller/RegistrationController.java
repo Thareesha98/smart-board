@@ -2,9 +2,12 @@ package com.sbms.sbms_monolith.controller;
 
 import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
 import com.sbms.sbms_monolith.dto.registration.*;
+import com.sbms.sbms_monolith.model.Registration;
 import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
+import com.sbms.sbms_monolith.repository.RegistrationRepository;
 import com.sbms.sbms_monolith.repository.UserRepository;
+import com.sbms.sbms_monolith.service.PaymentReceiptPdfService;
 import com.sbms.sbms_monolith.service.RegistrationService;
 import com.sbms.sbms_monolith.service.UserService;
 
@@ -24,8 +27,13 @@ public class RegistrationController {
     private RegistrationService registrationService;
     
     @Autowired UserRepository userRepository;
-    
-    
+
+    @Autowired
+    private PaymentReceiptPdfService pdfService;
+
+    @Autowired
+    private RegistrationRepository registrationRepo;
+
 
     @PostMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
@@ -86,6 +94,18 @@ public class RegistrationController {
                 registrationService.getDashboard(regId, user.getId());
 
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping(value = "/{regId}/receipt", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long regId) {
+        Registration reg = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        byte[] pdfBytes = pdfService.generateRegistrationReceipt(reg);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=receipt_" + regId + ".pdf")
+                .body(pdfBytes);
     }
 
 
