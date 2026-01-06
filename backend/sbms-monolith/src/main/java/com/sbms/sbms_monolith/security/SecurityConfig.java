@@ -45,6 +45,7 @@ public class SecurityConfig {
                     sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
+            		.requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 .requestMatchers(
                         "/api/auth/**",
@@ -60,7 +61,7 @@ public class SecurityConfig {
                         "/swagger-ui.html"
                 ).permitAll()
 
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+             //   .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 .requestMatchers("/api/owner/**").hasRole("OWNER")
                 .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
