@@ -48,7 +48,7 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
     setStep(2); // Open Payment Gateway
   };
 
-  const handlePaymentSuccess = (transactionId) => {
+  const handlePaymentSuccess = (transactionId, paidAmount) => {
     const finalData = {
         ...formData,
         paymentMethod: "CARD",
