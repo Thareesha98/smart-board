@@ -1,8 +1,11 @@
-import React, { useState } from "react";
-import { FaCreditCard, FaLock, FaCcVisa, FaCcMastercard, FaCcAmex } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaCreditCard, FaLock, FaCcVisa, FaCcMastercard, FaCcAmex, FaMoneyBillWave } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-const PaymentGatewayModal = ({ isOpen, onClose, amount, onPaymentComplete }) => {
+const PaymentGatewayModal = ({ isOpen, onClose, defaultAmount, onPaymentComplete }) => {
+  // ✅ State for the editable amount
+  const [paymentAmount, setPaymentAmount] = useState("");
+  
   const [cardData, setCardData] = useState({
     holderName: "",
     cardNumber: "",
@@ -10,6 +13,13 @@ const PaymentGatewayModal = ({ isOpen, onClose, amount, onPaymentComplete }) => 
     cvv: ""
   });
   const [processing, setProcessing] = useState(false);
+
+  // Set default amount when modal opens
+  useEffect(() => {
+    if (isOpen && defaultAmount) {
+      setPaymentAmount(defaultAmount);
+    }
+  }, [isOpen, defaultAmount]);
 
   if (!isOpen) return null;
 
@@ -31,17 +41,25 @@ const PaymentGatewayModal = ({ isOpen, onClose, amount, onPaymentComplete }) => 
 
   const handlePay = (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
+        alert("Please enter a valid payment amount");
+        return;
+    }
     if (cardData.cardNumber.length < 16 || !cardData.cvv || !cardData.expiry) {
         alert("Please enter valid card details");
         return;
     }
 
     setProcessing(true);
-    // Simulate Bank Delay
+    
+    // Simulate Bank Processing Delay
     setTimeout(() => {
         setProcessing(false);
-        // Generate a fake Transaction ID
-        onPaymentComplete("TXN-" + Math.floor(Math.random() * 1000000000));
+        const transactionId = "TXN-" + Math.floor(Math.random() * 1000000000);
+        // ✅ Return both Transaction ID and the Actual Amount Paid
+        onPaymentComplete(transactionId, paymentAmount);
     }, 2500);
   };
 
@@ -52,17 +70,18 @@ const PaymentGatewayModal = ({ isOpen, onClose, amount, onPaymentComplete }) => 
         animate={{ scale: 1, opacity: 1 }}
         className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
       >
+        {/* Header */}
         <div className="bg-gray-900 text-white p-6 flex justify-between items-center">
             <div>
                 <h3 className="text-lg font-bold flex items-center gap-2"><FaLock className="text-green-400"/> Secure Payment</h3>
                 <p className="text-xs text-gray-400">SSL Encrypted Transaction</p>
             </div>
             <div className="text-right">
-                <p className="text-xs text-gray-400">Total Amount</p>
-                <p className="text-xl font-bold">LKR {amount.toLocaleString()}</p>
+                <p className="text-xs text-gray-400">Paying Key Money</p>
             </div>
         </div>
 
+        {/* Body */}
         <div className="p-6">
             <div className="flex gap-3 mb-6 justify-center text-3xl text-gray-400">
                 <FaCcVisa className="hover:text-blue-600 transition-colors"/>
@@ -71,10 +90,29 @@ const PaymentGatewayModal = ({ isOpen, onClose, amount, onPaymentComplete }) => 
             </div>
 
             <form onSubmit={handlePay} className="space-y-4">
+                
+                {/* ✅ NEW: Payment Amount Input */}
+                <div className="bg-green-50 p-4 rounded-xl border border-green-100 mb-4">
+                    <label className="block text-xs font-bold text-green-700 uppercase mb-1">Amount to Pay (LKR)</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-3 text-green-600 font-bold">LKR</span>
+                        <input 
+                            type="number" 
+                            value={paymentAmount} 
+                            onChange={(e) => setPaymentAmount(e.target.value)} 
+                            className="w-full p-2 pl-12 text-xl font-bold text-green-800 bg-transparent border-b-2 border-green-300 focus:border-green-600 outline-none" 
+                            placeholder="0.00"
+                            required
+                        />
+                    </div>
+                </div>
+
+                {/* Card Details */}
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Cardholder Name</label>
                     <input type="text" id="holderName" value={cardData.holderName} onChange={handleInputChange} placeholder="JOHN DOE" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none uppercase" required />
                 </div>
+
                 <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Card Number</label>
                     <div className="relative">
@@ -82,6 +120,7 @@ const PaymentGatewayModal = ({ isOpen, onClose, amount, onPaymentComplete }) => 
                         <FaCreditCard className="absolute left-3 top-3.5 text-gray-400"/>
                     </div>
                 </div>
+
                 <div className="flex gap-4">
                     <div className="flex-1">
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Expiry Date</label>
@@ -93,15 +132,26 @@ const PaymentGatewayModal = ({ isOpen, onClose, amount, onPaymentComplete }) => 
                     </div>
                 </div>
 
+                {/* Pay Button */}
                 <button 
                     type="submit" 
                     disabled={processing}
                     className={`w-full py-4 rounded-xl font-bold text-lg text-white shadow-lg mt-4 transition-all ${processing ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/30'}`}
                 >
-                    {processing ? "Processing..." : `Pay LKR ${amount.toLocaleString()}`}
+                    {processing ? (
+                        <span className="flex items-center justify-center gap-2">
+                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> 
+                            Processing...
+                        </span>
+                    ) : (
+                        `Pay LKR ${paymentAmount ? parseFloat(paymentAmount).toLocaleString() : '0'}`
+                    )}
                 </button>
             </form>
-            <button onClick={onClose} disabled={processing} className="w-full mt-3 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium">Cancel Transaction</button>
+            
+            <button onClick={onClose} disabled={processing} className="w-full mt-3 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium">
+                Cancel Transaction
+            </button>
         </div>
       </motion.div>
     </div>
