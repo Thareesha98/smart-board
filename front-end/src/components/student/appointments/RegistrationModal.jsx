@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import PaymentGatewayModal from "./PaymentGatewayModal";
+import { useAuth } from "../../../context/student/StudentAuthContext";
 
 const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
+  const { currentUser } = useAuth(); // Get logged-in user details
+  const [step, setStep] = useState(1);
+
   const [formData, setFormData] = useState({
+    studentName: "",
+    studentPhone: "",
     moveInDate: "",
     contractDuration: "",
     emergencyContact: "",
@@ -10,212 +17,198 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
     agreeTerms: false,
   });
 
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      setFormData((prev) => ({
+        ...prev,
+        studentName: currentUser.name || currentUser.fullName || "",
+        studentPhone: currentUser.phone || currentUser.phoneNumber || ""
+      }));
+    }
+  }, [isOpen, currentUser]);
+
   const handleChange = (e) => {
     const value =
       e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setFormData({ ...formData, [e.target.id]: value });
   };
 
-  const handleSubmit = () => {
+  const handleNext = () => {
     if (
+      !formData.studentName ||
+      !formData.studentPhone ||
       !formData.moveInDate ||
       !formData.contractDuration ||
       !formData.emergencyContact ||
-      !formData.emergencyPhone ||
       !formData.agreeTerms
     ) {
       alert("Please fill in all required fields and agree to the terms.");
       return;
     }
-    onSubmit(formData);
-    setFormData({
-      // Reset form after submission
-      moveInDate: "",
-      contractDuration: "",
-      emergencyContact: "",
-      emergencyPhone: "",
-      specialRequirements: "",
-      agreeTerms: false,
-    });
+    setStep(2); // Open Payment Gateway
+  };
+
+  const handlePaymentSuccess = (transactionId) => {
+    const finalData = {
+        ...formData,
+        paymentMethod: "CARD",
+        transactionId: transactionId
+    };
+    onSubmit(finalData); 
   };
 
   if (!isOpen || !appointment) return null;
 
-  const durationOptions = [
-    { value: "3", label: "3 Months" },
-    { value: "6", label: "6 Months" },
-    { value: "12", label: "12 Months" },
-    { value: "24", label: "24 Months" },
-  ];
-
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-card-bg p-8 rounded-large w-11/12 max-w-2xl relative animate-modalSlideIn">
-        <span
-          className="absolute top-4 right-4 text-2xl cursor-pointer text-text-muted hover:text-text-dark"
-          onClick={onClose}
-        >
-          &times;
-        </span>
-        <h3 className="text-2xl font-bold text-primary mb-6">
-          Register for {appointment.boardingName}
-        </h3>
+    <>
+      {/* STEP 1: REGISTRATION FORM */}
+      {step === 1 && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white p-8 rounded-2xl w-11/12 max-w-2xl relative animate-modalSlideIn max-h-[90vh] overflow-y-auto">
+            <span 
+              className="absolute top-4 right-4 text-2xl cursor-pointer text-gray-400 hover:text-gray-600 transition-colors" 
+              onClick={onClose}
+            >&times;</span>
+            
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Register for {appointment.boardingName}</h3>
+            <p className="text-gray-500 mb-6 text-sm">Fill in your details to generate your rental agreement.</p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Move-in Date */}
-          <div className="form-group">
-            <label
-              htmlFor="moveInDate"
-              className="block font-semibold mb-1 text-primary"
-            >
-              Move-in Date
-            </label>
-            <input
-              type="date"
-              id="moveInDate"
-              value={formData.moveInDate}
-              onChange={handleChange}
-              required
-              min={new Date().toISOString().split("T")[0]}
-              className="form-input"
-            />
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* ✅ NEW: Student Name */}
+              <div className="form-group">
+                <label className="block font-semibold mb-1 text-gray-700 text-sm">Full Name (for Contract) *</label>
+                <input 
+                  type="text" 
+                  id="studentName" 
+                  value={formData.studentName} 
+                  onChange={handleChange} 
+                  placeholder="e.g. John Doe"
+                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" 
+                />
+              </div>
 
-          {/* Contract Duration */}
-          <div className="form-group">
-            <label
-              htmlFor="contractDuration"
-              className="block font-semibold mb-1 text-primary"
-            >
-              Contract Duration
-            </label>
-            <select
-              id="contractDuration"
-              value={formData.contractDuration}
-              onChange={handleChange}
-              required
-              className="form-input"
-            >
-              <option value="" disabled>
-                Select duration
-              </option>
-              {durationOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+              {/* ✅ NEW: Student Phone */}
+              <div className="form-group">
+                <label className="block font-semibold mb-1 text-gray-700 text-sm">Your Phone Number *</label>
+                <input 
+                  type="tel" 
+                  id="studentPhone" 
+                  value={formData.studentPhone} 
+                  onChange={handleChange} 
+                  placeholder="e.g. 077 123 4567"
+                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" 
+                />
+              </div>
 
-          {/* Emergency Contact */}
-          <div className="form-group">
-            <label
-              htmlFor="emergencyContact"
-              className="block font-semibold mb-1 text-primary"
-            >
-              Emergency Contact Name
-            </label>
-            <input
-              type="text"
-              id="emergencyContact"
-              value={formData.emergencyContact}
-              onChange={handleChange}
-              placeholder="Full name of emergency contact"
-              required
-              className="form-input"
-            />
-          </div>
+              {/* Move-in Date */}
+              <div className="form-group">
+                <label className="block font-semibold mb-1 text-gray-700 text-sm">Move-in Date *</label>
+                <input 
+                  type="date" 
+                  id="moveInDate" 
+                  value={formData.moveInDate} 
+                  onChange={handleChange} 
+                  min={new Date().toISOString().split("T")[0]} 
+                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" 
+                />
+              </div>
 
-          {/* Emergency Phone */}
-          <div className="form-group">
-            <label
-              htmlFor="emergencyPhone"
-              className="block font-semibold mb-1 text-primary"
-            >
-              Emergency Contact Phone
-            </label>
-            <input
-              type="tel"
-              id="emergencyPhone"
-              value={formData.emergencyPhone}
-              onChange={handleChange}
-              placeholder="Phone number"
-              required
-              className="form-input"
-            />
+              {/* ✅ UPDATED: Contract Duration */}
+              <div className="form-group">
+                <label className="block font-semibold mb-1 text-gray-700 text-sm">Agreement Period (Contract) *</label>
+                <select 
+                  id="contractDuration" 
+                  value={formData.contractDuration} 
+                  onChange={handleChange} 
+                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+                >
+                  <option value="" disabled>Select period</option>
+                  <option value="6 Months">6 Months</option>
+                  <option value="1 Year">1 Year</option>
+                  <option value="2 Years">2 Years</option>
+                </select>
+              </div>
+
+              {/* Emergency Contact */}
+              <div className="form-group">
+                <label className="block font-semibold mb-1 text-gray-700 text-sm">Emergency Contact Name *</label>
+                <input 
+                  type="text" 
+                  id="emergencyContact" 
+                  value={formData.emergencyContact} 
+                  onChange={handleChange} 
+                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" 
+                />
+              </div>
+
+              {/* Emergency Phone */}
+              <div className="form-group">
+                <label className="block font-semibold mb-1 text-gray-700 text-sm">Emergency Phone *</label>
+                <input 
+                  type="tel" 
+                  id="emergencyPhone" 
+                  value={formData.emergencyPhone} 
+                  onChange={handleChange} 
+                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" 
+                />
+              </div>
+            </div>
+
+            {/* Special Requirements */}
+            <div className="form-group mt-4">
+              <label className="block font-semibold mb-1 text-gray-700 text-sm">Special Requirements</label>
+              <textarea 
+                id="specialRequirements" 
+                value={formData.specialRequirements} 
+                onChange={handleChange} 
+                rows="2" 
+                placeholder="Any dietary restrictions or allergies?"
+                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
+              ></textarea>
+            </div>
+
+            {/* Terms Checkbox */}
+            <div className="form-group mt-4">
+              <label className="flex items-center gap-3 cursor-pointer text-sm text-gray-600 select-none">
+                <input 
+                  type="checkbox" 
+                  id="agreeTerms" 
+                  checked={formData.agreeTerms} 
+                  onChange={handleChange} 
+                  className="w-4 h-4 text-green-600 rounded focus:ring-green-500" 
+                />
+                I agree to the boarding house rules and terms of service
+              </label>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-3 mt-6">
+              <button 
+                onClick={onClose} 
+                className="px-6 py-2 rounded-lg border text-gray-600 hover:bg-gray-100 font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleNext} 
+                className="px-6 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-semibold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
+              >
+                 Proceed to Payment
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Special Requirements */}
-        <div className="form-group mt-4">
-          <label
-            htmlFor="specialRequirements"
-            className="block font-semibold mb-1 text-primary"
-          >
-            Special Requirements (Optional)
-          </label>
-          <textarea
-            id="specialRequirements"
-            value={formData.specialRequirements}
-            onChange={handleChange}
-            placeholder="Any dietary restrictions, allergies, or special needs..."
-            rows="3"
-            className="form-input"
-          ></textarea>
-        </div>
-
-        {/* Terms Checkbox */}
-        <div className="form-group mt-4">
-          <label className="flex items-start gap-3 cursor-pointer text-sm text-text-dark">
-            <input
-              type="checkbox"
-              id="agreeTerms"
-              checked={formData.agreeTerms}
-              onChange={handleChange}
-              required
-              className="mt-1 appearance-none w-5 h-5 border-2 border-text-muted rounded-md transition-all duration-200 checked:bg-accent checked:border-accent"
-            />
-            <span className="custom-checkbox-label">
-              I agree to the boarding house rules and terms of service
-            </span>
-          </label>
-        </div>
-
-        {/* Form Actions */}
-        <div className="flex justify-end gap-3 mt-8">
-          {/* Cancel Button */}
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg border bg-red-600 text-white hover:bg-red-500 hover:text-white transition"
-          >
-            Cancel
-          </button>
-
-          {/* Complete Registration Button */}
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-500 transition"
-          >
-            Complete Registration
-          </button>
-        </div>
-
-        {/* Custom Form Styling */}
-        <style jsx>{`
-          .form-input {
-            @apply w-full p-3 border border-gray-200 rounded-btn text-text-dark transition-colors duration-200 focus:border-accent focus:outline-none;
-          }
-          .btn-outline {
-            @apply px-6 py-2 rounded-large font-semibold transition-all duration-300 border border-accent text-accent hover:bg-accent hover:text-white hover:-translate-y-0.5;
-          }
-          .btn-primary {
-            @apply px-6 py-2 rounded-large font-semibold transition-all duration-300 shadow-md hover:-translate-y-0.5;
-          }
-        `}</style>
-      </div>
-    </div>
+      {/* STEP 2: PAYMENT GATEWAY */}
+      <PaymentGatewayModal 
+        isOpen={step === 2}
+        onClose={() => setStep(1)} // Go back to form
+        amount={50000} // This should ideally come from backend keyMoney
+        onPaymentComplete={handlePaymentSuccess}
+      />
+    </>
   );
 };
 
