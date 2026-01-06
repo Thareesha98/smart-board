@@ -36,10 +36,9 @@ public class RegistrationService {
     @Autowired
     private UserRepository userRepo;
     
-    
-
     @Autowired
     private PaymentService paymentService;
+
     public RegistrationResponseDTO register(Long studentId, RegistrationRequestDTO dto) {
 
         User student = userRepo.findById(studentId)
@@ -56,10 +55,13 @@ public class RegistrationService {
             throw new RuntimeException("Key money must be paid to register");
         }
 
+        PaymentMethod method = dto.getPaymentMethod() != null ?
+                PaymentMethod.valueOf(dto.getPaymentMethod().toUpperCase()) : PaymentMethod.CARD;
+
         PaymentResult result = paymentService.processPayment(
                 studentId,
                 boarding.getKeyMoney(),
-                PaymentMethod.CARD   // simulated
+                method
         );
 
         if (!result.isSuccess()) {
@@ -67,20 +69,26 @@ public class RegistrationService {
                     "Key money payment failed: " + result.getMessage()
             );
         }
-        
-       
-
-
 
         Registration r = new Registration();
         r.setBoarding(boarding);
         r.setStudent(student);
         r.setNumberOfStudents(dto.getNumberOfStudents());
         r.setStudentNote(dto.getStudentNote());
-        r.setStatus(RegistrationStatus.PENDING);
+
+        r.setStatus(RegistrationStatus.APPROVED);
         r.setKeyMoneyPaid(true);
-        
         r.setPaymentTransactionRef(result.getTransactionId());
+
+        r.setMoveInDate(dto.getMoveInDate());
+        r.setContractDuration(dto.getContractDuration());
+        r.setEmergencyContactName(dto.getEmergencyContact());
+        r.setEmergencyContactPhone(dto.getEmergencyPhone());
+        r.setSpecialRequirements(dto.getSpecialRequirements());
+
+        // Update Boarding Slots
+        boarding.setAvailable_slots(boarding.getAvailable_slots() - dto.getNumberOfStudents());
+        boardingRepo.save(boarding);
 
         registrationRepo.save(r);
 
@@ -165,7 +173,8 @@ public class RegistrationService {
         Double avgRating = 0.0;
         boolean reviewSubmitted = false;
 
-        return StudentBoardingDashboardMapper.toDTO(
+        // 1. Basic Mapping using Mapper
+        StudentBoardingDashboardDTO dto = StudentBoardingDashboardMapper.toDTO(
                 reg,
                 currentMonthDue,
                 paymentStatus,
@@ -176,6 +185,32 @@ public class RegistrationService {
                 avgRating,
                 reviewSubmitted
         );
+
+        // 2. Fetch & Map Members List
+        List<Registration> activeRegistrations = registrationRepo.findByBoarding_IdAndStatus(
+                reg.getBoarding().getId(), RegistrationStatus.APPROVED
+        );
+
+        List<StudentBoardingDashboardDTO.MemberDTO> members = activeRegistrations.stream()
+                .map(r -> {
+                    StudentBoardingDashboardDTO.MemberDTO m = new MemberDTO();
+                    m.setId(r.getStudent().getId());
+                    m.setName(r.getStudent().getFullName());
+                    m.setPhone(r.getStudent().getPhone()); // Include Phone
+                    m.setJoinedDate(r.getCreatedAt().toLocalDate().toString());
+                    m.setAvatar(r.getStudent().getProfileImageUrl());
+                    return m;
+                }).collect(Collectors.toList());
+
+        dto.setMembers(members);
+
+        if (reg.getBoarding().getImageUrls() != null && !reg.getBoarding().getImageUrls().isEmpty()) {
+            dto.setBoardingImage(reg.getBoarding().getImageUrls().get(0));
+        }
+        dto.setOwnerId(reg.getBoarding().getOwner().getId());
+        dto.setOwnerName(reg.getBoarding().getOwner().getFullName());
+
+        return dto;
     }
 
     
