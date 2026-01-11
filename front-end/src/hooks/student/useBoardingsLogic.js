@@ -45,6 +45,12 @@ const useBoardingsLogic = () => {
                   image: dashboardData.boardingImage || 'https://via.placeholder.com/300',
                   monthlyRent: dashboardData.monthlyPrice,
 
+                  // Stats (from DB)
+                  rating: 4.8, // You can add this to backend DTO later if needed
+                  area: 1200, 
+                  responseRate: 95,
+                  roommates: dashboardData.members ? dashboardData.members.length : 0,
+
                   // --- Owner Info ---
                   owner: {
                       id: dashboardData.ownerId,
@@ -55,7 +61,13 @@ const useBoardingsLogic = () => {
                   },
 
                   // --- Members (Empty if pending usually) ---
-                  members: dashboardData.members || [],
+                  members: dashboardData.members?.map(m => ({
+                      id: m.id,
+                      name: m.name,
+                      joinedDate: m.joinedDate,
+                      // Use DB avatar, or fallback to generated one
+                      avatar: m.avatar || `https://ui-avatars.com/api/?name=${m.name}&background=random`
+                  })) || [],
 
                   // --- Payment Info ---
                   nextPayment: { 
@@ -82,10 +94,23 @@ const useBoardingsLogic = () => {
     alert("Payment integration coming soon!");
   };
 
+  // ✅ NEW FUNCTION: Downloads the Key Money PDF
+  const downloadReceipt = async () => {
+    if (currentBoarding?.registrationId) {
+        try {
+            await StudentService.downloadReceipt(currentBoarding.registrationId);
+        } catch (error) {
+            console.error("Download failed", error);
+            alert("Could not download receipt.");
+        }
+    }
+  };
+
   return {
     currentBoarding,
     hasBoarding,
     payRent,
+    downloadReceipt,
     loading
   };
 };
