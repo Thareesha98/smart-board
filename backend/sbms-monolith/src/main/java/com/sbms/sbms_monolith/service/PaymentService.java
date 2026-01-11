@@ -1,126 +1,88 @@
 package com.sbms.sbms_monolith.service;
 
-import java.math.BigDecimal;
+
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.sbms.sbms_monolith.dto.payment.GatewayChargeResult;
 import com.sbms.sbms_monolith.dto.payment.PaymentHistoryDTO;
 import com.sbms.sbms_monolith.dto.payment.PaymentResult;
-import com.sbms.sbms_monolith.mapper.PaymentMapper;
+import com.sbms.sbms_monolith.model.PaymentIntent;
 import com.sbms.sbms_monolith.model.PaymentTransaction;
+import com.sbms.sbms_monolith.model.enums.PaymentIntentStatus;
 import com.sbms.sbms_monolith.model.enums.PaymentMethod;
 import com.sbms.sbms_monolith.model.enums.PaymentStatus;
+import com.sbms.sbms_monolith.repository.PaymentIntentRepository;
 import com.sbms.sbms_monolith.repository.PaymentTransactionRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-
-
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class PaymentService {
 
-    @Autowired
-    private PaymentTransactionRepository transactionRepo;
+    private final PaymentIntentRepository intentRepo;
+    private final PaymentTransactionRepository txRepo;
+    private final PaymentGateway paymentGateway;
 
-    @Autowired
-    private NotificationPublisher notificationPublisher;
+    @Transactional
+    public PaymentResult pay(Long intentId, PaymentMethod method) {
 
-    @Autowired
-    private DummyPaymentGateway gateway;
-    
-    @Autowired
-    private PaymentReceiptPdfService pdfService;
+        PaymentIntent intent = intentRepo.findById(intentId)
+                .orElseThrow(() -> new RuntimeException("Payment intent not found"));
 
-    @Autowired
-    private S3Service s3Service;
+        if (intent.getStatus() == PaymentIntentStatus.SUCCESS)
+            throw new RuntimeException("Payment already completed");
 
+        intent.setStatus(PaymentIntentStatus.PROCESSING);
+        intentRepo.save(intent);
 
-    public PaymentResult processPayment(
-            Long userId,
-            BigDecimal amount,
-            PaymentMethod method
-    ) {
+        // 🔹 Gateway only INITIATES payment
+        GatewayChargeResult gateway =
+                paymentGateway.charge(intent, method);
 
+        // 🔹 Create PENDING transaction
         PaymentTransaction tx = new PaymentTransaction();
-        tx.setUserId(userId);
-        tx.setAmount(amount);
+        tx.setIntent(intent);
+        tx.setTransactionRef(gateway.getGatewayRef());
+        tx.setAmount(intent.getAmount());
         tx.setMethod(method);
-        tx.setTransactionRef(gateway.generateTransactionRef());
+        tx.setGateway("PAYHERE");
         tx.setStatus(PaymentStatus.PENDING);
 
-        transactionRepo.save(tx);
+        txRepo.save(tx);
+        
+        
 
-        boolean gatewayResult = gateway.simulateGatewayResponse();
-
-        if (gatewayResult) {
-            tx.setStatus(PaymentStatus.SUCCESS);
-            transactionRepo.save(tx);
-            
-            byte[] pdfBytes = pdfService.generateReceipt(tx);
-
-	         String receiptKey = "receipts/" + tx.getTransactionRef() + ".pdf";
-	         String receiptUrl = s3Service.uploadBytes(
-	                 pdfBytes,
-	                 receiptKey,
-	                 "application/pdf"
-	         );
-	
-	         tx.setReceiptUrl(receiptUrl);
-	         transactionRepo.save(tx);
-
-            // 🔔 PAYMENT SUCCESS EVENT
-            notificationPublisher.publish(
-                    "payment.success",
-                    userId,
-                    tx.getTransactionRef(),
-                    Map.of(
-                            "amount", amount,
-                            "method", method.name(),
-                            "transactionRef", tx.getTransactionRef()
-                    )
-            );
-
-            return new PaymentResult(
-                    true,
-                    tx.getTransactionRef(),
-                    "Payment successful"
-            );
-
-        } else {
-            tx.setStatus(PaymentStatus.FAILED);
-            tx.setFailureReason("Insufficient funds (simulated)");
-            transactionRepo.save(tx);
-
-            // 🔔 PAYMENT FAILURE EVENT
-            notificationPublisher.publish(
-                    "payment.failed",
-                    userId,
-                    tx.getTransactionRef(),
-                    Map.of(
-                            "amount", amount,
-                            "method", method.name(),
-                            "reason", tx.getFailureReason()
-                    )
-            );
-
-            return new PaymentResult(
-                    false,
-                    tx.getTransactionRef(),
-                    "Payment failed"
-            );
-        }
+        // 🔹 DO NOT mark success here
+        return new PaymentResult(
+                tx.getId(),
+                tx.getTransactionRef(),
+                intent.getAmount().doubleValue(),
+                "PENDING",
+                null
+        );
     }
-    
-    
-    public List<PaymentHistoryDTO> getPaymentHistory(Long userId) {
 
-        return transactionRepo.findByUserIdOrderByCreatedAtDesc(userId)
+    public List<PaymentHistoryDTO> history(Long userId) {
+
+        return txRepo.findByIntentStudentId(userId)
                 .stream()
-                .map(PaymentMapper::toDTO)
+                .map(tx -> {
+                    PaymentHistoryDTO dto = new PaymentHistoryDTO();
+                    dto.setId(tx.getId());
+                    dto.setTransactionRef(tx.getTransactionRef());
+                    dto.setAmount(tx.getAmount());
+                    dto.setMethod(tx.getMethod());
+                    dto.setStatus(tx.getStatus());
+                    dto.setPaidAt(tx.getPaidAt());
+                    dto.setReceiptUrl(tx.getReceiptPath());
+                    return dto;
+                })
                 .toList();
     }
-
 }
+

@@ -86,8 +86,8 @@ const QuickInfoCard = ({ boarding, onBookVisit }) => {
 
       {/* 4. Stats Section */}
       <div className="grid grid-cols-3 gap-3">
-        {boarding.quickStats.map((stat, idx) => {
-          const Icon = iconMap[stat.icon];
+        {safeStats.map((stat, idx) => {
+          const Icon = iconMap[stat.icon] || FaBed;
           return (
             <div
               key={idx}
