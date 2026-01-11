@@ -6,8 +6,27 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
   const { currentUser } = useAuth(); // Get logged-in user details
   const [step, setStep] = useState(1);
 
-  const keyMoneyAmount = appointment?.boarding?.keyMoney || appointment?.keyMoney || 0;
+  const [autoKeyMoney, setAutoKeyMoney] = useState(0);
 
+  // Logic: When modal opens, ensure we have the correct Key Money amount
+  useEffect(() => {
+    if (isOpen && appointment) {
+        // Option A: Use data passed in props (if backend updated)
+        if (appointment.keyMoney) {
+            setAutoKeyMoney(appointment.keyMoney);
+        } 
+        // Option B: Safety Net - Fetch fresh data from backend
+        else if (appointment.boardingId) {
+            StudentService.getBoarding(appointment.boardingId)
+                .then(data => {
+                    // Handle potential response variations
+                    const amount = data.keyMoney || (data.data && data.data.keyMoney) || 0;
+                    setAutoKeyMoney(amount);
+                })
+                .catch(err => console.error("Error fetching price", err));
+        }
+    }
+  }, [isOpen, appointment]);
   const [formData, setFormData] = useState({
     studentName: "",
     studentPhone: "",
@@ -75,6 +94,18 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
             
             <h3 className="text-2xl font-bold text-gray-800 mb-2">Register for {appointment.boardingName}</h3>
             <p className="text-gray-500 mb-6 text-sm">Fill in your details to generate your rental agreement.</p>
+
+
+            {/* ✅ DISPLAY KEY MONEY INFO HERE */}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg flex justify-between items-center">
+                <div>
+                    <p className="text-blue-800 font-semibold text-sm">Required Key Money</p>
+                    <p className="text-xs text-blue-600">This amount will be locked in the payment step.</p>
+                </div>
+                <span className="text-blue-900 font-bold text-xl">
+                    LKR {autoKeyMoney ? autoKeyMoney.toLocaleString() : "0.00"}
+                </span>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               
@@ -208,7 +239,7 @@ const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
       <PaymentGatewayModal 
         isOpen={step === 2}
         onClose={() => setStep(1)} // Go back to form
-        defaultAmount={keyMoneyAmount}
+        defaultAmount={autoKeyMoney}
         onPaymentComplete={handlePaymentSuccess}
       />
     </>
