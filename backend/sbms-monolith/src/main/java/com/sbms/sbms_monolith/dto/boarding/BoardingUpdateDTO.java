@@ -4,6 +4,7 @@ import com.sbms.sbms_monolith.model.enums.BoardingType;
 import com.sbms.sbms_monolith.model.enums.Gender;
 import lombok.Data;
 
+import java.io.ObjectInputFilter.Status;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
