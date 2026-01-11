@@ -3,51 +3,90 @@ import { useAuth } from '../../context/student/StudentAuthContext';
 import StudentService from '../../api/student/StudentService';
 
 const useBoardingsLogic = () => {
-  const { user } = useAuth();
+  const { currentUser } = useAuth(); 
+  
   const [currentBoarding, setCurrentBoarding] = useState(null);
   const [hasBoarding, setHasBoarding] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user?.id) {
-        //Logic: Find an appointment with status 'SELECTED' or 'REGISTERED'
-        // Since we don't have that endpoint yet, we will fetch appointments
-        // and look for one locally.
-        fetchMyBoarding();
+    if (currentUser?.id) {
+        fetchMyBoarding(currentUser.id);
     }
-  }, [user]);
+  }, [currentUser]);
 
-  const fetchMyBoarding = async () => {
+  const fetchMyBoarding = async (studentId) => {
       try {
-          // This is a placeholder logic until you add a specific Endpoint
-          // e.g. @GetMapping("/student/{id}/current-boarding")
-          const apps = await StudentService.getMyAppointments(user.id);
-          // Mock logic: take the first one for demo
-          if (apps.length > 0) {
-              const app = apps[0];
+          setLoading(true);
+          
+          // 1. Get All Registrations to check status
+          const registrations = await StudentService.getRegistrations(studentId);
+          
+          // 2. Find the relevant registration (Approved takes priority, then Pending)
+          const activeReg = registrations.find(r => r.status === 'APPROVED') 
+                         || registrations.find(r => r.status === 'PENDING');
+
+          if (activeReg) {
+              // 3. Fetch Dashboard Data (Contains Boarding Info, Owner, Members)
+              // Note: The backend 'getDashboard' endpoint works for both Pending and Approved
+              // but returns limited info for Pending if you set it up that way.
+              const dashboardData = await StudentService.getDashboard(activeReg.id);
+
               setCurrentBoarding({
-                  id: app.boardingId,
-                  name: app.boardingTitle,
-                  address: app.boardingAddress,
-                  rent: 15000, // Placeholder
-                  image: 'https://via.placeholder.com/300',
-                  nextPayment: { amount: 15000, dueDate: '2024-05-01' }
+                  // --- Status & ID ---
+                  id: activeReg.boardingId,
+                  registrationId: activeReg.id,
+                  status: activeReg.status, // "PENDING" or "APPROVED"
+                  joinedDate: activeReg.moveInDate,
+
+                  // --- Basic Info (Visible in both states) ---
+                  name: dashboardData.boardingTitle,
+                  address: dashboardData.boardingAddress,
+                  image: dashboardData.boardingImage || 'https://via.placeholder.com/300',
+                  monthlyRent: dashboardData.monthlyPrice,
+
+                  // --- Owner Info ---
+                  owner: {
+                      id: dashboardData.ownerId,
+                      name: dashboardData.ownerName,
+                      rating: "4.8", 
+                      reviews: 12,
+                      avatar: `https://ui-avatars.com/api/?name=${dashboardData.ownerName}&background=random`
+                  },
+
+                  // --- Members (Empty if pending usually) ---
+                  members: dashboardData.members || [],
+
+                  // --- Payment Info ---
+                  nextPayment: { 
+                      amount: dashboardData.currentMonthDue, 
+                      dueDate: dashboardData.dueInDays > 0 
+                        ? `Due in ${dashboardData.dueInDays} days` 
+                        : "Paid"
+                  }
               });
               setHasBoarding(true);
+          } else {
+              setHasBoarding(false);
+              setCurrentBoarding(null);
           }
       } catch (e) {
-          console.error(e);
+          console.error("Failed to fetch boarding data:", e);
+          setHasBoarding(false);
+      } finally {
+          setLoading(false);
       }
   };
 
   const payRent = () => {
-    // Call Payment Gateway API here later
-    alert("Payment feature coming soon!");
+    alert("Payment integration coming soon!");
   };
 
   return {
     currentBoarding,
     hasBoarding,
-    payRent
+    payRent,
+    loading
   };
 };
 
