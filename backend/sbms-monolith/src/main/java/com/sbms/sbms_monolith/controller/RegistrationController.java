@@ -9,7 +9,6 @@ import com.sbms.sbms_monolith.repository.RegistrationRepository;
 import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.PaymentReceiptPdfService;
 import com.sbms.sbms_monolith.service.RegistrationService;
-import com.sbms.sbms_monolith.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +24,9 @@ public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
-    
-    @Autowired UserRepository userRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private PaymentReceiptPdfService pdfService;
@@ -34,6 +34,7 @@ public class RegistrationController {
     @Autowired
     private RegistrationRepository registrationRepo;
 
+    // --- STUDENT ENDPOINTS ---
 
     @PostMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
@@ -59,6 +60,24 @@ public class RegistrationController {
         return registrationService.cancel(studentId, regId);
     }
 
+    @GetMapping("/{regId}/dashboard")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
+            @PathVariable Long regId,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        StudentBoardingDashboardDTO dto =
+                registrationService.getDashboard(regId, user.getId());
+
+        return ResponseEntity.ok(dto);
+    }
+
+    // --- OWNER ENDPOINTS ---
+
     @GetMapping("/owner/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
     public List<RegistrationResponseDTO> ownerRegistrations(
@@ -77,24 +96,8 @@ public class RegistrationController {
     ) {
         return registrationService.decide(ownerId, regId, dto);
     }
-    
-    
-    @GetMapping("/{regId}/dashboard")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
-            @PathVariable Long regId,
-            Authentication authentication
-    ) {
-        String email = authentication.getName(); // 👈 from JWT
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        StudentBoardingDashboardDTO dto =
-                registrationService.getDashboard(regId, user.getId());
-
-        return ResponseEntity.ok(dto);
-    }
+    // --- SHARED (PDF) ---
 
     @GetMapping(value = "/{regId}/receipt", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
     @PreAuthorize("isAuthenticated()")
@@ -108,6 +111,4 @@ public class RegistrationController {
                 .header("Content-Disposition", "attachment; filename=receipt_" + regId + ".pdf")
                 .body(pdfBytes);
     }
-
-
 }
