@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FaStar, FaCheckCircle, FaCamera, FaTimes, FaPaperPlane, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { useAuth } from '../../../context/student/AuthContext.jsx';
+import { useAuth } from '../../../context/student/StudentAuthContext';
 
 const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
   const { currentUser } = useAuth();
