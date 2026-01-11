@@ -172,7 +172,7 @@ const StudentService = {
       throw error;
     }
   },
-  
+
   submitReview: async (reviewData) => {
     const payload = {
       studentId: reviewData.userId,
@@ -188,7 +188,13 @@ const StudentService = {
   getBoardingReviews: async (boardingId) => {
     const response = await api.get(`/reviews/boarding/${boardingId}`);
     return response.data;
+  },
+
+  deleteReview: async (reviewId) => {
+    const response = await api.delete(`/reviews/${reviewId}`);
+    return response.data;
   }
+  
 };
 
 export default StudentService;
