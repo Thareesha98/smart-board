@@ -108,12 +108,10 @@ const PaymentGatewayModal = ({ isOpen, onClose, defaultAmount, onPaymentComplete
                     <div className="relative w-full max-w-[200px]">
                         <span className="absolute left-0 top-2 text-green-600 font-bold text-lg">LKR</span>
                         <input 
-                            type="number" 
-                            value={paymentAmount} 
-                            onChange={(e) => setPaymentAmount(e.target.value)} 
-                            className="w-full p-1 pl-10 text-2xl font-bold text-green-800 bg-transparent border-b-2 border-green-300 focus:border-green-600 outline-none text-center" 
-                            placeholder="0.00"
-                            required
+                            type="text" 
+                            value={paymentAmount ? parseFloat(paymentAmount).toLocaleString() : "0.00"} 
+                            readOnly // ✅ PREVENTS EDITING
+                            className="w-full p-1 pl-10 text-2xl font-bold text-green-800 bg-transparent border-b-2 border-green-300 focus:border-green-600 outline-none text-center cursor-not-allowed" 
                         />
                     </div>
                 </div>
