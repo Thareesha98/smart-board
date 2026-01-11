@@ -18,7 +18,7 @@ import ReviewForm from "../../components/student/boardings/ReviewForm";
 
 const MyBoardingsPage = () => {
   const navigate = useNavigate();
-  const { currentBoarding, hasBoarding, payRent, loading } =
+  const { currentBoarding, hasBoarding, payRent, loading, downloadReceipt } =
     useBoardingsLogic();
   const [notification, setNotification] = useState(null);
   const [isPayingRent, setIsPayingRent] = useState(false);
@@ -138,6 +138,13 @@ const MyBoardingsPage = () => {
                           <p className="text-green-600 font-bold flex items-center gap-2 mt-1">
                             <FaCheckCircle /> Paid
                           </p>
+                          {/* ✅ Button to download receipt even while pending */}
+                          <button
+                            onClick={downloadReceipt}
+                            className="text-xs text-blue-600 underline mt-1 hover:text-blue-800"
+                          >
+                            Download Receipt
+                          </button>
                         </div>
                         <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                           <p className="text-xs text-gray-400 uppercase font-bold">
@@ -174,7 +181,7 @@ const MyBoardingsPage = () => {
                   onPayRent={handlePayRent}
                   onRequestMaintenance={handleRequestMaintenance}
                   onContactOwner={handleContactOwner}
-                  onViewDocuments={handleViewDocuments}
+                  onViewDocuments={downloadReceipt}
                   isPayingRent={isPayingRent}
                 />
                 {/* Review Form - Full width on mobile/tablet, left column on desktop */}
