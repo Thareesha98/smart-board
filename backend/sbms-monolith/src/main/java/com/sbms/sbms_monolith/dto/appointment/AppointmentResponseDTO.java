@@ -18,6 +18,8 @@ public class AppointmentResponseDTO {
 
     private String boardingImage;
 
+    private BigDecimal keyMoney;
+
     private Long studentId;
     private String studentName;
     private String studentEmail;
