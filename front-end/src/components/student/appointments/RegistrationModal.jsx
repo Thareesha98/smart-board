@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import PaymentGatewayModal from "./PaymentGatewayModal";
 import { useAuth } from "../../../context/student/StudentAuthContext";
 
+import StudentService from "../../../api/student/StudentService";
+
 const RegistrationModal = ({ isOpen, onClose, onSubmit, appointment }) => {
   const { currentUser } = useAuth(); // Get logged-in user details
   const [step, setStep] = useState(1);
