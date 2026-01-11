@@ -18,11 +18,7 @@ const InfoCards = ({ boarding, onContactOwner }) => {
   };
 
   // --- MOCK MEMBERS DATA (Remove this if your backend provides boarding.members) ---
-  const membersList = boarding.members || [
-    { id: 101, name: "Kasun Perera", joinedDate: "Jan 2024", avatar: "https://ui-avatars.com/api/?name=Kasun+Perera&background=random" },
-    { id: 102, name: "Amal Silva", joinedDate: "Feb 2024", avatar: "https://ui-avatars.com/api/?name=Amal+Silva&background=random" },
-    { id: 103, name: "Nimali Fernando", joinedDate: "Mar 2024", avatar: "https://ui-avatars.com/api/?name=Nimali+Fernando&background=random" },
-  ];
+  const membersList = boarding?.members || [];
   // --------------------------------------------------------------------------------
 
   return (
@@ -38,10 +34,9 @@ const InfoCards = ({ boarding, onContactOwner }) => {
         title="Details"
         content={
           <div className="space-y-3">
-            <DetailItem label="Room Type" value={boarding.details?.roomType || 'N/A'} />
-            <DetailItem label="Bathroom" value={boarding.details?.bathroom || 'N/A'} />
-            <DetailItem label="Kitchen" value={boarding.details?.kitchen || 'N/A'} />
-            <DetailItem label="Lease" value={boarding.details?.leasePeriod || 'N/A'} />
+            <DetailItem label="Status" value={boarding.status === 'APPROVED' ? 'Active' : 'Pending'} />
+            <DetailItem label="Joined" value={boarding.joinedDate || 'N/A'} />
+            <DetailItem label="Rent" value={`LKR ${boarding.monthlyRent?.toLocaleString()}`} />
           </div>
         }
       />
@@ -57,7 +52,7 @@ const InfoCards = ({ boarding, onContactOwner }) => {
               {/* --- CLICKABLE AVATAR --- */}
               <img
                 onClick={() => handleViewProfile(boarding.owner?.id)}
-                src={boarding.owner?.avatar || "https://via.placeholder.com/50"}
+                src={boarding.owner?.avatar}
                 alt={boarding.owner?.name}
                 className="w-14 h-14 rounded-full object-cover border-2 border-accent p-0.5 flex-shrink-0 cursor-pointer hover:border-primary transition-colors duration-300"
               />
