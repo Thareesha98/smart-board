@@ -157,12 +157,29 @@ const StudentService = {
   // ==========================================
   // 6. REVIEWS (Ratings)
   // ==========================================
+  uploadReviewImages: async (files) => {
+    try {
+      const formData = new FormData();
+      files.forEach((file) => formData.append("files", file));
+
+      // Endpoint: POST /api/files/upload-multiple/{folder}
+      const response = await api.post("/files/upload-multiple/reviews", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data; // List of S3 URLs
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      throw error;
+    }
+  },
+  
   submitReview: async (reviewData) => {
     const payload = {
       studentId: reviewData.userId,
       boardingId: reviewData.boardingId,
       rating: reviewData.rating,
-      comment: reviewData.review
+      comment: reviewData.review,
+      imageUrls: reviewData.imageUrls || []
     };
     const response = await api.post('/reviews', payload);
     return response.data;
