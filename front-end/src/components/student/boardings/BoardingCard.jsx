@@ -18,6 +18,14 @@ const BoardingCard = ({
   onViewDocuments,
   isPayingRent
 }) => {
+
+  const navigate = useNavigate();
+
+  // Navigation handler
+  const handleNameClick = () => {
+    navigate(`/student/boarding-details/${boarding.id}`); 
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -70,7 +78,12 @@ const BoardingCard = ({
         {/* Info */}
         <div className="flex flex-col justify-between">
           <div>
-            <h3 className="text-2xl font-bold text-text-dark mb-4">{boarding.name}</h3>
+            <h3 
+                onClick={handleNameClick}
+                className="text-2xl font-bold text-text-dark mb-4 cursor-pointer hover:text-accent transition-colors"
+            >
+                {boarding.name}
+            </h3>
             
             {/* Meta Items */}
             <div className="space-y-3 mb-6">
