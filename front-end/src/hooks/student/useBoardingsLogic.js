@@ -46,6 +46,8 @@ const useBoardingsLogic = () => {
                   monthlyRent: dashboardData.monthlyPrice,
 
                   rating: dashboardData.averageRating || 0,
+                  boardingSince: dashboardData.boardingCreatedDate || "2024",
+                  joinedDate: activeReg.moveInDate || new Date().toISOString().split('T')[0],
                   area: 1200, 
                   responseRate: 95,
                   roommates: dashboardData.members ? dashboardData.members.length : 0,
