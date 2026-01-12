@@ -42,7 +42,7 @@ const useBoardingsLogic = () => {
                   // --- Basic Info (Visible in both states) ---
                   name: dashboardData.boardingTitle,
                   address: dashboardData.boardingAddress,
-                  image: dashboardData.boardingImage || 'https://via.placeholder.com/300',
+                  image: dashboardData.boardingImage ,
                   monthlyRent: dashboardData.monthlyPrice,
 
                   rating: dashboardData.averageRating || 0,

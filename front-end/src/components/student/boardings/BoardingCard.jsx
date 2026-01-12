@@ -22,9 +22,17 @@ const BoardingCard = ({
   const navigate = useNavigate();
 
   // Navigation handler
-  const handleNameClick = () => {
-    navigate(`/student/boarding-details/${boarding.id}`); 
+  const handleDetailsClick = () => {
+    if (boarding?.id) {
+        navigate(`/student/boarding-details/${boarding.id}`);
+    }
   };
+
+  const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80";
+
+  const displayImage = (boarding?.image && boarding.image.trim() !== "") 
+                        ? boarding.image 
+                        : FALLBACK_IMAGE;
 
   return (
     <motion.div
@@ -67,10 +75,12 @@ const BoardingCard = ({
         <motion.div
           whileHover={{ scale: 1.02 }}
           className="rounded-large overflow-hidden h-48 lg:h-52"
+          onClick={handleDetailsClick}
         >
           <img
-            src={boarding.image}
+            src={displayImage}
             alt={boarding.name}
+            onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_IMAGE; }}
             className="w-full h-full object-cover"
           />
         </motion.div>
@@ -79,7 +89,7 @@ const BoardingCard = ({
         <div className="flex flex-col justify-between">
           <div>
             <h3 
-                onClick={handleNameClick}
+                onClick={handleDetailsClick}
                 className="text-2xl font-bold text-text-dark mb-4 cursor-pointer hover:text-accent transition-colors"
             >
                 {boarding.name}
