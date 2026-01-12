@@ -12,6 +12,7 @@ import com.sbms.sbms_monolith.model.enums.PaymentMethod;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
 import com.sbms.sbms_monolith.repository.BoardingRepository;
 import com.sbms.sbms_monolith.repository.RegistrationRepository;
+import com.sbms.sbms_monolith.repository.ReviewRepository;
 import com.sbms.sbms_monolith.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class RegistrationService {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private ReviewRepository reviewRepo;
 
     // --- STUDENT REGISTRATION ---
     @Transactional // ✅ Ensures Data Integrity (Rollback if payment fails)
@@ -163,6 +167,7 @@ public class RegistrationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public StudentBoardingDashboardDTO getDashboard(Long regId, Long loggedStudentId) {
         Registration reg = registrationRepo.findById(regId)
                 .orElseThrow(() -> new RuntimeException("Registration not found"));
@@ -177,8 +182,11 @@ public class RegistrationService {
         int openIssues = 0;
         int resolvedIssues = 0;
         LocalDate lastIssueDate = null;
-        Double avgRating = 0.0;
-        boolean reviewSubmitted = false;
+
+        Double avg = reviewRepo.getAverageRatingForBoarding(reg.getBoarding().getId());
+        Double avgRating = (avg != null) ? Math.round(avg * 10.0) / 10.0 : 0.0; // Round to 1 decimal
+
+        boolean reviewSubmitted = reviewRepo.existsByStudentIdAndBoardingId(loggedStudentId, reg.getBoarding().getId());
 
         StudentBoardingDashboardDTO dto = StudentBoardingDashboardMapper.toDTO(
                 reg, currentMonthDue, paymentStatus, lastPaymentDate,
@@ -207,6 +215,8 @@ public class RegistrationService {
         }
         dto.setOwnerId(reg.getBoarding().getOwner().getId());
         dto.setOwnerName(reg.getBoarding().getOwner().getFullName());
+
+        dto.setAvgRating(avgRating);
 
         return dto;
     }
