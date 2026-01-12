@@ -154,6 +154,11 @@ const StudentService = {
     link.remove();
   },
 
+  requestLeave: async (studentId, regId) => {
+    const response = await api.post(`/registrations/student/${studentId}/leave/${regId}`);
+    return response.data;
+  },
+
   // ==========================================
   // 6. REVIEWS (Ratings)
   // ==========================================
