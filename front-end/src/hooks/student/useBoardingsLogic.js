@@ -73,7 +73,9 @@ const useBoardingsLogic = () => {
                       name: dashboardData.ownerName,
                       rating: dashboardData.averageRating || "New", 
                       reviews: dashboardData.reviewCount || 0,
-                      avatar: dashboardData.ownerProfileImage || `https://ui-avatars.com/api/?name=${dashboardData.ownerName}&background=0D8ABC&color=fff`
+                      avatar: dashboardData.ownerProfileImage || `https://ui-avatars.com/api/?name=${dashboardData.ownerName}&background=0D8ABC&color=fff`,
+                      email: dashboardData.ownerEmail,
+                      phone: dashboardData.ownerPhone
                   },
 
                   // --- Members (Empty if pending usually) ---

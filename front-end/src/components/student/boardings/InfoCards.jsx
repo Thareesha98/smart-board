@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -9,11 +9,30 @@ import {
 const InfoCards = ({ boarding, onContactOwner }) => {
   const navigate = useNavigate();
 
+  const [showPhone, setShowPhone] = useState(false);
+
   const handleViewProfile = (userId) => {
     if (userId) {
         navigate(`/profile/view/${userId}`);
     } else {
         console.warn("Cannot navigate: User ID is missing.");
+    }
+  };
+
+  const handleMessage = () => {
+    if (boarding.owner?.email) {
+        window.location.href = `mailto:${boarding.owner.email}`;
+    } else {
+        alert("Owner email not available.");
+        onContactOwner(); // Fallback
+    }
+  };
+
+  const handleCall = () => {
+    if (boarding.owner?.phone) {
+        setShowPhone(true); // Switches button text to phone number
+    } else {
+        alert("Owner phone number not available.");
     }
   };
 
@@ -79,20 +98,22 @@ const InfoCards = ({ boarding, onContactOwner }) => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={onContactOwner}
+                onClick={handleMessage}
                 className="flex-1 min-w-[100px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-bold text-xs bg-accent text-white hover:bg-primary transition-all whitespace-nowrap"
               >
                 <FaEnvelope size={12} />
                 Message
               </motion.button>
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={onContactOwner}
-                className="flex-1 min-w-[80px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-bold text-xs border border-gray-300 text-text-dark hover:bg-gray-50 transition-all whitespace-nowrap"
+                onClick={handleCall}
+                className={`flex-1 min-w-[80px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-bold text-xs border border-gray-300 text-text-dark hover:bg-gray-50 transition-all whitespace-nowrap ${showPhone ? 'bg-gray-100' : ''}`}
               >
                 <FaPhone size={12} />
-                Call
+                {/* Logic: Show Phone Number if clicked, otherwise 'Call' */}
+                {showPhone ? boarding.owner?.phone : "Call"}
               </motion.button>
             </div>
           </div>
