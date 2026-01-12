@@ -186,6 +186,8 @@ public class RegistrationService {
         Double avg = reviewRepo.getAverageRatingForBoarding(reg.getBoarding().getId());
         Double avgRating = (avg != null) ? Math.round(avg * 10.0) / 10.0 : 0.0; // Round to 1 decimal
 
+        int totalReviews = reviewRepo.countByBoardingId(reg.getBoarding().getId());
+
         boolean reviewSubmitted = reviewRepo.existsByStudentIdAndBoardingId(loggedStudentId, reg.getBoarding().getId());
 
         StudentBoardingDashboardDTO dto = StudentBoardingDashboardMapper.toDTO(
@@ -221,6 +223,7 @@ public class RegistrationService {
         }
 
         dto.setAverageRating(avgRating);
+        dto.setReviewCount(totalReviews);
 
         return dto;
     }

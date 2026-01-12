@@ -37,6 +37,7 @@ public class StudentBoardingDashboardDTO {
     private LocalDate lastIssueDate;
 
     private Double averageRating;
+    private int reviewCount;
     private boolean yourReviewSubmitted;
 
     private List<MemberDTO> members;
