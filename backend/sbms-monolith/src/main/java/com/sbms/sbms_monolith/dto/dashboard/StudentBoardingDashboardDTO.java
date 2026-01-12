@@ -25,6 +25,8 @@ public class StudentBoardingDashboardDTO {
     private String ownerName;
     private Long ownerId;
     private String ownerProfileImage;
+    private String ownerEmail;
+    private String ownerPhone;
 
     private BigDecimal keyMoney;
     private BigDecimal monthlyPrice;
