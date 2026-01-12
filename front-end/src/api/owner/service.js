@@ -225,3 +225,31 @@ export const updateAppointmentStatus = async (ownerId, appointmentId, decisionDa
     throw error;
   }
 };
+
+// =================================================================
+// 📝 REGISTRATION SERVICES
+// =================================================================
+
+// 1. Get all registrations for the owner
+// Matches Java: @GetMapping("/api/registrations/owner/{ownerId}")
+export const getOwnerRegistrations = async (ownerId) => {
+  try {
+    const response = await api.get(`/registrations/owner/${ownerId}`);
+    return response.data; //
+  } catch (error) {
+    console.error("Error fetching registrations:", error);
+    throw error;
+  }
+};
+
+// 2. Decide on a registration (Accept/Reject)
+// Matches Java: @PutMapping("/api/registrations/owner/{ownerId}/{regId}")
+export const decideRegistration = async (ownerId, regId, decisionDTO) => {
+  try {
+    const response = await api.put(`/registrations/owner/${ownerId}/${regId}`, decisionDTO);
+    return response.data; //
+  } catch (error) {
+    console.error("Error updating registration status:", error);
+    throw error;
+  }
+};
