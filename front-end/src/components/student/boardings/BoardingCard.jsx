@@ -86,14 +86,14 @@ const BoardingCard = ({
             </h3>
             
             {/* Meta Items */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-6 text-sm">
               <div className="flex items-center gap-3 text-text-muted">
                 <FaMapMarkerAlt className="text-accent w-4" />
                 <span>{boarding.address}</span>
               </div>
               <div className="flex items-center gap-3 text-text-muted">
                 <FaCalendarAlt className="text-accent w-4" />
-                <span>Since {boarding.joinedDate}</span>
+                <span>Since {boarding.boardingSince}</span>
               </div>
               <div className="flex items-center gap-3 text-text-muted">
                 <FaDollarSign className="text-accent w-4" />
