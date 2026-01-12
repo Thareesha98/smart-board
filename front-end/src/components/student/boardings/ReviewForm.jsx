@@ -109,7 +109,11 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
         imageUrls: uploadedImageUrls 
       };
 
-      await StudentService.submitReview(reviewData);
+      if (isEditing) {
+        await StudentService.updateReview(reviewData);
+      } else {
+        await StudentService.submitReview(reviewData);
+      }
 
       setIsSubmitting(false);
       setIsSuccess(true);
