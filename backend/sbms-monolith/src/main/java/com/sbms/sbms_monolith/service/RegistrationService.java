@@ -212,9 +212,12 @@ public class RegistrationService {
 
         dto.setMembers(members);
 
-        if (reg.getBoarding().getImageUrls() != null && !reg.getBoarding().getImageUrls().isEmpty()) {
-            dto.setBoardingImage(reg.getBoarding().getImageUrls().get(0));
+        if (reg.getBoarding().getCreatedAt() != null) {
+            dto.setBoardingCreatedDate(reg.getBoarding().getCreatedAt().toLocalDate().toString());
+        } else {
+            dto.setBoardingCreatedDate(LocalDate.now().toString()); // Fallback
         }
+
         if (reg.getBoarding().getOwner() != null) {
             dto.setOwnerId(reg.getBoarding().getOwner().getId());
             dto.setOwnerName(reg.getBoarding().getOwner().getFullName());
