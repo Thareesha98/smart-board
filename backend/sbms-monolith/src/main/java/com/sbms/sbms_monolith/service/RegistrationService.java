@@ -273,6 +273,8 @@ public class RegistrationService {
             dto.setOwnerName(reg.getBoarding().getOwner().getFullName());
             // ✅ Fix: Set Owner Profile Image
             dto.setOwnerProfileImage(reg.getBoarding().getOwner().getProfileImageUrl());
+            dto.setOwnerEmail(reg.getBoarding().getOwner().getEmail());
+            dto.setOwnerPhone(reg.getBoarding().getOwner().getPhone());
         }
 
         dto.setAverageRating(avgRating);
