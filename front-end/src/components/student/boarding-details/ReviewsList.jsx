@@ -71,12 +71,19 @@ const ReviewsList = ({ boardingId }) => {
     if (!reviewToDelete) return;
     try {
         await StudentService.deleteReview(reviewToDelete.id);
-        // Optimistic UI update
-        setReviews(prev => prev.filter(r => r.id !== reviewToDelete.id));
+        const updatedReviews = reviews.filter(r => r.id !== reviewToDelete.id);
+        setReviews(updatedReviews);
+        
+        // Recalculate average
+        if (updatedReviews.length > 0) {
+            const total = updatedReviews.reduce((acc, curr) => acc + (curr.rating || 0), 0);
+            setAverageRating((total / updatedReviews.length).toFixed(1));
+        } else {
+            setAverageRating(0);
+        }
         setReviewToDelete(null);
     } catch (error) {
         console.error("Failed to delete review", error);
-        alert("Failed to delete review.");
     }
   };
 
