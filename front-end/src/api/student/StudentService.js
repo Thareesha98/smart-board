@@ -185,6 +185,20 @@ const StudentService = {
     return response.data;
   },
 
+  updateReview: async (reviewData) => {
+    const payload = {
+      rating: reviewData.rating,
+      comment: reviewData.review,
+      imageUrls: reviewData.imageUrls || []
+    };
+    // Match backend: PUT /api/reviews/student/{sid}/boarding/{bid}
+    const response = await api.put(
+        `/reviews/student/${reviewData.userId}/boarding/${reviewData.boardingId}`, 
+        payload
+    );
+    return response.data;
+  },
+
   getBoardingReviews: async (boardingId) => {
     const response = await api.get(`/reviews/boarding/${boardingId}`);
     return response.data;
