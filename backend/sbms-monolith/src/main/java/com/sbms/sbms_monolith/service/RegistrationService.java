@@ -213,10 +213,14 @@ public class RegistrationService {
         if (reg.getBoarding().getImageUrls() != null && !reg.getBoarding().getImageUrls().isEmpty()) {
             dto.setBoardingImage(reg.getBoarding().getImageUrls().get(0));
         }
-        dto.setOwnerId(reg.getBoarding().getOwner().getId());
-        dto.setOwnerName(reg.getBoarding().getOwner().getFullName());
+        if (reg.getBoarding().getOwner() != null) {
+            dto.setOwnerId(reg.getBoarding().getOwner().getId());
+            dto.setOwnerName(reg.getBoarding().getOwner().getFullName());
+            // ✅ Fix: Set Owner Profile Image
+            dto.setOwnerProfileImage(reg.getBoarding().getOwner().getProfileImageUrl());
+        }
 
-        dto.setAvgRating(avgRating);
+        dto.setAverageRating(avgRating);
 
         return dto;
     }
