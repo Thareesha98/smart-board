@@ -15,6 +15,7 @@ import InfoCards from "../../components/student/boardings/InfoCards";
 import EmptyState from "../../components/student/boardings/EmptyState";
 import Notification from "../../components/student/maintenance/Notification";
 import ReviewForm from "../../components/student/boardings/ReviewForm";
+import LeaveBoardingSection from "../../components/student/boardings/LeaveBoardingSection";
 
 const MyBoardingsPage = () => {
   const navigate = useNavigate();
@@ -189,6 +190,9 @@ const MyBoardingsPage = () => {
                   boardingId={currentBoarding?.id || "default-boarding-id"}
                   onSubmitSuccess={handleReviewSubmit}
                 />
+
+                <LeaveBoardingSection boarding={currentBoarding} />
+                
               </div>
               <div className="w-full min-[1400px]:col-span-1">
                 <InfoCards
