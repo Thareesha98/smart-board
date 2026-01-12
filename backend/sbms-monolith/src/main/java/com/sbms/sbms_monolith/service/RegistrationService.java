@@ -46,6 +46,11 @@ public class RegistrationService {
     @Transactional // ✅ Ensures Data Integrity (Rollback if payment fails)
     public RegistrationResponseDTO register(Long studentId, RegistrationRequestDTO dto) {
 
+        //  PREVENT DUPLICATES
+        if (registrationRepo.existsActiveRegistration(studentId, dto.getBoardingId())) {
+            throw new RuntimeException("You already have a Pending or Active registration for this boarding.");
+        }
+
         User student = userRepo.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
@@ -103,7 +108,48 @@ public class RegistrationService {
         return RegistrationMapper.toDTO(r);
     }
 
-    // --- OWNER DECISION ---
+    // --- STUDENT REQUEST LEAVE ---
+    @Transactional
+    public void requestLeave(Long studentId, Long regId) {
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!r.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (r.getStatus() != RegistrationStatus.APPROVED) {
+            throw new RuntimeException("You can only request leave if you are currently approved.");
+        }
+
+        r.setStatus(RegistrationStatus.LEAVE_REQUESTED);
+        registrationRepo.save(r);
+    }
+
+    // --- ✅ OWNER APPROVE LEAVE ---
+    @Transactional
+    public void approveLeave(Long ownerId, Long regId) {
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!r.getBoarding().getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        // Logic: Free up slot
+        if (r.getStatus() == RegistrationStatus.LEAVE_REQUESTED || r.getStatus() == RegistrationStatus.APPROVED) {
+            Boarding b = r.getBoarding();
+            b.setAvailable_slots(b.getAvailable_slots() + r.getNumberOfStudents());
+            boardingRepo.save(b);
+
+            r.setStatus(RegistrationStatus.LEFT);
+            registrationRepo.save(r);
+        } else {
+            throw new RuntimeException("Cannot approve leave for this registration status.");
+        }
+    }
+
+    // --- OWNER DECISION (Registration) ---
     @Transactional // ✅ Ensures slots update and status update happen together
     public RegistrationResponseDTO decide(Long ownerId, Long regId, RegistrationDecisionDTO dto) {
 
