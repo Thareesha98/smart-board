@@ -45,8 +45,7 @@ const useBoardingsLogic = () => {
                   image: dashboardData.boardingImage || 'https://via.placeholder.com/300',
                   monthlyRent: dashboardData.monthlyPrice,
 
-                  // Stats (from DB)
-                  rating: 4.8, // You can add this to backend DTO later if needed
+                  rating: dashboardData.averageRating || 0,
                   area: 1200, 
                   responseRate: 95,
                   roommates: dashboardData.members ? dashboardData.members.length : 0,
@@ -55,9 +54,9 @@ const useBoardingsLogic = () => {
                   owner: {
                       id: dashboardData.ownerId,
                       name: dashboardData.ownerName,
-                      rating: "4.8", 
-                      reviews: 12,
-                      avatar: `https://ui-avatars.com/api/?name=${dashboardData.ownerName}&background=random`
+                      rating: dashboardData.averageRating || "New", 
+                      reviews: dashboardData.reviewCount || 0,
+                      avatar: dashboardData.ownerProfileImage || `https://ui-avatars.com/api/?name=${dashboardData.ownerName}&background=0D8ABC&color=fff`
                   },
 
                   // --- Members (Empty if pending usually) ---
