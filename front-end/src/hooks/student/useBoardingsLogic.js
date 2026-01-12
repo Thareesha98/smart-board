@@ -32,6 +32,21 @@ const useBoardingsLogic = () => {
               // but returns limited info for Pending if you set it up that way.
               const dashboardData = await StudentService.getDashboard(activeReg.id);
 
+              // FIX: Deduplicate members to prevent "same key" error
+              const uniqueMemberIds = new Set();
+              const uniqueMembers = (dashboardData.members || [])
+                .filter(m => {
+                    if (uniqueMemberIds.has(m.id)) return false;
+                    uniqueMemberIds.add(m.id);
+                    return true;
+                })
+                .map(m => ({
+                    id: m.id,
+                    name: m.name,
+                    joinedDate: m.joinedDate,
+                    avatar: m.avatar || `https://ui-avatars.com/api/?name=${m.name}&background=random`
+                }));
+
               setCurrentBoarding({
                   // --- Status & ID ---
                   id: activeReg.boardingId,
