@@ -65,6 +65,20 @@ public class RegistrationController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/student/{studentId}/leave/{regId}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<String> requestLeave(@PathVariable Long studentId, @PathVariable Long regId) {
+        registrationService.requestLeave(studentId, regId);
+        return ResponseEntity.ok("Leave request sent.");
+    }
+
+    @PostMapping("/owner/{ownerId}/approve-leave/{regId}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<String> approveLeave(@PathVariable Long ownerId, @PathVariable Long regId) {
+        registrationService.approveLeave(ownerId, regId);
+        return ResponseEntity.ok("Leave approved.");
+    }
+
     @GetMapping("/{regId}/dashboard")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
