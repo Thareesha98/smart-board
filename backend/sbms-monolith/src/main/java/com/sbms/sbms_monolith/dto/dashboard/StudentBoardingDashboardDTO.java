@@ -20,6 +20,7 @@ public class StudentBoardingDashboardDTO {
     private String boardingTitle;
     private String boardingAddress;
     private String boardingImage;
+    private String boardingCreatedDate;
 
     private String ownerName;
     private Long ownerId;
