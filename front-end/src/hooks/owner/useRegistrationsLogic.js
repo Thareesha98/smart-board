@@ -32,19 +32,26 @@ const useRegistrationsLogic = () => {
       const data = await getOwnerRegistrations(currentOwner.id);
 
       // Map Backend DTO to Frontend Structure
-      const mappedData = data.map((dto) => ({
-        id: dto.id,
-        studentName: dto.studentName || "Unknown Student",
-        boardingName: dto.boardingName || "Unknown Property",
-        status: dto.status, // "PENDING", "ACCEPTED", "REJECTED"
-        keyMoneyPaid: dto.keyMoneyPaid,
-        paymentTransactionRef: dto.paymentTransactionRef,
-        studentNote: dto.studentNote,
-        ownerNote: dto.ownerNote,
-        date: dto.createdAt || new Date().toISOString(), // Fallback if DTO lacks date
-        numberOfStudents: dto.numberOfStudents,
-        moveInDate: dto.moveInDate,
-      }));
+      const mappedData = data.map((dto) => {
+        
+        let uiStatus = dto.status;
+        if (dto.status === "ACCEPTED") uiStatus = "APPROVED";
+        if (dto.status === "DECLINED") uiStatus = "REJECTED"; // Optional safety
+
+        return {
+          id: dto.id,
+          studentName: dto.studentName || "Unknown Student",
+          boardingName: dto.boardingName || "Unknown Property",
+          status: uiStatus, 
+          keyMoneyPaid: dto.keyMoneyPaid,
+          paymentTransactionRef: dto.paymentTransactionRef,
+          studentNote: dto.studentNote,
+          ownerNote: dto.ownerNote,
+          date: dto.createdAt || new Date().toISOString(),
+          numberOfStudents: dto.numberOfStudents,
+          moveInDate: dto.moveInDate,
+        };
+      });
 
       setRegistrations(mappedData);
       setError(null);
@@ -61,25 +68,31 @@ const useRegistrationsLogic = () => {
   }, [fetchRegistrations]);
 
   // --- 2. Action Handlers ---
-  const handleDecision = async (regId, status, ownerNote = "") => {
+  const handleDecision = async (regId, uiStatus, ownerNote = "") => {
     if (!currentOwner) return false;
 
-    // Optimistic Update: Update UI immediately
+    let backendStatus = uiStatus;
+    if (uiStatus === "APPROVED") backendStatus = "ACCEPTED";
+    if (uiStatus === "REJECTED") backendStatus = "REJECTED";
+
+    // Optimistic Update
     const previousState = [...registrations];
     setRegistrations((prev) =>
-      prev.map((reg) => (reg.id === regId ? { ...reg, status: status } : reg))
+      prev.map((reg) =>
+        reg.id === regId ? { ...reg, status: uiStatus } : reg
+      )
     );
 
     const toastId = toast.loading("Processing decision...");
 
     try {
       const decisionDTO = {
-        status: status, // "ACCEPTED" or "REJECTED"
+        status: backendStatus, // "ACCEPTED" or "REJECTED"
         ownerNote: ownerNote,
       };
 
       await decideRegistration(currentOwner.id, regId, decisionDTO);
-      toast.success(`Request ${status.toLowerCase()} successfully!`, {
+      toast.success(`Request ${uiStatus.toLowerCase()} successfully!`, {
         id: toastId,
       });
       return true; // Return true to close modal
@@ -128,42 +141,39 @@ const useRegistrationsLogic = () => {
 
   // --- Helpers ---
   const counts = useMemo(() => {
-    return registrations.reduce(
-      (acc, reg) => {
-        const statusKey = reg.status; // "PENDING", "ACCEPTED", etc.
-        acc[statusKey] = (acc[statusKey] || 0) + 1;
-        return acc;
-      },
-      { PENDING: 0, ACCEPTED: 0, REJECTED: 0 }
-    );
+    // Initialize with 0 for all required tabs
+    const initialCounts = { PENDING: 0, APPROVED: 0, REJECTED: 0 };
+    return registrations.reduce((acc, reg) => {
+      const statusKey = reg.status; 
+      if (acc[statusKey] !== undefined) {
+        acc[statusKey]++;
+      }
+      return acc;
+    }, initialCounts);
   }, [registrations]);
 
   const getStatusStyle = (status) => {
     const styles = {
       PENDING: {
-        color: "text-warning",
-        bg: "bg-warning/10",
+        textClass: "text-warning",
+        bgClass: "bg-warning/10",
+        colorClass: "bg-warning", // Solid color for icons/active indicators
         border: "border-warning/20",
       },
-      ACCEPTED: {
-        color: "text-success",
-        bg: "bg-success/10",
+      APPROVED: {
+        textClass: "text-success",
+        bgClass: "bg-success/10",
+        colorClass: "bg-success",
         border: "border-success/20",
       },
       REJECTED: {
-        color: "text-error",
-        bg: "bg-error/10",
+        textClass: "text-error",
+        bgClass: "bg-error/10",
+        colorClass: "bg-error",
         border: "border-error/20",
       },
     };
-    // Default fallback
-    return (
-      styles[status] || {
-        color: "text-muted",
-        bg: "bg-gray-100",
-        border: "border-gray-200",
-      }
-    );
+    return styles[status] || styles.PENDING;
   };
 
   const activeOwnerData = {

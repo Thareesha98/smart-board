@@ -33,6 +33,8 @@ const RegistrationPage = () => {
   const [selectedReg, setSelectedReg] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const TABS = ["PENDING", "APPROVED", "REJECTED"];
+
   const openProofModal = (reg) => {
     setSelectedReg(reg);
     setIsModalOpen(true);
@@ -78,12 +80,12 @@ const RegistrationPage = () => {
 
         {/* Filter Tabs */}
         <section className="p-2 mx-2 border md:p-6 rounded-report shadow-custom bg-card-bg border-light">
-          <div className="grid grid-cols-3 gap-2 md:grid-cols-4 md:gap-4">
-            {Object.keys(counts).map((status) => (
+          <div className="grid grid-cols-3 gap-2 md:gap-4">
+            {TABS.map((status) => (
               <StatusTab
                 key={status}
                 status={status}
-                count={counts[status]}
+                count={counts[status] || 0}
                 currentFilter={filter}
                 setFilter={setFilter}
                 config={getStatusStyle(status)}

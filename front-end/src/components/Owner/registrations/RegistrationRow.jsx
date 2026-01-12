@@ -35,7 +35,7 @@ const RegistrationRow = ({ registration, config, onViewProof }) => {
         <div className="flex items-start gap-4">
           {/* Status Icon Box */}
           <div
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${config.bg} ${config.color}`}
+            className={`relative p-4 rounded-2xl bg-white border ${config.border} shadow-sm hover:shadow-md transition-all group`}
           >
             {registration.status === "PENDING" && <FaClock size={22} />}
             {registration.status === "ACCEPTED" && <FaCheckCircle size={22} />}
@@ -63,7 +63,7 @@ const RegistrationRow = ({ registration, config, onViewProof }) => {
             {/* Badges */}
             <div className="flex items-center gap-2 mt-1.5">
               <span
-                className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wide ${config.bg} ${config.color}`}
+                className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wide ${config.bgClass} ${config.textClass}`}
               >
                 {registration.status}
               </span>
