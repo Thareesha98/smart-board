@@ -1,11 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 
-// 1. Service Imports
-import {
-  getOwnerRegistrations,
-  decideRegistration,
-} from "../../api/owner/registrationService";
+import { 
+  getOwnerRegistrations, 
+  decideRegistration 
+} from "../../api/owner/service";
 
 // 2. Auth Context Import
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
