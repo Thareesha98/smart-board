@@ -44,17 +44,27 @@ const useMaintenanceLogic = () => {
     return { activeRequests: active, requestHistory: history };
   }, [requests]);
 
-  // 3. Create Request
+  // 3. Create Request (UPDATED LOGIC)
   const addRequest = async (formData, boardingId) => {
     try {
-      // Backend DTO Expects: { boardingId, title, description, issueType, maintenanceUrgency, imageUrls }
+      let uploadedImageUrls = [];
+
+      // STEP 1: Upload Images (if any)
+      if (formData.images && formData.images.length > 0) {
+          // Check if they are raw File objects (from input)
+          if (formData.images[0] instanceof File) {
+              uploadedImageUrls = await StudentService.uploadMaintenanceImages(formData.images);
+          }
+      }
+
+      // STEP 2: Create Request with URLs
       const payload = {
         boardingId: boardingId,
-        title: getIssueTitle(formData.issueType), // "Plumbing Issue"
+        title: getIssueTitle(formData.issueType),
         description: formData.description,
         issueType: formData.issueType.toUpperCase(),
         maintenanceUrgency: formData.urgency.toUpperCase(),
-        imageUrls: [] // Handle image upload logic separately if needed (S3) or pass URLs
+        imageUrls: uploadedImageUrls // Send the URLs to backend
       };
 
       await StudentService.createMaintenanceRequest(payload);
