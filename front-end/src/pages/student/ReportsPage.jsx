@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import StudentLayout from '../../components/student/common/StudentLayout';
 import useReportsLogic from '../../hooks/student/useReportsLogic.js';
+import useBoardingsLogic from '../../hooks/student/useBoardingsLogic.js';
 import ReportTypesGrid from '../../components/student/reports/ReportTypesGrid';
 import ReportForm from '../../components/student/reports/ReportForm';
 import ReportsList from '../../components/student/reports/ReportsList';
@@ -18,6 +19,9 @@ const ReportsPage = () => {
     setFilter,
   } = useReportsLogic();
 
+  const { currentBoarding, hasBoarding } = useBoardingsLogic();
+  const isRegistered = hasBoarding && currentBoarding?.status === 'APPROVED';
+
   const [notification, setNotification] = useState(null);
   const [selectedReportType, setSelectedReportType] = useState(null);
   const [selectedReportId, setSelectedReportId] = useState(null);
@@ -33,26 +37,31 @@ const ReportsPage = () => {
     setSelectedReportType({ type, typeName });
   };
 
-  const handleResetForm = () => {
-    setSelectedReportType(null);
-  };
+  // const handleResetForm = () => {
+  //   setSelectedReportType(null);
+  // };
 
   const handleFormSubmit = (reportData) => {
     setPendingReport(reportData);
     setShowConfirmation(true);
   };
 
-  const handleConfirmSubmit = () => {
-    submitReport(pendingReport);
-    setShowConfirmation(false);
-    setPendingReport(null);
-    setSelectedReportType(null);
-    showNotification('Report submitted successfully! Our team will review it shortly.', 'success');
+  const handleConfirmSubmit = async () => {
+    try {
+        await submitReport(pendingReport);
+        setShowConfirmation(false);
+        setPendingReport(null);
+        setSelectedReportType(null);
+        showNotification('Report submitted successfully!', 'success');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+        showNotification('Failed to submit report.', 'error');
+    }
   };
 
-  const handleViewDetails = (reportId) => {
-    setSelectedReportId(reportId);
-  };
+  // const handleViewDetails = (reportId) => {
+  //   setSelectedReportId(reportId);
+  // };
 
   // Function to start a new report (resets view to Grid)
   const startNewReport = () => {
@@ -90,7 +99,7 @@ const ReportsPage = () => {
           <h2 className="text-2xl font-bold text-primary mb-6">
             What would you like to report?
           </h2>
-          <ReportTypesGrid onSelectType={handleSelectReportType} />
+          <ReportTypesGrid onSelectType={handleSelectReportType} isRegistered={isRegistered} />
         </motion.section>
       )}
 
@@ -106,7 +115,8 @@ const ReportsPage = () => {
             <ReportForm
               reportType={selectedReportType}
               onSubmit={handleFormSubmit}
-              onCancel={handleResetForm}
+              onCancel={() => setSelectedReportType(null)}
+              boardingData={isRegistered ? currentBoarding : null}
             />
           </motion.section>
         )}
