@@ -47,18 +47,19 @@ const useReportsLogic = () => {
       formData.append('senderId', currentUser.id);
       formData.append('reportTitle', reportData.reportTitle);
       formData.append('reportDescription', reportData.reportDescription);
-      formData.append('type', reportData.type);
-      formData.append('severity', reportData.severity);
-      formData.append('incidentDate', reportData.incidentDate);
-      formData.append('allowContact', reportData.allowContact);
+      formData.append('type', reportData.type?.toUpperCase() || 'OTHER');
+      formData.append('severity', reportData.severity?.toUpperCase() || 'LOW');
+      formData.append('incidentDate', reportData.incidentDate || new Date().toISOString().split('T')[0]);
+      formData.append('allowContact', reportData.allowContact || true);
 
       // Optional Text Fields
       if (reportData.boarding) formData.append('boarding', reportData.boarding);
       if (reportData.reportedPerson) formData.append('reportedPersonName', reportData.reportedPerson);
+      if (reportData.reportedUserId) formData.append('reportedUserId', reportData.reportedUserId);
 
       // Files
       if (reportData.evidence && reportData.evidence.length > 0) {
-        reportData.evidence.forEach(file => formData.append('evidence', file));
+        reportData.evidence.forEach((file) => formData.append('evidence', file));
       }
 
       // Cleaner: Calls the service
