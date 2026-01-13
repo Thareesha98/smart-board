@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCalendar, FaHashtag } from 'react-icons/fa';
+import { FaCalendar, FaHashtag, FaPaperclip } from 'react-icons/fa';
 
 // UPDATED COLORS: Consistent with ReportForm (Light bg, dark text, border)
 const STATUS_CONFIG = {
@@ -104,16 +104,27 @@ const ReportItem = ({ report, onViewDetails, formatDate, index }) => {
       </div>
 
       <div className="flex gap-3 mb-4 flex-wrap">
-        {/* ✅ FIX 4: Display the correct field 'priority' */}
+        {/* FIX 4: Display the correct field 'priority' */}
         <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${severityColor}`}>
           {report.priority || 'LOW'}
         </span>
         
-        {/* ✅ FIX 5: Use 'property' (Backend DTO field) instead of 'boarding' */}
+        {/* FIX 5: Use 'property' (Backend DTO field) instead of 'boarding' */}
         {report.property && <span className="text-sm text-text-muted">{report.property}</span>}
       </div>
 
       <p className="text-text-muted mb-4 line-clamp-2 flex-1">{report.description}</p>
+
+      {/* NEW: EVIDENCE INDICATOR */}
+      {/* This only shows if the backend says there is evidence (evidenceCount > 0) */}
+      {report.evidenceCount > 0 && (
+        <div className="mb-4 mt-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-xs font-semibold text-text-dark">
+                <FaPaperclip className="text-accent" />
+                <span>{report.evidenceCount} Evidence Attached</span>
+            </div>
+        </div>
+      )}
 
       <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2 text-text-muted text-sm">
