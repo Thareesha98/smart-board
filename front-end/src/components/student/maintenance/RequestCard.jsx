@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCalendar, FaHashtag, FaImage } from 'react-icons/fa';
+import { FaCalendar, FaHashtag, FaImage, FaPaperclip } from 'react-icons/fa';
 
 const STATUS_CONFIG = {
   pending: { label: 'Pending', color: 'bg-info/20 text-info' },
@@ -64,17 +64,9 @@ const RequestCard = ({ request, onClick }) => {
 
       {request.images && request.images.length > 0 && (
         <div className="mb-4 mt-auto">
-            <div className="relative h-24 w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                <img 
-                    src={request.images[0]} 
-                    alt="Evidence" 
-                    className="w-full h-full object-cover"
-                />
-                {request.images.length > 1 && (
-                    <div className="absolute bottom-1 right-1 bg-black/60 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
-                        <FaImage /> +{request.images.length - 1}
-                    </div>
-                )}
+            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-xs font-semibold text-text-dark">
+                <FaPaperclip className="text-accent" />
+                <span>{request.images.length} Evidence Attached</span>
             </div>
         </div>
       )}
