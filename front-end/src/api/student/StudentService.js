@@ -223,6 +223,22 @@ const StudentService = {
     return response.data;
   },
 
+  uploadMaintenanceImages: async (files) => {
+    try {
+      const formData = new FormData();
+      files.forEach((file) => formData.append("files", file));
+
+      // Uses your existing file upload endpoint, saving to 'maintenance' folder
+      const response = await api.post("/files/upload-multiple/maintenance", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return response.data; // Returns List<String> (URLs)
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      throw error;
+    }
+  },
+
   createMaintenanceRequest: async (data) => {
     // data must match MaintenanceCreateDTO: { boardingId, title, description, issueType, maintenanceUrgency, imageUrls }
     const response = await api.post('/maintenance', data); 
