@@ -34,10 +34,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setUserDestinationPrefix("/user");
     }
 
-    /**
-     * 🔥 THIS WAS MISSING
-     * Without this, CONNECT succeeds but MESSAGE/SUBSCRIBE fails silently
-     */
+   
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(jwtAuthInterceptor);
