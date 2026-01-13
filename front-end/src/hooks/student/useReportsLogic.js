@@ -3,7 +3,9 @@ import StudentService from '../../api/student/StudentService'; // Import the Ser
 import { useAuth } from '../../context/student/StudentAuthContext';
 
 const useReportsLogic = () => {
-  const { user } = useAuth();
+  const authContext = useAuth();
+  const currentUser = authContext.currentUser || authContext.user;
+  
   const [userReports, setUserReports] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
