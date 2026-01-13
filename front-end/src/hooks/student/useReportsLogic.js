@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useContext } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import StudentService from '../../api/student/StudentService'; // Import the Service
 import { useAuth } from '../../context/student/StudentAuthContext';
 
@@ -9,13 +9,13 @@ const useReportsLogic = () => {
   const [loading, setLoading] = useState(true);
 
   // --- 1. FETCH REPORTS ---
-  const fetchReports = async () => {
-    if (!user || !user.id) return;
+  const fetchReports = useCallback(async () => {
+    if (!currentUser?.id) return;
     setLoading(true);
     try {
-      // Cleaner: Calls the service
-      const data = await StudentService.getSentReports(user.id);
+      const data = await StudentService.getSentReports(currentUser.id);
       
+      // Map Backend Status strings to Frontend keys
       const normalizedData = data.map(report => ({
         ...report,
         status: mapBackendStatus(report.status)
@@ -26,9 +26,9 @@ const useReportsLogic = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
 
-  useEffect(() => { fetchReports(); }, [user]);
+  useEffect(() => { fetchReports(); }, [fetchReports]);
 
   // --- 2. FILTER ---
   const filteredReports = useMemo(() => {
@@ -38,11 +38,11 @@ const useReportsLogic = () => {
 
   // --- 3. SUBMIT ---
   const submitReport = async (reportData) => {
-    if (!user?.id) return alert("Please log in.");
+    if (!currentUser?.id) return alert("Please log in.");
 
     try {
       const formData = new FormData();
-      formData.append('senderId', user.id);
+      formData.append('senderId', currentUser.id);
       formData.append('reportTitle', reportData.reportTitle);
       formData.append('reportDescription', reportData.reportDescription);
       formData.append('type', reportData.type);
@@ -66,7 +66,7 @@ const useReportsLogic = () => {
       return true;
     } catch (err) {
       console.error("Submit error:", err);
-      alert("Failed to submit report.");
+      throw err;
     }
   };
 
@@ -75,10 +75,12 @@ const useReportsLogic = () => {
 
 // Helper
 const mapBackendStatus = (status) => {
-    if(status === 'New') return 'pending';
-    if(status === 'In Progress' || status === 'Investigating') return 'under-review';
-    if(status === 'Resolved') return 'resolved';
-    if(status === 'Dismissed') return 'dismissed';
+    if (!status) return 'pending';
+    const lower = status.toLowerCase();
+    if (lower === 'new' || lower === 'pending') return 'pending';
+    if (lower.includes('progress') || lower.includes('investigating')) return 'under-review';
+    if (lower === 'resolved') return 'resolved';
+    if (lower === 'dismissed') return 'dismissed';
     return 'pending';
 };
 
