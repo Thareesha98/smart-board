@@ -35,4 +35,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // CHECK FOR DUPLICATES: Returns true if student has a live registration
     @Query("SELECT COUNT(r) > 0 FROM Registration r WHERE r.student.id = :studentId AND r.boarding.id = :boardingId AND r.status IN ('PENDING', 'APPROVED', 'LEAVE_REQUESTED')")
     boolean existsActiveRegistration(@Param("studentId") Long studentId, @Param("boardingId") Long boardingId);
+
+    boolean existsByStudentIdAndBoardingIdAndStatus(Long studentId, Long boardingId, RegistrationStatus status);
 }
