@@ -212,7 +212,22 @@ const StudentService = {
   deleteReview: async (reviewId) => {
     const response = await api.delete(`/reviews/${reviewId}`);
     return response.data;
-  }
+  },
+
+  // ==========================================
+  // 7. MAINTENANCE (New Section)
+  // ==========================================
+  
+  getMaintenanceRequests: async () => {
+    const response = await api.get('/maintenance/student');
+    return response.data;
+  },
+
+  createMaintenanceRequest: async (data) => {
+    // data must match MaintenanceCreateDTO: { boardingId, title, description, issueType, maintenanceUrgency, imageUrls }
+    const response = await api.post('/maintenance', data); 
+    return response.data;
+  },
   
 };
 
