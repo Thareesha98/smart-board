@@ -126,7 +126,7 @@ const ReportsPage = () => {
       <section className="mb-8">
         <ReportsList
           reports={filteredReports}
-          onViewDetails={handleViewDetails}
+          onViewDetails={setSelectedReportId}
           onFilterChange={setFilter}
         />
       </section>
