@@ -10,26 +10,30 @@ const STATUS_CONFIG = {
 };
 
 const SEVERITY_CONFIG = {
-  low: 'bg-success/20 text-success',
-  medium: 'bg-info/20 text-info',
-  high: 'bg-error/20 text-error',
-  critical: 'bg-error text-white',
+  LOW: 'bg-success/20 text-success',
+  MEDIUM: 'bg-info/20 text-info',
+  HIGH: 'bg-error/20 text-error',
+  CRITICAL: 'bg-error text-white',
 };
 
 const TYPE_NAMES = {
-  boarding: 'Boarding Issue',
-  owner: 'Owner Behavior',
-  student: 'Other Student',
-  safety: 'Safety Concern',
-  fraud: 'Fraudulent Listing',
-  other: 'Other Issue',
+  BOARDING: 'Boarding Issue',
+  OWNER: 'Owner Behavior',
+  STUDENT: 'Other Student',
+  SAFETY: 'Safety Concern',
+  FRAUD: 'Fraudulent Listing',
+  OTHER: 'Other Issue',
 };
 
 const ReportDetailsModal = ({ isOpen, onClose, report }) => {
   if (!report) return null;
 
   const statusConfig = STATUS_CONFIG[report.status] || STATUS_CONFIG.pending;
-  const severityColor = SEVERITY_CONFIG[report.severity] || SEVERITY_CONFIG.low;
+  const severityKey = report.priority ? report.priority.toUpperCase() : 'LOW'; 
+  const severityColor = SEVERITY_CONFIG[severityKey] || SEVERITY_CONFIG.LOW;
+
+  const typeKey = report.type ? report.type.toUpperCase() : 'OTHER';
+  const typeLabel = TYPE_NAMES[typeKey] || typeKey;
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -82,7 +86,7 @@ const ReportDetailsModal = ({ isOpen, onClose, report }) => {
                 label="Severity"
                 value={
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${severityColor}`}>
-                    {report.severity}
+                    {report.priority || 'LOW'}
                   </span>
                 }
               />
@@ -105,6 +109,30 @@ const ReportDetailsModal = ({ isOpen, onClose, report }) => {
                 <h4 className="font-semibold text-text-dark mb-2">Description</h4>
                 <p className="text-text-muted leading-relaxed">{report.description}</p>
               </div>
+
+              {/* ADDED: EVIDENCE SECTION */}
+              {report.evidence && (
+                <div className="pt-4 border-t border-gray-100">
+                  <h4 className="font-semibold text-text-dark mb-3">Attached Evidence</h4>
+                  <div className="flex flex-wrap gap-4">
+                     {report.evidence.type === 'image' ? (
+                        <div className="relative group">
+                            <img 
+                                src={report.evidence.url} 
+                                alt="Evidence" 
+                                className="h-40 w-auto rounded-lg border border-gray-200 object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                                onClick={() => window.open(report.evidence.url, '_blank')}
+                            />
+                            <div className="text-xs text-text-muted mt-1 text-center">Click to enlarge</div>
+                        </div>
+                     ) : (
+                        <a href={report.evidence.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-accent">
+                            <FaFileAlt /> View Document
+                        </a>
+                     )}
+                  </div>
+                </div>
+              )}
 
               {report.adminResponse && (
                 <div className="p-4 bg-info/10 border-l-4 border-info rounded-lg">
