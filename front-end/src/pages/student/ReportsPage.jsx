@@ -16,7 +16,7 @@ const ReportsPage = () => {
     userReports,
     filteredReports,
     submitReport,
-    setFilter,
+    setFilter
   } = useReportsLogic();
 
   const { currentBoarding, hasBoarding } = useBoardingsLogic();
