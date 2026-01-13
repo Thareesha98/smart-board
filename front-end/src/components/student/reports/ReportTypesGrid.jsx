@@ -9,7 +9,7 @@ import {
   FaQuestionCircle,
 } from 'react-icons/fa';
 
-const REPORT_TYPES = [
+const ALL_REPORT_TYPES = [
   {
     type: 'BOARDING',
     icon: FaBuilding,
