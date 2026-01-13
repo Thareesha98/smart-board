@@ -2,6 +2,8 @@ package com.sbms.sbms_monolith.service;
 
 import java.util.List;
 
+import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
+import com.sbms.sbms_monolith.repository.RegistrationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +35,9 @@ public class MaintenanceService {
     @Autowired
     private S3Service s3Service;
 
+    @Autowired
+    private RegistrationRepository registrationRepo;
+
     public MaintenanceResponseDTO create(Long studentId, MaintenanceCreateDTO dto) {
 
         User student = userRepo.findById(studentId)
@@ -40,6 +45,17 @@ public class MaintenanceService {
 
         Boarding boarding = boardingRepo.findById(dto.getBoardingId())
                 .orElseThrow(() -> new RuntimeException("Boarding not found"));
+
+        //  SECURITY CHECK: Is student approved for this boarding?
+        boolean isResident = registrationRepo.existsByStudentIdAndBoardingIdAndStatus(
+                studentId,
+                boarding.getId(),
+                RegistrationStatus.APPROVED
+        );
+
+        if (!isResident) {
+            throw new RuntimeException("You can only submit maintenance requests for a boarding you are currently approved in.");
+        }
 
         Maintenance m = new Maintenance();
         m.setStudent(student);
