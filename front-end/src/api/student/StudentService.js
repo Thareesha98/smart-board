@@ -281,6 +281,47 @@ const StudentService = {
       console.error("Avatar upload failed:", error);
       throw error;
     }
+  },
+
+  
+  // ==========================================
+  // 9. DASHBOARD API CALLS
+  // ==========================================
+
+  // 1. Get All Appointments (for Upcoming Visits widget)
+  getAllAppointments: async (studentId) => {
+    const response = await api.get(`/appointments/student/${studentId}`);
+    return response.data;
+  },
+
+  // 2. Get All Registrations (for Current Boarding widget)
+  getAllRegistrations: async (studentId) => {
+    const response = await api.get(`/registrations/student/${studentId}`);
+    return response.data;
+  },
+
+  // 3. Get Specific Registration Dashboard (for Payment widget)
+  getRegistrationDashboard: async (regId) => {
+    const response = await api.get(`/registrations/${regId}/dashboard`);
+    return response.data;
+  },
+
+  // 4. Get Payment History (for Recent Activity)
+  getPaymentHistory: async () => {
+    const response = await api.get('/payments/history');
+    return response.data;
+  },
+
+  // 5. Get My Reviews (for Reviews widget)
+  getMyReviews: async (studentId) => {
+    // Falls back to empty array if endpoint doesn't exist yet
+    try {
+        const response = await api.get(`/reviews/student/${studentId}`);
+        return response.data;
+    } catch (e) {
+        console.warn("Review endpoint not ready", e);
+        return [];
+    }
   }
   
 };
