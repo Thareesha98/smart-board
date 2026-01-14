@@ -115,7 +115,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             .addEndpoint("/ws")
             .setAllowedOriginPatterns("*")
             .withSockJS()
-            .setSessionCookieNeeded(false); // ✅ REQUIRED FOR EXPO
+            .setSessionCookieNeeded(false); // REQUIRED FOR EXPO
     }
 
     @Override
