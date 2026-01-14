@@ -32,7 +32,9 @@ public class User extends BaseEntity {
     
     private String address;
 
-
+    private String dob;
+    private String emergencyContact;
+    private String studentIdNumber;
  
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
