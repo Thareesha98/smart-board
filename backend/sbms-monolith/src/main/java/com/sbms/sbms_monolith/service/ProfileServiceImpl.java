@@ -42,6 +42,12 @@ public class ProfileServiceImpl implements ProfileService {
         user.setProfileImageUrl(dto.getProfileImageUrl());
         user.setStudentUniversity(dto.getStudentUniversity());
 
+        user.setAddress(dto.getAddress());
+        user.setGender(dto.getGender());
+        user.setDob(dto.getDob());
+        user.setEmergencyContact(dto.getEmergencyContact());
+        user.setStudentIdNumber(dto.getStudentId());
+
         return ProfileResponseDTO.from(user);
     }
 
