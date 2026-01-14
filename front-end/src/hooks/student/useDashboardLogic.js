@@ -88,7 +88,7 @@ const useDashboardLogic = () => {
         id: `apt-${a.id}`,
         type: 'appointment',
         rawDate: a.createdDate || a.date,
-        content: <span className="text-text-dark">Appointment <strong>{a.status.toLowerCase()}</strong> for {a.boardingName}</span>,
+        content: `Appointment ${a.status.toLowerCase()} for ${a.boardingName}`,
         icon: FaCalendarCheck
       }));
 
@@ -97,7 +97,7 @@ const useDashboardLogic = () => {
         id: `pay-${p.id}`,
         type: 'payment',
         rawDate: p.paymentDate,
-        content: <span className="text-text-dark">Paid <strong>LKR {p.amount}</strong> for rent</span>,
+        content: `Paid LKR ${p.amount} for rent`,
         icon: FaCreditCard
       }));
 
@@ -106,7 +106,7 @@ const useDashboardLogic = () => {
         id: `rev-${r.id}`,
         type: 'review',
         rawDate: r.createdAt || new Date(), 
-        content: <span className="text-text-dark">Rated <strong>{r.boardingName || 'Boarding'}</strong> {r.rating} stars</span>,
+        content: `Rated ${r.boardingName || 'Boarding'} ${r.rating} stars`,
         icon: FaStar
       }));
 
@@ -115,7 +115,7 @@ const useDashboardLogic = () => {
         id: `reg-${r.id}`,
         type: 'registration',
         rawDate: r.startDate,
-        content: <span className="text-text-dark">Registration <strong>{r.status.toLowerCase()}</strong> for {r.boardingTitle}</span>,
+        content: `Registration ${r.status.toLowerCase()} for ${r.boardingTitle}`,
         icon: FaHome
       }));
 
