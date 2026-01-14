@@ -244,6 +244,44 @@ const StudentService = {
     const response = await api.post('/maintenance', data); 
     return response.data;
   },
+
+  // ==========================================
+  // 8. PROFILE & SETTINGS
+  // ==========================================
+  
+  // 1. Get Profile (Fresh Data)
+  getProfile: async () => {
+    const response = await api.get('/student/profile');
+    return response.data;
+  },
+
+  // 2. Update Profile Data (Name, Phone, Uni, etc.)
+  updateProfile: async (updateData) => {
+    // Expects: { fullName, phone, studentUniversity, profileImageUrl, ... }
+    const response = await api.put('/student/profile', updateData);
+    return response.data;
+  },
+
+  // 3. Upload Avatar (File -> URL)
+  uploadAvatar: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file); // Standard key for single file upload
+
+      // Adjust endpoint if your backend uses a different path for single uploads
+      // Assuming you have a generic upload or reusing the multiple one
+      const response = await api.post("/files/upload/profiles", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      
+      // If backend returns a simple string URL, return it.
+      // If it returns { url: "..." }, adjust accordingly.
+      return response.data; 
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+      throw error;
+    }
+  }
   
 };
 
