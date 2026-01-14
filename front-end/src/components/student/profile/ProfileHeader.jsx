@@ -49,7 +49,7 @@ const ProfileHeader = ({ userData, onChangeAvatar }) => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4 w-full lg:w-auto">
+        {/* <div className="grid grid-cols-2 gap-4 w-full lg:w-auto">
           {[
             { label: 'Visits Booked', value: '12' },
             { label: 'Reviews Posted', value: '5' },
@@ -67,7 +67,7 @@ const ProfileHeader = ({ userData, onChangeAvatar }) => {
               <div className="text-sm text-text-muted">{stat.label}</div>
             </motion.div>
           ))}
-        </div>
+        </div> */}
       </div>
     </motion.section>
   );
