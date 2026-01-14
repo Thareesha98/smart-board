@@ -1,90 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import StudentLayout from '../../components/student/common/StudentLayout';
 import StatWidget from '../../components/student/dashbord/StatWidget';
 import QuickActionsSection from '../../components/student/dashbord/QuickActionsSection';
 import RecentActivitySection from '../../components/student/dashbord/RecentActivitySection';
-import { 
-  FaCalendarCheck, FaStar, FaHome, FaFileInvoiceDollar 
-} from 'react-icons/fa';
+import { FaCalendarCheck, FaStar, FaHome, FaFileInvoiceDollar } from 'react-icons/fa';
+import useDashboardLogic from '../../hooks/student/useDashboardLogic'; // ✅ Import Logic Hook
 
 const StudentDashboard = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const { stats, recentActivity, loading, currentUser } = useDashboardLogic();
 
   const handlePayNow = () => {
-    window.location.href = '/billing';
+    window.location.href = '/student/billing';
+  };
+
+  const getGreeting = () => {
+      const hour = new Date().getHours();
+      if (hour < 12) return "Good Morning";
+      if (hour < 18) return "Good Afternoon";
+      return "Good Evening";
   };
 
   return (
-    <StudentLayout subtitle="Here's your boarding overview">
+    <StudentLayout 
+        title={`${getGreeting()}, ${currentUser?.firstName || 'Student'}!`}
+        subtitle="Here's your boarding overview"
+    >
 
       {/* Stats Overview */}
       <section className="mb-8">
-        {/* GRID LOGIC:
-            - Mobile (<768px): 1 Column
-            - Tablet (<1400px): 2 Columns
-            - Desktop (>=1400px): 4 Columns
-            - items-stretch ensures all cards in a row match the height of the tallest card (if text wraps)
-        */}
         <div className="grid grid-cols-1 md:grid-cols-2 min-[1400px]:grid-cols-4 gap-4 md:gap-6 items-stretch">
           
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
-            className="h-full"
-          >
+          {/* 1. Upcoming Visit */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: loading ? 0.5 : 1, y: 0 }} className="h-full">
             <StatWidget 
               icon={<FaCalendarCheck />}
-              title="Upcoming Visits" 
-              mainDetail="Tomorrow 2:00 PM" 
-              subDetail="Sunshine Hostel" 
+              title="Upcoming Visit" 
+              mainDetail={stats.upcomingVisit ? new Date(stats.upcomingVisit.date).toLocaleDateString() : "No visits"} 
+              subDetail={stats.upcomingVisit ? stats.upcomingVisit.boardingName : "Schedule one now"} 
             />
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
-            className="h-full"
-          >
+          {/* 2. Monthly Rent (Pending Payments) */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: loading ? 0.5 : 1, y: 0 }} className="h-full">
             <StatWidget 
               icon={<FaFileInvoiceDollar />}
-              title="Pending Payments" 
-              mainDetail="$350 Due Jan 5" 
-              subDetail="Sunshine Hostel"
-              actionButton={{ label: "Pay Now", onClick: handlePayNow }}
+              title="Monthly Rent" 
+              mainDetail={stats.pendingPayment ? `LKR ${stats.pendingPayment.amount}` : "No Active Rent"} 
+              subDetail={stats.pendingPayment ? `Due: ${stats.pendingPayment.dueDate}` : "All clear"}
+              actionButton={stats.pendingPayment ? { label: "Pay Now", onClick: handlePayNow } : null}
             />
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
-            className="h-full"
-          >
+          {/* 3. Current Boarding */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: loading ? 0.5 : 1, y: 0 }} className="h-full">
             <StatWidget 
               icon={<FaHome />}
               title="Current Boarding" 
-              mainDetail="Sunshine Hostel" 
-              subDetail="Since Dec 2023" 
+              mainDetail={stats.currentBoarding ? stats.currentBoarding.boardingTitle : "Not Registered"} 
+              subDetail={stats.currentBoarding ? `Since ${new Date(stats.currentBoarding.startDate).toLocaleDateString()}` : "Find a place"} 
             />
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: isLoading ? 0.8 : 1, y: 0 }}
-            className="h-full"
-          >
+          {/* 4. My Reviews */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: loading ? 0.5 : 1, y: 0 }} className="h-full">
             <StatWidget 
               icon={<FaStar />}
               title="My Reviews" 
-              mainDetail="12 Reviews" 
-              subDetail="4.8⭐ Average" 
+              mainDetail={`${stats.reviewCount} Reviews`} 
+              subDetail={stats.reviewCount > 0 ? `${stats.reviewAvg}⭐ Average` : "Start reviewing!"} 
             />
           </motion.div>
 
@@ -92,7 +76,10 @@ const StudentDashboard = () => {
       </section>
 
       <QuickActionsSection />
-      <RecentActivitySection />
+      
+      {/* Pass the real activity data to the section */}
+      <RecentActivitySection activities={recentActivity} />
+      
     </StudentLayout>
   );
 };
