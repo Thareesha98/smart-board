@@ -47,12 +47,53 @@ const useDashboardLogic = () => {
         StudentService.getMyReviews(currentUser.id).catch(() => [])
       ]);
 
-      // --- WIDGET 1: Upcoming Visit ---
-      // Filter for 'APPROVED' or 'PENDING' appointments in the future
-      const nextVisit = appointments
-        .filter(a => (a.status === 'APPROVED' || a.status === 'PENDING') && new Date(a.date) >= new Date())
-        .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+      // 🔍 DEBUG: Check what the backend is actually sending
+      console.log("🔍 Appointments Raw:", appointments);
 
+      // --- WIDGET 1: Upcoming Visit (Smart Logic) ---
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const processedAppointments = appointments.map(appt => {
+        // 1. Try to find the date field
+        const rawDate = appt.date || appt.appointmentDate || appt.visitDate || appt.createdDate;
+        
+        // 2. Try to find the status field
+        const rawStatus = appt.status || appt.appointmentStatus || 'PENDING'; // Default to PENDING if missing
+
+        return {
+          ...appt,
+          normalizedDate: new Date(rawDate),
+          normalizedStatus: rawStatus.toUpperCase(),
+          // Ensure we have a name to display
+          displayName: appt.boardingTitle || appt.boardingName || appt.boardingAddress || "Boarding Visit"
+        };
+      });
+
+      // A. Try to find a FUTURE appointment
+      let nextVisit = processedAppointments
+        .filter(a => {
+           // Valid Date check
+           if (isNaN(a.normalizedDate)) return false; 
+           // Future check
+           const isFuture = a.normalizedDate >= today;
+           // Status check (Allow Approved, Pending, or New)
+           const isValidStatus = ['APPROVED', 'PENDING', 'NEW', 'REQUESTED'].includes(a.normalizedStatus);
+           return isFuture && isValidStatus;
+        })
+        .sort((a, b) => a.normalizedDate - b.normalizedDate)[0];
+
+      // B. Fallback: If no future visit, get the MOST RECENT past visit (so the widget isn't empty)
+      if (!nextVisit) {
+        const lastVisit = processedAppointments
+            .filter(a => !isNaN(a.normalizedDate))
+            .sort((a, b) => b.normalizedDate - a.normalizedDate)[0]; // Sort descending (newest first)
+            
+        if (lastVisit) {
+            nextVisit = { ...lastVisit, isPast: true }; // Mark as past
+        }
+      }
+      
       // --- WIDGET 2: Current Boarding ---
       const activeReg = registrations.find(r => r.status === 'APPROVED');
       
