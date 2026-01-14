@@ -145,23 +145,18 @@ export const StudentAuthProvider = ({ children }) => {
     window.location.href = "/login";
   };
 
-  // --- 3. PROFILE UPDATE ACTIONS (Connects Sidebar/Header/Profile) ---
+  // --- 5. PROFILE UPDATE ACTIONS (UPDATED FOR NEW CONTROLLER) ---
 
-  // Update Text Details
+  // Update Data
   const updateProfile = async (updatedData) => {
     try {
-      if (!currentUser?.id) return { success: false };
+      // ✅ FIX: No ID needed. Controller uses Token.
+      // Pass the DTO (fullName, phone, dob, etc.)
+      const responseUser = await StudentService.updateProfile(updatedData);
 
-      // 1. Call Backend
-      const responseUser = await StudentService.updateProfile(
-        currentUser.id,
-        updatedData
-      );
-
-      // 2. Merge response with current user state (Backend should return updated user object)
+      // Merge response with current state
       const newUser = { ...currentUser, ...responseUser };
 
-      // 3. Update LocalStorage & State
       localStorage.setItem("user_data", JSON.stringify(newUser));
       setCurrentUser(newUser);
 
@@ -175,25 +170,35 @@ export const StudentAuthProvider = ({ children }) => {
   // Update Avatar
   const updateAvatar = async (fileOrUrl) => {
     try {
-      let newAvatarUrl;
+      let newAvatarUrl = fileOrUrl;
 
-      // Check if it's a file (for upload) or a string (gallery selection)
-      if (typeof fileOrUrl === "object") {
-        // It's a File object, upload to backend
-        const response = await StudentService.updateAvatar(
-          currentUser.id,
-          fileOrUrl
-        );
-        newAvatarUrl = response.avatarUrl; // Assuming backend returns { avatarUrl: "..." }
-      } else {
-        // It's a string from the gallery, just update profile directly
-        newAvatarUrl = fileOrUrl;
-        // Optional: Call updateProfile here to save the gallery URL choice to backend
-        await updateProfile({ ...currentUser, avatar: newAvatarUrl });
-      }
+      // 1. If it's a File object, upload it to get a URL
+      if (fileOrUrl instanceof File) {
+         // ✅ FIX: Use service to upload and get string URL back
+         const response = await StudentService.uploadAvatar(fileOrUrl);
+         newAvatarUrl = response; // Assuming backend returns raw string URL
+      } 
+      
+      // 2. Save the new URL to the profile
+      // We re-use updateProfile to save just the image URL
+      const payload = { 
+          // We must send other required fields if your DTO validation is strict,
+          // but usually patch updates or full objects work. 
+          // Safest is to spread current user data that matches DTO:
+          fullName: currentUser.fullName,
+          phone: currentUser.phone,
+          studentUniversity: currentUser.studentUniversity,
+          profileImageUrl: newAvatarUrl,
+          // Add others to be safe if backend overwrites nulls
+          address: currentUser.address,
+          gender: currentUser.gender,
+          dob: currentUser.dob
+      };
 
-      // Update State
-      const newUserState = { ...currentUser, avatar: newAvatarUrl };
+      await StudentService.updateProfile(payload);
+
+      // 3. Update State
+      const newUserState = { ...currentUser, profileImageUrl: newAvatarUrl, avatar: newAvatarUrl };
       localStorage.setItem("user_data", JSON.stringify(newUserState));
       setCurrentUser(newUserState);
 
