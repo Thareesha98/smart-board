@@ -14,6 +14,7 @@ import {
   FaMapMarkedAlt,
 } from "react-icons/fa";
 
+import Map from "../../components/common/Map.jsx";
 import StudentLayout from "../../components/student/common/StudentLayout";
 import ImageGallery from "../../components/student/boarding-details/ImageGallery";
 import QuickInfoCard from "../../components/student/boarding-details/QuickInfoCard";
@@ -30,6 +31,12 @@ import {
 } from "../../data/student/boardingDetailsData.js";
 import { useImageGallery } from "../../hooks/student/useImageGallery.js";
 import { useAppointmentForm } from "../../hooks/student/useAppointmentForm.js";
+
+// Map center default. TODO: Use actual boarding location
+const center = {
+  lat: 5.9485,
+  lng: 80.5353,
+}
 
 const amenityIcons = {
   wifi: FaWifi,
@@ -260,13 +267,14 @@ const BoardingDetailsPage = () => {
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
             <h2 className="text-xl font-bold text-primary mb-4">Location</h2>
-            <div className="bg-background-light rounded-xl h-48 md:h-64 flex flex-col items-center justify-center mb-6 relative group overflow-hidden cursor-pointer">
+            <div className="bg-background-light rounded-xl h-48 md:h-96 flex flex-col items-center justify-center mb-6 relative group overflow-hidden cursor-pointer">
               <div className="absolute inset-0 bg-accent/5 group-hover:bg-accent/10 transition-colors"></div>
-              <FaMapMarkedAlt className="text-5xl text-accent mb-2 transform group-hover:scale-110 transition-transform" />
+              <Map center={center} />
+              {/* <FaMapMarkedAlt className="text-5xl text-accent mb-2 transform group-hover:scale-110 transition-transform" />
               <p className="text-text-dark font-bold z-10">View on Map</p>
               <p className="text-sm text-text-muted z-10 text-center px-4 mt-1">
                 {currentBoarding?.location?.address || currentBoarding.address || "Address not available"}
-              </p>
+              </p> */}
             </div>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {currentBoarding.nearbyPlaces && (

@@ -21,4 +21,5 @@ public class RegistrationRequestDTO {
     private String emergencyPhone;
     private String specialRequirements;
     private String paymentMethod;
+    private String paymentTransactionRef;
 }

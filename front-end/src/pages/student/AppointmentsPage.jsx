@@ -9,11 +9,16 @@ import ScheduleModal from "../../components/student/appointments/ScheduleModal";
 import DecisionModal from "../../components/student/appointments/DecisionModal";
 import RegistrationModal from "../../components/student/appointments/RegistrationModal";
 import CancelModal from "../../components/student/appointments/CancelModal.jsx";
+import StudentService from "../../api/student/StudentService";
+import { useAuth } from "../../context/student/StudentAuthContext";
 
 import { FaPlus } from "react-icons/fa";
 
 const AppointmentsPage = () => {
   const navigate = useNavigate();
+
+  const { currentUser } = useAuth();
+
   const {
     activeCategory,
     counts,
@@ -115,31 +120,56 @@ const AppointmentsPage = () => {
       }
   };
 
-  const finalizeRegistration = (regData) => {
-    const registeredAppointment = handleRegistrationSubmit(
-      currentAppointmentId,
-      regData
-    );
+  const finalizeRegistration = async (regData) => {
 
-    if (registeredAppointment) {
-      setModalContent({
-        title: "Registration Complete! 🎉",
-        message: `You have successfully registered for **${registeredAppointment.boardingName}**!`,
-        details: [
-          { label: "Move-in Date", value: registeredAppointment.moveInDate },
-          { label: "Contract Duration", value: registeredAppointment.contractDuration },
-          { label: "Emergency Contact", value: registeredAppointment.emergencyContact },
-        ],
-        actionLabel: "Done",
-        action: () => setIsDecisionModalOpen(false),
-        secondaryActionLabel: "View My Boardings",
-        secondaryAction: () => navigate('/student/my-boardings'),
-        isSuccess: true,
-        isRegistrationSuccess: true,
-      });
-      setIsRegistrationModalOpen(false);
-      setIsDecisionModalOpen(true);
-      setActiveCategory("selected");
+    if (!currentUser?.id) {
+        alert("User session invalid. Please log in again.");
+        return;
+    }
+    
+    try {
+        const payload = {
+            boardingId: currentAppointment.boardingId,
+            numberOfStudents: 1,
+            studentNote: "Registered via App",
+            keyMoneyPaid: true,
+            // Form Data
+            moveInDate: regData.moveInDate,
+            contractDuration: regData.contractDuration,
+            emergencyContact: regData.emergencyContact,
+            emergencyPhone: regData.emergencyPhone,
+            specialRequirements: regData.specialRequirements,
+            paymentMethod: "CARD",
+            paymentTransactionRef: regData.transactionId
+        };
+
+        // 1. Send to Backend
+        const response = await StudentService.registerBoarding(currentUser.id, payload);
+        
+        // 2. Download Receipt PDF
+        if (response.id) {
+            await StudentService.downloadReceipt(response.id);
+        }
+
+        setModalContent({
+            title: "Registration Successful! 🎉",
+            message: "Payment confirmed. Receipt downloaded.",
+            actionLabel: "Go to My Boarding",
+            action: () => navigate('/student/my-boardings'),
+            isSuccess: true,
+            isRegistrationSuccess: true,
+            details: [
+               { label: "Contract", value: regData.contractDuration },
+               { label: "Receipt", value: "Downloaded" }
+            ]
+        });
+        setIsRegistrationModalOpen(false);
+        setIsDecisionModalOpen(true);
+        setActiveCategory("selected");
+        
+    } catch (error) {
+        console.error(error);
+        alert("Registration Failed: " + (error.response?.data?.message || "Unknown error"));
     }
   };
 
@@ -180,6 +210,8 @@ const AppointmentsPage = () => {
       </div>
     );
   };
+
+  
 
   return (
     <StudentLayout

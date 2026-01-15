@@ -64,6 +64,13 @@ public class ReviewService {
 
     }
 
+    public List<ReviewResponseDTO> getReviewsByStudent(Long studentId) {
+        return reviewRepository.findByStudentIdOrderByCreatedAtDesc(studentId)
+                .stream()
+                .map(reviewMapper::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
     public ReviewResponseDTO getReviewByStudent(Long studentId,Long boardingId){
         return reviewRepository.findByStudentIdAndBoardingId(studentId,boardingId)
                 .map(reviewMapper::toResponseDto)

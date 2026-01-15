@@ -19,7 +19,14 @@ public class StudentBoardingDashboardDTO {
     private Long boardingId;
     private String boardingTitle;
     private String boardingAddress;
+    private String boardingImage;
+    private String boardingCreatedDate;
+
     private String ownerName;
+    private Long ownerId;
+    private String ownerProfileImage;
+    private String ownerEmail;
+    private String ownerPhone;
 
     private BigDecimal keyMoney;
     private BigDecimal monthlyPrice;
@@ -33,6 +40,7 @@ public class StudentBoardingDashboardDTO {
     private LocalDate lastIssueDate;
 
     private Double averageRating;
+    private int reviewCount;
     private boolean yourReviewSubmitted;
 
     private List<MemberDTO> members;

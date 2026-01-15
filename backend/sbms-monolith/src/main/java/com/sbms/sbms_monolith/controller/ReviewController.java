@@ -53,4 +53,9 @@ public class ReviewController {
     public void deleteReview(@PathVariable Long reviewId){
         reviewRepository.deleteById(reviewId);
     }
+
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<ReviewResponseDTO>> getReviewsByStudent(@PathVariable Long studentId){
+        return ResponseEntity.ok(reviewService.getReviewsByStudent(studentId));
+    }
 }

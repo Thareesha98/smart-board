@@ -18,6 +18,8 @@ public class AppointmentMapper {
         dto.setBoardingTitle(b.getTitle());
         dto.setBoardingAddress(b.getAddress());
 
+        dto.setKeyMoney(b.getKeyMoney());
+
         if (b.getImageUrls() != null && !b.getImageUrls().isEmpty()) {
             dto.setBoardingImage(b.getImageUrls().getFirst());
         }
