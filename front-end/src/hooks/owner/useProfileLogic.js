@@ -1,56 +1,46 @@
-import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
-
-// Update this if your backend runs on a different port
-const API_BASE_URL = "http://localhost:8080/api/owner/profile";
+import { useState, useEffect, useCallback } from 'react';
+import { getOwnerProfile, updateOwnerProfile } from "../../api/owner/service";
 
 const useProfileLogic = () => {
-  const { currentOwner } = useOwnerAuth();
-
+  
   const [ownerData, setOwnerData] = useState({
-    // Default initial state
-    firstName: "",
-    fullName: "", // Maps to Business Name
+    firstName: "", 
+    fullName: "", // Acts as Business Name
     email: "",
     phone: "",
     avatar: "https://randomuser.me/api/portraits/men/32.jpg",
     address: "",
     accNo: "",
-    // Removed 'stats' object here to get rid of the "active tabs"
-    preferences: {
-      emailNotifications: true,
-      autoConfirm: false,
-      marketingEmails: false,
-    },
+    // Backend doesn't support preferences yet, so we keep defaults locally
+    preferences: { 
+      emailNotifications: true, 
+      autoConfirm: false, 
+      marketingEmails: false 
+    }
   });
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("token");
-    return { headers: { Authorization: `Bearer ${token}` } };
-  };
-
-  // --- Fetch Profile ---
+  // --- 1. Fetch Profile ---
   const fetchProfile = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(API_BASE_URL, getAuthHeader());
-      const data = response.data;
+      // Use the service function
+      const data = await getOwnerProfile();
 
-      setOwnerData((prev) => ({
+      setOwnerData(prev => ({
         ...prev,
         id: data.id,
         fullName: data.fullName,
         email: data.email,
         phone: data.phone,
+        // If backend sends null for image, keep the default or previous one
         avatar: data.profileImageUrl || prev.avatar,
         address: data.address,
         accNo: data.accNo,
         verifiedOwner: data.verifiedOwner,
-        preferences: prev.preferences,
+        preferences: prev.preferences 
       }));
       setIsLoading(false);
     } catch (err) {
@@ -64,54 +54,59 @@ const useProfileLogic = () => {
     fetchProfile();
   }, [fetchProfile]);
 
-  // --- Update Profile ---
-  const updateBusinessInfo = async (data) => {
-    const payload = {
-      fullName: data.businessName, // Frontend 'businessName' -> Backend 'fullName'
-      phone: data.phone,
-      accNo: data.paymentMethod, // Frontend 'paymentMethod' -> Backend 'accNo'
-    };
-    // Note: Backend ProfileServiceImpl does not currently update 'address'
-
-    await updateBackend(payload);
-  };
-
-  const updateAvatar = async (avatarUrl) => {
-    await updateBackend({ profileImageUrl: avatarUrl });
-  };
-
-  const updateBackend = async (payload) => {
+  // --- Helper: Centralized Update Logic ---
+  const handleServiceUpdate = async (payload) => {
     try {
-      // Merging current data with updates
+      // Merge current data with the new payload to ensure we don't send nulls
+      // if the backend expects a full DTO.
       const finalPayload = {
         fullName: payload.fullName || ownerData.fullName,
         phone: payload.phone || ownerData.phone,
         accNo: payload.accNo || ownerData.accNo,
-        profileImageUrl: payload.profileImageUrl || ownerData.avatar,
+        profileImageUrl: payload.profileImageUrl || ownerData.avatar
+        // Note: 'address' is not currently updatable via the OwnerProfileUpdateDTO
       };
 
-      const response = await axios.put(
-        API_BASE_URL,
-        finalPayload,
-        getAuthHeader()
-      );
-
-      setOwnerData((prev) => ({
+      // Use the service function
+      const updatedData = await updateOwnerProfile(finalPayload);
+      
+      // Update local state with the fresh response from backend
+      setOwnerData(prev => ({
         ...prev,
-        fullName: response.data.fullName,
-        phone: response.data.phone,
-        avatar: response.data.profileImageUrl,
-        accNo: response.data.accNo,
+        fullName: updatedData.fullName,
+        phone: updatedData.phone,
+        avatar: updatedData.profileImageUrl,
+        accNo: updatedData.accNo
       }));
+
+      return true;
     } catch (err) {
+      console.error("Update failed:", err);
       throw err;
     }
   };
 
+  // --- 2. Action: Update Business Info ---
+  const updateBusinessInfo = async (formData) => {
+    // Map Frontend Form keys -> Backend DTO keys
+    await handleServiceUpdate({
+      fullName: formData.businessName, 
+      phone: formData.phone,
+      accNo: formData.paymentMethod 
+    });
+  };
+
+  // --- 3. Action: Update Avatar ---
+  const updateAvatar = async (avatarUrl) => {
+    // Map Frontend Avatar -> Backend 'profileImageUrl'
+    await handleServiceUpdate({ profileImageUrl: avatarUrl });
+  };
+
+  // --- 4. Action: Update Preferences (Local Only) ---
   const updatePreferences = (key, value) => {
-    setOwnerData((prev) => ({
+    setOwnerData(prev => ({
       ...prev,
-      preferences: { ...prev.preferences, [key]: value },
+      preferences: { ...prev.preferences, [key]: value }
     }));
   };
 
@@ -121,7 +116,7 @@ const useProfileLogic = () => {
     error,
     updateBusinessInfo,
     updateAvatar,
-    updatePreferences,
+    updatePreferences
   };
 };
 

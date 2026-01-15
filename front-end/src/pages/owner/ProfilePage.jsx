@@ -1,15 +1,16 @@
-import React, { useState } from "react";
-import HeaderBar from "../../components/Owner/common/HeaderBar";
-import Notification from "../../components/student/maintenance/Notification";
+import React, { useState } from 'react';
+import HeaderBar from '../../components/Owner/common/HeaderBar';
+import Notification from '../../components/student/maintenance/Notification';
 
-import ChangeAvatarModal from "../../components/student/profile/ChangeAvatarModal";
-import PreferencesSection from "../../components/student/profile/PreferencesSection";
-import ProfileHeader from "../../components/Owner/profile/ProfileHeader";
-import BusinessInfoSection from "../../components/Owner/profile/BusinessInfoSection";
-import AccountSection from "../../components/Owner/profile/AccountSection";
-import EditBusinessModal from "../../components/Owner/profile/EditBusinessModal";
+// Component Imports
+import ChangeAvatarModal from '../../components/student/profile/ChangeAvatarModal';
+import PreferencesSection from '../../components/student/profile/PreferencesSection';
+import ProfileHeader from '../../components/Owner/profile/ProfileHeader';
+import BusinessInfoSection from '../../components/Owner/profile/BusinessInfoSection';
+import AccountSection from '../../components/Owner/profile/AccountSection';
+import EditBusinessModal from '../../components/Owner/profile/EditBusinessModal';
 
-import useProfileLogic from "../../hooks/owner/useProfileLogic";
+import useProfileLogic from '../../hooks/owner/useProfileLogic';
 
 const ProfilePage = () => {
   const {
@@ -25,7 +26,8 @@ const ProfilePage = () => {
   const [isEditBusinessOpen, setIsEditBusinessOpen] = useState(false);
   const [isChangeAvatarOpen, setIsChangeAvatarOpen] = useState(false);
 
-  const showNotification = (message, type = "info") => {
+  // --- Handlers ---
+  const showNotification = (message, type = 'info') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 4000);
   };
@@ -34,9 +36,9 @@ const ProfilePage = () => {
     try {
       await updateBusinessInfo(data);
       setIsEditBusinessOpen(false);
-      showNotification("Business information updated successfully!", "success");
+      showNotification('Business information updated successfully!', 'success');
     } catch (err) {
-      showNotification("Failed to update information.", "error");
+      showNotification('Failed to update information. Please try again.', 'error');
     }
   };
 
@@ -44,72 +46,88 @@ const ProfilePage = () => {
     try {
       await updateAvatar(avatarUrl);
       setIsChangeAvatarOpen(false);
-      showNotification("Profile picture updated successfully!", "success");
+      showNotification('Profile picture updated successfully!', 'success');
     } catch (err) {
-      showNotification("Failed to update profile picture.", "error");
+      showNotification('Failed to update profile picture.', 'error');
     }
   };
 
-  if (isLoading) return <div className="p-10 text-center">Loading...</div>;
-  if (error)
-    return <div className="p-10 text-center text-red-500">{error}</div>;
+  // --- Loading / Error States ---
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-light">
+        <div className="font-medium text-gray-500">Loading Profile...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-light">
+        <div className="font-medium text-red-500">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-4 pb-12 space-y-6 bg-light">
-      <HeaderBar
-        title="My Profile"
+      
+      <HeaderBar 
+        title="My Profile" 
         subtitle="Manage your business identity and account settings"
         userAvatar={ownerData.avatar}
-        userName={ownerData.fullName}
+        userName={ownerData.fullName} 
       />
 
       <div className="px-4 max-w-[1600px] mx-auto space-y-6 mt-8">
-        {/* Profile Header 
-            Note: ownerData no longer contains 'stats', so the "Active Tabs" 
-            (Active Ads, Tenants) should disappear or show blank, depending on your component.
-        */}
+        
+        {/* Profile Header */}
         <ProfileHeader
           ownerData={ownerData}
           onChangeAvatar={() => setIsChangeAvatarOpen(true)}
         />
 
+        {/* Sections Grid */}
         <div className="space-y-6">
-          {/* Business Info Section */}
+          
+          {/* Business Info */}
           <BusinessInfoSection
+            // The component expects 'businessName', so we map 'fullName' to it
             ownerData={{
-              ...ownerData,
-              businessName: ownerData.fullName,
+                ...ownerData,
+                businessName: ownerData.fullName 
             }}
             onEdit={() => setIsEditBusinessOpen(true)}
           />
 
-          {/* Account Section */}
+          {/* Account Info */}
           <AccountSection
+            // The component expects 'paymentMethod', so we map 'accNo' to it
             ownerData={{
-              ...ownerData,
-              paymentMethod: ownerData.accNo,
+                ...ownerData,
+                paymentMethod: ownerData.accNo 
             }}
-            onSecurity={() =>
-              showNotification("Security settings coming soon!", "info")
-            }
+            onSecurity={() => showNotification('Security settings coming soon!', 'info')}
           />
 
-          {/* Preferences Section */}
+          {/* Preferences */}
           <PreferencesSection
             preferences={ownerData.preferences}
             onPreferenceChange={updatePreferences}
-            onSettings={() => showNotification("Settings coming soon!", "info")}
+            onSettings={() => showNotification('Settings coming soon!', 'info')}
           />
         </div>
       </div>
 
+      {/* --- Modals --- */}
       <EditBusinessModal
         isOpen={isEditBusinessOpen}
         onClose={() => setIsEditBusinessOpen(false)}
+        // Map data for the modal form inputs
         ownerData={{
-          ...ownerData,
-          businessName: ownerData.fullName,
-          paymentMethod: ownerData.accNo,
+            ...ownerData,
+            businessName: ownerData.fullName,
+            paymentMethod: ownerData.accNo
         }}
         onSubmit={handleUpdateBusiness}
       />

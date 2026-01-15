@@ -253,3 +253,31 @@ export const decideRegistration = async (ownerId, regId, decisionDTO) => {
     throw error;
   }
 };
+
+// =================================================================
+// 👤 PROFILE SERVICES (NEW)
+// =================================================================
+
+// 1. Get Owner Profile
+// Matches Java: @GetMapping("/api/owner/profile")
+export const getOwnerProfile = async () => {
+  try {
+    const response = await api.get("/owner/profile");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching owner profile:", error);
+    throw error;
+  }
+};
+
+// 2. Update Owner Profile
+// Matches Java: @PutMapping("/api/owner/profile")
+export const updateOwnerProfile = async (profileData) => {
+  try {
+    const response = await api.put("/owner/profile", profileData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating owner profile:", error);
+    throw error;
+  }
+};
