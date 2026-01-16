@@ -17,6 +17,13 @@ const defaultCenter = {
   lng: 79.8612
 };
 
+const SRI_LANKA_BOUNDS = {
+  north: 9.9,
+  south: 5.8,
+  west: 79.3,
+  east: 82.0,
+};
+
 const LocationPicker = ({ lat, lng, onLocationSelect }) => {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script-picker',
@@ -41,6 +48,7 @@ const LocationPicker = ({ lat, lng, onLocationSelect }) => {
 
   const onSearchLoad = (autocomplete) => {
     searchBoxRef.current = autocomplete;
+    autocomplete.setComponentRestrictions({ country: "lk" });
   };
 
   const onPlaceChanged = () => {
@@ -146,6 +154,11 @@ const LocationPicker = ({ lat, lng, onLocationSelect }) => {
              streetViewControl: false,
              mapTypeControl: false,
              fullscreenControl: true,
+             zoomControl: true,
+             restriction: {
+                latLngBounds: SRI_LANKA_BOUNDS,
+                strictBounds: false,
+             },
           }}
         >
           <Marker
