@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
-import { FaCrosshairs, FaMapMarkerAlt } from 'react-icons/fa';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from '@react-google-maps/api';
+import { FaCrosshairs, FaMapMarkerAlt, FaSearch, FaSpinner } from 'react-icons/fa';
 
 // ✅ Use the existing ENV variable
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const libraries = ['places'];
 
 const containerStyle = {
   width: '100%',
@@ -19,11 +20,14 @@ const defaultCenter = {
 const LocationPicker = ({ lat, lng, onLocationSelect }) => {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script-picker',
-    googleMapsApiKey: googleMapsApiKey
+    googleMapsApiKey: googleMapsApiKey,
+    libraries: libraries
   });
 
   const [map, setMap] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(defaultCenter);
+  const [loadingLocation, setLoadingLocation] = useState(false); // ✅ Loading State
+  const searchBoxRef = useRef(null);
 
   // Sync state if editing
   useEffect(() => {
@@ -35,6 +39,26 @@ const LocationPicker = ({ lat, lng, onLocationSelect }) => {
   const onLoad = useCallback((map) => setMap(map), []);
   const onUnmount = useCallback(() => setMap(null), []);
 
+  const onSearchLoad = (autocomplete) => {
+    searchBoxRef.current = autocomplete;
+  };
+
+  const onPlaceChanged = () => {
+    if (searchBoxRef.current) {
+      const place = searchBoxRef.current.getPlace();
+      if (place.geometry && place.geometry.location) {
+        const newLat = place.geometry.location.lat();
+        const newLng = place.geometry.location.lng();
+        const newPos = { lat: newLat, lng: newLng };
+        
+        setMarkerPosition(newPos);
+        map?.panTo(newPos);
+        map?.setZoom(16);
+        onLocationSelect(newLat, newLng);
+      }
+    }
+  };
+
   const handleLocationChange = (e) => {
     const newLat = e.latLng.lat();
     const newLng = e.latLng.lng();
@@ -44,6 +68,8 @@ const LocationPicker = ({ lat, lng, onLocationSelect }) => {
 
   const handleUseMyLocation = (e) => {
     e.preventDefault();
+    setLoadingLocation(true);
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -53,10 +79,25 @@ const LocationPicker = ({ lat, lng, onLocationSelect }) => {
           };
           setMarkerPosition(pos);
           map?.panTo(pos);
+          map?.setZoom(18); // Zoom in closer for accuracy
           onLocationSelect(pos.lat, pos.lng);
+          setLoadingLocation(false);
         },
-        () => alert("Error: Could not access location.")
+        (error) => {
+          console.error("Error getting location: ", error);
+          alert("Could not get precise location. Please ensure GPS is on.");
+          setLoadingLocation(false);
+        },
+        
+        {
+          enableHighAccuracy: true, 
+          timeout: 10000, 
+          maximumAge: 0
+        }
       );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+      setLoadingLocation(false);
     }
   };
 
@@ -68,15 +109,32 @@ const LocationPicker = ({ lat, lng, onLocationSelect }) => {
         <label className="text-xs font-black uppercase tracking-[0.2em] text-muted flex items-center gap-2">
            <FaMapMarkerAlt className="text-accent"/> Pin Location
         </label>
+
         <button
           onClick={handleUseMyLocation}
-          className="flex items-center gap-2 text-[10px] font-bold text-accent hover:text-primary transition-colors bg-white px-3 py-2 rounded-lg border border-light shadow-sm"
+          disabled={loadingLocation}
+          className="flex items-center gap-2 text-[10px] font-bold text-accent hover:text-primary transition-colors bg-white px-3 py-2 rounded-lg border border-light shadow-sm disabled:opacity-50"
         >
-          <FaCrosshairs /> Use My Current Location
+          {loadingLocation ? <FaSpinner className="fa-spin"/> : <FaCrosshairs />} 
+          {loadingLocation ? "Locating..." : "Use My Precise Location"}
         </button>
       </div>
 
       <div className="rounded-xl overflow-hidden border-4 border-white shadow-custom relative">
+        
+        <div className="absolute top-4 left-4 right-14 z-10">
+            <Autocomplete onLoad={onSearchLoad} onPlaceChanged={onPlaceChanged}>
+                <div className="relative w-full max-w-sm">
+                    <input
+                        type="text"
+                        placeholder="Search for a city or place..."
+                        className="w-full pl-10 pr-4 py-3 rounded-lg shadow-lg text-sm font-medium border-0 focus:ring-2 focus:ring-accent outline-none text-text-dark"
+                    />
+                    <FaSearch className="absolute left-3 top-3.5 text-gray-400" />
+                </div>
+            </Autocomplete>
+        </div>
+        
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={markerPosition}
