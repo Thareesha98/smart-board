@@ -42,7 +42,7 @@ const useMaintenanceLogic = () => {
           image: item.imageUrls || [], // Map 'imageUrls' -> 'image'
           roomNumber: item.roomNumber,
           createdDate: item.createdAt, 
-          updatedDate: item.updated,
+          updatedDate: item.updatedAt,
 
         }));
 

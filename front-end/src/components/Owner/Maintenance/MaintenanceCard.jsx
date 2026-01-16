@@ -83,21 +83,21 @@ const MaintenanceCard = ({ request, onUpdateStatus }) => {
           {request.description}
         </p>
 
-        {/* 🔥 NEW: IMAGE GALLERY SECTION */}
+        {/* 🔥 UPDATED: IMAGE GALLERY SECTION */}
         {hasImages && (
           <div className="mb-4">
              <p className="text-[10px] uppercase font-bold text-gray-400 mb-2 flex items-center gap-1">
                <FaImage /> Attached Evidence ({request.image.length})
              </p>
              <div className="flex gap-2 pb-2 overflow-x-auto scrollbar-hide">
-               {request.image.map((imgName, index) => (
+               {request.image.map((imgUrl, index) => (
                  <img 
                    key={index}
-                   // Assuming imgName is just the filename "photo.jpg"
-                   src={`${BASE_IMAGE_URL}${imgName}`} 
+                   // ✅ FIX: Use imgUrl directly. Do NOT add BASE_IMAGE_URL.
+                   src={imgUrl} 
                    alt={`Evidence ${index + 1}`}
                    className="object-cover w-24 h-16 border border-gray-100 rounded-lg cursor-pointer hover:opacity-90"
-                   onClick={() => window.open(`${BASE_IMAGE_URL}${imgName}`, '_blank')}
+                   onClick={() => window.open(imgUrl, '_blank')}
                  />
                ))}
              </div>
