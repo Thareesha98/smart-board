@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -36,44 +37,50 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .sessionManagement(sm ->
-                    sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers(
-                        "/api/auth/**",
-                        "/api/boardings",
-                        "/api/boardings/**" ,
+                        // -----------------------------------------------------------
+                        // 🚨 CRITICAL FIX: OWNER RULES MUST BE FIRST 🚨
+                        // -----------------------------------------------------------
+                        .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
+                        .requestMatchers("/api/owner/**").hasRole("OWNER")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        "/api/users/public/**",
-                        
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
-                ).permitAll()
+                        // -----------------------------------------------------------
+                        // ✅ PUBLIC RULES (AFTER SPECIFIC RULES)
+                        // -----------------------------------------------------------
+                        // 1. Allow Login/Register
+                        .requestMatchers("/api/auth/**").permitAll()
 
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 2. Allow Students to VIEW boardings (GET Only)
+                        // We use HttpMethod.GET to ensure they can't POST/DELETE
+                        .requestMatchers(HttpMethod.GET, "/api/boardings/**").permitAll()
 
-                .requestMatchers("/api/owner/**").hasRole("OWNER")
-                .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
+                        // 3. Other Public endpoints
+                        .requestMatchers(
+                                "/api/users/public/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
 
-                .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
+                        // -----------------------------------------------------------
+                        // 🔒 RESTRICTED AREAS
+                        // -----------------------------------------------------------
+                        .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
+                        .requestMatchers("/api/student/**").hasRole("STUDENT")
+                        .requestMatchers("/api/registrations/**").authenticated()
+                        .requestMatchers("/api/payment/**").authenticated()
 
-                .requestMatchers("/api/student/**").hasRole("STUDENT")
-
-                .requestMatchers("/api/registrations/**").authenticated()
-                .requestMatchers("/api/payment/**").authenticated()
-
-                .anyRequest().authenticated()
-            )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().authenticated()
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
