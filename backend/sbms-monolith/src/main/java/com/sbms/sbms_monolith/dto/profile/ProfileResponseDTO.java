@@ -12,8 +12,10 @@ public class ProfileResponseDTO {
     private String fullName;
     private String email;
     private String phone;
+    private String address;
     private String profileImageUrl;
     private UserRole role;
+    private String nicNumber;
 
     private String accNo;
     private String studentUniversity;
@@ -28,6 +30,8 @@ public class ProfileResponseDTO {
         dto.setRole(user.getRole());
         dto.setAccNo(user.getAccNo());
         dto.setStudentUniversity(user.getStudentUniversity());
+        dto.setAddress(user.getAddress());
+        dto.setNicNumber(user.getNicNumber());
         return dto;
     }
 }
