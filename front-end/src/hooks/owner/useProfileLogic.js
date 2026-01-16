@@ -1,18 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
-import { getOwnerProfile, updateOwnerProfile } from "../../api/owner/service"; // Use the service we fixed
+import { getOwnerProfile, updateOwnerProfile } from "../../api/owner/service"; // Update path if needed
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 
 const useProfileLogic = () => {
+  const { currentOwner } = useOwnerAuth(); // Optional: if you need context state
+
   const [ownerData, setOwnerData] = useState({
-    // Default structure matching the Page expectations
-    businessName: "", // Backend: fullName
+    id: null,
+    businessName: "", // Maps to backend 'fullName'
     email: "",
     phone: "",
-    avatar: "https://randomuser.me/api/portraits/men/40.jpg",
+    avatar: "https://randomuser.me/api/portraits/men/40.jpg", // Default fallback
     address: "",
-    paymentMethod: "", // Backend: accNo
+    paymentMethod: "", // Maps to backend 'accNo'
     nicNumber: "",
+    verifiedOwner: false,
 
-    // Preferences (Local defaults since backend doesn't have them yet)
+    // Preferences (Local only for now)
     preferences: {
       emailNotifications: true,
       smsNotifications: false,
@@ -21,32 +25,34 @@ const useProfileLogic = () => {
   });
 
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // --- 1. FETCH DATA (Backend -> Frontend) ---
+  // --- 1. FETCH DATA ---
   const fetchProfile = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await getOwnerProfile(); // Call backend
+      setError(null);
+
+      const data = await getOwnerProfile(); // Call Service
 
       // Map Backend DTO -> Frontend State
       setOwnerData((prev) => ({
         ...prev,
         id: data.id,
-        businessName: data.fullName, // Map fullName -> businessName
+        businessName: data.fullName,
         email: data.email,
         phone: data.phone,
         address: data.address,
         avatar: data.profileImageUrl || prev.avatar,
-        paymentMethod: data.accNo, // Map accNo -> paymentMethod
+        paymentMethod: data.accNo,
         nicNumber: data.nicNumber,
         verifiedOwner: data.verifiedOwner,
-
-        // Keep existing preferences
-        preferences: prev.preferences,
+        preferences: prev.preferences, // Keep local prefs
       }));
-      setIsLoading(false);
     } catch (err) {
       console.error("Failed to load profile", err);
+      setError("Could not load profile data.");
+    } finally {
       setIsLoading(false);
     }
   }, []);
@@ -55,49 +61,49 @@ const useProfileLogic = () => {
     fetchProfile();
   }, [fetchProfile]);
 
-  // --- 2. UPDATE HANDLERS (Frontend -> Backend) ---
-
-  // Helper to send data to backend
+  // --- 2. UPDATE HANDLER ---
   const handleServiceUpdate = async (payload) => {
-    // Merge updates with current state to avoid sending nulls
+    // 1. Prepare Payload for Backend (OwnerProfileUpdateDTO)
+    // We merge with existing data to ensure no fields are wiped out accidentally
     const backendPayload = {
       fullName: payload.businessName || ownerData.businessName,
       phone: payload.phone || ownerData.phone,
       accNo: payload.paymentMethod || ownerData.paymentMethod,
       profileImageUrl: payload.avatar || ownerData.avatar,
-      address: payload.address || ownerData.address
-      
+      address:
+        payload.address !== undefined ? payload.address : ownerData.address,
     };
 
+    // 2. Call API
     const updated = await updateOwnerProfile(backendPayload);
 
-    // Update local state immediately
+    // 3. Update Local State with the Fresh Response
     setOwnerData((prev) => ({
       ...prev,
       businessName: updated.fullName,
       phone: updated.phone,
       paymentMethod: updated.accNo,
       avatar: updated.profileImageUrl,
-      address: updated.address
+      address: updated.address, // Ensure backend returns this!
     }));
   };
 
-  // Called by "Edit Business Info" Modal
+  // --- 3. EXPOSED ACTIONS ---
+
   const updateBusinessInfo = async (data) => {
+    // Expects: { businessName, phone, address, paymentMethod? }
     await handleServiceUpdate({
       businessName: data.businessName,
       phone: data.phone,
-      paymentMethod: data.paymentMethod,
-      address: data.address
+      address: data.address,
+      paymentMethod: data.paymentMethod, // Optional, usually handled by AccountModal
     });
   };
 
-  // Called by Avatar Modal
   const updateAvatar = async (avatarUrl) => {
     await handleServiceUpdate({ avatar: avatarUrl });
   };
 
-  // Called by Preferences Section (Local Only)
   const updatePreferences = (key, value) => {
     setOwnerData((prev) => ({
       ...prev,
@@ -106,9 +112,10 @@ const useProfileLogic = () => {
   };
 
   return {
-    ownerData, // Replaces 'userData'
+    ownerData,
     isLoading,
-    updateBusinessInfo, // Replaces 'updatePersonalInfo'
+    error,
+    updateBusinessInfo,
     updateAvatar,
     updatePreferences,
   };

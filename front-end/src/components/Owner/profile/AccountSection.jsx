@@ -2,9 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FaKey, FaLock, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 
-const AccountSection = ({ ownerData, onSecurity }) => {
+const AccountSection = ({ ownerData, onEditAccount }) => {
   
-  // Logic to display status based on backend boolean
   const statusElement = ownerData.verifiedOwner ? (
     <span className="flex items-center gap-2 px-3 py-1 text-xs font-bold text-green-600 bg-green-100 rounded-full w-fit">
       <FaCheckCircle /> Verified
@@ -16,10 +15,9 @@ const AccountSection = ({ ownerData, onSecurity }) => {
   );
 
   const accountItems = [
-    { label: 'Login Email', value: ownerData.email },
-    { label: 'Owner ID', value: `#${ownerData.id || '---'}` },
-    { label: 'Bank Account Number', value: ownerData.paymentMethod || "Not set" },
-    { label: 'Account Status', value: statusElement }, // Renders the component above
+    { label: 'Password', value: '••••••••••••' },
+    { label: 'Bank Account Number', value: ownerData.paymentMethod || "Not set" }, // accNo mapped to paymentMethod
+    { label: 'Account Status', value: statusElement },
   ];
 
   return (
@@ -37,11 +35,11 @@ const AccountSection = ({ ownerData, onSecurity }) => {
         <motion.button
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onSecurity}
+          onClick={onEditAccount} // Opens the EditAccountModal
           className="flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-large bg-background-light text-text-dark hover:bg-accent hover:text-white"
         >
           <FaLock />
-          Security
+          Edit Account
         </motion.button>
       </div>
 
