@@ -104,30 +104,42 @@ const MaintenanceCard = ({ request, onUpdateStatus }) => {
           </div>
         )}
 
-        {/* Action Footer (Pushed to bottom) */}
+        {/* Action Footer */}
         <div className="flex gap-2 pt-4 mt-auto border-t border-gray-50">
-          {statusKey !== 'completed' && statusKey !== 'resolved' ? (
-            <>
-              {statusKey === 'pending' && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onUpdateStatus(request.id, 'IN_PROGRESS'); }}
-                  className="flex items-center justify-center flex-1 gap-2 py-2 text-sm font-semibold text-blue-600 transition-colors rounded-lg bg-blue-50 hover:bg-blue-100"
-                >
-                  <FaClock size={12} /> Start Work
-                </button>
-              )}
-              <button
-                onClick={(e) => { e.stopPropagation(); onUpdateStatus(request.id, 'COMPLETED'); }}
-                className="flex items-center justify-center flex-1 gap-2 py-2 text-sm font-semibold text-green-600 transition-colors rounded-lg bg-green-50 hover:bg-green-100"
-              >
-                <FaCheckCircle size={12} /> Mark Done
-              </button>
-            </>
-          ) : (
+          
+          {/* CASE 1: PENDING - Only show 'Start Work' */}
+          {statusKey === 'pending' && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpdateStatus(request.id, 'IN_PROGRESS');
+              }}
+              className="flex items-center justify-center w-full gap-2 py-2 text-sm font-semibold text-blue-600 transition-colors rounded-lg bg-blue-50 hover:bg-blue-100"
+            >
+              <FaClock size={12} /> Start Work
+            </button>
+          )}
+
+          {/* CASE 2: IN PROGRESS - Only show 'Mark Done' */}
+          {(statusKey === 'in_progress' || statusKey === 'in-progress') && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpdateStatus(request.id, 'COMPLETED');
+              }}
+              className="flex items-center justify-center w-full gap-2 py-2 text-sm font-semibold text-green-600 transition-colors rounded-lg bg-green-50 hover:bg-green-100"
+            >
+              <FaCheckCircle size={12} /> Mark Done
+            </button>
+          )}
+
+          {/* CASE 3: COMPLETED - Show Date */}
+          {(statusKey === 'completed' || statusKey === 'resolved') && (
             <div className="w-full py-2 text-sm font-medium text-center text-gray-400 rounded-lg bg-gray-50">
               Completed on {formatDate(request.updatedDate)}
             </div>
           )}
+          
         </div>
       </div>
     </motion.div>
