@@ -54,6 +54,7 @@ public class PaymentController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<PaymentResult> pay(
             @PathVariable Long intentId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
             @RequestParam PaymentMethod method
     ) {
         return ResponseEntity.ok(
