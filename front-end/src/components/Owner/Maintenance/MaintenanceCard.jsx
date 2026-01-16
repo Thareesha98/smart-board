@@ -125,7 +125,7 @@ const MaintenanceCard = ({ request, onUpdateStatus }) => {
             </>
           ) : (
             <div className="w-full py-2 text-sm font-medium text-center text-gray-400 rounded-lg bg-gray-50">
-              Completed on {formatDate(new Date())}
+              Completed on {formatDate(request.updatedDate)}
             </div>
           )}
         </div>

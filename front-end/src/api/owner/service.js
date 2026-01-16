@@ -184,17 +184,16 @@ export const getOwnerMaintenanceRequests = async () => {
 // 2. Update the status of a request (Decide)
 // Matches Java: @PutMapping("/owner/{maintenanceId}")
 // Expects MaintenanceDecisionDTO body
-export const updateMaintenanceStatus = async (requestId, newStatus, ownerNote = "") => {
-  try {
-    const response = await api.put(`/maintenance/owner/${requestId}`, {
-      status: newStatus,
-      ownerNote: ownerNote 
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error updating status:", error);
-    throw error;
-  }
+export const updateMaintenanceStatus = async (id, status, ownerNote, updatedAt) => {
+  // Ensure your payload matches MaintenanceDecisionDTO.java
+  const payload = {
+    status: status,
+    ownerNote: ownerNote,
+    updatedAt: updatedAt // 
+  };
+
+  const response = await axios.put(`/api/maintenance/owner/${id}`, payload);
+  return response.data;
 };
 
 // =================================================================
