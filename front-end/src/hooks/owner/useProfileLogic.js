@@ -1,51 +1,52 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getOwnerProfile, updateOwnerProfile } from "../../api/owner/service";
+import { useState, useEffect, useCallback } from "react";
+import { getOwnerProfile, updateOwnerProfile } from "../../api/owner/service"; // Use the service we fixed
 
 const useProfileLogic = () => {
-  
   const [ownerData, setOwnerData] = useState({
-    firstName: "", 
-    fullName: "", // Acts as Business Name
+    // Default structure matching the Page expectations
+    businessName: "", // Backend: fullName
     email: "",
     phone: "",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    avatar: "https://randomuser.me/api/portraits/men/40.jpg",
     address: "",
-    accNo: "",
-    // Backend doesn't support preferences yet, so we keep defaults locally
-    preferences: { 
-      emailNotifications: true, 
-      autoConfirm: false, 
-      marketingEmails: false 
-    }
+    paymentMethod: "", // Backend: accNo
+    nicNumber: "",
+
+    // Preferences (Local defaults since backend doesn't have them yet)
+    preferences: {
+      emailNotifications: true,
+      smsNotifications: false,
+      marketingEmails: false,
+    },
   });
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // --- 1. Fetch Profile ---
+  // --- 1. FETCH DATA (Backend -> Frontend) ---
   const fetchProfile = useCallback(async () => {
     try {
       setIsLoading(true);
-      // Use the service function
-      const data = await getOwnerProfile();
+      const data = await getOwnerProfile(); // Call backend
 
-      setOwnerData(prev => ({
+      // Map Backend DTO -> Frontend State
+      setOwnerData((prev) => ({
         ...prev,
         id: data.id,
-        fullName: data.fullName,
+        businessName: data.fullName, // Map fullName -> businessName
         email: data.email,
         phone: data.phone,
-        // If backend sends null for image, keep the default or previous one
-        avatar: data.profileImageUrl || prev.avatar,
         address: data.address,
-        accNo: data.accNo,
+        avatar: data.profileImageUrl || prev.avatar,
+        paymentMethod: data.accNo, // Map accNo -> paymentMethod
+        nicNumber: data.nicNumber,
         verifiedOwner: data.verifiedOwner,
-        preferences: prev.preferences 
+
+        // Keep existing preferences
+        preferences: prev.preferences,
       }));
       setIsLoading(false);
     } catch (err) {
-      console.error("Failed to fetch profile:", err);
-      setError("Could not load profile data.");
+      console.error("Failed to load profile", err);
       setIsLoading(false);
     }
   }, []);
@@ -54,69 +55,59 @@ const useProfileLogic = () => {
     fetchProfile();
   }, [fetchProfile]);
 
-  // --- Helper: Centralized Update Logic ---
+  // --- 2. UPDATE HANDLERS (Frontend -> Backend) ---
+
+  // Helper to send data to backend
   const handleServiceUpdate = async (payload) => {
-    try {
-      // Merge current data with the new payload to ensure we don't send nulls
-      // if the backend expects a full DTO.
-      const finalPayload = {
-        fullName: payload.fullName || ownerData.fullName,
-        phone: payload.phone || ownerData.phone,
-        accNo: payload.accNo || ownerData.accNo,
-        profileImageUrl: payload.profileImageUrl || ownerData.avatar
-        // Note: 'address' is not currently updatable via the OwnerProfileUpdateDTO
-      };
+    // Merge updates with current state to avoid sending nulls
+    const backendPayload = {
+      fullName: payload.businessName || ownerData.businessName,
+      phone: payload.phone || ownerData.phone,
+      accNo: payload.paymentMethod || ownerData.paymentMethod,
+      profileImageUrl: payload.avatar || ownerData.avatar,
+      // Backend DTO only accepts these fields for now
+    };
 
-      // Use the service function
-      const updatedData = await updateOwnerProfile(finalPayload);
-      
-      // Update local state with the fresh response from backend
-      setOwnerData(prev => ({
-        ...prev,
-        fullName: updatedData.fullName,
-        phone: updatedData.phone,
-        avatar: updatedData.profileImageUrl,
-        accNo: updatedData.accNo
-      }));
+    const updated = await updateOwnerProfile(backendPayload);
 
-      return true;
-    } catch (err) {
-      console.error("Update failed:", err);
-      throw err;
-    }
+    // Update local state immediately
+    setOwnerData((prev) => ({
+      ...prev,
+      businessName: updated.fullName,
+      phone: updated.phone,
+      paymentMethod: updated.accNo,
+      avatar: updated.profileImageUrl,
+    }));
   };
 
-  // --- 2. Action: Update Business Info ---
-  const updateBusinessInfo = async (formData) => {
-    // Map Frontend Form keys -> Backend DTO keys
+  // Called by "Edit Business Info" Modal
+  const updateBusinessInfo = async (data) => {
     await handleServiceUpdate({
-      fullName: formData.businessName, 
-      phone: formData.phone,
-      accNo: formData.paymentMethod 
+      businessName: data.businessName,
+      phone: data.phone,
+      paymentMethod: data.paymentMethod,
     });
   };
 
-  // --- 3. Action: Update Avatar ---
+  // Called by Avatar Modal
   const updateAvatar = async (avatarUrl) => {
-    // Map Frontend Avatar -> Backend 'profileImageUrl'
-    await handleServiceUpdate({ profileImageUrl: avatarUrl });
+    await handleServiceUpdate({ avatar: avatarUrl });
   };
 
-  // --- 4. Action: Update Preferences (Local Only) ---
+  // Called by Preferences Section (Local Only)
   const updatePreferences = (key, value) => {
-    setOwnerData(prev => ({
+    setOwnerData((prev) => ({
       ...prev,
-      preferences: { ...prev.preferences, [key]: value }
+      preferences: { ...prev.preferences, [key]: value },
     }));
   };
 
   return {
-    ownerData,
+    ownerData, // Replaces 'userData'
     isLoading,
-    error,
-    updateBusinessInfo,
+    updateBusinessInfo, // Replaces 'updatePersonalInfo'
     updateAvatar,
-    updatePreferences
+    updatePreferences,
   };
 };
 
