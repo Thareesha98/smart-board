@@ -1,16 +1,17 @@
 package com.sbms.sbms_monolith.service;
 
-import com.sbms.sbms_monolith.dto.boarding.BoardingDetailDTO;
-import com.sbms.sbms_monolith.dto.boarding.BoardingSearchRequest;
-import com.sbms.sbms_monolith.dto.boarding.BoardingSummaryDTO;
+import com.sbms.sbms_monolith.dto.boarding.*;
 import com.sbms.sbms_monolith.mapper.BoardingMapper;
 import com.sbms.sbms_monolith.model.Boarding;
+import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.Status;
 import com.sbms.sbms_monolith.repository.BoardingRepository;
 import com.sbms.sbms_monolith.repository.ReviewRepository;
+import com.sbms.sbms_monolith.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
@@ -24,6 +25,9 @@ public class BoardingService {
 
     @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public Page<BoardingSummaryDTO> searchBoardings(BoardingSearchRequest request) {
 
@@ -156,5 +160,60 @@ public class BoardingService {
 
         Pageable pageable = PageRequest.of(page, size);
         return new PageImpl<>(content, pageable, filtered.size());
+    }
+
+    public List<OwnerBoardingResponseDTO> getBoardingsByOwner(Long ownerId) {
+        return boardingRepository.findByOwner_Id(ownerId).stream()
+                .map(BoardingMapper::toOwnerResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public OwnerBoardingResponseDTO createBoarding(Long ownerId, BoardingCreateDTO dto) {
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new RuntimeException("Owner not found"));
+
+        Boarding boarding = BoardingMapper.toEntityFromCreate(dto);
+        boarding.setOwner(owner);
+
+        // Ensure Lat/Lng are set (Mapper handles it, but double check)
+        if(dto.getLatitude() == null) boarding.setLatitude(6.9271);
+        if(dto.getLongitude() == null) boarding.setLongitude(79.8612);
+
+        Boarding saved = boardingRepository.save(boarding);
+        return BoardingMapper.toOwnerResponse(saved);
+    }
+
+    @Transactional
+    public OwnerBoardingResponseDTO updateBoarding(Long boardingId, BoardingCreateDTO dto) {
+        Boarding boarding = boardingRepository.findById(boardingId)
+                .orElseThrow(() -> new RuntimeException("Boarding Ad not found"));
+
+        // Update fields
+        boarding.setTitle(dto.getTitle());
+        boarding.setDescription(dto.getDescription());
+        boarding.setAddress(dto.getAddress());
+        boarding.setPricePerMonth(dto.getPricePerMonth());
+        boarding.setKeyMoney(dto.getKeyMoney());
+        boarding.setGenderType(dto.getGenderType());
+        boarding.setBoardingType(dto.getBoardingType());
+        boarding.setAvailable_slots(dto.getAvailableSlots());
+        boarding.setMaxOccupants(dto.getMaxOccupants());
+        boarding.setAmenities(dto.getAmenities());
+        boarding.setImageUrls(dto.getImageUrls());
+
+        // Update Location
+        if(dto.getLatitude() != null) boarding.setLatitude(dto.getLatitude());
+        if(dto.getLongitude() != null) boarding.setLongitude(dto.getLongitude());
+
+        // Reset status to PENDING on update (optional logic)
+        boarding.setStatus(Status.PENDING);
+
+        Boarding saved = boardingRepository.save(boarding);
+        return BoardingMapper.toOwnerResponse(saved);
+    }
+
+    public void deleteBoarding(Long id) {
+        boardingRepository.deleteById(id);
     }
 }
