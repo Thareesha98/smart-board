@@ -59,6 +59,7 @@ public class ProfileServiceImpl implements ProfileService {
         user.setAddress(dto.getAddress());
         user.setProfileImageUrl(dto.getProfileImageUrl());
         user.setAccNo(dto.getAccNo());
+        
 
         return ProfileResponseDTO.from(user);
     }

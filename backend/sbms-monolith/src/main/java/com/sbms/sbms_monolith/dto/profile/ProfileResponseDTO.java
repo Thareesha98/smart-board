@@ -11,6 +11,7 @@ public class ProfileResponseDTO {
     private Long id;
     private String fullName;
     private String email;
+    private String password;
     private String phone;
     private String address;
     private String profileImageUrl;
@@ -19,12 +20,14 @@ public class ProfileResponseDTO {
 
     private String accNo;
     private String studentUniversity;
+    private boolean verifiedOwner;
 
     public static ProfileResponseDTO from(User user) {
         ProfileResponseDTO dto = new ProfileResponseDTO();
         dto.setId(user.getId());
         dto.setFullName(user.getFullName());
         dto.setEmail(user.getEmail());
+        
         dto.setPhone(user.getPhone());
         dto.setProfileImageUrl(user.getProfileImageUrl());
         dto.setRole(user.getRole());

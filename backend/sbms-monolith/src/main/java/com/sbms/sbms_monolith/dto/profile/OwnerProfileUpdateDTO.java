@@ -10,6 +10,7 @@ public class OwnerProfileUpdateDTO {
     private String phone;
     private String address;
     private String profileImageUrl;
+    
 
     private String accNo;
 }
