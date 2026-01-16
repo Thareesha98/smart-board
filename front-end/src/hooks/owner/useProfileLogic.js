@@ -65,7 +65,8 @@ const useProfileLogic = () => {
       phone: payload.phone || ownerData.phone,
       accNo: payload.paymentMethod || ownerData.paymentMethod,
       profileImageUrl: payload.avatar || ownerData.avatar,
-      // Backend DTO only accepts these fields for now
+      address: payload.address || ownerData.address
+      
     };
 
     const updated = await updateOwnerProfile(backendPayload);
@@ -77,6 +78,7 @@ const useProfileLogic = () => {
       phone: updated.phone,
       paymentMethod: updated.accNo,
       avatar: updated.profileImageUrl,
+      address: updated.address
     }));
   };
 
@@ -86,6 +88,7 @@ const useProfileLogic = () => {
       businessName: data.businessName,
       phone: data.phone,
       paymentMethod: data.paymentMethod,
+      address: data.address
     });
   };
 
