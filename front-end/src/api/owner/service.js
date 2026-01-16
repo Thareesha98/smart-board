@@ -281,3 +281,20 @@ export const updateOwnerProfile = async (profileData) => {
     throw error;
   }
 };
+
+// =================================================================
+//  AUTH SERVICES (Password Change)
+// =================================================================
+
+export const changePassword = async (currentPassword, newPassword) => {
+  try {
+    const response = await api.post("/auth/change-password", {
+      currentPassword,
+      newPassword
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error changing password:", error);
+    throw error;
+  }
+};

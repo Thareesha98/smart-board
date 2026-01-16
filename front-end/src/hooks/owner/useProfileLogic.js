@@ -1,22 +1,25 @@
 import { useState, useEffect, useCallback } from "react";
-import { getOwnerProfile, updateOwnerProfile } from "../../api/owner/service"; // Update path if needed
+// Updated imports to include changePassword
+import {
+  getOwnerProfile,
+  updateOwnerProfile,
+  changePassword,
+} from "../../api/owner/service";
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 
 const useProfileLogic = () => {
-  const { currentOwner } = useOwnerAuth(); // Optional: if you need context state
+  const { currentOwner } = useOwnerAuth();
 
   const [ownerData, setOwnerData] = useState({
     id: null,
-    businessName: "", // Maps to backend 'fullName'
+    businessName: "",
     email: "",
     phone: "",
-    avatar: "https://randomuser.me/api/portraits/men/40.jpg", // Default fallback
+    avatar: "https://randomuser.me/api/portraits/men/40.jpg",
     address: "",
-    paymentMethod: "", // Maps to backend 'accNo'
+    paymentMethod: "",
     nicNumber: "",
     verifiedOwner: false,
-
-    // Preferences (Local only for now)
     preferences: {
       emailNotifications: true,
       smsNotifications: false,
@@ -32,10 +35,8 @@ const useProfileLogic = () => {
     try {
       setIsLoading(true);
       setError(null);
+      const data = await getOwnerProfile();
 
-      const data = await getOwnerProfile(); // Call Service
-
-      // Map Backend DTO -> Frontend State
       setOwnerData((prev) => ({
         ...prev,
         id: data.id,
@@ -47,7 +48,7 @@ const useProfileLogic = () => {
         paymentMethod: data.accNo,
         nicNumber: data.nicNumber,
         verifiedOwner: data.verifiedOwner,
-        preferences: prev.preferences, // Keep local prefs
+        preferences: prev.preferences,
       }));
     } catch (err) {
       console.error("Failed to load profile", err);
@@ -61,10 +62,8 @@ const useProfileLogic = () => {
     fetchProfile();
   }, [fetchProfile]);
 
-  // --- 2. UPDATE HANDLER ---
+  // --- Internal Helper: Update Profile Backend ---
   const handleServiceUpdate = async (payload) => {
-    // 1. Prepare Payload for Backend (OwnerProfileUpdateDTO)
-    // We merge with existing data to ensure no fields are wiped out accidentally
     const backendPayload = {
       fullName: payload.businessName || ownerData.businessName,
       phone: payload.phone || ownerData.phone,
@@ -74,36 +73,51 @@ const useProfileLogic = () => {
         payload.address !== undefined ? payload.address : ownerData.address,
     };
 
-    // 2. Call API
     const updated = await updateOwnerProfile(backendPayload);
 
-    // 3. Update Local State with the Fresh Response
     setOwnerData((prev) => ({
       ...prev,
       businessName: updated.fullName,
       phone: updated.phone,
       paymentMethod: updated.accNo,
       avatar: updated.profileImageUrl,
-      address: updated.address, // Ensure backend returns this!
+      address: updated.address,
     }));
   };
 
-  // --- 3. EXPOSED ACTIONS ---
+  // --- 2. EXPOSED ACTIONS ---
 
+  // A. Update Business Info
   const updateBusinessInfo = async (data) => {
-    // Expects: { businessName, phone, address, paymentMethod? }
     await handleServiceUpdate({
       businessName: data.businessName,
       phone: data.phone,
       address: data.address,
-      paymentMethod: data.paymentMethod, // Optional, usually handled by AccountModal
+      paymentMethod: data.paymentMethod,
     });
   };
 
+  // B. Update Avatar
   const updateAvatar = async (avatarUrl) => {
     await handleServiceUpdate({ avatar: avatarUrl });
   };
 
+  // C. Update Account Settings (Bank + Password) -> Logic moved here
+  const updateAccountSettings = async (formData) => {
+    // 1. Update Bank Account if changed
+    if (formData.accNo !== ownerData.paymentMethod) {
+      await handleServiceUpdate({
+        paymentMethod: formData.accNo,
+      });
+    }
+
+    // 2. Update Password if requested
+    if (formData.isPasswordChange) {
+      await changePassword(formData.currentPassword, formData.newPassword);
+    }
+  };
+
+  // D. Update Preferences (Local)
   const updatePreferences = (key, value) => {
     setOwnerData((prev) => ({
       ...prev,
@@ -117,6 +131,7 @@ const useProfileLogic = () => {
     error,
     updateBusinessInfo,
     updateAvatar,
+    updateAccountSettings, // ✅ Exposed to component
     updatePreferences,
   };
 };
