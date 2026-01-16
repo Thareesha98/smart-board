@@ -12,5 +12,6 @@ public class MaintenanceDecisionDTO {
 
     private MaintenanceStatus status; // IN_PROGRESS / COMPLETED / REJECTED
     private String ownerNote;
+    private LocalDateTime updatedAt;
     
 }

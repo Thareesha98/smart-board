@@ -42,7 +42,7 @@ const useMaintenanceLogic = () => {
           image: item.imageUrls || [], // Map 'imageUrls' -> 'image'
           roomNumber: item.roomNumber,
           createdDate: item.createdAt, 
-          updatedDate: item.updatedAt,
+          updatedDate: item.updated,
 
         }));
 
@@ -60,12 +60,11 @@ const useMaintenanceLogic = () => {
   }, [currentOwner]);
 
   const handleStatusUpdate = async (id, newStatus) => {
-    // 1. Capture the current time immediately
+    // 1. Capture the current date immediately
     const now = new Date();
-    // distinct format for UI (if needed) or just use ISO string for both
-    const isoDate = now.toISOString(); 
+    const isoDate = now.toISOString(); // e.g., "2023-10-27T10:00:00.000Z"
 
-    // 2. Optimistic Update (Update UI Immediately)
+    // 2. Optimistic Update
     const originalRequests = [...requests];
     const statusToSend = newStatus.toUpperCase();
 
@@ -75,7 +74,7 @@ const useMaintenanceLogic = () => {
           ? { 
               ...req, 
               status: statusToSend, 
-              updatedDate: isoDate 
+              updatedDate: isoDate // <--- ADDS THE DATE TO UI INSTANTLY
             } 
           : req
       )
@@ -83,7 +82,8 @@ const useMaintenanceLogic = () => {
 
     try {
       // 3. Send to Backend
-      await updateMaintenanceStatus(id, statusToSend, "", isoDate); 
+      // Ensure your updateMaintenanceStatus function accepts this 4th parameter
+      await updateMaintenanceStatus(id, statusToSend, "", isoDate);
     } catch (err) {
       console.error("Update failed:", err);
       setRequests(originalRequests); // Revert on error

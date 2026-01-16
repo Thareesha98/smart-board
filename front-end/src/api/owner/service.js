@@ -192,7 +192,7 @@ export const updateMaintenanceStatus = async (id, status, ownerNote, updatedAt) 
     updatedAt: updatedAt // 
   };
 
-  const response = await axios.put(`/api/maintenance/owner/${id}`, payload);
+  const response = await api.put(`/maintenance/owner/${id}`, payload);
   return response.data;
 };
 
