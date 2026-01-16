@@ -41,7 +41,9 @@ const useMaintenanceLogic = () => {
           urgency: item.maintenanceUrgency, // Map 'maintenanceUrgency' -> 'urgency'
           image: item.imageUrls || [], // Map 'imageUrls' -> 'image'
           roomNumber: item.roomNumber,
-          date: item.createdDate, 
+          createdDate: item.createdDate, 
+          updatedDate: item.updatedDate,
+
         }));
 
         setRequests(mappedData);

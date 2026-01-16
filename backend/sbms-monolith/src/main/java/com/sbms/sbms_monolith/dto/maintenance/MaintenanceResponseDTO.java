@@ -27,4 +27,6 @@ public class MaintenanceResponseDTO {
 
     private String studentNote;
     private String ownerNote;
+    private String createdAt;
+    private String updatedAt;
 }
