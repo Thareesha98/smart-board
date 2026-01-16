@@ -1,16 +1,12 @@
 package com.sbms.sbms_monolith.controller;
 
-import com.sbms.sbms_monolith.dto.boarding.BoardingDetailDTO;
-import com.sbms.sbms_monolith.dto.boarding.BoardingSearchRequest;
-import com.sbms.sbms_monolith.dto.boarding.BoardingSummaryDTO;
+import com.sbms.sbms_monolith.dto.boarding.*;
 import com.sbms.sbms_monolith.model.enums.BoardingType;
 import com.sbms.sbms_monolith.model.enums.Gender;
 import com.sbms.sbms_monolith.service.BoardingService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-
 import java.math.BigDecimal;
 
 @RestController
