@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -197,6 +198,28 @@ public class AuthController {
                         .build();
 
         return jwtService.generateToken(userDetails);
+    }
+
+    @PostMapping("/change-password")
+    @Operation(
+        summary = "Change password",
+        description = "Allows a logged-in user to change their password"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Password updated successfully"),
+        @ApiResponse(responseCode = "401", description = "Invalid current password"),
+        @ApiResponse(responseCode = "403", description = "User not authenticated")
+    })
+    public String changePassword(
+            @RequestBody ChangePasswordDTO req,
+            Authentication auth // Injected automatically by Spring Security if token is present
+    ) {
+        // auth.getName() extracts the email from the JWT Token
+        return userService.changePassword(
+                auth.getName(),
+                req.getCurrentPassword(),
+                req.getNewPassword()
+        );
     }
 }
 
