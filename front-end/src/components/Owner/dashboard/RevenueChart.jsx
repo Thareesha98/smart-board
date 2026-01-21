@@ -43,7 +43,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const RevenueChart = () => {
   return (
-    <div className="w-full h-full min-h-[300px]">
+    <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}

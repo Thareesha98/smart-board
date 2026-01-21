@@ -6,7 +6,8 @@ import HeroAction from "../../components/Owner/dashboard/HeroAction";
 import DashButton from "../../components/Owner/dashboard/DashButton";
 import AppointmentItem from "../../components/Owner/dashboard/AppointmentItem";
 import DashboardSection from "../../components/Owner/dashboard/DashboardSection";
-import RecentTransactions from "../../components/Owner/dashboard/RecentTransactions"; // Imported new component
+import RecentTransactions from "../../components/Owner/dashboard/RecentTransactions";
+import RevenueChart from "../../components/Owner/dashboard/RevenueChart";
 import { recentAppointments, ownerData } from "../../data/mockData.js";
 
 export default function Dashboard() {
@@ -72,27 +73,20 @@ export default function Dashboard() {
           {/* LEFT COLUMN (Wide): Financials & Deep Data */}
           <div className="space-y-8 lg:col-span-2">
             {/* Revenue Analytics Chart Area */}
-            <div className="bg-card-bg rounded-xl border border-light p-6 shadow-sm min-h-[350px] flex flex-col">
+            <div className="bg-card-bg rounded-xl border border-light p-6 shadow-sm min-h-[400px] flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-text">
                   Revenue Analytics
                 </h3>
-                <select className="text-xs font-bold tracking-wide uppercase rounded-lg border-light text-muted bg-light/30">
+                <select className="text-xs font-bold tracking-wide uppercase rounded-lg outline-none border-light text-muted bg-light/30 focus:border-primary">
                   <option>This Year</option>
                   <option>Last Year</option>
                 </select>
               </div>
 
-              {/* Placeholder for Recharts - Replace with actual chart later */}
-              <div className="relative flex items-center justify-center flex-1 overflow-hidden border border-dashed rounded-lg bg-light/20 border-light/50 text-muted group">
-                <div className="z-10 text-center">
-                  <i className="mb-3 text-5xl fas fa-chart-area opacity-20"></i>
-                  <p className="text-sm font-medium">
-                    Chart Visualization Loading...
-                  </p>
-                </div>
-                {/* Decorative background for professional feel */}
-                <div className="absolute inset-0 opacity-50 bg-gradient-to-t from-light/40 to-transparent"></div>
+              {/* 2. Insert the Chart Component here */}
+              <div className="flex-1 w-full">
+                <RevenueChart />
               </div>
             </div>
 
