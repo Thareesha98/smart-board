@@ -15,7 +15,7 @@ export default function Dashboard() {
 
   // Simulate data fetching from backend
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
+    const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
