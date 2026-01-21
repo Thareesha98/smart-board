@@ -55,15 +55,9 @@ const ReportDetailModal = ({ report, onClose }) => {
               <h2 className="text-xl font-bold leading-tight text-gray-800">
                 {data.title}
               </h2>
-              <span className="px-2 py-0.5 bg-gray-200 text-gray-600 text-[10px] font-bold uppercase rounded tracking-wider">
-                #{data.id}
-              </span>
             </div>
             <p className="text-xs font-medium text-gray-500">
               Submitted on <span className="text-gray-700">{data.date}</span> •
-              <span className="ml-1 font-bold tracking-wide uppercase text-accent/80">
-                {data.type}
-              </span>
             </p>
           </div>
 
