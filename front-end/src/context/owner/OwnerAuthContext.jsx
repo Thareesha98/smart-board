@@ -9,6 +9,8 @@ export const OwnerAuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   // 1. Check for logged-in user on load
+  // In OwnerAuthContext.jsx
+
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("token");
@@ -16,11 +18,19 @@ export const OwnerAuthProvider = ({ children }) => {
 
       if (token && savedUser) {
         try {
-          setCurrentOwner(JSON.parse(savedUser));
-          setIsAuthenticated(true);
+          const parsedUser = JSON.parse(savedUser);
+
+          // ✅ ADD THIS CHECK: Only load if it's actually an OWNER
+          if (parsedUser.role === "OWNER") {
+            setCurrentOwner(parsedUser);
+            setIsAuthenticated(true);
+          }
+          // If it's not an owner, we do nothing.
+          // We do NOT clear local storage here either.
         } catch (e) {
           console.error("Failed to parse user data", e);
-          localStorage.clear();
+          // Only clear if the JSON is actually corrupt
+          // localStorage.clear();
         }
       }
       setIsLoading(false);
@@ -71,7 +81,7 @@ export const OwnerAuthProvider = ({ children }) => {
       const response = await api.post(
         "/auth/register/request",
         userData,
-        config
+        config,
       );
       return { success: true, message: response.data };
     } catch (error) {

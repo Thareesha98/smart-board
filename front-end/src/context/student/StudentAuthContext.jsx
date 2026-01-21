@@ -24,7 +24,9 @@ export const StudentAuthProvider = ({ children }) => {
             setCurrentUser(user);
             setIsAuthenticated(true);
           } else {
-            localStorage.clear();
+            // Just don't authenticate this context, but DO NOT wipe storage.
+            // It might be an Owner logged in!
+            setIsAuthenticated(false);
           }
         } catch (e) {
           console.error("Failed to parse user data", e);
@@ -47,7 +49,7 @@ export const StudentAuthProvider = ({ children }) => {
           headers: {
             Authorization: undefined,
           },
-        }
+        },
       );
       const { token, refreshToken, user } = response.data;
 
@@ -94,7 +96,7 @@ export const StudentAuthProvider = ({ children }) => {
       const response = await api.post(
         "/auth/register/request",
         payload,
-        config
+        config,
       );
 
       return {
@@ -155,7 +157,7 @@ export const StudentAuthProvider = ({ children }) => {
       // 1. Call Backend
       const responseUser = await StudentService.updateProfile(
         currentUser.id,
-        updatedData
+        updatedData,
       );
 
       // 2. Merge response with current user state (Backend should return updated user object)
@@ -182,7 +184,7 @@ export const StudentAuthProvider = ({ children }) => {
         // It's a File object, upload to backend
         const response = await StudentService.updateAvatar(
           currentUser.id,
-          fileOrUrl
+          fileOrUrl,
         );
         newAvatarUrl = response.avatarUrl; // Assuming backend returns { avatarUrl: "..." }
       } else {
