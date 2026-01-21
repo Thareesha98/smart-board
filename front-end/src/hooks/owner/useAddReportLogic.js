@@ -9,32 +9,28 @@ export default function useAddReportLogic() {
   const { currentOwner } = useOwnerAuth();
   const { submitNewReport, isSubmitting } = useReportLogic();
 
-  // --- 1. DATA STATE ---
+  // --- State ---
   const [properties, setProperties] = useState([]);
   const [students, setStudents] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [newFiles, setNewFiles] = useState([]);
 
-  // --- 2. FORM STATE (Matches Java DTO Exact Keys) ---
+  // Form Data (Matches Java DTO: ReportCreateDTO)
   const [formData, setFormData] = useState({
-    reportTitle: "",         // Fixed: was 'title'
-    reportDescription: "",   // Fixed: was 'description'
-    type: "",                // Fixed: was 'reportType'
+    reportTitle: "",
+    reportDescription: "",
+    type: "",
     severity: "",
-    boarding: "",            // Fixed: Java expects String name
-    
-    senderId: "",            // Will be set on submit
-    reportedUserId: "",      // Fixed: was 'studentId'
-    reportedPersonName: "",  // New: Java field
-    
+    boarding: "",
+    senderId: currentOwner?.id,
+    reportedUserId: "",
+    reportedPersonName: "",
     incidentDate: "",
     allowContact: true,
-    
-    // Helper for frontend logic (not sent to backend)
-    propertyId: ""
+    propertyId: "", // Helper only
   });
 
-  // --- 3. LOAD BOARDINGS (WITH MAPPING FIX) ---
+  // --- 1. SMART FETCH (Fixes Blank Dropdown) ---
   useEffect(() => {
     const loadProperties = async () => {
       if (!currentOwner?.id) return;
@@ -43,15 +39,35 @@ export default function useAddReportLogic() {
         setLoadingData(true);
         const data = await getOwnerBoardings(currentOwner.id);
 
-        if (Array.isArray(data)) {
-          // 🛠️ MAPPING FIX: Force data into { id, name } format
-          // This ensures SelectGroup always finds a .name to display
-          const formattedBoardings = data.map(p => ({
-            id: p.id || p.boardingId,
-            name: p.name || p.boardingName || p.title || "Unnamed Property"
+        if (Array.isArray(data) && data.length > 0) {
+          console.log("📦 Raw Boarding Data:", data);
+
+          // 🛠️ AUTO-FIX: Detect the correct field names
+          const sample = data[0];
+          const keys = Object.keys(sample);
+
+          // Find the key that looks like a Name/Title
+          const nameKey =
+            keys.find(
+              (k) =>
+                k.toLowerCase().includes("name") ||
+                k.toLowerCase().includes("title") ||
+                k.toLowerCase().includes("label"),
+            ) || "name";
+
+          // Find the key that looks like an ID
+          const idKey =
+            keys.find((k) => k.toLowerCase().includes("id")) || "id";
+
+          console.log(`🔑 Mapping: ID=[${idKey}], Name=[${nameKey}]`);
+
+          const formatted = data.map((p) => ({
+            id: p[idKey],
+            // Use the detected key, or fallback to "Property #{id}" so it's never blank
+            name: p[nameKey] || `Property #${p[idKey]}`,
           }));
-          
-          setProperties(formattedBoardings);
+
+          setProperties(formatted);
         }
       } catch (error) {
         console.error("Failed to load properties", error);
@@ -62,28 +78,30 @@ export default function useAddReportLogic() {
     loadProperties();
   }, [currentOwner]);
 
-  // --- 4. HANDLERS ---
-
+  // --- 2. Handlers ---
   const handlePropertyChange = async (e) => {
     const selectedId = e.target.value;
-    
-    // Find the name for the DTO
-    const selectedProp = properties.find(p => String(p.id) === String(selectedId));
+    const selectedProp = properties.find(
+      (p) => String(p.id) === String(selectedId),
+    );
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       propertyId: selectedId,
-      boarding: selectedProp ? selectedProp.name : "", // Send Name to Backend
-      reportedUserId: "", // Reset student
-      reportedPersonName: ""
+      boarding: selectedProp ? selectedProp.name : "", // Sent to backend
+      reportedUserId: "",
+      reportedPersonName: "",
     }));
 
-    // Load Tenants
     if (selectedId) {
       try {
         const tenantList = await getBoardingTenants(selectedId);
-        // Map tenants if needed, assuming they have {id, name}
-        setStudents(tenantList); 
+        // Ensure tenants also have 'name' property
+        const formattedTenants = tenantList.map((t) => ({
+          id: t.id || t.userId,
+          name: t.name || t.fullName || t.username || "Unknown Student",
+        }));
+        setStudents(formattedTenants);
       } catch (err) {
         setStudents([]);
       }
@@ -93,53 +111,39 @@ export default function useAddReportLogic() {
   };
 
   const handleStudentChange = (e) => {
-    const studentId = e.target.value;
-    const student = students.find(s => String(s.id) === String(studentId));
-
-    setFormData(prev => ({
+    const sId = e.target.value;
+    const student = students.find((s) => String(s.id) === String(sId));
+    setFormData((prev) => ({
       ...prev,
-      reportedUserId: studentId,
-      reportedPersonName: student ? student.name : ""
+      reportedUserId: sId,
+      reportedPersonName: student ? student.name : "",
     }));
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleFileChange = (e) => {
-    if (e.target.files) {
-      setNewFiles(prev => [...prev, ...Array.from(e.target.files)]);
-    }
-  };
-
-  const handleRemoveFile = (index) => {
-    setNewFiles(prev => prev.filter((_, i) => i !== index));
-  };
+  const handleFileChange = (e) =>
+    setNewFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+  const handleRemoveFile = (i) =>
+    setNewFiles((prev) => prev.filter((_, idx) => idx !== i));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Prepare Final Payload
-    const payload = {
-      ...formData,
-      senderId: currentOwner.id, // Ensure ID is attached
-    };
-
-    // Remove helper fields that Java doesn't know about
-    delete payload.propertyId; 
+    const payload = { ...formData, senderId: currentOwner?.id };
+    delete payload.propertyId; // Don't send helper field
 
     const result = await submitNewReport(payload, newFiles);
-
     if (result.success) {
       alert("Report submitted successfully.");
       navigate("/owner/reports");
     } else {
-      alert(result.message || "Failed to submit report.");
+      alert(result.message || "Failed.");
     }
   };
 
@@ -155,6 +159,6 @@ export default function useAddReportLogic() {
     handleChange,
     handleFileChange,
     handleRemoveFile,
-    handleSubmit
+    handleSubmit,
   };
 }
