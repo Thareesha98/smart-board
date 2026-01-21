@@ -30,7 +30,7 @@ export default function Dashboard() {
         // ... other props
       />
 
-      <div className="px-4 py-8 mx-auto space-y-8 max-w-7xl sm:px-6">
+      <div className="w-full px-4 py-8 space-y-8 sm:px-6 md:px-8">
         {/* 1. Stats Row - Always visible at top */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {loading ? (
