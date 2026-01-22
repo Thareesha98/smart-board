@@ -4,6 +4,7 @@ import useMyAdsLogic from "../../hooks/owner/useMyAdsLogic";
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; 
 import FormGroup from "../../components/Owner/forms/FormGroup";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
+import LocationPicker from "../../components/common/LocationPicker";
 import {
   AmenityCheckbox,
   PhotoUploader,
@@ -55,6 +56,8 @@ const CreateAdPage = () => {
     boardingType: "ROOM",
     availableSlots: 1,
     maxOccupants: 1,
+    latitude: 6.9271, 
+    longitude: 79.8612
   });
 
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -86,6 +89,10 @@ const CreateAdPage = () => {
           : prev.amenities.filter((i) => i !== value)
         : value,
     }));
+  };
+
+  const handleLocationSelect = (lat, lng) => {
+    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
   };
 
   const handleSubmit = (e) => {
@@ -213,7 +220,22 @@ const CreateAdPage = () => {
           </div>
         </motion.section>
 
-        {/* Section 2: Amenities & Media (Animated) */}
+        {/* ✅ Section 2: MAP LOCATION */}
+        <motion.section 
+          variants={itemVariants} 
+          className="bg-card-bg p-8 rounded-report shadow-custom border border-light"
+        >
+          <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
+             Boarding Location
+          </h2>
+          <LocationPicker 
+             lat={formData.latitude} 
+             lng={formData.longitude} 
+             onLocationSelect={handleLocationSelect} 
+          />
+        </motion.section>
+
+        {/* Section 3: Amenities & Media (Animated) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <motion.section 
             variants={itemVariants}
