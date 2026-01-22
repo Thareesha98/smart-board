@@ -19,7 +19,6 @@ import com.sbms.sbms_monolith.common.BaseEntity;
 @Table(name = "boardings")
 public class Boarding extends BaseEntity {
 
-	//ownerID
 	
 	@ManyToOne
 	@JoinColumn(name = "owner_id")

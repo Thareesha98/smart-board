@@ -3,7 +3,6 @@ package com.sbms.sbms_monolith.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -13,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -88,7 +88,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
 
-        // 🔥 NEW constructor (Spring Security 6.3)
+        // NEW constructor (Spring Security 6.3)
         DaoAuthenticationProvider provider =
                 new DaoAuthenticationProvider(customUserDetailsService);
 
@@ -96,6 +96,8 @@ public class SecurityConfig {
 
         return provider;
     }
+    
+   
 
   
     @Bean
@@ -109,19 +111,33 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    
+    
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
+      /*  config.setAllowedOrigins(List.of(
         		"https://smartboard.thareesha.software",
                 "http://13.233.34.226:8086",
                 "http://localhost:5173"
-        		));
+        		)); */
+        config.setAllowedOriginPatterns(List.of("*"));
+
+        
+        
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+       
         config.setAllowedHeaders(List.of("*"));
+        
+     /*   config.setAllowedHeaders(List.of(
+        	    "Authorization",
+        	    "Content-Type"
+        	));
+*/
+        
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

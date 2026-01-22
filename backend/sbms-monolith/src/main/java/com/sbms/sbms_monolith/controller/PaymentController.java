@@ -1,80 +1,78 @@
 package com.sbms.sbms_monolith.controller;
 
-import java.util.List;
+import com.sbms.sbms_monolith.dto.payment.*;
+import com.sbms.sbms_monolith.model.PaymentIntent;
+import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.model.enums.PaymentMethod;
+import com.sbms.sbms_monolith.repository.UserRepository;
+import com.sbms.sbms_monolith.service.PaymentIntentService;
+import com.sbms.sbms_monolith.service.PaymentService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import com.sbms.sbms_monolith.dto.payment.PaymentHistoryDTO;
-import com.sbms.sbms_monolith.dto.payment.PaymentRequestDTO;
-import com.sbms.sbms_monolith.dto.payment.PaymentResult;
-import com.sbms.sbms_monolith.model.MonthlyBill;
-import com.sbms.sbms_monolith.model.User;
-import com.sbms.sbms_monolith.model.enums.MonthlyBillStatus;
-import com.sbms.sbms_monolith.repository.MonthlyBillRepository;
-import com.sbms.sbms_monolith.service.PaymentService;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/payment")
+@RequestMapping("/api/payments")
 @RequiredArgsConstructor
 public class PaymentController {
-	
-	@Autowired
-	public MonthlyBillRepository monthlyBillRepo;
-	
-	public PaymentService paymentService;
 
-	@PostMapping("/pay-bill")
-	@PreAuthorize("hasRole('STUDENT')")
-	public ResponseEntity<?> payMonthlyBill(
-	        @RequestBody PaymentRequestDTO dto,
-	        Authentication authentication
-	) {
-	    User student = (User) authentication.getPrincipal();
+    private final PaymentService paymentService;
+    private final PaymentIntentService paymentIntentService;
+    private final UserRepository userRepository;
 
-	    if (!student.getId().equals(dto.getUserId())) {
-	        throw new RuntimeException("Unauthorized");
-	    }
+    // 1️⃣ Create Payment Intent
+    @PostMapping("/intent")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<PaymentIntent> createIntent(
+            @RequestBody CreatePaymentIntentDTO dto,
+            Authentication auth
+    ) {
+        // ✅ Correct way with your security setup
+        String email = auth.getName();
 
-	    MonthlyBill bill = monthlyBillRepo.findById(dto.getMonthlyBillId())
-	            .orElseThrow(() -> new RuntimeException("Bill not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-	    if (!bill.getStudent().getId().equals(student.getId())) {
-	        throw new RuntimeException("Forbidden");
-	    }
+        Long studentId = user.getId();
 
-	    PaymentResult result = paymentService.processPayment(
-	            student.getId(),
-	            bill.getTotalAmount(),
-	            dto.getPaymentMethod()
-	    );
+        if (!studentId.equals(dto.getStudentId())) {
+            throw new RuntimeException("Unauthorized");
+        }
 
-	    if (!result.isSuccess()) {
-	        throw new RuntimeException("Payment failed");
-	    }
-
-	    bill.setStatus(MonthlyBillStatus.PAID);
-	    monthlyBillRepo.save(bill);
-
-	    return ResponseEntity.ok(result);
-	}
-	
-	@GetMapping("/my")
-    public ResponseEntity<List<PaymentHistoryDTO>> myPayments(Authentication auth) {
-
-        // Extract logged-in user ID safely
-        Long userId = Long.parseLong(auth.getName());
-
-        List<PaymentHistoryDTO> payments =
-                paymentService.getPaymentHistory(userId);
-
-        return ResponseEntity.ok(payments);
+        return ResponseEntity.ok(
+                paymentIntentService.create(dto)
+        );
     }
-	
-	
 
+    // 2️⃣ Pay using Dummy PayHere
+    @PostMapping("/pay/{intentId}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<PaymentResult> pay(
+            @PathVariable Long intentId,
+            @RequestParam PaymentMethod method
+    ) {
+        return ResponseEntity.ok(
+                paymentService.pay(intentId, method)
+        );
+    }
+
+    // 3️⃣ Payment History
+    @GetMapping("/history")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<PaymentHistoryDTO>> history(Authentication auth) {
+
+        String email = auth.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return ResponseEntity.ok(
+                paymentService.history(user.getId())
+        );
+    }
 }

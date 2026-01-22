@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: sbms-backend
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
   # Database Configuration
   datasource:
