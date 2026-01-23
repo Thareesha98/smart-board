@@ -1,11 +1,14 @@
 package com.sbms.sbms_monolith.dto.user;
 
 import com.sbms.sbms_monolith.model.enums.Gender;
+import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
 import com.sbms.sbms_monolith.model.enums.UserRole;
 import lombok.Data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Schema(description = "User registration request payload")
@@ -67,6 +70,13 @@ public class UserRegisterDTO {
         example = "University of Colombo"
     )
     private String studentUniversity;
+
+    // -------- Technician FIELDS --------
+
+    private String province;
+    private String city;
+    private Double basePrice;
+    private List<MaintenanceIssueType> skills;
 }
 
 
