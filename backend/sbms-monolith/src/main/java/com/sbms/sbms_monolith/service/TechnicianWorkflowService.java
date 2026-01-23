@@ -46,4 +46,9 @@ public class TechnicianWorkflowService {
         m.setRejectedByTechnician(false);
         maintenanceRepo.save(m);
     }
+
+    // 3. TECHNICIAN: Get Assigned Jobs
+    public List<Maintenance> getAssignedJobs(Long technicianId) {
+        return maintenanceRepo.findByAssignedTechnician_Id(technicianId);
+    }
 }
