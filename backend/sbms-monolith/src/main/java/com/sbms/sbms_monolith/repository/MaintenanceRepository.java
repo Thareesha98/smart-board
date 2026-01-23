@@ -17,4 +17,6 @@ public interface MaintenanceRepository extends JpaRepository<Maintenance, Long> 
     int countByRegistration_IdAndStatus(Long regId, String status);
 
     Maintenance findTopByRegistration_IdOrderByCreatedAtDesc(Long regId);
+
+    List<Maintenance> findByAssignedTechnician_Id(Long technicianId);
 }
