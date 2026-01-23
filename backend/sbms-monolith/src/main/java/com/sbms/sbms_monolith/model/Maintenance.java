@@ -53,4 +53,7 @@ public class Maintenance extends BaseEntity {
 
     private boolean rejectedByTechnician = false;
 
+    @Column(length = 500)
+    private String technicianRejectionReason;
+
 }
