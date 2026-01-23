@@ -44,14 +44,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // -----------------------------------------------------------
-                        // 🚨 CRITICAL FIX: OWNER RULES MUST BE FIRST 🚨
                         // -----------------------------------------------------------
                         .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
                         .requestMatchers("/api/owner/**").hasRole("OWNER")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // -----------------------------------------------------------
-                        // ✅ PUBLIC RULES (AFTER SPECIFIC RULES)
+                        //  PUBLIC RULES (AFTER SPECIFIC RULES)
                         // -----------------------------------------------------------
                         // 1. Allow Login/Register
                         .requestMatchers("/api/auth/**").permitAll()
@@ -76,6 +75,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/student/**").hasRole("STUDENT")
                         .requestMatchers("/api/registrations/**").authenticated()
                         .requestMatchers("/api/payment/**").authenticated()
+
+                        .requestMatchers("/api/technician-workflow/search").hasRole("OWNER")
+                        .requestMatchers("/api/technician-workflow/*/assign/*").hasRole("OWNER")
+                        .requestMatchers("/api/technician-workflow/*/review").hasRole("OWNER")
+
+                        .requestMatchers("/api/technician-workflow/my-jobs").hasRole("TECHNICIAN")
+                        .requestMatchers("/api/technician-workflow/*/decision").hasRole("TECHNICIAN")
+                        .requestMatchers("/api/technician-workflow/*/complete").hasRole("TECHNICIAN")
+                        .requestMatchers("/api/technician-workflow/profile").hasRole("TECHNICIAN")
 
                         .anyRequest().authenticated()
                 )
