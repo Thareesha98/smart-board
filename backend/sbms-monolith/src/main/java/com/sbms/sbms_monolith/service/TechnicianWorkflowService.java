@@ -70,4 +70,13 @@ public class TechnicianWorkflowService {
         }
         maintenanceRepo.save(m);
     }
+
+    // 5. TECHNICIAN: Mark Work Done
+    public void markWorkDone(Long maintenanceId, Long technicianId) {
+        Maintenance m = maintenanceRepo.findById(maintenanceId).orElseThrow();
+        if(!m.getAssignedTechnician().getId().equals(technicianId)) throw new RuntimeException("Unauthorized");
+
+        m.setStatus(MaintenanceStatus.WORK_DONE);
+        maintenanceRepo.save(m);
+    }
 }
