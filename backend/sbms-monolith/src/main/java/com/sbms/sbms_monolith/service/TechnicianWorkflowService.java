@@ -51,4 +51,23 @@ public class TechnicianWorkflowService {
     public List<Maintenance> getAssignedJobs(Long technicianId) {
         return maintenanceRepo.findByAssignedTechnician_Id(technicianId);
     }
+
+    // 4. TECHNICIAN: Accept/Reject
+    public void technicianDecision(Long maintenanceId, Long technicianId, boolean accepted) {
+        Maintenance m = maintenanceRepo.findById(maintenanceId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (!m.getAssignedTechnician().getId().equals(technicianId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (accepted) {
+            m.setStatus(MaintenanceStatus.IN_PROGRESS);
+        } else {
+            m.setAssignedTechnician(null);
+            m.setStatus(MaintenanceStatus.PENDING); // Goes back to owner
+            m.setRejectedByTechnician(true);
+        }
+        maintenanceRepo.save(m);
+    }
 }
