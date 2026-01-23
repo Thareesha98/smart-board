@@ -1,7 +1,9 @@
 package com.sbms.sbms_monolith.service;
 
+import com.sbms.sbms_monolith.model.Maintenance;
 import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
+import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
 import com.sbms.sbms_monolith.model.enums.UserRole;
 import com.sbms.sbms_monolith.repository.MaintenanceRepository;
 import com.sbms.sbms_monolith.repository.TechnicianReviewRepository;
@@ -25,5 +27,23 @@ public class TechnicianWorkflowService {
                 .filter(t -> t.getSkills() != null && t.getSkills().contains(skill))
                 .filter(t -> city == null || city.isEmpty() || (t.getCity() != null && t.getCity().equalsIgnoreCase(city)))
                 .collect(Collectors.toList());
+    }
+
+    // 2. OWNER: Assign Technician
+    public void assignTechnician(Long maintenanceId, Long technicianId, Long ownerId) {
+        Maintenance m = maintenanceRepo.findById(maintenanceId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+
+        if (!m.getBoarding().getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        User tech = userRepository.findById(technicianId)
+                .orElseThrow(() -> new RuntimeException("Technician not found"));
+
+        m.setAssignedTechnician(tech);
+        m.setStatus(MaintenanceStatus.ASSIGNED);
+        m.setRejectedByTechnician(false);
+        maintenanceRepo.save(m);
     }
 }
