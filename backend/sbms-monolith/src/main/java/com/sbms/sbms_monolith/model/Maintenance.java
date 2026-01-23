@@ -46,4 +46,11 @@ public class Maintenance extends BaseEntity {
     @Column(name = "urgency", nullable = true)
     private MaintenanceUrgency maintenanceUrgency;
 
+    //  NEW: Assigned Technician Link
+    @ManyToOne
+    @JoinColumn(name = "assigned_technician_id")
+    private User assignedTechnician;
+
+    private boolean rejectedByTechnician = false;
+
 }
