@@ -1,15 +1,16 @@
 package com.sbms.sbms_monolith.controller;
 
 import com.sbms.sbms_monolith.dto.technician.TechnicianCardDTO;
+import com.sbms.sbms_monolith.dto.technician.TechnicianProfileResponseDTO;
+import com.sbms.sbms_monolith.model.Maintenance;
+import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
 import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.TechnicianWorkflowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,5 +47,69 @@ public class TechnicianWorkflowController {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @PutMapping("/{maintenanceId}/assign/{technicianId}")
+    @PreAuthorize("hasRole('OWNER')")
+    public String assignTechnician(@PathVariable Long maintenanceId, @PathVariable Long technicianId, Authentication auth) {
+        User owner = userRepository.findByEmail(auth.getName()).orElseThrow();
+        workflowService.assignTechnician(maintenanceId, technicianId, owner.getId());
+        return "Assigned successfully.";
+    }
+
+    @PostMapping("/{maintenanceId}/review")
+    @PreAuthorize("hasRole('OWNER')")
+    public String reviewTechnician(@PathVariable Long maintenanceId, @RequestParam int rating, @RequestParam String comment, Authentication auth) {
+        User owner = userRepository.findByEmail(auth.getName()).orElseThrow();
+        workflowService.reviewTechnician(owner.getId(), maintenanceId, rating, comment);
+        return "Review submitted.";
+    }
+
+    // --- TECHNICIAN ACTIONS ---
+
+    @GetMapping("/my-jobs")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public List<Maintenance> getMyJobs(Authentication auth) {
+        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+        return workflowService.getAssignedJobs(tech.getId());
+    }
+
+    @PutMapping("/{maintenanceId}/decision")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public String technicianDecision(@PathVariable Long maintenanceId, @RequestParam boolean accept, Authentication auth) {
+        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+        workflowService.technicianDecision(maintenanceId, tech.getId(), accept);
+        return accept ? "Accepted" : "Rejected";
+    }
+
+    @PutMapping("/{maintenanceId}/complete")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public String markWorkDone(@PathVariable Long maintenanceId, Authentication auth) {
+        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+        workflowService.markWorkDone(maintenanceId, tech.getId());
+        return "Marked as done.";
+    }
+
+    @GetMapping("/profile")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public TechnicianProfileResponseDTO getMyProfile(Authentication auth) {
+        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+        TechnicianProfileResponseDTO dto = new TechnicianProfileResponseDTO();
+        dto.setId(tech.getId());
+        dto.setFullName(tech.getFullName());
+        dto.setEmail(tech.getEmail());
+        dto.setPhone(tech.getPhone());
+        dto.setProfileImageUrl(tech.getProfileImageUrl());
+        dto.setNicNumber(tech.getNicNumber());
+        dto.setDob(tech.getDob());
+        dto.setGender(tech.getGender());
+        dto.setAddress(tech.getAddress());
+        dto.setCity(tech.getCity());
+        dto.setProvince(tech.getProvince());
+        dto.setBasePrice(tech.getBasePrice());
+        dto.setSkills(tech.getSkills());
+        dto.setAverageRating(tech.getTechnicianAverageRating());
+        dto.setTotalJobsCompleted(tech.getTechnicianTotalJobs());
+        return dto;
     }
 }
