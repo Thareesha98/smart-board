@@ -55,7 +55,7 @@ public class TechnicianWorkflowService {
     }
 
     // 4. TECHNICIAN: Accept/Reject
-    public void technicianDecision(Long maintenanceId, Long technicianId, boolean accepted) {
+    public void technicianDecision(Long maintenanceId, Long technicianId, boolean accepted, String reason) {
         Maintenance m = maintenanceRepo.findById(maintenanceId)
                 .orElseThrow(() -> new RuntimeException("Request not found"));
 
@@ -69,6 +69,7 @@ public class TechnicianWorkflowService {
             m.setAssignedTechnician(null);
             m.setStatus(MaintenanceStatus.PENDING); // Goes back to owner
             m.setRejectedByTechnician(true);
+            m.setTechnicianRejectionReason(reason);
         }
         maintenanceRepo.save(m);
     }
