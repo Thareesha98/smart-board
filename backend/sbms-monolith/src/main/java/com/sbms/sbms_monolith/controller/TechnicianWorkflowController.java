@@ -76,9 +76,14 @@ public class TechnicianWorkflowController {
 
     @PutMapping("/{maintenanceId}/decision")
     @PreAuthorize("hasRole('TECHNICIAN')")
-    public String technicianDecision(@PathVariable Long maintenanceId, @RequestParam boolean accept, Authentication auth) {
+    public String technicianDecision(@PathVariable Long maintenanceId, @RequestParam boolean accept, @RequestParam(required = false) String reason, Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
-        workflowService.technicianDecision(maintenanceId, tech.getId(), accept);
+
+        if (!accept && (reason == null || reason.trim().isEmpty())) {
+            throw new RuntimeException("Rejection reason is required.");
+        }
+
+        workflowService.technicianDecision(maintenanceId, tech.getId(), accept, reason);
         return accept ? "Accepted" : "Rejected";
     }
 
