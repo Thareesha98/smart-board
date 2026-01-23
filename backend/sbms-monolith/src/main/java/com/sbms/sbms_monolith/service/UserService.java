@@ -50,6 +50,15 @@ public class UserService {
         User user = UserMapper.toEntity(dto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
+        if (dto.getRole() == UserRole.TECHNICIAN) {
+            user.setCity(dto.getCity());
+            user.setProvince(dto.getProvince());
+            user.setBasePrice(dto.getBasePrice());
+            user.setSkills(dto.getSkills());
+            user.setTechnicianAverageRating(0.0);
+            user.setTechnicianTotalJobs(0);
+        }
+
         User saved = userRepository.save(user);
         return UserMapper.toUserResponse(saved);
     }
@@ -95,6 +104,13 @@ public class UserService {
 
         if(dto.getProfileImageUrl() != null) {
             user.setProfileImageUrl(dto.getProfileImageUrl());
+        }
+
+        if (user.getRole() == UserRole.TECHNICIAN) {
+            if (dto.getCity() != null) user.setCity(dto.getCity());
+            if (dto.getProvince() != null) user.setProvince(dto.getProvince());
+            if (dto.getBasePrice() != null) user.setBasePrice(dto.getBasePrice());
+            if (dto.getSkills() != null) user.setSkills(dto.getSkills());
         }
 
         User saved = userRepository.save(user);
@@ -155,6 +171,13 @@ public class UserService {
         pending.setStudentUniversity(dto.getStudentUniversity());
         pending.setRole(dto.getRole());
 
+        if (dto.getRole() == UserRole.TECHNICIAN) {
+            pending.setCity(dto.getCity());
+            pending.setProvince(dto.getProvince());
+            pending.setBasePrice(dto.getBasePrice());
+            pending.setSkills(dto.getSkills());
+        }
+
         pendingRepo.save(pending);
 
         Otp otp = otpService.createRegistrationOtp(dto.getEmail());
@@ -191,6 +214,17 @@ public class UserService {
         user.setStudentUniversity(p.getStudentUniversity());
         user.setRole(p.getRole());
         user.setVerifiedOwner(p.getRole() == UserRole.OWNER);
+
+        if (p.getRole() == UserRole.TECHNICIAN) {
+            user.setCity(p.getCity());
+            user.setProvince(p.getProvince());
+            user.setBasePrice(p.getBasePrice());
+            user.setSkills(p.getSkills());
+
+            // Initialize Stats
+            user.setTechnicianAverageRating(0.0);
+            user.setTechnicianTotalJobs(0);
+        }
 
         User saved = userRepository.save(user);
         pendingRepo.delete(p);
