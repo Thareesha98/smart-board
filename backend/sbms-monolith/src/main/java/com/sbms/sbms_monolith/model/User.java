@@ -2,6 +2,7 @@ package com.sbms.sbms_monolith.model;
 
 import com.sbms.sbms_monolith.common.BaseEntity;
 import com.sbms.sbms_monolith.model.enums.Gender;
+import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
 import com.sbms.sbms_monolith.model.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -33,16 +34,37 @@ public class User extends BaseEntity {
     private String address;
 
     private String dob;
+
+    // Student
     private String emergencyContact;
     private String studentIdNumber;
+    private String studentUniversity;
+
+    // Owner
+    private boolean verifiedOwner = true;
+    private int subscription_id;
+    private String accNo;
+
+    // TECHNICIAN SPECIFIC FIELDS
+    private String province;
+    private String city;
+    private Double basePrice;
+
+    // Stores Skills (e.g. PLUMBING, ELECTRICAL)
+    @ElementCollection(targetClass = MaintenanceIssueType.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "technician_skills", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "skill")
+    private List<MaintenanceIssueType> skills;
+
+    // Technician Rating Stats
+    private Double technicianAverageRating = 0.0;
+    private Integer technicianTotalJobs = 0;
  
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role;
-    private boolean verifiedOwner = true;  // For admin approval later
-    private int subscription_id;
-    private String accNo;
-    private String studentUniversity;
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Boarding> boardings;   // List of ads owner created
 }
