@@ -1,7 +1,10 @@
 import React from 'react';
 
-const UserModal = ({ user, onClose, onDelete }) => {
+const UserModal = ({ user, onClose, onDelete, onVerify }) => {
   if (!user) return null;
+
+  // Check if the user is an owner awaiting verification
+  const isPendingOwner = user.role === 'OWNER' && !user.verifiedOwner;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-text-dark/40 backdrop-blur-sm transition-opacity">
@@ -26,61 +29,97 @@ const UserModal = ({ user, onClose, onDelete }) => {
               <img 
                 src={user.avatar} 
                 alt={user.name} 
-                className="w-20 h-20 lg:w-24 lg:h-24 rounded-full border-4 border-accent shadow-md object-cover" 
+                className="w-24 h-24 lg:w-32 lg:h-32 rounded-full object-cover border-4 border-white shadow-md"
               />
-              <div className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${
+              <span className={`absolute bottom-1 right-1 w-6 h-6 rounded-full border-4 border-white ${
                 user.status === 'active' ? 'bg-success' : 'bg-red-alert'
-              }`}></div>
+              }`}></span>
             </div>
-            <h4 className="text-lg lg:text-xl font-bold mt-4 text-text-dark">{user.name}</h4>
-            <span className="px-3 py-1 bg-accent/10 text-accent text-[10px] lg:text-xs uppercase font-bold rounded-full mt-2 tracking-widest">
+            <h2 className="mt-4 text-xl lg:text-2xl font-bold text-text-dark">{user.name}</h2>
+            <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mt-2">
               {user.role}
             </span>
           </div>
 
-          <div className="space-y-3 lg:space-y-4">
-            {/* Email Info */}
-            <div className="flex items-center gap-4 p-3 lg:p-4 bg-background-light rounded-[15px] border border-gray-100/50">
-              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-accent shadow-sm shrink-0">
-                <i className="fas fa-envelope"></i>
+          <div className="space-y-4 lg:space-y-6">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex items-center gap-4 p-3 lg:p-4 border border-gray-100 rounded-[15px] bg-gray-50/30">
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                  <i className="fas fa-envelope"></i>
+                </div>
+                <div>
+                  <p className="text-text-muted text-[10px] lg:text-xs uppercase font-bold tracking-wider">Email Address</p>
+                  <p className="text-xs lg:text-sm text-text-dark font-bold">{user.email}</p>
+                </div>
               </div>
-              <div className="overflow-hidden">
-                <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Email Address</p>
-                <p className="text-sm lg:text-base text-text-dark font-medium truncate">{user.email}</p>
-              </div>
-            </div>
 
-            {/* Registration Details */}
-            <div className="grid grid-cols-2 gap-3 lg:gap-4">
-              <div className="p-3 lg:p-4 border border-gray-100 rounded-[15px] bg-gray-50/30">
-                <p className="text-text-muted text-[10px] lg:text-xs uppercase font-bold tracking-wider mb-1">Joined</p>
-                <p className="text-xs lg:text-sm text-text-dark font-bold">{user.registrationDate}</p>
+              <div className="flex items-center gap-4 p-3 lg:p-4 border border-gray-100 rounded-[15px] bg-gray-50/30">
+                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                  <i className="fas fa-phone"></i>
+                </div>
+                <div>
+                  <p className="text-text-muted text-[10px] lg:text-xs uppercase font-bold tracking-wider">Phone Number</p>
+                  <p className="text-xs lg:text-sm text-text-dark font-bold">{user.phone || 'Not provided'}</p>
+                </div>
               </div>
-              <div className="p-3 lg:p-4 border border-gray-100 rounded-[15px] bg-gray-50/30">
-                <p className="text-text-muted text-[10px] lg:text-xs uppercase font-bold tracking-wider mb-1">Last Active</p>
-                <p className="text-xs lg:text-sm text-text-dark font-bold">{user.lastActive || 'Today'}</p>
-              </div>
+
+              {/* Show University for Students */}
+              {user.studentUniversity && (
+                <div className="flex items-center gap-4 p-3 lg:p-4 border border-gray-100 rounded-[15px] bg-gray-50/30">
+                  <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
+                    <i className="fas fa-university"></i>
+                  </div>
+                  <div>
+                    <p className="text-text-muted text-[10px] lg:text-xs uppercase font-bold tracking-wider">University</p>
+                    <p className="text-xs lg:text-sm text-text-dark font-bold">{user.studentUniversity}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Modal Footer */}
-        <div className="p-5 lg:p-6 bg-gray-50 flex gap-3">
-          <button 
-            onClick={onClose}
-            className="flex-1 px-4 py-2.5 lg:py-3 rounded-[12px] font-bold text-text-muted hover:bg-gray-200 transition-all text-sm"
-          >
-            Close
-          </button>
-          <button 
-            onClick={() => {
-              onDelete(user.id);
-              onClose();
-            }}
-            className="flex-1 px-4 py-2.5 lg:py-3 rounded-[12px] font-bold bg-red-alert text-white hover:bg-red-700 shadow-md transition-all text-sm flex items-center justify-center gap-2"
-          >
-            <i className="fas fa-trash-alt"></i> Delete User
-          </button>
+        <div className="p-5 lg:p-6 bg-gray-50 border-t border-gray-100">
+          {isPendingOwner ? (
+            <div className="flex flex-col gap-3">
+              <p className="text-[11px] font-bold text-warning uppercase text-center mb-1">
+                <i className="fas fa-exclamation-triangle mr-1"></i> Owner Awaiting Verification
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => onVerify(user.id, true)}
+                  className="flex-1 bg-success text-white px-4 py-2.5 lg:py-3 rounded-[12px] font-bold hover:bg-success/90 transition-all text-sm shadow-sm"
+                >
+                  Approve Owner
+                </button>
+                <button 
+                  onClick={() => onVerify(user.id, false)}
+                  className="flex-1 bg-red-alert/10 text-red-alert px-4 py-2.5 lg:py-3 rounded-[12px] font-bold hover:bg-red-alert/20 transition-all text-sm"
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              <button 
+                onClick={onClose}
+                className="flex-1 px-4 py-2.5 lg:py-3 rounded-[12px] font-bold text-text-muted hover:bg-gray-200 transition-all text-sm border border-gray-200"
+              >
+                Close
+              </button>
+              <button 
+                onClick={() => {
+                  onDelete(user.id);
+                  onClose();
+                }}
+                className="flex-1 px-4 py-2.5 lg:py-3 rounded-[12px] font-bold bg-red-alert/10 text-red-alert hover:bg-red-alert hover:text-white transition-all text-sm"
+              >
+                Delete User
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
