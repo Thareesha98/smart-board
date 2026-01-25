@@ -146,8 +146,8 @@ export default function UtilityPage() {
               <BillingSummary
                 totalUtility={totalUtility}
                 totalMonthly={totalMonthly}
-                baseRent={selectedBoarding.baseRent}
-                tenantCount={selectedBoarding.tenantCount || 4}
+                baseRent={selectedBoarding.pricePerMonth}
+                tenantCount={selectedBoarding.maxOccupants - selectedBoarding.availableSlots || 4}
               />
 
               <div className="flex gap-4 pt-2 pb-2">

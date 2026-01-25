@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { getOwnerBoardings, updateUtilityBill } from "../../api/owner/service";
-import { INITIAL_BOARDINGS_DATA } from "../../data/mockData"; // Keep as fallback
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 
 export const useUtilityLogic = () => {

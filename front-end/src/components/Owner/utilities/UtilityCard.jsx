@@ -4,11 +4,14 @@ const formatCost = (cost) => `LKR ${Math.round(cost).toLocaleString()}`;
 
 const UtilityCard = ({ boarding, onOpenModal }) => {
   const totalUtilityCost = boarding.electricityCost + boarding.waterCost;
-  const totalMonthlyBill = boarding.baseRent + totalUtilityCost;
+  const totalMonthlyBill = boarding.pricePerMonth + totalUtilityCost;
   const isUpdated = boarding.lastUpdated !== "N/A";
 
   // New Feature: Tenant Logic (Default to 4 if not in data)
-  const tenantCount = boarding.tenantCount || 4;
+  const maxOccupants = boarding.maxOccupants;
+  const availableSlots = boarding.availableSlots;
+
+  const tenantCount = maxOccupants-availableSlots || 4;
   const perStudentCost = totalMonthlyBill / tenantCount;
 
   // New Feature: Mock Trend Logic (For demo purposes)
@@ -34,9 +37,9 @@ const UtilityCard = ({ boarding, onOpenModal }) => {
       <div className="mb-4 w-full h-[100px] overflow-hidden rounded-card relative">
         <img
           src={
-            boarding.image || "https://via.placeholder.com/300?text=No+Image"
+            boarding.imageUrls[0] || "https://via.placeholder.com/300?text=No+Image"
           }
-          alt={boarding.name}
+          alt={boarding.title}
           className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
         />
         {/* Overlay Gradient for text readability if needed */}
@@ -47,7 +50,7 @@ const UtilityCard = ({ boarding, onOpenModal }) => {
         {/* Header */}
         <div>
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted mb-1 truncate pr-16">
-            {boarding.name}
+            {boarding.title}
           </h3>
           <div className="flex items-end gap-2">
             <div className="text-2xl font-black leading-none tracking-tighter text-text">
@@ -100,7 +103,7 @@ const UtilityCard = ({ boarding, onOpenModal }) => {
         <div className="pt-2 space-y-1">
           <div className="flex justify-between text-[11px] font-bold text-muted border-b border-light/50 pb-1">
             <span>Base Rent</span>
-            <span className="text-text">{formatCost(boarding.baseRent)}</span>
+            <span className="text-text">{formatCost(boarding.pricePerMonth)}</span>
           </div>
           <div className="flex justify-between text-[11px] font-bold text-muted border-b border-light/50 pb-1">
             <span>Utilities</span>
