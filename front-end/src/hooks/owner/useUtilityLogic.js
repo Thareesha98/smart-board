@@ -1,12 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
-import { getOwnerBoardings, updateUtilityBill } from "../services/service"; // Import your services
-import { INITIAL_BOARDINGS_DATA } from "../data/mockData"; // Keep as fallback
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { getOwnerBoardings, updateUtilityBill } from "../../api/owner/service";
+import { INITIAL_BOARDINGS_DATA } from "../../data/mockData"; // Keep as fallback
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 
 export const useUtilityLogic = () => {
+  const { currentOwner } = useOwnerAuth(); // 2. Get Current User
+
   // --- State ---
-  const [boardings, setBoardings] = useState(INITIAL_BOARDINGS_DATA);
+  const [boardings, setBoardings] = useState([]);
   const [selectedBoarding, setSelectedBoarding] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Search & Filter
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,47 +23,59 @@ export const useUtilityLogic = () => {
     period: "",
   });
 
-  // --- Effects ---
-  
-  // 1. Fetch Boardings on Mount (Uncomment when ready to replace mock data completely)
-  /*
+  // --- 3. Fetch Data Effect ---
+  const fetchBoardings = useCallback(async () => {
+    // If no user is logged in yet, don't fetch
+    if (!currentOwner) return;
+
+    try {
+      setLoading(true);
+      
+      // Call API to get boardings owned by this user
+      const data = await getOwnerBoardings();
+      
+      // Map Backend Data to UI Structure
+      // Since the standard Boarding entity might not have 'electricityCost' on top level yet,
+      // we default them to 0 or check if your backend DTO sends a 'latestUtility' object.
+      const formattedData = Array.isArray(data) ? data.map(b => ({
+          ...b,
+          // If your backend Boarding DTO doesn't have these fields, default them:
+          electricityCost: b.latestUtility?.electricityCost || 0, 
+          waterCost: b.latestUtility?.waterCost || 0,
+          lastUpdated: b.latestUtility?.period || "N/A",
+          // Ensure baseRent exists
+          baseRent: b.rent || b.baseRent || 0 
+      })) : [];
+
+      setBoardings(formattedData);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to load boardings", err);
+      setError("Failed to load properties.");
+    } finally {
+      setLoading(false);
+    }
+  }, [currentOwner]);
+
+  // Trigger fetch when user is ready
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const data = await getOwnerBoardings();
-        // Ensure data has the fields we need (defaulting to N/A or 0 if missing)
-        const formattedData = data.map(b => ({
-            ...b,
-            electricityCost: b.latestUtility?.electricityCost || 0,
-            waterCost: b.latestUtility?.waterCost || 0,
-            lastUpdated: b.latestUtility?.period || "N/A"
-        }));
-        setBoardings(formattedData);
-      } catch (err) {
-        console.error("Failed to load boardings", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-  */
+    fetchBoardings();
+  }, [fetchBoardings]);
+
 
   // --- Calculations ---
-
   const totalUtility = (Number(formData.electricity) || 0) + (Number(formData.water) || 0);
-  
-  // Safe calculation for total monthly bill
   const totalMonthly = (selectedBoarding?.baseRent || 0) + totalUtility;
 
-  // Filter Logic
+  // --- Filter Logic ---
   const filteredBoardings = useMemo(() => {
     return boardings.filter((b) => {
-      const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const isUpdated = b.lastUpdated !== "N/A";
+      const nameMatch = b.name?.toLowerCase() || "";
+      const matchesSearch = nameMatch.includes(searchTerm.toLowerCase());
       
+      const isUpdated = b.lastUpdated !== "N/A";
       let matchesStatus = true;
+      
       if (filterStatus === "pending") matchesStatus = !isUpdated;
       if (filterStatus === "updated") matchesStatus = isUpdated;
 
@@ -74,7 +90,6 @@ export const useUtilityLogic = () => {
     setFormData({
       electricity: boarding.electricityCost || "",
       water: boarding.waterCost || "",
-      // Smart Date: Use existing date if updated, else current month
       period: boarding.lastUpdated !== "N/A" 
         ? boarding.lastUpdated 
         : new Date().toISOString().substring(0, 7),
@@ -88,7 +103,8 @@ export const useUtilityLogic = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 1. Prepare Backend Payload
+    if (!currentOwner) return;
+
     const payload = {
       boardingId: selectedBoarding.id,
       period: formData.period,
@@ -97,10 +113,10 @@ export const useUtilityLogic = () => {
     };
 
     try {
-      // 2. Call API
+      // 1. Send to Backend
       const savedRecord = await updateUtilityBill(payload);
 
-      // 3. Update Local State with response from backend
+      // 2. Optimistically update the UI list
       setBoardings((prev) =>
         prev.map((b) =>
           b.id === selectedBoarding.id
@@ -138,6 +154,7 @@ export const useUtilityLogic = () => {
     handleOpenModal,
     handleCloseModal,
     handleSubmit,
-    loading
+    loading,
+    error // Return error state for UI handling
   };
 };
