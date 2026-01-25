@@ -1,45 +1,77 @@
 // src/hooks/useDashboard.js
-import { useState } from 'react';
-import { initialApprovals, recentReports, initialActivities } from '../data/mockData';
+import { useState, useEffect } from 'react';
+import AdminService from '../api/admin/AdminService';
 
 export const useDashboard = () => {
-  const [approvals, setApprovals] = useState(initialApprovals);
-  const [activities, setActivities] = useState(initialActivities);
-  const [toast, setToast] = useState(null); // { message, type }
+  const [stats, setStats] = useState(null);
+  const [approvals, setApprovals] = useState([]);
+  const [recentReports, setRecentReports] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
 
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleApproveAd = (id) => {
-    setApprovals((prev) => prev.filter((ad) => ad.id !== id));
-    showToast(`Ad #${id} approved successfully!`, 'success');
-    // In real app, you would add a new "Approved" activity here
-  };
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      // 1. Fetch Stats from AdminDashboardDTO
+      const statsData = await AdminService.getDashboardStats();
+      setStats(statsData);
 
-  const handleRejectAd = (id) => {
-    if (window.confirm('Are you sure you want to reject this ad?')) {
-      setApprovals((prev) => prev.filter((ad) => ad.id !== id));
-      showToast(`Ad #${id} rejected.`, 'error');
+      // 2. Fetch Boardings for PendingApprovals
+      const boardings = await AdminService.getAllBoardings();
+      setApprovals(boardings.filter(b => b.status === 'PENDING').slice(0, 5));
+
+      // 3. Fetch Reports for RecentReports
+      const reports = await AdminService.getReports('PENDING');
+      setRecentReports(reports.slice(0, 5));
+
+      setLoading(false);
+    } catch (error) {
+      showToast('Error loading dashboard data', 'error');
+      setLoading(false);
     }
   };
 
-  const handleBackup = () => {
-    if (window.confirm('Start system backup?')) {
-      showToast('System backup initiated...', 'info');
-      setTimeout(() => showToast('Backup completed!', 'success'), 2000);
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const handleApproveAd = async (id) => {
+    try {
+      await AdminService.approveBoarding(id);
+      showToast(`Boarding #${id} approved!`, 'success');
+      fetchDashboardData(); // Refresh data
+    } catch (error) {
+      showToast('Approval failed', 'error');
     }
   };
 
-  return {
-    approvals,
-    recentReports, // Static for now, can be state if needed
-    activities,
-    toast,
-    handleApproveAd,
-    handleRejectAd,
-    handleBackup,
-    showToast
+  const handleRejectAd = async (id) => {
+    const reason = window.prompt('Reason for rejection:');
+    if (reason !== null) {
+      try {
+        await AdminService.rejectBoarding(id, reason);
+        showToast(`Boarding #${id} rejected.`, 'error');
+        fetchDashboardData();
+      } catch (error) {
+        showToast('Rejection failed', 'error');
+      }
+    }
+  };
+
+  return { 
+    stats, 
+    approvals, 
+    recentReports, 
+    activities, 
+    loading, 
+    toast, 
+    handleApproveAd, 
+    handleRejectAd 
   };
 };
