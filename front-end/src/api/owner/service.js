@@ -297,3 +297,31 @@ export const changePassword = async (currentPassword, newPassword) => {
     throw error;
   }
 };
+
+// =================================================================
+// 💡 UTILITY SERVICES
+// =================================================================
+
+// 1. Save or Update a Utility Bill
+// Matches Java: @PostMapping("/api/owner/utilities")
+export const updateUtilityBill = async (utilityData) => {
+  try {
+    const response = await api.post("/owner/utilities", utilityData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating utility bill:", error);
+    throw error;
+  }
+};
+
+// 2. Get Utility History for a specific Boarding House
+// Matches Java: @GetMapping("/api/owner/utilities/history/{boardingId}")
+export const getUtilityHistory = async (boardingId) => {
+  try {
+    const response = await api.get(`/owner/utilities/history/${boardingId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching utility history:", error);
+    throw error;
+  }
+};
