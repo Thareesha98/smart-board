@@ -6,6 +6,11 @@ import AdDetailsModal from '../components/ads/AdDetailsModal';
 import Toast from '../components/common/Toast';
 import { useAds } from '../hooks/useAds';
 
+/**
+ * AdminAds Component
+ * Manages the lifecycle of property advertisements including approval and rejection.
+ *
+ */
 const AdminAds = ({ onNavigate }) => {
   const { 
     ads, stats, currentTab, setCurrentTab, selectedAd, setSelectedAd, 
@@ -19,8 +24,10 @@ const AdminAds = ({ onNavigate }) => {
       title="Ad Approvals" 
       subtitle="Review property listings"
     >
+      {/* Notification Toast */}
       {toast && <Toast message={toast.message} type={toast.type} />}
 
+      {/* Top Statistics Bar */}
       <AdStatsBar stats={stats} />
 
       <div className="bg-card-bg rounded-[25px] shadow-sm p-4 lg:p-8 min-h-[60vh]">
@@ -57,10 +64,11 @@ const AdminAds = ({ onNavigate }) => {
         )}
       </div>
 
+      {/* Ad Details and Action Modal */}
       {selectedAd && (
         <AdDetailsModal 
           ad={selectedAd} 
-          onClose={() => setSelectedAd(null)} 
+          onClose={() => setSelectedAd(null)}
           onApprove={handleApprove}
           onReject={handleReject}
         />
