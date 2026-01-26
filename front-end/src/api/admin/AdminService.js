@@ -1,14 +1,12 @@
-import api from '../api'; // Path to your central axios instance in src/api/api.js
+import api from '../api';
 
 const AdminService = {
-  // 1. Fetch Users (Maps to @GetMapping("/users") in AdminController)
+  // Users
   getAllUsers: async () => {
     const response = await api.get('/admin/users');
     return response.data; 
   },
 
-  // 2. Verify Owner (Maps to @PutMapping("/users/{userId}/verify-owner"))
-  // Expects { approved: boolean, reason: string } as per UserVerificationDTO.java
   verifyOwner: async (userId, isApproved, reason = "") => {
     const response = await api.put(`/admin/users/${userId}/verify-owner`, {
       approved: isApproved,
@@ -17,10 +15,33 @@ const AdminService = {
     return response.data;
   },
 
-  // 3. Get Stats (Maps to @GetMapping("/dashboard"))
-  // Returns totalUsers, totalStudents, totalOwners, etc., from AdminDashboardDTO.java
   getDashboardStats: async () => {
     const response = await api.get('/admin/dashboard');
+    return response.data;
+  },
+
+  // 🔹 NEW: Report Management
+  getReports: async (status = null) => {
+    // Backend expects uppercase: PENDING, RESOLVED, DISMISSED
+    const url = status ? `/admin/reports?status=${status.toUpperCase()}` : '/admin/reports';
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  resolveReport: async (reportId, decision) => {
+    // Maps to ReportDecisionDTO.java
+    const response = await api.put(`/admin/reports/${reportId}/resolve`, {
+      resolutionDetails: decision.details,
+      actionTaken: decision.action,
+      actionDuration: decision.duration
+    });
+    return response.data;
+  },
+
+  dismissReport: async (reportId, reason) => {
+    const response = await api.put(`/admin/reports/${reportId}/dismiss`, {
+      dismissalReason: reason
+    });
     return response.data;
   }
 };
