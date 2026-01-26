@@ -21,8 +21,7 @@ const AdminReports = ({ onNavigate }) => {
     handleResolve 
   } = useReports();
 
-  // Calculate stats dynamically from the filteredReports or total reports
-  // In a production app, you might get these from a specific dashboard API call
+  // Calculate stats dynamically from the current view
   const stats = {
     pending: filteredReports.filter(r => r.status === 'PENDING').length,
     urgent: filteredReports.filter(r => r.severity === 'HIGH').length,
@@ -30,13 +29,12 @@ const AdminReports = ({ onNavigate }) => {
     total: filteredReports.length
   };
 
-  
-
   return (
     <AdminLayout onNavigate={onNavigate} activePage="reports" title="Reports Management">
+      {/* Notifications */}
       {toast && <Toast message={toast.message} type={toast.type} />}
 
-      {/* Statistics Cards */}
+      {/* 1. Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
         {[
           { label: 'Pending', val: stats.pending, color: 'border-[#FF7A00]', icon: 'fa-clock', bg: 'bg-[#FF7A00]/10', text: 'text-[#FF7A00]' },
@@ -56,7 +54,7 @@ const AdminReports = ({ onNavigate }) => {
         ))}
       </div>
 
-      {/* Filters Section */}
+      {/* 2. Filters Section */}
       <div className="mb-6">
         <ReportFilters 
           currentTab={currentTab} 
@@ -66,27 +64,27 @@ const AdminReports = ({ onNavigate }) => {
         />
       </div>
 
-      {/* Table Section with Loading State */}
+      {/* 3. Table/Loading Section */}
       <div className="bg-white lg:rounded-[25px] lg:shadow-sm lg:overflow-hidden lg:border lg:border-gray-100 min-h-[400px] flex flex-col">
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center p-20">
             <div className="w-12 h-12 border-4 border-[#FF7A00] border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-400 font-bold animate-pulse">Fetching Reports...</p>
+            <p className="text-gray-400 font-bold animate-pulse">Fetching from Backend...</p>
           </div>
         ) : filteredReports.length > 0 ? (
           <ReportTable reports={filteredReports} onView={setSelectedReport} />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-20 text-center">
-            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-              <i className="fas fa-folder-open text-gray-200 text-3xl"></i>
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-200">
+              <i className="fas fa-folder-open text-3xl"></i>
             </div>
             <h3 className="text-lg font-bold text-gray-400">No reports found</h3>
-            <p className="text-sm text-gray-300">Try switching tabs or adjusting filters</p>
+            <p className="text-sm text-gray-300">Switch status tabs to view more data</p>
           </div>
         )}
       </div>
 
-      {/* Modals */}
+      {/* 4. Modals */}
       {selectedReport && (
         <ReportDetailsModal
           report={selectedReport}
