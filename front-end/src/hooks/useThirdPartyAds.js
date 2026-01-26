@@ -1,10 +1,10 @@
-import { useState, useMemo, useCallback } from 'react';
-import { initialSubmissions, initialCampaigns, initialPlans } from '../data/mockData';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import AdminService from '../services/AdminService';
 
 export const useThirdPartyAds = () => {
-    const [submissions, setSubmissions] = useState(initialSubmissions || []);
-    const [campaigns, setCampaigns] = useState(initialCampaigns || []);
-    const [plans, setPlans] = useState(initialPlans || []);
+    const [submissions, setSubmissions] = useState([]);
+    const [campaigns, setCampaigns] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('submissions');
     const [prefillAdData, setPrefillAdData] = useState(null); 
     const [toast, setToast] = useState(null);
@@ -14,79 +14,64 @@ export const useThirdPartyAds = () => {
         setTimeout(() => setToast(null), 3000);
     }, []);
 
-    // --- Submission Handlers ---
-    const handleApprove = (id) => {
-        setSubmissions(prev => prev.map(ad => 
-            ad.id === id ? { ...ad, status: 'approved' } : ad
-        ));
-        showToast("Ad submission approved");
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const [subData, campData] = await Promise.all([
+                AdminService.getSubmissions(),
+                AdminService.getCampaigns()
+            ]);
+            setSubmissions(subData);
+            setCampaigns(campData);
+        } catch (error) {
+            showToast("Error connecting to server", "error");
+        } finally {
+            setLoading(false);
+        }
+    }, [showToast]);
+
+    useEffect(() => { fetchData(); }, [fetchData]);
+
+    const handleApprove = async (id) => {
+        try {
+            await AdminService.approveAd(id);
+            showToast("Ad approved successfully");
+            fetchData();
+        } catch (err) { showToast("Action failed", "error"); }
     };
 
-    const handleReject = (id) => {
-        setSubmissions(prev => prev.map(ad => 
-            ad.id === id ? { ...ad, status: 'rejected' } : ad
-        ));
-        showToast("Ad submission rejected", "error");
+    const handleToggleCampaignStatus = async (id) => {
+        try {
+            await AdminService.toggleCampaignStatus(id);
+            fetchData();
+        } catch (err) { showToast("Update failed", "error"); }
     };
 
-    const handleDeleteSubmission = (id) => {
-        setSubmissions(prev => prev.filter(ad => ad.id !== id));
-        showToast("Submission removed from history");
+    const createAd = async (data) => {
+        try {
+            await AdminService.publishAd(data);
+            showToast("Ad published successfully");
+            setActiveTab('campaigns');
+            fetchData();
+        } catch (err) { showToast("Publishing failed", "error"); }
     };
 
-    // --- Plan Handlers ---
-    const togglePlanStatus = (id) => {
-        setPlans(prev => prev.map(p => 
-            p.id === id ? { ...p, status: p.status === 'active' ? 'inactive' : 'active' } : p
-        ));
-        showToast("Plan status updated");
-    };
-
-    const updatePlan = (id, updatedData) => {
-        setPlans(prev => prev.map(p => p.id === id ? { ...p, ...updatedData } : p));
-        showToast("Plan updated");
-    };
-
-    const addPlan = (newPlan) => {
-        setPlans(prev => [...prev, { ...newPlan, id: Date.now(), status: 'active' }]);
-        showToast("New plan created");
-    };
-
-    const deletePlan = (id) => {
-        setPlans(prev => prev.filter(p => p.id !== id));
-        showToast("Plan deleted", "error");
-    };
-
-    // --- Stats Calculation ---
     const stats = useMemo(() => ({
-        pending: submissions.filter(s => s.status === 'pending').length,
-        activeCampaigns: campaigns.filter(c => c.status === 'active').length,
-        totalRevenue: plans.reduce((acc, p) => acc + (parseInt(p.price) || 0), 0)
-    }), [submissions, campaigns, plans]);
+        pending: submissions.filter(s => s.status === 'PENDING').length,
+        activeCampaigns: campaigns.filter(c => c.status === 'ACTIVE').length,
+        totalRevenue: campaigns.reduce((acc, c) => acc + (c.planPrice || 0), 0)
+    }), [submissions, campaigns]);
 
     return {
-        submissions, campaigns, plans, activeTab, setActiveTab, toast, stats,
-        prefillAdData, togglePlanStatus, updatePlan, addPlan, deletePlan,
-        handleApprove, 
-        handleReject, 
-        handleDeleteSubmission,
+        submissions, campaigns, activeTab, setActiveTab, toast, stats, loading,
+        prefillAdData,
+        handleApprove,
+        handleToggleCampaignStatus,
         startPublishWorkflow: (ad) => {
             setPrefillAdData(ad);
             setActiveTab('create');
         },
-        createAd: (data) => {
-            setCampaigns(prev => [...prev, { ...data, id: Date.now(), status: 'active' }]);
-            showToast("Ad published successfully");
-            setActiveTab('campaigns');
-        },
-        toggleCampaignStatus: (id) => {
-            setCampaigns(prev => prev.map(c => 
-                c.id === id ? { ...c, status: c.status === 'active' ? 'paused' : 'active' } : c
-            ));
-        },
-        updateCampaign: (id, data) => {
-            setCampaigns(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
-            showToast("Campaign updated");
-        }
+        createAd,
+        refresh: fetchData
     };
 };
