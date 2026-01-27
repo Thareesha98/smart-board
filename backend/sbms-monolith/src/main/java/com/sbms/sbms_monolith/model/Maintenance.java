@@ -51,6 +51,7 @@ public class Maintenance extends BaseEntity {
     @JoinColumn(name = "assigned_technician_id")
     private User assignedTechnician;
 
+    @Column(nullable = false)
     private boolean rejectedByTechnician = false;
 
     @Column(length = 500)
