@@ -71,7 +71,7 @@ public class SecurityConfig {
                         // 🔒 RESTRICTED AREAS
                         // -----------------------------------------------------------
                         .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
+                        .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER", "TECHNICIAN")
                         .requestMatchers("/api/student/**").hasRole("STUDENT")
                         .requestMatchers("/api/registrations/**").authenticated()
                         .requestMatchers("/api/payment/**").authenticated()
