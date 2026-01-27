@@ -3,6 +3,7 @@ package com.sbms.sbms_monolith.service;
 import com.sbms.sbms_monolith.dto.payment.CreatePaymentIntentDTO;
 import com.sbms.sbms_monolith.model.MonthlyBill;
 import com.sbms.sbms_monolith.model.PaymentIntent;
+import com.sbms.sbms_monolith.model.enums.ManualApprovalStatus;
 import com.sbms.sbms_monolith.model.enums.PaymentIntentStatus;
 import com.sbms.sbms_monolith.model.enums.PaymentType;
 import com.sbms.sbms_monolith.repository.MonthlyBillRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,61 +22,47 @@ public class PaymentIntentService {
 
     private final PaymentIntentRepository intentRepo;
     private final MonthlyBillRepository monthlyBillRepo;
+    
+    private String generateReferenceId() {
+        return "PI-" + System.currentTimeMillis();
+    }
+
 
     /**
      * Create a new payment intent with lifecycle state
+     * 
+     * 
      */
-    @Transactional
     public PaymentIntent create(CreatePaymentIntentDTO dto) {
 
-        validate(dto);
-
-        // Prevent duplicate active intents
-        intentRepo.findByStudentId(dto.getStudentId())
-                .stream()
-                .filter(i -> i.getStatus() != PaymentIntentStatus.SUCCESS)
-                .filter(i -> i.getStatus() != PaymentIntentStatus.EXPIRED)
-                .filter(i ->
-                        i.getType() == dto.getType()
-                        && i.getBoardingId().equals(dto.getBoardingId())
-                )
-                .findAny()
-                .ifPresent(i -> {
-                    throw new RuntimeException("Active payment intent already exists");
-                });
-
         PaymentIntent intent = new PaymentIntent();
+
         intent.setStudentId(dto.getStudentId());
         intent.setOwnerId(dto.getOwnerId());
         intent.setBoardingId(dto.getBoardingId());
         intent.setType(dto.getType());
         intent.setAmount(dto.getAmount());
         intent.setDescription(dto.getDescription());
+        intent.setMonthlyBillId(dto.getMonthlyBillId());
 
-        // ✅ lifecycle fields
         intent.setStatus(PaymentIntentStatus.CREATED);
-        intent.setCreatedAt(LocalDateTime.now());
+
+        intent.setManualApprovalStatus(
+            dto.getType() == PaymentType.KEY_MONEY
+                ? ManualApprovalStatus.PENDING
+                : ManualApprovalStatus.NOT_REQUIRED
+        );
         intent.setExpiresAt(calculateExpiry(dto));
 
-        // Link monthly bill if applicable
-        if (dto.getType() != PaymentType.KEY_MONEY) {
 
-            MonthlyBill bill = monthlyBillRepo.findById(dto.getMonthlyBillId())
-                    .orElseThrow(() -> new RuntimeException("Monthly bill not found"));
+        intent.setCurrency("LKR");
+        intent.setReferenceId(UUID.randomUUID().toString());
 
-            if (!bill.getStudent().getId().equals(dto.getStudentId())) {
-                throw new RuntimeException("Bill does not belong to student");
-            }
-
-            intent.setDescription(
-                    dto.getType() == PaymentType.MONTHLY_RENT
-                            ? "Monthly Boarding Fee - " + bill.getMonth()
-                            : "Utilities Payment - " + bill.getMonth()
-            );
-        }
+      //  intent.setReferenceType("KEY_MONEY");
 
         return intentRepo.save(intent);
     }
+
 
     // -------------------- EXPIRY RULES --------------------
 
