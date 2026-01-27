@@ -2,7 +2,7 @@ server:
   port: 8086
 
 spring:
-  application:
+  application: 
     name: sbms-backend
   mvc:
     pathmatch:

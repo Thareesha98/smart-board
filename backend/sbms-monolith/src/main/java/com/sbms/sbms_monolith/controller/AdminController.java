@@ -22,7 +22,7 @@ import com.sbms.sbms_monolith.service.AdminService;
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')") // 🔒 ALL admin endpoints protected
+@PreAuthorize("hasRole('ADMIN')") 
 public class AdminController {
 
     @Autowired

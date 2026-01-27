@@ -65,6 +65,7 @@ public class Boarding extends BaseEntity {
     
     private BoardingType boardingType;
     
+    @Enumerated(EnumType.STRING)
     @Column(nullable=false)
     @Enumerated(EnumType.STRING)
     private Status status;

@@ -38,49 +38,48 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(sm ->
+                    sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(auth -> auth
+            		// .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // -----------------------------------------------------------
-                        // 🚨 CRITICAL FIX: OWNER RULES MUST BE FIRST 🚨
-                        // -----------------------------------------------------------
-                        .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
-                        .requestMatchers("/api/owner/**").hasRole("OWNER")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            		.requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // -----------------------------------------------------------
-                        // ✅ PUBLIC RULES (AFTER SPECIFIC RULES)
-                        // -----------------------------------------------------------
-                        // 1. Allow Login/Register
-                        .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(
+                        "/api/auth/**",
+                        "/api/boardings",
+                        "/api/boardings/**" ,
+                        
+                        "/ws/**",
 
-                        // 2. Allow Students to VIEW boardings (GET Only)
-                        // We use HttpMethod.GET to ensure they can't POST/DELETE
-                        .requestMatchers(HttpMethod.GET, "/api/boardings/**").permitAll()
+                        "/api/users/public/**",
+                        
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                ).permitAll()
 
-                        // 3. Other Public endpoints
-                        .requestMatchers(
-                                "/api/users/public/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+             //   .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                
+                .requestMatchers("/api/payments/**").hasRole("STUDENT")
 
-                        // -----------------------------------------------------------
-                        // 🔒 RESTRICTED AREAS
-                        // -----------------------------------------------------------
-                        .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
-                        .requestMatchers("/api/student/**").hasRole("STUDENT")
-                        .requestMatchers("/api/registrations/**").authenticated()
-                        .requestMatchers("/api/payment/**").authenticated()
+                .requestMatchers("/api/owner/**").hasRole("OWNER")
+                .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
 
-                        .anyRequest().authenticated()
-                )
-                .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .requestMatchers("/api/reports/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
+
+                .requestMatchers("/api/student/**").hasRole("STUDENT")
+                .requestMatchers("/api/bills/student/**").hasRole("STUDENT")
+                
+
+                .anyRequest().authenticated()
+            )
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -124,7 +123,8 @@ public class SecurityConfig {
                 "http://13.233.34.226:8086",
                 "http://localhost:5173"
         		)); */
-        config.setAllowedOriginPatterns(List.of("*"));
+       // config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
 
         
         

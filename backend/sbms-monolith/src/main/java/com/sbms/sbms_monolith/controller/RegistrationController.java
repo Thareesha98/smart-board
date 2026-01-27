@@ -24,19 +24,11 @@ public class RegistrationController {
 
     @Autowired
     private RegistrationService registrationService;
-
+    
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PaymentReceiptPdfService pdfService;
-
-    @Autowired
-    private RegistrationRepository registrationRepo;
-
-    // ==========================================
-    // 🎓 STUDENT ENDPOINTS
-    // ==========================================
+    // ================= STUDENT =================
 
     @PostMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
@@ -50,9 +42,10 @@ public class RegistrationController {
 
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<RegistrationResponseDTO>> studentRegistrations(@PathVariable Long studentId) {
-        List<RegistrationResponseDTO> registrations = registrationService.getStudentRegistrations(studentId);
-        return ResponseEntity.ok(registrations);
+    public List<RegistrationResponseDTO> studentRegistrations(
+            @PathVariable Long studentId
+    ) {
+        return registrationService.getStudentRegistrations(studentId);
     }
 
     @PutMapping("/student/{studentId}/{regId}/cancel")
@@ -93,9 +86,7 @@ public class RegistrationController {
         return ResponseEntity.ok(dto);
     }
 
-    // ==========================================
-    // 👔 OWNER ENDPOINTS
-    // ==========================================
+    // ================= OWNER =================
 
     @GetMapping("/owner/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
@@ -118,20 +109,20 @@ public class RegistrationController {
         return ResponseEntity.ok(response);
     }
 
-    // ==========================================
-    // 📄 SHARED ENDPOINTS (PDF Receipt)
-    // ==========================================
+    // ================= DASHBOARD =================
 
-    @GetMapping(value = "/{regId}/receipt", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
-    @PreAuthorize("isAuthenticated()") // Both Student and Owner can download
-    public ResponseEntity<byte[]> downloadReceipt(@PathVariable Long regId) {
-        Registration reg = registrationRepo.findById(regId)
-                .orElseThrow(() -> new RuntimeException("Registration not found"));
+    @GetMapping("/{regId}/dashboard")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
+            @PathVariable Long regId,
+            Authentication authentication
+    ) {
+        String email = authentication.getName(); // from JWT
 
-        byte[] pdfBytes = pdfService.generateRegistrationReceipt(reg);
+ 
 
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=receipt_" + regId + ".pdf")
-                .body(pdfBytes);
-    }
+    
+    
+    
+   
 }

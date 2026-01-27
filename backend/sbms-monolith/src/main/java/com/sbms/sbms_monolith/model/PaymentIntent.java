@@ -3,7 +3,9 @@ package com.sbms.sbms_monolith.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.sbms.sbms_monolith.model.enums.ManualApprovalStatus;
 import com.sbms.sbms_monolith.model.enums.PaymentIntentStatus;
+import com.sbms.sbms_monolith.model.enums.PaymentMethod;
 import com.sbms.sbms_monolith.model.enums.PaymentType;
 
 import jakarta.persistence.*;
@@ -20,13 +22,9 @@ public class PaymentIntent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // -------------------- RELATION REFERENCES --------------------
-
     private Long studentId;
     private Long ownerId;
     private Long boardingId;
-
-    // -------------------- PAYMENT DETAILS --------------------
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -35,35 +33,40 @@ public class PaymentIntent {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal amount;
 
-    @Column(length = 255)
-    private String description; // "Monthly Rent - Jan", "Key Money", etc.
-
-    // -------------------- LIFECYCLE STATE --------------------
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentIntentStatus status;
 
-    // -------------------- TIMESTAMPS --------------------
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ManualApprovalStatus manualApprovalStatus;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    /**
-     * Payment intent expiry time.
-     * Used to invalidate abandoned or late payments.
-     */
+    private LocalDateTime completedAt;
     private LocalDateTime expiresAt;
 
-    /**
-     * Set only when payment is completed successfully.
-     */
-    private LocalDateTime completedAt;
+    @Column(nullable = false, length = 3)
+    private String currency;
 
-    // -------------------- SAFETY --------------------
+    @Column(nullable = false, unique = true)
+    private String referenceId;
 
+    @Column(nullable=true ,   name = "monthly_bill_id")
+    private Long monthlyBillId;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private PaymentMethod method;
+
+    
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 }
+
