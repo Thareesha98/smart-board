@@ -30,6 +30,9 @@ public class BoardingDetailDTO {
     private BigDecimal pricePerMonth;
     private BigDecimal keyMoney;
     
+    private Double latitude;
+    private Double longitude;
+    
     private Long ownerId;
     
     private Gender genderType;
