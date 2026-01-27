@@ -27,9 +27,6 @@ public class BoardingDetailDTO {
     private String description;
     private String address;
 
-    private Double latitude;
-    private Double longitude;
-
     private BigDecimal pricePerMonth;
     private BigDecimal keyMoney;
     
