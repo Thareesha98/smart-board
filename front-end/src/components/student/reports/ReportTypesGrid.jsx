@@ -9,53 +9,55 @@ import {
   FaQuestionCircle,
 } from 'react-icons/fa';
 
-const REPORT_TYPES = [
+const ALL_REPORT_TYPES = [
   {
-    type: 'boarding',
+    type: 'BOARDING',
     icon: FaBuilding,
     title: 'Boarding Issue',
     description: 'Report problems with boarding facilities, amenities, or living conditions',
   },
   {
-    type: 'owner',
+    type: 'OWNER',
     icon: FaUserTie,
     title: 'Owner Behavior',
     description: 'Report inappropriate behavior, harassment, or unfair treatment by owners',
   },
   {
-    type: 'student',
+    type: 'STUDENT',
     icon: FaUsers,
     title: 'Other Student',
     description: 'Report issues with other students sharing the boarding facility',
   },
   {
-    type: 'safety',
+    type: 'SAFETY',
     icon: FaShieldAlt,
     title: 'Safety Concern',
     description: 'Report safety hazards, security issues, or emergency situations',
   },
   {
-    type: 'fraud',
+    type: 'FRAUD',
     icon: FaExclamationTriangle,
     title: 'Fraudulent Listing',
     description: 'Report fake, misleading, or scam boarding advertisements',
   },
   {
-    type: 'other',
+    type: 'OTHER',
     icon: FaQuestionCircle,
     title: 'Other Issue',
     description: 'Report any other concerns not covered by the categories above',
   },
 ];
 
-const ReportTypesGrid = ({ onSelectType }) => {
+const ReportTypesGrid = ({ onSelectType, isRegistered }) => {
+  
+  // ✅ Filter logic: If not registered, only allow Fraud & Other
+  const visibleTypes = isRegistered 
+    ? ALL_REPORT_TYPES 
+    : ALL_REPORT_TYPES.filter(t => ['FRAUD', 'OTHER'].includes(t.type));
+
   return (
-    // GRID LOGIC:
-    // 1 col on Mobile (<768)
-    // 2 cols on Tablet/Laptop (<1400)
-    // 3 cols on Large Desktop (>=1400)
     <div className="grid grid-cols-1 md:grid-cols-2 min-[1400px]:grid-cols-3 gap-6">
-      {REPORT_TYPES.map((reportType, index) => (
+      {visibleTypes.map((reportType, index) => (
         <ReportTypeCard
           key={reportType.type}
           reportType={reportType}

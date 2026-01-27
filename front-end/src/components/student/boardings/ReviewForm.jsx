@@ -1,113 +1,155 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FaStar, FaCheckCircle, FaCamera, FaTimes, FaPaperPlane, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { useAuth } from '../../../context/student/AuthContext.jsx';
+import { FaStar, FaCheckCircle, FaCamera, FaPaperPlane, FaChevronDown, FaChevronUp, FaTimes, FaSpinner, FaEdit } from 'react-icons/fa';
+import { useAuth } from '../../../context/student/StudentAuthContext';
+import StudentService from '../../../api/student/StudentService';
 
 const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
   const { currentUser } = useAuth();
+  
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [review, setReview] = useState('');
-  const [photos, setPhotos] = useState([]);
+  
+  const [selectedFiles, setSelectedFiles] = useState([]); 
+  const [previews, setPreviews] = useState([]); 
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false); // ✅ Controls visibility
-  const [isEditing, setIsEditing] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false); 
+  const [isEditing, setIsEditing] = useState(false); // ✅ Restore Editing State
   
   const fileInputRef = useRef(null);
 
-  // Load existing review
+  // ✅ RESTORED: Check Database for existing review
   useEffect(() => {
-    if (currentUser?.studentId && boardingId) {
-      const existingReviews = JSON.parse(localStorage.getItem('boardingReviews') || '{}');
-      const boardReviews = existingReviews[boardingId] || [];
-      const myReview = boardReviews.find(r => r.userId === currentUser.studentId);
-      
-      if (myReview) {
-        setRating(myReview.rating);
-        setReview(myReview.review);
-        setPhotos(myReview.photos || []);
-        setIsEditing(true);
-        setIsExpanded(false); // Keep collapsed even if edited, let user open it
+    const checkExistingReview = async () => {
+      if (currentUser?.id && boardingId) {
+        try {
+          // Fetch all reviews for this boarding
+          const reviews = await StudentService.getBoardingReviews(boardingId);
+          
+          // Find if THIS user has already written one
+          // Note: Ensure your backend DTO returns 'userId' or 'studentId'
+          const myReview = reviews.find(r => r.userId === currentUser.id || r.studentId === currentUser.id);
+
+          if (myReview) {
+            setRating(myReview.rating);
+            setReview(myReview.comment || myReview.review);
+            
+            // If backend returns image URLs, show them
+            if (myReview.imageUrls && myReview.imageUrls.length > 0) {
+                setPreviews(myReview.imageUrls);
+            }
+            
+            setIsEditing(true); 
+            // We don't auto-expand on load to keep UI clean, user can click to edit
+          }
+        } catch (error) {
+          console.error("Error checking existing review", error);
+        }
       }
-    }
+    };
+    
+    checkExistingReview();
   }, [currentUser, boardingId]);
 
   const handleStarClick = (star) => {
     setRating(star);
-    setIsExpanded(true); // ✅ Auto-expand when user rates
+    setIsExpanded(true); 
   };
 
-  const handlePhotoUpload = (e) => {
+  const handlePhotoSelect = (e) => {
     const files = Array.from(e.target.files);
-    if (photos.length + files.length > 3) return alert("Max 3 photos allowed.");
-
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => setPhotos(prev => [...prev, reader.result]);
-      reader.readAsDataURL(file);
-    });
+    if (files.length + selectedFiles.length > 3) {
+        alert("You can only upload up to 3 photos.");
+        return;
+    }
+    setSelectedFiles(prev => [...prev, ...files]);
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setPreviews(prev => [...prev, ...newPreviews]);
   };
 
-  const removePhoto = (index) => setPhotos(prev => prev.filter((_, i) => i !== index));
+  const removePhoto = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (rating === 0 || !review.trim()) return;
+    if (rating === 0 || !review.trim()) {
+        alert("Please provide a rating and a comment.");
+        return;
+    }
+    if (!currentUser?.id) {
+        alert("You must be logged in to submit a review.");
+        return;
+    }
 
     setIsSubmitting(true);
     
-    setTimeout(() => {
-      // (Mock API Logic - same as before)
-      const reviewData = {
-        boardingId, rating, review: review.trim(), photos,
-        timestamp: new Date().toISOString(), userId: currentUser?.studentId
-      };
-      
-      // Save to LocalStorage logic...
-      const existingReviews = JSON.parse(localStorage.getItem('boardingReviews') || '{}');
-      if (!existingReviews[boardingId]) existingReviews[boardingId] = [];
-      
-      // Update or Push logic
-      const userIndex = existingReviews[boardingId].findIndex(r => r.userId === currentUser.studentId);
-      if (userIndex > -1) existingReviews[boardingId][userIndex] = reviewData;
-      else existingReviews[boardingId].push(reviewData);
+    try {
+      let uploadedImageUrls = [];
 
-      localStorage.setItem('boardingReviews', JSON.stringify(existingReviews));
-      
+      // 1. Upload new photos if selected
+      if (selectedFiles.length > 0) {
+        uploadedImageUrls = await StudentService.uploadReviewImages(selectedFiles);
+      } else {
+        // Keep existing photos if no new ones selected (logic depends on your needs)
+        // For now, if editing and no new files, we might keep old URLs in `previews`
+        // filtered for strings (URLs) vs blobs.
+        uploadedImageUrls = previews.filter(p => typeof p === 'string' && p.startsWith('http'));
+      }
+
+      const reviewData = {
+        userId: currentUser.id,
+        boardingId: boardingId,
+        rating: rating,
+        review: review.trim(),
+        imageUrls: uploadedImageUrls 
+      };
+
+      if (isEditing) {
+        await StudentService.updateReview(reviewData);
+      } else {
+        await StudentService.submitReview(reviewData);
+      }
+
       setIsSubmitting(false);
       setIsSuccess(true);
       
       setTimeout(() => {
         setIsSuccess(false);
-        setIsExpanded(false); // Collapse on success
-        if (onSubmitSuccess) onSubmitSuccess();
+        setIsExpanded(false); 
+        if (onSubmitSuccess) onSubmitSuccess(); 
       }, 1500);
-    }, 1000);
+
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+      alert("Failed to submit review.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <motion.div 
       layout
-      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6"
     >
-      {/* Header & Stars Section (Always Visible) */}
+      {/* Header */}
       <div className="p-4 flex flex-col items-center justify-center bg-gray-50/50">
         <div className="flex justify-between items-center w-full mb-2">
-            <h3 className="text-sm font-bold text-text-dark uppercase tracking-wide">
-                {isEditing ? 'Edit Review' : 'Rate Your Stay'}
+            <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center gap-2">
+                {isEditing ? <><FaEdit /> Edit Your Review</> : "Rate Your Stay"}
             </h3>
-            <button 
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="text-text-muted hover:text-accent text-xs"
-            >
+            <button onClick={() => setIsExpanded(!isExpanded)} className="text-gray-400 hover:text-green-600 text-xs">
                 {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
             </button>
         </div>
 
         {isSuccess ? (
           <div className="text-green-500 font-bold text-sm flex items-center gap-2 py-2">
-            <FaCheckCircle /> Submitted Successfully!
+            <FaCheckCircle /> {isEditing ? "Updated Successfully!" : "Submitted Successfully!"}
           </div>
         ) : (
           <div className="flex gap-2">
@@ -120,18 +162,14 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
                 onMouseLeave={() => setHoveredRating(0)}
                 className="focus:outline-none transition-transform hover:scale-110"
               >
-                <FaStar
-                  className={`text-2xl transition-colors ${
-                    star <= (hoveredRating || rating) ? 'text-yellow-400' : 'text-gray-300'
-                  }`}
-                />
+                <FaStar className={`text-2xl transition-colors ${star <= (hoveredRating || rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* Expandable Form Content */}
+      {/* Form */}
       <AnimatePresence>
         {isExpanded && !isSuccess && (
           <motion.form
@@ -141,70 +179,42 @@ const ReviewForm = ({ boardingId, onSubmitSuccess }) => {
             className="px-4 pb-4"
             onSubmit={handleSubmit}
           >
-            {/* Text Area */}
             <textarea
               value={review}
               onChange={(e) => setReview(e.target.value)}
               placeholder="Write your experience here..."
               rows={3}
-              className="w-full mt-3 p-3 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent focus:bg-white transition-all resize-none"
+              className="w-full mt-3 p-3 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 focus:bg-white transition-all resize-none"
             />
 
-            {/* Photos & Actions Row */}
             <div className="mt-3 flex items-center justify-between">
-              
-              {/* Photo Upload Area */}
-              <div className="flex items-center gap-2">
-                 <button
-                   type="button"
-                   onClick={() => fileInputRef.current.click()}
-                   className="text-text-muted hover:text-accent p-2 rounded-full hover:bg-gray-100 transition-colors"
-                   title="Add Photos"
-                 >
-                   <FaCamera />
-                 </button>
-                 <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" className="hidden" multiple />
-                 
-                 {/* Mini Thumbnails */}
-                 <div className="flex gap-2">
-                   {photos.map((photo, index) => (
-                     <div key={index} className="relative w-8 h-8 rounded-md overflow-hidden group border border-gray-200">
-                       <img src={photo} alt="mini" className="w-full h-full object-cover" />
-                       <button
-                         type="button"
-                         onClick={() => removePhoto(index)}
-                         className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 text-[8px]"
-                       >
-                         ✕
-                       </button>
-                     </div>
-                   ))}
-                 </div>
-              </div>
+                <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current.click()}
+                        className="text-gray-500 hover:text-green-600 transition p-2 bg-gray-100 rounded-full"
+                    >
+                        <FaCamera />
+                    </button>
+                    <input type="file" ref={fileInputRef} onChange={handlePhotoSelect} accept="image/*" multiple className="hidden" />
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting || !review.trim()}
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold text-white transition-all shadow-sm ${
-                    isSubmitting || !review.trim() 
-                    ? 'bg-gray-300 cursor-not-allowed' 
-                    : 'bg-accent hover:bg-primary hover:shadow-md'
-                }`}
-              >
-                {isSubmitting ? (
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                ) : (
-                    <>
-                        <FaPaperPlane size={10} /> 
-                        {isEditing ? 'Update' : 'Post'}
-                    </>
-                )}
-              </button>
-            </div>
-            
-            <div className="text-[10px] text-text-muted mt-2 text-right">
-                {review.length} characters • Public Review
+                    <div className="flex gap-2">
+                        {previews.map((src, index) => (
+                            <div key={index} className="relative w-10 h-10 rounded-lg overflow-hidden border border-gray-300 group">
+                                <img src={src} alt="preview" className="w-full h-full object-cover" />
+                                <button type="button" onClick={() => removePhoto(index)} className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><FaTimes size={12} /></button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={isSubmitting || !review.trim()}
+                    className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold text-white transition-all shadow-sm ${isSubmitting || !review.trim() ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 hover:shadow-md'}`}
+                >
+                    {isSubmitting ? <><FaSpinner className="animate-spin" /> {isEditing ? "Updating..." : "Posting..."}</> : <><FaPaperPlane size={12} /> {isEditing ? "Update Review" : "Post Review"}</>}
+                </button>
             </div>
           </motion.form>
         )}

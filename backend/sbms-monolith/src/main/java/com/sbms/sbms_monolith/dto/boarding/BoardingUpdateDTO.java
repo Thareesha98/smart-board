@@ -15,6 +15,9 @@ public class BoardingUpdateDTO {
     private String description;
     private String address;
 
+    private Double latitude;
+    private Double longitude;
+
     private BigDecimal pricePerMonth;
     private BigDecimal keyMoney;
 
@@ -31,4 +34,6 @@ public class BoardingUpdateDTO {
     private List<String> amenities;
 
     private Map<String, Double> nearbyPlaces;
+
+    private Status status;
 }

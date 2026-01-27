@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   FaPaperPlane,
@@ -14,39 +14,74 @@ import {
 
 // FIXED: 'critical' now uses red text on light red background for better visibility
 const SEVERITY_LEVELS = [
-  { value: 'low', label: 'Low', icon: FaInfoCircle, color: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' },
-  { value: 'medium', label: 'Medium', icon: FaExclamationCircle, color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' },
-  { value: 'high', label: 'High', icon: FaTimesCircle, color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100' },
-  { value: 'critical', label: 'Critical', icon: FaSkullCrossbones, color: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' },
+  { value: 'LOW', label: 'Low', icon: FaInfoCircle, color: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' },
+  { value: 'MEDIUM', label: 'Medium', icon: FaExclamationCircle, color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100' },
+  { value: 'HIGH', label: 'High', icon: FaTimesCircle, color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100' },
+  { value: 'CRITICAL', label: 'Critical', icon: FaSkullCrossbones, color: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' },
 ];
 
-const BOARDING_OPTIONS = [
-  { value: '', label: 'Select a boarding' },
-  { value: 'sunshine-hostel', label: 'Sunshine Hostel' },
-  { value: 'city-view-apartments', label: 'City View Apartments' },
-  { value: 'green-garden-residence', label: 'Green Garden Residence' },
-  { value: 'other', label: 'Other (not listed)' },
-];
+// const BOARDING_OPTIONS = [
+//   { value: '', label: 'Select a boarding' },
+//   { value: 'sunshine-hostel', label: 'Sunshine Hostel' },
+//   { value: 'city-view-apartments', label: 'City View Apartments' },
+//   { value: 'green-garden-residence', label: 'Green Garden Residence' },
+//   { value: 'other', label: 'Other (not listed)' },
+// ];
 
-const ReportForm = ({ reportType, onSubmit, onCancel }) => {
+const ReportForm = ({ reportType, onSubmit, onCancel, boardingData }) => {
   const [formData, setFormData] = useState({
     reportTitle: '',
     incidentDate: '',
     reportDescription: '',
     severity: '',
-    boarding: '',
-    reportedPerson: '',
+    boarding: '', 
+    reportedPersonName: '', // Corrected key to match Backend DTO
+    reportedUserId: null,
     allowContact: true,
   });
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
 
-  const showBoardingSelection = ['boarding', 'safety'].includes(reportType.type);
-  const showPersonSelection = ['owner', 'student'].includes(reportType.type);
+  useEffect(() => {
+    if (boardingData) {
+        let updates = {};
+        
+        // 1. Auto-fill Boarding Name (For relevant types)
+        if (['BOARDING', 'SAFETY', 'OWNER', 'STUDENT'].includes(reportType.type)) {
+            updates.boarding = boardingData.name;
+        }
+
+        // 2. Auto-fill Owner Name
+        if (reportType.type === 'OWNER') {
+            updates.reportedPersonName = boardingData.owner?.name || 'Landlord';
+            updates.reportedUserId = boardingData.owner?.id;
+        }
+
+        setFormData(prev => ({ ...prev, ...updates }));
+    }
+  }, [boardingData, reportType]);
+
+  // const showBoardingSelection = ['boarding', 'safety'].includes(reportType.type);
+  // const showPersonSelection = ['owner', 'student'].includes(reportType.type);
 
   const handleChange = (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData({ ...formData, [e.target.name]: value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+  };
+
+  //  Handle Roommate Selection (Dropdown)
+  const handleStudentSelect = (e) => {
+    const selectedId = e.target.value;
+    const student = boardingData?.members?.find(m => m.id.toString() === selectedId);
+    if (student) {
+        setFormData({ 
+            ...formData, 
+            reportedPersonName: student.name,
+            reportedUserId: student.id 
+        });
+    } else {
+        setFormData({ ...formData, reportedPersonName: '', reportedUserId: null });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -86,9 +121,9 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
     });
   };
 
-  const charCount = formData.reportDescription.length;
-  const charLimitColor =
-    charCount > 1000 ? 'text-red-500' : charCount > 800 ? 'text-orange-500' : 'text-gray-400';
+  // const charCount = formData.reportDescription.length;
+  // const charLimitColor =
+  //   charCount > 1000 ? 'text-red-500' : charCount > 800 ? 'text-orange-500' : 'text-gray-400';
 
   return (
     <motion.div
@@ -113,36 +148,67 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
       </div>
 
       <div className="space-y-6">
-        {showBoardingSelection && (
+
+        {/* Boarding Name Field */}
+        {['BOARDING', 'SAFETY', 'OWNER', 'STUDENT'].includes(reportType.type) && (
           <div>
             <label className="block font-semibold text-text-dark mb-2">Select Boarding</label>
-            <select
+            <input
+              type="text"
               name="boarding"
               value={formData.boarding}
               onChange={handleChange}
-              className="w-full p-3 border-2 border-gray-200 rounded-btn transition-colors focus:border-accent focus:outline-none bg-white"
-            >
-              {BOARDING_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {showPersonSelection && (
-          <div>
-            <label className="block font-semibold text-text-dark mb-2">Person to Report</label>
-            <input
-              type="text"
-              name="reportedPerson"
-              value={formData.reportedPerson}
-              onChange={handleChange}
-              placeholder="Enter name or identifier"
-              className="w-full p-3 border-2 border-gray-200 rounded-btn transition-colors focus:border-accent focus:outline-none"
+              readOnly={!!boardingData} // Lock if auto-filled
+              className={`w-full p-3 border-2 rounded-btn ${boardingData ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white border-gray-200 focus:border-accent'}`}
+              placeholder="Enter boarding name"
             />
           </div>
         )}
 
+        {/* Reported Person Field */}
+        {['OWNER', 'STUDENT'].includes(reportType.type) && (
+          <div>
+            <label className="block font-semibold text-text-dark mb-2">
+                {reportType.type === 'OWNER' ? 'Reported Owner' : 'Reported Student'}
+            </label>
+            
+            {/* If Owner: Read-Only Input */}
+            {reportType.type === 'OWNER' && (
+                <input
+                    type="text"
+                    value={formData.reportedPersonName}
+                    readOnly
+                    className="w-full p-3 border-2 border-gray-200 rounded-btn bg-gray-100 text-gray-500 cursor-not-allowed"
+                />
+            )}
+
+            {/* If Student: Dropdown of Roommates */}
+            {reportType.type === 'STUDENT' && (
+                boardingData?.members?.length > 0 ? (
+                    <select
+                        onChange={handleStudentSelect}
+                        className="w-full p-3 border-2 border-gray-200 rounded-btn bg-white focus:border-accent focus:outline-none"
+                    >
+                        <option value="">-- Select a Roommate --</option>
+                        {boardingData.members.map(member => (
+                            <option key={member.id} value={member.id}>{member.name}</option>
+                        ))}
+                    </select>
+                ) : (
+                    <input
+                        type="text"
+                        name="reportedPersonName"
+                        value={formData.reportedPersonName}
+                        onChange={handleChange}
+                        placeholder="Enter student name manually"
+                        className="w-full p-3 border-2 border-gray-200 rounded-btn focus:border-accent"
+                    />
+                )
+            )}
+          </div>
+        )}  
+
+        {/* Common Fields */}
         <div>
           <label className="block font-semibold text-text-dark mb-2">
             Report Title <span className="text-red-500">*</span>
@@ -185,9 +251,7 @@ const ReportForm = ({ reportType, onSubmit, onCancel }) => {
             maxLength="1000"
             className="w-full p-3 border-2 border-gray-200 rounded-btn transition-colors focus:border-accent focus:outline-none resize-vertical"
           />
-          <div className={`text-right text-sm mt-1 ${charLimitColor}`}>
-            {charCount}/1000 characters
-          </div>
+          <div className="text-right text-sm text-gray-400 mt-1">{formData.reportDescription.length}/1000 characters</div>
         </div>
 
         <div>

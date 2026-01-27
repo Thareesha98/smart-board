@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import StudentLayout from '../../components/student/common/StudentLayout';
-import useMaintenanceLogic from '../../hooks/student/useMaintenanceLogic.js';
-import RequestForm from '../../components/student/maintenance/RequestForm';
-import RequestCard from '../../components/student/maintenance/RequestCard';
-import RequestModal from '../../components/student/maintenance/RequestModal';
-import Notification from '../../components/student/maintenance/Notification';
-import { FaPlus, FaClipboardList } from 'react-icons/fa';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import StudentLayout from "../../components/student/common/StudentLayout";
+import useMaintenanceLogic from "../../hooks/student/useMaintenanceLogic.js";
+import useBoardingsLogic from "../../hooks/student/useBoardingsLogic.js";
+import RequestForm from "../../components/student/maintenance/RequestForm";
+import RequestCard from "../../components/student/maintenance/RequestCard";
+import RequestModal from "../../components/student/maintenance/RequestModal";
+import Notification from "../../components/student/maintenance/Notification";
+import { FaPlus, FaClipboardList, FaLock } from "react-icons/fa";
 
 // EmptyState component
 const EmptyState = ({ type }) => (
@@ -20,7 +21,9 @@ const EmptyState = ({ type }) => (
       No {type} requests found
     </h3>
     <p className="text-text-muted">
-      {type === 'active' ? 'All your maintenance issues are resolved!' : 'Your request history will appear here'}
+      {type === "active"
+        ? "All your maintenance issues are resolved!"
+        : "Your request history will appear here"}
     </p>
   </motion.div>
 );
@@ -34,21 +37,30 @@ const MaintenancePage = () => {
     getRequestById,
   } = useMaintenanceLogic();
 
+  const { currentBoarding, hasBoarding } = useBoardingsLogic();
+  const canSubmit = hasBoarding && currentBoarding?.status === "APPROVED";
   const [showForm, setShowForm] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState(null);
   const [notification, setNotification] = useState(null);
 
-  const handleFormSubmit = (formData) => {
-    addRequest(formData);
+  const handleFormSubmit = async (formData) => {
+    if (!canSubmit) return;
+
+    await addRequest(formData, currentBoarding.id);
+
     setShowForm(false);
-    showNotification('Maintenance request submitted successfully!', 'success');
+    showNotification("Maintenance request submitted successfully!", "success");
   };
 
   const handleCancelRequest = (requestId) => {
-    if (window.confirm('Are you sure you want to cancel this maintenance request?')) {
+    if (
+      window.confirm(
+        "Are you sure you want to cancel this maintenance request?"
+      )
+    ) {
       cancelRequest(requestId);
       setSelectedRequestId(null);
-      showNotification('Maintenance request cancelled', 'info');
+      showNotification("Maintenance request cancelled", "info");
     }
   };
 
@@ -58,17 +70,22 @@ const MaintenancePage = () => {
   };
 
   // --- HEADER BUTTON (Visible on Tablet/Desktop) ---
-  const headerRightContent = (
+  const headerRightContent = canSubmit ? (
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      // Fixed: Hidden on mobile (sm:hidden), Flex on larger screens
       className="hidden sm:flex items-center gap-2 py-3 px-5 rounded-large font-semibold transition-all duration-300 bg-accent text-white shadow-md hover:bg-primary whitespace-nowrap"
       onClick={() => setShowForm(!showForm)}
     >
-      <FaPlus />
-      {showForm ? 'Cancel' : 'New Request'}
+      <FaPlus /> {showForm ? "Cancel" : "New Request"}
     </motion.button>
+  ) : (
+    <div
+      className="hidden sm:flex items-center gap-2 py-2 px-4 rounded-large bg-gray-100 text-gray-400 font-semibold border border-gray-200 cursor-not-allowed"
+      title="You must be an active resident to submit requests"
+    >
+      <FaLock size={14} /> Requests Locked
+    </div>
   );
 
   return (
@@ -77,12 +94,27 @@ const MaintenancePage = () => {
       subtitle="Submit and track maintenance issues"
       headerRightContent={headerRightContent}
     >
+      {/* Show Warning if Not Eligible */}
+      {!canSubmit && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-xl mb-6 flex items-center gap-3"
+        >
+          <FaLock />
+          <span>
+            You must be an <strong>active resident</strong> (Approved) of a
+            boarding place to submit maintenance requests.
+          </span>
+        </motion.div>
+      )}
+
       {/* Request Form Section */}
       <AnimatePresence>
-        {showForm && (
+        {showForm && canSubmit && (
           <motion.section
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
             className="mb-8 overflow-hidden"
@@ -108,7 +140,6 @@ const MaintenancePage = () => {
         {activeRequests.length === 0 ? (
           <EmptyState type="active" />
         ) : (
-          // GRID LOGIC: 1 Col < 1400px, 2 Cols >= 1400px
           <div className="grid grid-cols-1 min-[1400px]:grid-cols-2 gap-6">
             {activeRequests.map((request, index) => (
               <motion.div
@@ -116,7 +147,7 @@ const MaintenancePage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="h-full" // Ensure card fills height
+                className="h-full"
               >
                 <RequestCard
                   request={request}
@@ -130,7 +161,9 @@ const MaintenancePage = () => {
 
       {/* Request History Section */}
       <section className="mb-8">
-        <h2 className="text-primary text-2xl font-bold mb-4">Request History</h2>
+        <h2 className="text-primary text-2xl font-bold mb-4">
+          Request History
+        </h2>
         {requestHistory.length === 0 ? (
           <EmptyState type="history" />
         ) : (
@@ -165,16 +198,22 @@ const MaintenancePage = () => {
       <Notification notification={notification} />
 
       {/* --- MOBILE FLOATING BUTTON (Visible ONLY on Mobile) --- */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setShowForm(!showForm)}
-        className="fixed bottom-24 right-8 h-14 w-14 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
-        aria-label="New Request"
-      >
-        <FaPlus size={24} className={`transition-transform duration-300 ${showForm ? 'rotate-45' : ''}`} />
-      </motion.button>
-
+      {canSubmit && (
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setShowForm(!showForm)}
+          className="fixed bottom-24 right-8 h-14 w-14 rounded-full bg-accent text-white shadow-xl flex items-center justify-center sm:hidden z-50 hover:bg-primary transition-colors"
+          aria-label="New Request"
+        >
+          <FaPlus
+            size={24}
+            className={`transition-transform duration-300 ${
+              showForm ? "rotate-45" : ""
+            }`}
+          />
+        </motion.button>
+      )}
     </StudentLayout>
   );
 };
