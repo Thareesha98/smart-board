@@ -1,5 +1,6 @@
 package com.sbms.sbms_monolith.model;
 
+import com.sbms.sbms_monolith.model.enums.ManualApprovalStatus;
 import com.sbms.sbms_monolith.model.enums.PaymentIntentStatus;
 import com.sbms.sbms_monolith.model.enums.PaymentMethod;
 import com.sbms.sbms_monolith.model.enums.PaymentType;
