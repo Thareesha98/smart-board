@@ -2,16 +2,19 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TYPE_NAMES = {
-  boarding: 'Boarding Issue',
-  owner: 'Owner Behavior',
-  student: 'Other Student',
-  safety: 'Safety Concern',
-  fraud: 'Fraudulent Listing',
-  other: 'Other Issue',
+  BOARDING: 'Boarding Issue',
+  OWNER: 'Owner Behavior',
+  STUDENT: 'Other Student',
+  SAFETY: 'Safety Concern',
+  FRAUD: 'Fraudulent Listing',
+  OTHER: 'Other Issue',
 };
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, reportData }) => {
   if (!reportData) return null;
+
+  const typeKey = reportData.type ? reportData.type.toUpperCase() : 'OTHER';
+  const displayType = TYPE_NAMES[typeKey] || typeKey;
 
   return (
     <AnimatePresence>
@@ -43,7 +46,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, reportData }) => {
               <div className="bg-background-light p-4 rounded-large space-y-2">
                 <div className="flex justify-between">
                   <span className="font-semibold text-text-dark">Type:</span>
-                  <span className="text-text-muted">{TYPE_NAMES[reportData.type]}</span>
+                  <span className="text-text-muted">{displayType}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-semibold text-text-dark">Title:</span>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCalendar, FaHashtag } from 'react-icons/fa';
+import { FaCalendar, FaHashtag, FaPaperclip } from 'react-icons/fa';
 
 // UPDATED COLORS: Consistent with ReportForm (Light bg, dark text, border)
 const STATUS_CONFIG = {
@@ -11,10 +11,10 @@ const STATUS_CONFIG = {
 };
 
 const SEVERITY_CONFIG = {
-  low: 'bg-green-50 text-green-700 border border-green-200',
-  medium: 'bg-blue-50 text-blue-700 border border-blue-200',
-  high: 'bg-orange-50 text-orange-700 border border-orange-200',
-  critical: 'bg-red-50 text-red-700 border border-red-200', // Fixed Critical visibility
+  LOW: 'bg-green-50 text-green-700 border border-green-200',
+  MEDIUM: 'bg-blue-50 text-blue-700 border border-blue-200',
+  HIGH: 'bg-orange-50 text-orange-700 border border-orange-200',
+  CRITICAL: 'bg-red-50 text-red-700 border border-red-200', // Fixed Critical visibility
 };
 
 const ReportsList = ({ reports, onViewDetails, onFilterChange }) => {
@@ -77,7 +77,8 @@ const ReportsList = ({ reports, onViewDetails, onFilterChange }) => {
 
 const ReportItem = ({ report, onViewDetails, formatDate, index }) => {
   const statusConfig = STATUS_CONFIG[report.status] || STATUS_CONFIG.pending;
-  const severityColor = SEVERITY_CONFIG[report.severity] || SEVERITY_CONFIG.low;
+  const severityKey = report.priority ? report.priority.toUpperCase() : 'LOW';
+  const severityColor = SEVERITY_CONFIG[severityKey] || SEVERITY_CONFIG.LOW;
 
   return (
     <motion.div
@@ -103,13 +104,27 @@ const ReportItem = ({ report, onViewDetails, formatDate, index }) => {
       </div>
 
       <div className="flex gap-3 mb-4 flex-wrap">
+        {/* FIX 4: Display the correct field 'priority' */}
         <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${severityColor}`}>
-          {report.severity}
+          {report.priority || 'LOW'}
         </span>
-        {report.boarding && <span className="text-sm text-text-muted">{report.boarding}</span>}
+        
+        {/* FIX 5: Use 'property' (Backend DTO field) instead of 'boarding' */}
+        {report.property && <span className="text-sm text-text-muted">{report.property}</span>}
       </div>
 
       <p className="text-text-muted mb-4 line-clamp-2 flex-1">{report.description}</p>
+
+      {/* NEW: EVIDENCE INDICATOR */}
+      {/* This only shows if the backend says there is evidence (evidenceCount > 0) */}
+      {report.evidenceCount > 0 && (
+        <div className="mb-4 mt-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-xs font-semibold text-text-dark">
+                <FaPaperclip className="text-accent" />
+                <span>{report.evidenceCount} Evidence Attached</span>
+            </div>
+        </div>
+      )}
 
       <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2 text-text-muted text-sm">

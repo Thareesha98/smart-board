@@ -22,6 +22,8 @@ public interface ReviewRepository extends JpaRepository<Review,Long> {
 
     int countByBoardingId(Long boardingId);
 
+    List<Review> findByStudentIdOrderByCreatedAtDesc(Long studentId);
+
     // Calculate the average rating for a boarding house
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.boarding.id = :boardingId")
     Double getAverageRatingForBoarding(Long boardingId);

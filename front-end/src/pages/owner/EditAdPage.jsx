@@ -4,6 +4,7 @@ import useMyAdsLogic from "../../hooks/owner/useMyAdsLogic";
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
 import FormGroup from "../../components/Owner/forms/FormGroup";
+import LocationPicker from "../../components/common/LocationPicker";
 
 import {
   AdStatusBadge,
@@ -54,6 +55,10 @@ const EditAdPage = () => {
           boardingType: data.boardingType || "ROOM",
           availableSlots: data.availableSlots || 1,
           maxOccupants: data.maxOccupants || 1,
+
+
+          latitude: data.latitude || 6.9271, 
+          longitude: data.longitude || 79.8612
         });
       }
     };
@@ -73,6 +78,10 @@ const EditAdPage = () => {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleLocationSelect = (lat, lng) => {
+    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
   };
 
   const handleImageSelect = (e) => {
@@ -240,6 +249,18 @@ const EditAdPage = () => {
               />
             </div>
           </div>
+        </div>
+
+        {/* Map Section (Inserted Here) */}
+        <div className="bg-card-bg p-8 rounded-report shadow-custom border border-light">
+          <h2 className="text-xl font-black mb-6 pb-3 border-b border-light text-primary uppercase tracking-tight">
+             Update Location
+          </h2>
+          <LocationPicker 
+             lat={formData.latitude} 
+             lng={formData.longitude} 
+             onLocationSelect={handleLocationSelect} 
+          />
         </div>
 
         {/* Features & Media */}

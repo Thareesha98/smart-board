@@ -2,6 +2,7 @@ package com.sbms.sbms_monolith.dto.profile;
 
 
 import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.model.enums.Gender;
 import com.sbms.sbms_monolith.model.enums.UserRole;
 import lombok.Data;
 
@@ -18,6 +19,12 @@ public class ProfileResponseDTO {
     private String accNo;
     private String studentUniversity;
 
+    private String address;
+    private Gender gender;
+    private String dob;
+    private String emergencyContact;
+    private String studentId;
+
     public static ProfileResponseDTO from(User user) {
         ProfileResponseDTO dto = new ProfileResponseDTO();
         dto.setId(user.getId());
@@ -28,6 +35,13 @@ public class ProfileResponseDTO {
         dto.setRole(user.getRole());
         dto.setAccNo(user.getAccNo());
         dto.setStudentUniversity(user.getStudentUniversity());
+
+        dto.setAddress(user.getAddress());
+        dto.setGender(user.getGender());
+        dto.setDob(user.getDob());
+        dto.setEmergencyContact(user.getEmergencyContact());
+        dto.setStudentId(user.getStudentIdNumber());
+
         return dto;
     }
 }

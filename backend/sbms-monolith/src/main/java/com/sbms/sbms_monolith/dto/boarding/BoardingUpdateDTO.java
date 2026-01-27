@@ -19,8 +19,6 @@ public class BoardingUpdateDTO {
 
     private Double latitude;
     private Double longitude;
-    
- 
 
     private BigDecimal pricePerMonth;
     private BigDecimal keyMoney;

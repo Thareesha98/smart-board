@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -18,6 +18,22 @@ const BoardingCard = ({
   onViewDocuments,
   isPayingRent
 }) => {
+
+  const navigate = useNavigate();
+
+  // Navigation handler
+  const handleDetailsClick = () => {
+    if (boarding?.id) {
+        navigate(`/student/boarding-details/${boarding.id}`);
+    }
+  };
+
+  const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80";
+
+  const displayImage = (boarding?.image && boarding.image.trim() !== "") 
+                        ? boarding.image 
+                        : FALLBACK_IMAGE;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -59,10 +75,12 @@ const BoardingCard = ({
         <motion.div
           whileHover={{ scale: 1.02 }}
           className="rounded-large overflow-hidden h-48 lg:h-52"
+          onClick={handleDetailsClick}
         >
           <img
-            src={boarding.image}
+            src={displayImage}
             alt={boarding.name}
+            onError={(e) => { e.target.onerror = null; e.target.src = FALLBACK_IMAGE; }}
             className="w-full h-full object-cover"
           />
         </motion.div>
@@ -70,17 +88,22 @@ const BoardingCard = ({
         {/* Info */}
         <div className="flex flex-col justify-between">
           <div>
-            <h3 className="text-2xl font-bold text-text-dark mb-4">{boarding.name}</h3>
+            <h3 
+                onClick={handleDetailsClick}
+                className="text-2xl font-bold text-text-dark mb-4 cursor-pointer hover:text-accent transition-colors"
+            >
+                {boarding.name}
+            </h3>
             
             {/* Meta Items */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-6 text-sm">
               <div className="flex items-center gap-3 text-text-muted">
                 <FaMapMarkerAlt className="text-accent w-4" />
                 <span>{boarding.address}</span>
               </div>
               <div className="flex items-center gap-3 text-text-muted">
                 <FaCalendarAlt className="text-accent w-4" />
-                <span>Since {boarding.joinedDate}</span>
+                <span>Since {boarding.boardingSince}</span>
               </div>
               <div className="flex items-center gap-3 text-text-muted">
                 <FaDollarSign className="text-accent w-4" />
@@ -121,7 +144,7 @@ const BoardingCard = ({
             <h4 className="text-lg font-bold text-text-dark mb-2">Next Payment</h4>
             <div className="flex items-center gap-4 mb-4">
               <span className="text-3xl font-bold text-accent">LKR {boarding.nextPayment.amount}</span>
-              <span className="text-text-muted">Due {boarding.nextPayment.dueDate}</span>
+              <span className="text-text-muted">{boarding.nextPayment.dueDate}</span>
             </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
