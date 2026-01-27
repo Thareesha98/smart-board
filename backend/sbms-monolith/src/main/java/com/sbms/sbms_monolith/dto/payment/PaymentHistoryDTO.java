@@ -27,4 +27,8 @@ public class PaymentHistoryDTO {
     
     private String receiptUrl;
 
+    private BigDecimal platformFee;
+    private BigDecimal gatewayFee;
+    private BigDecimal netAmount;
+
 }
