@@ -31,9 +31,6 @@ public class OwnerBoardingService {
         Boarding b = BoardingMapper.toEntityFromCreate(dto);
         b.setOwner(owner); // link owner
 
-        if(b.getLatitude() == null) b.setLatitude(6.9271);
-        if(b.getLongitude() == null) b.setLongitude(79.8612);
-
         Boarding saved = boardingRepository.save(b);
 
         return BoardingMapper.toOwnerResponse(saved);
@@ -60,9 +57,6 @@ public class OwnerBoardingService {
         b.setAmenities(dto.getAmenities());
         b.setImageUrls(dto.getImageUrls());
         b.setNearbyPlaces(dto.getNearbyPlaces());
-
-        if(dto.getLatitude() != null) b.setLatitude(dto.getLatitude());
-        if(dto.getLongitude() != null) b.setLongitude(dto.getLongitude());
 
 
         Boarding saved = boardingRepository.save(b);
