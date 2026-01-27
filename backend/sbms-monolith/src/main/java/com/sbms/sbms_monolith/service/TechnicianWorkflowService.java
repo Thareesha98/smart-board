@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,11 +76,21 @@ public class TechnicianWorkflowService {
     }
 
     // 5. TECHNICIAN: Mark Work Done
-    public void markWorkDone(Long maintenanceId, Long technicianId) {
+    public void markWorkDone(Long maintenanceId, Long technicianId, BigDecimal finalAmount) {
         Maintenance m = maintenanceRepo.findById(maintenanceId).orElseThrow();
-        if(!m.getAssignedTechnician().getId().equals(technicianId)) throw new RuntimeException("Unauthorized");
+
+        if(!m.getAssignedTechnician().getId().equals(technicianId)) {
+            throw new RuntimeException("Unauthorized: Job not assigned to you");
+        }
+
+        // Validate Amount
+        if(finalAmount == null || finalAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("You must enter a valid final amount.");
+        }
 
         m.setStatus(MaintenanceStatus.WORK_DONE);
+        m.setTechnicianFee(finalAmount); //  Save the bill
+
         maintenanceRepo.save(m);
     }
 
