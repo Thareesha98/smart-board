@@ -14,6 +14,9 @@ public class BoardingCreateDTO {
     private String title;
     private String description;
     private String address;
+    
+    private Double latitude;
+    private Double longitude;
 
     private Double latitude;
     private Double longitude;
