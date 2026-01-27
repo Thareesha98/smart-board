@@ -45,6 +45,8 @@ public class SecurityConfig {
                     sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
+            		// .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
             		.requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 .requestMatchers(
@@ -62,6 +64,8 @@ public class SecurityConfig {
                 ).permitAll()
 
              //   .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                
+                .requestMatchers("/api/payments/**").hasRole("STUDENT")
 
                 .requestMatchers("/api/owner/**").hasRole("OWNER")
                 .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
@@ -70,6 +74,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/reports/**").hasAnyRole("STUDENT", "OWNER")
 
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
+                .requestMatchers("/api/bills/student/**").hasRole("STUDENT")
                 
 
                 .anyRequest().authenticated()
@@ -119,7 +124,8 @@ public class SecurityConfig {
                 "http://13.233.34.226:8086",
                 "http://localhost:5173"
         		)); */
-        config.setAllowedOriginPatterns(List.of("*"));
+       // config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
 
         
         
