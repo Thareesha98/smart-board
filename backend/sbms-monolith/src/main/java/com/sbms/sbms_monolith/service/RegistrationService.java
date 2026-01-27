@@ -187,13 +187,13 @@ public class RegistrationService {
 
 
 
-
 package com.sbms.sbms_monolith.service;
 
-import com.sbms.sbms_monolith.mapper.RegistrationMapper;
-import com.sbms.sbms_monolith.mapper.StudentBoardingDashboardMapper;
+import com.sbms.sbms_monolith.dto.agreement.AgreementPdfResult;
 import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
 import com.sbms.sbms_monolith.dto.registration.*;
+import com.sbms.sbms_monolith.mapper.RegistrationMapper;
+import com.sbms.sbms_monolith.mapper.StudentBoardingDashboardMapper;
 import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.PaymentIntent;
 import com.sbms.sbms_monolith.model.Registration;
@@ -208,6 +208,7 @@ import com.sbms.sbms_monolith.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -216,68 +217,70 @@ import java.util.List;
 @Service
 public class RegistrationService {
 
-    @Autowired
-    private RegistrationRepository registrationRepo;
+    @Autowired private RegistrationRepository registrationRepo;
+    @Autowired private BoardingRepository boardingRepo;
+    @Autowired private UserRepository userRepo;
+    @Autowired private PaymentIntentRepository paymentIntentRepo;
+    @Autowired private AgreementPdfService agreementPdfService;
+    @Autowired private AgreementBlockchainService agreementBlockchainService;
 
-    @Autowired
-    private BoardingRepository boardingRepo;
+    // ================= STUDENT REGISTER =================
 
-    @Autowired
-    private UserRepository userRepo;
-
-    // ✅ NEW: payment intent repository
-    @Autowired
-    private PaymentIntentRepository paymentIntentRepo;
-
+    @Transactional
     public RegistrationResponseDTO register(Long studentId, RegistrationRequestDTO dto) {
-
-        User student = userRepo.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
 
         Boarding boarding = boardingRepo.findById(dto.getBoardingId())
                 .orElseThrow(() -> new RuntimeException("Boarding not found"));
 
-        if (boarding.getAvailable_slots() < dto.getNumberOfStudents()) {
-            throw new RuntimeException("Not enough slots available");
-        }
+        User student = userRepo.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        if (!dto.isKeyMoneyPaid()) {
-            throw new RuntimeException("Key money must be paid to register");
-        }
-
-        // ================== 🔑 KEY MONEY VALIDATION (NEW SYSTEM) ==================
-
-        PaymentIntent keyMoneyIntent = paymentIntentRepo
-                .findByStudentIdAndBoardingIdAndType(
+        PaymentIntent intent = paymentIntentRepo
+                .findTopByStudentIdAndBoardingIdAndTypeOrderByCreatedAtDesc(
                         studentId,
                         boarding.getId(),
                         PaymentType.KEY_MONEY
                 )
-                .orElseThrow(() -> new RuntimeException("Key money payment not found"));
+                .orElseThrow(() -> new RuntimeException("Key money payment required"));
 
-        if (keyMoneyIntent.getStatus() != PaymentIntentStatus.SUCCESS) {
-            throw new RuntimeException("Key money payment not completed");
+        boolean keyMoneyPaid =
+                intent.getStatus() == PaymentIntentStatus.SUCCESS
+             || intent.getStatus() == PaymentIntentStatus.AWAITING_MANUAL_APPROVAL;
+
+        if (!keyMoneyPaid) {
+            throw new RuntimeException("Key money not paid");
         }
-
-        // ========================================================================
 
         Registration r = new Registration();
         r.setBoarding(boarding);
         r.setStudent(student);
         r.setNumberOfStudents(dto.getNumberOfStudents());
         r.setStudentNote(dto.getStudentNote());
-        r.setStatus(RegistrationStatus.PENDING);
-        r.setKeyMoneyPaid(true);
+        r.setMoveInDate(dto.getMoveInDate());
+        r.setContractDuration(dto.getContractDuration());
+        r.setEmergencyContactName(dto.getEmergencyContact());
+        r.setSpecialRequirements(dto.getSpecialRequirements());
+        r.setStudentSignatureBase64(dto.getStudentSignatureBase64());
 
-        // store reference safely
-        r.setPaymentTransactionRef(
-                "INTENT-" + keyMoneyIntent.getId()
-        );
+        r.setKeyMoneyPaid(true);
+     // payment method
+        r.setPaymentMethod(intent.getMethod().name());
+        r.setPaymentTransactionRef(intent.getReferenceId());
+
+
+        // transaction / slip reference
+        r.setPaymentTransactionRef(intent.getReferenceId());
+ // CARD / BANK_SLIP / CASH
+        r.setPaymentTransactionRef(intent.getReferenceId());
+        r.setStatus(RegistrationStatus.PENDING);
 
         registrationRepo.save(r);
 
         return RegistrationMapper.toDTO(r);
     }
+
+
+    // ================= STUDENT VIEWS =================
 
     public List<RegistrationResponseDTO> getStudentRegistrations(Long studentId) {
         return registrationRepo.findByStudentId(studentId)
@@ -305,14 +308,18 @@ public class RegistrationService {
         return RegistrationMapper.toDTO(r);
     }
 
-    public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
+    // ================= OWNER VIEWS =================
 
+    public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
         return registrationRepo.findByBoardingOwnerId(ownerId, status)
                 .stream()
                 .map(RegistrationMapper::toDTO)
                 .toList();
     }
 
+    // ================= OWNER DECISION =================
+
+    @Transactional
     public RegistrationResponseDTO decide(Long ownerId, Long regId, RegistrationDecisionDTO dto) {
 
         Registration r = registrationRepo.findById(regId)
@@ -322,23 +329,74 @@ public class RegistrationService {
             throw new RuntimeException("Unauthorized");
         }
 
+        // 🔒 Fetch payment intent again (source of truth)
+        PaymentIntent intent = paymentIntentRepo
+                .findTopByStudentIdAndBoardingIdAndTypeOrderByCreatedAtDesc(
+                        r.getStudent().getId(),
+                        r.getBoarding().getId(),
+                        PaymentType.KEY_MONEY
+                )
+                .orElseThrow(() -> new RuntimeException("Key money payment missing"));
+
+        // 🔐 PAYMENT GATE (NEW)
+        if (dto.getStatus() == RegistrationStatus.APPROVED) {
+
+            if (intent.getStatus() == PaymentIntentStatus.AWAITING_MANUAL_APPROVAL
+                    && !dto.isApproveWithPendingPayment()) {
+
+                throw new RuntimeException(
+                    "Payment is not verified. Owner must confirm override."
+                );
+            }
+
+            if (intent.getStatus() != PaymentIntentStatus.SUCCESS
+                    && intent.getStatus() != PaymentIntentStatus.AWAITING_MANUAL_APPROVAL) {
+
+                throw new RuntimeException("Registration cannot be approved without payment");
+            }
+        }
+
+        // ================= APPLY DECISION =================
+
         r.setStatus(dto.getStatus());
         r.setOwnerNote(dto.getOwnerNote());
 
         if (dto.getStatus() == RegistrationStatus.APPROVED) {
+
+            if (dto.getOwnerSignatureBase64() == null) {
+                throw new RuntimeException("Owner signature required");
+            }
+
+            r.setOwnerSignatureBase64(dto.getOwnerSignatureBase64());
+
+            // 📄 AGREEMENT
+            AgreementPdfResult result =
+                    agreementPdfService.generateAndUploadAgreement(r);
+
+            r.setAgreementPdfPath(result.getPdfUrl());
+            r.setAgreementHash(result.getPdfHash());
+
+            // 🔗 BLOCKCHAIN
+            agreementBlockchainService.addAgreementBlock(
+                    r.getId(),
+                    result.getPdfHash()
+            );
+
+            // 📉 UPDATE SLOTS
             Boarding b = r.getBoarding();
             b.setAvailable_slots(b.getAvailable_slots() - r.getNumberOfStudents());
             boardingRepo.save(b);
         }
 
         registrationRepo.save(r);
-
         return RegistrationMapper.toDTO(r);
     }
 
+    // ================= DASHBOARD =================
+
     public StudentBoardingDashboardDTO getDashboard(Long regId, Long loggedStudentId) {
 
-        Registration reg = registrationRepo.findById(regId)
+    	Registration reg = registrationRepo.findById(regId)
                 .orElseThrow(() -> new RuntimeException("Registration not found"));
 
         if (!reg.getStudent().getId().equals(loggedStudentId)) {
@@ -346,31 +404,17 @@ public class RegistrationService {
         }
 
         BigDecimal currentMonthDue = reg.getBoarding().getPricePerMonth();
-        String paymentStatus = "PENDING";
-        LocalDate lastPaymentDate = null;
-
-        int openIssues = 0;
-        int resolvedIssues = 0;
-        LocalDate lastIssueDate = null;
-
-        Double avgRating = 0.0;
-        boolean reviewSubmitted = false;
 
         return StudentBoardingDashboardMapper.toDTO(
                 reg,
                 currentMonthDue,
-                paymentStatus,
-                lastPaymentDate,
-                openIssues,
-                resolvedIssues,
-                lastIssueDate,
-                avgRating,
-                reviewSubmitted
+                "PENDING",
+                null,
+                0,
+                0,
+                null,
+                0.0,
+                false
         );
     }
 }
-
-
-
-
-
