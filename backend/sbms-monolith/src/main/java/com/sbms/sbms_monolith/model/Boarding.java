@@ -33,9 +33,6 @@ public class Boarding extends BaseEntity {
 
     @Column(nullable = false)
     private String address;
-
-    private Double latitude;
-    private Double longitude;
     
     @Column(nullable = false)
     private BigDecimal pricePerMonth;
@@ -67,7 +64,6 @@ public class Boarding extends BaseEntity {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
-    @Enumerated(EnumType.STRING)
     private Status status;
     
     private boolean isBosted = false;
