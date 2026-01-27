@@ -1,9 +1,11 @@
 package com.sbms.sbms_monolith.model;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.sbms.sbms_monolith.common.BaseEntity;
+import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
 import com.sbms.sbms_monolith.model.enums.MaintenanceUrgency;
 
@@ -39,6 +41,9 @@ public class Maintenance extends BaseEntity {
     @Column(nullable = false)
     private MaintenanceStatus status = MaintenanceStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
+    private MaintenanceIssueType issueType;
+
     private String studentNote;
     private String ownerNote;
     
@@ -57,4 +62,6 @@ public class Maintenance extends BaseEntity {
     @Column(length = 500)
     private String technicianRejectionReason;
 
+    @Column(precision = 12, scale = 2)
+    private BigDecimal technicianFee;
 }
