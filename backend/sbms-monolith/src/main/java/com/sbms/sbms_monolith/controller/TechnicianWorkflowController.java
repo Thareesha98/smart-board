@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,10 +90,14 @@ public class TechnicianWorkflowController {
 
     @PutMapping("/{maintenanceId}/complete")
     @PreAuthorize("hasRole('TECHNICIAN')")
-    public String markWorkDone(@PathVariable Long maintenanceId, Authentication auth) {
+    public String markWorkDone(
+            @PathVariable Long maintenanceId,
+            @RequestParam BigDecimal amount,
+            Authentication auth
+    ) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
-        workflowService.markWorkDone(maintenanceId, tech.getId());
-        return "Marked as done.";
+        workflowService.markWorkDone(maintenanceId, tech.getId(), amount);
+        return "Marked as done. Final bill set to: " + amount;
     }
 
     @GetMapping("/profile")
