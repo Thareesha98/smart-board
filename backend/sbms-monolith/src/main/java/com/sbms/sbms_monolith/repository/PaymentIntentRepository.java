@@ -23,5 +23,11 @@ public interface PaymentIntentRepository extends JpaRepository<PaymentIntent, Lo
             PaymentType type
     );
     List<PaymentIntent> findByStatus(PaymentIntentStatus status);
+    
+    Optional<PaymentIntent> findTopByStudentIdAndBoardingIdAndTypeOrderByCreatedAtDesc(
+            Long studentId,
+            Long boardingId,
+            PaymentType type
+    );
 
 }

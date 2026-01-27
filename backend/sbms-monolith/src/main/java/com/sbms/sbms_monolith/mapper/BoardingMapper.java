@@ -125,6 +125,10 @@ public class BoardingMapper {
     public static OwnerBoardingResponseDTO toOwnerResponse(Boarding b) {
         OwnerBoardingResponseDTO dto = new OwnerBoardingResponseDTO();
 
+        int max = b.getMaxOccupants();
+        int now = b.getAvailable_slots();
+        
+        
         dto.setId(b.getId());
         dto.setTitle(b.getTitle());
         dto.setDescription(b.getDescription());
@@ -138,6 +142,7 @@ public class BoardingMapper {
         dto.setImageUrls(b.getImageUrls());
         dto.setAmenities(b.getAmenities());
         dto.setNearbyPlaces(b.getNearbyPlaces());
+        dto.setCurrentStudents(max - now);
 
         dto.setStatus(b.getStatus());
         dto.setBoosted(b.isBosted());

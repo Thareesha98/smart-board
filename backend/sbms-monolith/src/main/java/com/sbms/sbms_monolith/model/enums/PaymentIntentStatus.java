@@ -3,11 +3,18 @@ package com.sbms.sbms_monolith.model.enums;
 
 public enum PaymentIntentStatus {
 
-    CREATED,        // Intent created, not yet sent to gateway
-    INITIATED,      // Frontend started payment
-    PROCESSING,     // Waiting for gateway confirmation (webhook)
-    SUCCESS,        // Payment completed successfully
-    FAILED,         // Payment failed
-    EXPIRED,        // Time expired before payment
-    CANCELLED       // User cancelled manually
+	CREATED,                  // intent created
+    IN_PROGRESS,              // card redirect / upload started
+
+    AWAITING_MANUAL_APPROVAL, // cash or bank slip submitted
+
+    SUCCESS,  
+    
+    PROCESSING,
+    // payment confirmed (card webhook OR owner approval)
+
+    FAILED,
+    EXPIRED,
+    CANCELLED
+    // User cancelled manually
 }

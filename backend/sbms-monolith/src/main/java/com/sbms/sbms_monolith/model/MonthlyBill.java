@@ -52,5 +52,9 @@ public class MonthlyBill extends BaseEntity {
     private LocalDate dueDate;
     
     private LocalDateTime paidAt;
+    
+    @Column(name = "monthly_bill_id" ,  nullable = true)
+    private Long monthlyBillId;
+
 
 }
