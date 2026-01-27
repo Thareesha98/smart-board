@@ -79,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/technician-workflow/search").hasRole("OWNER")
                         .requestMatchers("/api/technician-workflow/*/assign/*").hasRole("OWNER")
                         .requestMatchers("/api/technician-workflow/*/review").hasRole("OWNER")
+                        .requestMatchers("/api/payments/intent/technician").hasRole("OWNER")
 
                         .requestMatchers("/api/technician-workflow/my-jobs").hasRole("TECHNICIAN")
                         .requestMatchers("/api/technician-workflow/*/decision").hasRole("TECHNICIAN")
