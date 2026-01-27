@@ -1,128 +1,420 @@
-package com.sbms.sbms_monolith.controller;
+/*package com.sbms.sbms_monolith.service;
 
+import com.sbms.sbms_monolith.mapper.RegistrationMapper;
+import com.sbms.sbms_monolith.mapper.StudentBoardingDashboardMapper;
 import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
+import com.sbms.sbms_monolith.dto.payment.PaymentResult;
 import com.sbms.sbms_monolith.dto.registration.*;
+import com.sbms.sbms_monolith.model.Boarding;
 import com.sbms.sbms_monolith.model.Registration;
 import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.model.enums.PaymentMethod;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
+import com.sbms.sbms_monolith.model.enums.Status;
+import com.sbms.sbms_monolith.model.enums.UserRole;
+import com.sbms.sbms_monolith.repository.BoardingRepository;
 import com.sbms.sbms_monolith.repository.RegistrationRepository;
 import com.sbms.sbms_monolith.repository.UserRepository;
-import com.sbms.sbms_monolith.service.PaymentReceiptPdfService;
-import com.sbms.sbms_monolith.service.RegistrationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class RegistrationService {
+
+    @Autowired
+    private RegistrationRepository registrationRepo;
+
+    @Autowired
+    private BoardingRepository boardingRepo;
+
+    @Autowired
+    private UserRepository userRepo;
+    
+    
+
+    @Autowired
+    private PaymentService paymentService;
+    public RegistrationResponseDTO register(Long studentId, RegistrationRequestDTO dto) {
+
+        User student = userRepo.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        Boarding boarding = boardingRepo.findById(dto.getBoardingId())
+                .orElseThrow(() -> new RuntimeException("Boarding not found"));
+
+        if (boarding.getAvailable_slots() < dto.getNumberOfStudents()) {
+            throw new RuntimeException("Not enough slots available");
+        }
+
+        if (!dto.isKeyMoneyPaid()) {
+            throw new RuntimeException("Key money must be paid to register");
+        }
+
+        PaymentResult result = paymentService.processPayment(
+                studentId,
+                boarding.getKeyMoney(),
+                PaymentMethod.CARD   // simulated
+        );
+
+        if (!result.isSuccess()) {
+            throw new RuntimeException(
+                    "Key money payment failed: " + result.getMessage()
+            );
+        }
+        
+       
+
+
+
+        Registration r = new Registration();
+        r.setBoarding(boarding);
+        r.setStudent(student);
+        r.setNumberOfStudents(dto.getNumberOfStudents());
+        r.setStudentNote(dto.getStudentNote());
+        r.setStatus(RegistrationStatus.PENDING);
+        r.setKeyMoneyPaid(true);
+        
+        r.setPaymentTransactionRef(result.getTransactionId());
+
+        registrationRepo.save(r);
+
+        return RegistrationMapper.toDTO(r);
+    }
+
+
+    public List<RegistrationResponseDTO> getStudentRegistrations(Long studentId) {
+        return registrationRepo.findByStudentId(studentId)
+                .stream().map(RegistrationMapper::toDTO)
+                .toList();
+    }
+
+    public RegistrationResponseDTO cancel(Long studentId, Long regId) {
+
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!r.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (r.getStatus() == RegistrationStatus.APPROVED) {
+            throw new RuntimeException("Cannot cancel approved registration");
+        }
+
+        r.setStatus(RegistrationStatus.CANCELLED);
+        registrationRepo.save(r);
+
+        return RegistrationMapper.toDTO(r);
+    }
+
+    public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
+
+        return registrationRepo.findByBoardingOwnerId(ownerId, status)
+                .stream()
+                .map(RegistrationMapper::toDTO)
+                .toList();
+    }
+
+    public RegistrationResponseDTO decide(Long ownerId, Long regId, RegistrationDecisionDTO dto) {
+
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!r.getBoarding().getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        r.setStatus(dto.getStatus());
+        r.setOwnerNote(dto.getOwnerNote());
+
+        if (dto.getStatus() == RegistrationStatus.APPROVED) {
+            Boarding b = r.getBoarding();
+            b.setAvailable_slots(b.getAvailable_slots() - r.getNumberOfStudents());
+            boardingRepo.save(b);
+        }
+
+        registrationRepo.save(r);
+
+        return RegistrationMapper.toDTO(r);
+    }
+    
+    public StudentBoardingDashboardDTO getDashboard(Long regId, Long loggedStudentId) {
+
+        Registration reg = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!reg.getStudent().getId().equals(loggedStudentId)) {
+            throw new RuntimeException("Forbidden");
+        }
+
+        BigDecimal currentMonthDue = reg.getBoarding().getPricePerMonth();
+        String paymentStatus = "PENDING";
+        LocalDate lastPaymentDate = null;
+
+        int openIssues = 0;
+        int resolvedIssues = 0;
+        LocalDate lastIssueDate = null;
+
+       
+        Double avgRating = 0.0;
+        boolean reviewSubmitted = false;
+
+        return StudentBoardingDashboardMapper.toDTO(
+                reg,
+                currentMonthDue,
+                paymentStatus,
+                lastPaymentDate,
+                openIssues,
+                resolvedIssues,
+                lastIssueDate,
+                avgRating,
+                reviewSubmitted
+        );
+    }
+
+    
+}  */
+
+
+
+
+
+
+
+package com.sbms.sbms_monolith.service;
+
+import com.sbms.sbms_monolith.dto.agreement.AgreementPdfResult;
+import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
+import com.sbms.sbms_monolith.dto.registration.*;
+import com.sbms.sbms_monolith.mapper.RegistrationMapper;
+import com.sbms.sbms_monolith.mapper.StudentBoardingDashboardMapper;
+import com.sbms.sbms_monolith.model.Boarding;
+import com.sbms.sbms_monolith.model.PaymentIntent;
+import com.sbms.sbms_monolith.model.Registration;
+import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.model.enums.PaymentIntentStatus;
+import com.sbms.sbms_monolith.model.enums.PaymentType;
+import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
+import com.sbms.sbms_monolith.repository.BoardingRepository;
+import com.sbms.sbms_monolith.repository.PaymentIntentRepository;
+import com.sbms.sbms_monolith.repository.RegistrationRepository;
+import com.sbms.sbms_monolith.repository.UserRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/registrations")
-public class RegistrationController {
+@Service
+public class RegistrationService {
 
-    @Autowired
-    private RegistrationService registrationService;
-    
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private RegistrationRepository registrationRepo;
+    @Autowired private BoardingRepository boardingRepo;
+    @Autowired private UserRepository userRepo;
+    @Autowired private PaymentIntentRepository paymentIntentRepo;
+    @Autowired private AgreementPdfService agreementPdfService;
+    @Autowired private AgreementBlockchainService agreementBlockchainService;
 
-    // ================= STUDENT =================
+    // ================= STUDENT REGISTER =================
 
-    @PostMapping("/student/{studentId}")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<RegistrationResponseDTO> register(
-            @PathVariable Long studentId,
-            @RequestBody RegistrationRequestDTO dto
-    ) {
-        RegistrationResponseDTO response = registrationService.register(studentId, dto);
-        return ResponseEntity.ok(response);
+    @Transactional
+    public RegistrationResponseDTO register(Long studentId, RegistrationRequestDTO dto) {
+
+        Boarding boarding = boardingRepo.findById(dto.getBoardingId())
+                .orElseThrow(() -> new RuntimeException("Boarding not found"));
+
+        User student = userRepo.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        PaymentIntent intent = paymentIntentRepo
+                .findTopByStudentIdAndBoardingIdAndTypeOrderByCreatedAtDesc(
+                        studentId,
+                        boarding.getId(),
+                        PaymentType.KEY_MONEY
+                )
+                .orElseThrow(() -> new RuntimeException("Key money payment required"));
+
+        boolean keyMoneyPaid =
+                intent.getStatus() == PaymentIntentStatus.SUCCESS
+             || intent.getStatus() == PaymentIntentStatus.AWAITING_MANUAL_APPROVAL;
+
+        if (!keyMoneyPaid) {
+            throw new RuntimeException("Key money not paid");
+        }
+
+        Registration r = new Registration();
+        r.setBoarding(boarding);
+        r.setStudent(student);
+        r.setNumberOfStudents(dto.getNumberOfStudents());
+        r.setStudentNote(dto.getStudentNote());
+        r.setMoveInDate(dto.getMoveInDate());
+        r.setContractDuration(dto.getContractDuration());
+        r.setEmergencyContactName(dto.getEmergencyContact());
+        r.setSpecialRequirements(dto.getSpecialRequirements());
+        r.setStudentSignatureBase64(dto.getStudentSignatureBase64());
+
+        r.setKeyMoneyPaid(true);
+     // payment method
+        r.setPaymentMethod(intent.getMethod().name());
+        r.setPaymentTransactionRef(intent.getReferenceId());
+
+
+        // transaction / slip reference
+        r.setPaymentTransactionRef(intent.getReferenceId());
+ // CARD / BANK_SLIP / CASH
+        r.setPaymentTransactionRef(intent.getReferenceId());
+        r.setStatus(RegistrationStatus.PENDING);
+
+        registrationRepo.save(r);
+
+        return RegistrationMapper.toDTO(r);
     }
 
-    @GetMapping("/student/{studentId}")
-    @PreAuthorize("hasRole('STUDENT')")
-    public List<RegistrationResponseDTO> studentRegistrations(
-            @PathVariable Long studentId
-    ) {
-        return registrationService.getStudentRegistrations(studentId);
+
+    // ================= STUDENT VIEWS =================
+
+    public List<RegistrationResponseDTO> getStudentRegistrations(Long studentId) {
+        return registrationRepo.findByStudentId(studentId)
+                .stream()
+                .map(RegistrationMapper::toDTO)
+                .toList();
     }
 
-    @PutMapping("/student/{studentId}/{regId}/cancel")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<RegistrationResponseDTO> cancel(
-            @PathVariable Long studentId,
-            @PathVariable Long regId
-    ) {
-        RegistrationResponseDTO response = registrationService.cancel(studentId, regId);
-        return ResponseEntity.ok(response);
+    public RegistrationResponseDTO cancel(Long studentId, Long regId) {
+
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!r.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (r.getStatus() == RegistrationStatus.APPROVED) {
+            throw new RuntimeException("Cannot cancel approved registration");
+        }
+
+        r.setStatus(RegistrationStatus.CANCELLED);
+        registrationRepo.save(r);
+
+        return RegistrationMapper.toDTO(r);
     }
 
-    @PostMapping("/student/{studentId}/leave/{regId}")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<String> requestLeave(@PathVariable Long studentId, @PathVariable Long regId) {
-        registrationService.requestLeave(studentId, regId);
-        return ResponseEntity.ok("Leave request sent.");
+    // ================= OWNER VIEWS =================
+
+    public List<RegistrationResponseDTO> getOwnerRegistrations(Long ownerId, RegistrationStatus status) {
+        return registrationRepo.findByBoardingOwnerId(ownerId, status)
+                .stream()
+                .map(RegistrationMapper::toDTO)
+                .toList();
     }
 
-    @PostMapping("/owner/{ownerId}/approve-leave/{regId}")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<String> approveLeave(@PathVariable Long ownerId, @PathVariable Long regId) {
-        registrationService.approveLeave(ownerId, regId);
-        return ResponseEntity.ok("Leave approved.");
-    }
+    // ================= OWNER DECISION =================
 
-    @GetMapping("/{regId}/dashboard")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
-            @PathVariable Long regId,
-            Authentication authentication
-    ) {
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    @Transactional
+    public RegistrationResponseDTO decide(Long ownerId, Long regId, RegistrationDecisionDTO dto) {
 
-        StudentBoardingDashboardDTO dto = registrationService.getDashboard(regId, user.getId());
-        return ResponseEntity.ok(dto);
-    }
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
 
-    // ================= OWNER =================
+        if (!r.getBoarding().getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Unauthorized");
+        }
 
-    @GetMapping("/owner/{ownerId}")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<List<RegistrationResponseDTO>> ownerRegistrations(
-            @PathVariable Long ownerId,
-            @RequestParam(required = false) RegistrationStatus status
-    ) {
-        List<RegistrationResponseDTO> list = registrationService.getOwnerRegistrations(ownerId, status);
-        return ResponseEntity.ok(list);
-    }
+        // 🔒 Fetch payment intent again (source of truth)
+        PaymentIntent intent = paymentIntentRepo
+                .findTopByStudentIdAndBoardingIdAndTypeOrderByCreatedAtDesc(
+                        r.getStudent().getId(),
+                        r.getBoarding().getId(),
+                        PaymentType.KEY_MONEY
+                )
+                .orElseThrow(() -> new RuntimeException("Key money payment missing"));
 
-    @PutMapping("/owner/{ownerId}/{regId}")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<RegistrationResponseDTO> decide(
-            @PathVariable Long ownerId,
-            @PathVariable Long regId,
-            @RequestBody RegistrationDecisionDTO dto
-    ) {
-        RegistrationResponseDTO response = registrationService.decide(ownerId, regId, dto);
-        return ResponseEntity.ok(response);
+        // 🔐 PAYMENT GATE (NEW)
+        if (dto.getStatus() == RegistrationStatus.APPROVED) {
+
+            if (intent.getStatus() == PaymentIntentStatus.AWAITING_MANUAL_APPROVAL
+                    && !dto.isApproveWithPendingPayment()) {
+
+                throw new RuntimeException(
+                    "Payment is not verified. Owner must confirm override."
+                );
+            }
+
+            if (intent.getStatus() != PaymentIntentStatus.SUCCESS
+                    && intent.getStatus() != PaymentIntentStatus.AWAITING_MANUAL_APPROVAL) {
+
+                throw new RuntimeException("Registration cannot be approved without payment");
+            }
+        }
+
+        // ================= APPLY DECISION =================
+
+        r.setStatus(dto.getStatus());
+        r.setOwnerNote(dto.getOwnerNote());
+
+        if (dto.getStatus() == RegistrationStatus.APPROVED) {
+
+            if (dto.getOwnerSignatureBase64() == null) {
+                throw new RuntimeException("Owner signature required");
+            }
+
+            r.setOwnerSignatureBase64(dto.getOwnerSignatureBase64());
+
+            // 📄 AGREEMENT
+            AgreementPdfResult result =
+                    agreementPdfService.generateAndUploadAgreement(r);
+
+            r.setAgreementPdfPath(result.getPdfUrl());
+            r.setAgreementHash(result.getPdfHash());
+
+            // 🔗 BLOCKCHAIN
+            agreementBlockchainService.addAgreementBlock(
+                    r.getId(),
+                    result.getPdfHash()
+            );
+
+            // 📉 UPDATE SLOTS
+            Boarding b = r.getBoarding();
+            b.setAvailable_slots(b.getAvailable_slots() - r.getNumberOfStudents());
+            boardingRepo.save(b);
+        }
+
+        registrationRepo.save(r);
+        return RegistrationMapper.toDTO(r);
     }
 
     // ================= DASHBOARD =================
 
-    @GetMapping("/{regId}/dashboard")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
-            @PathVariable Long regId,
-            Authentication authentication
-    ) {
-        String email = authentication.getName(); // from JWT
+    public StudentBoardingDashboardDTO getDashboard(Long regId, Long loggedStudentId) {
 
- 
+    	Registration reg = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
 
-    
-    
-    
-   
+        if (!reg.getStudent().getId().equals(loggedStudentId)) {
+            throw new RuntimeException("Forbidden");
+        }
+
+        BigDecimal currentMonthDue = reg.getBoarding().getPricePerMonth();
+
+        return StudentBoardingDashboardMapper.toDTO(
+                reg,
+                currentMonthDue,
+                "PENDING",
+                null,
+                0,
+                0,
+                null,
+                0.0,
+                false
+        );
+    }
 }
