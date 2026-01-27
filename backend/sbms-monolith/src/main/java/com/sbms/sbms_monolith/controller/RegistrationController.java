@@ -6,7 +6,6 @@ import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
 import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.RegistrationService;
-import com.sbms.sbms_monolith.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +22,10 @@ public class RegistrationController {
     @Autowired
     private RegistrationService registrationService;
     
-    @Autowired UserRepository userRepository;
-    
-    
+    @Autowired
+    private UserRepository userRepository;
+
+    // ================= STUDENT =================
 
     @PostMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
@@ -38,7 +38,9 @@ public class RegistrationController {
 
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
-    public List<RegistrationResponseDTO> studentRegistrations(@PathVariable Long studentId) {
+    public List<RegistrationResponseDTO> studentRegistrations(
+            @PathVariable Long studentId
+    ) {
         return registrationService.getStudentRegistrations(studentId);
     }
 
@@ -50,6 +52,8 @@ public class RegistrationController {
     ) {
         return registrationService.cancel(studentId, regId);
     }
+
+    // ================= OWNER =================
 
     @GetMapping("/owner/{ownerId}")
     @PreAuthorize("hasRole('OWNER')")
@@ -69,15 +73,16 @@ public class RegistrationController {
     ) {
         return registrationService.decide(ownerId, regId, dto);
     }
-    
-    
+
+    // ================= DASHBOARD =================
+
     @GetMapping("/{regId}/dashboard")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
             @PathVariable Long regId,
             Authentication authentication
     ) {
-        String email = authentication.getName(); // 👈 from JWT
+        String email = authentication.getName(); // from JWT
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -89,4 +94,8 @@ public class RegistrationController {
     }
 
 
+    
+    
+    
+   
 }
