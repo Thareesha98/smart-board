@@ -37,4 +37,7 @@ public class MaintenanceResponseDTO {
     private String ownerName;
     private String boardingAddress;
     private LocalDateTime createdAt;
+
+    private Integer rating;
+    private String reviewComment;
 }
