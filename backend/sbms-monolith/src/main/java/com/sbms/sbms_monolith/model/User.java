@@ -6,13 +6,17 @@ import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
 import com.sbms.sbms_monolith.model.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
 
 @Data
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
 
     @Column(nullable = false, length = 100)
     private String fullName;
@@ -67,4 +71,27 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Boarding> boardings;   // List of ads owner created
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // This converts your Enum "OWNER" -> "ROLE_OWNER"
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email; // We use email as the username
+    }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return true; }
 }

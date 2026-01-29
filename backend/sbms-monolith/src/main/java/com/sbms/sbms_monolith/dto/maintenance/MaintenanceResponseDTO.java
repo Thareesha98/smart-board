@@ -1,4 +1,5 @@
 package com.sbms.sbms_monolith.dto.maintenance;
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
@@ -22,6 +23,7 @@ public class MaintenanceResponseDTO {
     private List<String> imageUrls;
 
     private MaintenanceStatus status;
+    private BigDecimal technicianFee;
     private MaintenanceUrgency maintenanceUrgency;
 
 
