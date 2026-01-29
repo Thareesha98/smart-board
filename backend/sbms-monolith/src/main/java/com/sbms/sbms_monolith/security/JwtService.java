@@ -3,6 +3,7 @@ package com.sbms.sbms_monolith.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,16 @@ public class JwtService {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+
+        // 1. Get the Role from UserDetails
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority) // Returns "ROLE_OWNER"
+                .orElse("ROLE_USER");
+
+        // 2. Put it in the map
+        claims.put("role", role);
+
         return generateToken(claims, userDetails);
     }
 
