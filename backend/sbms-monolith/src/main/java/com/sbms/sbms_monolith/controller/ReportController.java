@@ -2,6 +2,7 @@ package com.sbms.sbms_monolith.controller;
 
 import com.sbms.sbms_monolith.dto.report.ReportCreateDTO;
 import com.sbms.sbms_monolith.dto.report.ReportResponseDTO;
+import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -19,6 +20,9 @@ public class ReportController {
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private UserRepository userRepo;
 
     // Create Report
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
