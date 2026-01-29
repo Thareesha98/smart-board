@@ -112,6 +112,9 @@ public class MaintenanceController {
             }
         }
 
+        dto.setRating(m.getTechnicianRating());
+        dto.setReviewComment(m.getOwnerReview());
+
         return ResponseEntity.ok(dto);
     }
 }
