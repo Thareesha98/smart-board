@@ -85,11 +85,33 @@ public class MaintenanceController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('OWNER', 'STUDENT', 'TECHNICIAN')")
-    public ResponseEntity<Maintenance> getMaintenanceById(@PathVariable Long id) {
+    public ResponseEntity<MaintenanceResponseDTO> getMaintenanceById(@PathVariable Long id) {
 
-        // Call the new service method
+        // 1. Get the heavy Entity
         Maintenance m = maintenanceService.getMaintenanceById(id);
 
-        return ResponseEntity.ok(m);
+        // 2. Convert to light DTO
+        MaintenanceResponseDTO dto = new MaintenanceResponseDTO();
+        dto.setId(m.getId());
+        dto.setTitle(m.getTitle());
+        dto.setDescription(m.getDescription());
+        dto.setStatus(m.getStatus());
+        dto.setTechnicianFee(m.getTechnicianFee()); //
+        dto.setCreatedAt(m.getCreatedAt());
+
+        // Null checks to prevent crashes if no technician is assigned yet
+        if (m.getAssignedTechnician() != null) {
+            dto.setTechnicianName(m.getAssignedTechnician().getFullName());
+            dto.setTechnicianId(m.getAssignedTechnician().getId());
+        }
+
+        if (m.getBoarding() != null) {
+            dto.setBoardingAddress(m.getBoarding().getAddress());
+            if (m.getBoarding().getOwner() != null) {
+                dto.setOwnerName(m.getBoarding().getOwner().getFullName());
+            }
+        }
+
+        return ResponseEntity.ok(dto);
     }
 }

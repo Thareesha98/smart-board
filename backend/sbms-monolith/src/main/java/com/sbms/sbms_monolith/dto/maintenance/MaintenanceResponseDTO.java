@@ -1,5 +1,6 @@
 package com.sbms.sbms_monolith.dto.maintenance;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
@@ -29,4 +30,11 @@ public class MaintenanceResponseDTO {
 
     private String studentNote;
     private String ownerNote;
+
+
+    private String technicianName;
+    private Long technicianId;
+    private String ownerName;
+    private String boardingAddress;
+    private LocalDateTime createdAt;
 }
