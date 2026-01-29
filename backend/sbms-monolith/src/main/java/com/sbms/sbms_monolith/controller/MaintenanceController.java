@@ -2,7 +2,10 @@ package com.sbms.sbms_monolith.controller;
 
 import java.util.List;
 
+import com.sbms.sbms_monolith.model.Maintenance;
+import com.sbms.sbms_monolith.repository.MaintenanceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +30,7 @@ public class MaintenanceController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
 
     @PostMapping(consumes = "application/json")
     @PreAuthorize("hasRole('STUDENT')")
@@ -77,5 +81,15 @@ public class MaintenanceController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return maintenanceService.decide(owner.getId(), maintenanceId, dto);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OWNER', 'STUDENT', 'TECHNICIAN')")
+    public ResponseEntity<Maintenance> getMaintenanceById(@PathVariable Long id) {
+
+        // Call the new service method
+        Maintenance m = maintenanceService.getMaintenanceById(id);
+
+        return ResponseEntity.ok(m);
     }
 }
