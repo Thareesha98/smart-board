@@ -61,6 +61,11 @@ public class UserMapper {
             dto.setStudentUniversity(user.getStudentUniversity());
         }
 
+        if (user.getRole() == UserRole.TECHNICIAN) {
+            dto.setTechnicianAverageRating(user.getTechnicianAverageRating());
+            dto.setTechnicianTotalJobs(user.getTechnicianTotalJobs());
+        }
+
         return dto;
     }
 
