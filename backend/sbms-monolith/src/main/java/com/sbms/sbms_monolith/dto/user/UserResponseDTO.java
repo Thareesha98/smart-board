@@ -64,5 +64,14 @@ public class UserResponseDTO {
         example = "University of Moratuwa"
     )
     private String studentUniversity;
+
+
+    // -------- TECHNICIAN ONLY --------
+
+    @Schema(description = "Average rating from 0.0 to 5.0", example = "4.8")
+    private Double technicianAverageRating;
+
+    @Schema(description = "Total number of completed jobs", example = "15")
+    private Integer technicianTotalJobs;
 }
 
