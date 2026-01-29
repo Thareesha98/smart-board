@@ -64,4 +64,10 @@ public class Maintenance extends BaseEntity {
 
     @Column(precision = 12, scale = 2)
     private BigDecimal technicianFee;
+
+
+    private Integer technicianRating; // 1-5 stars
+
+    @Column(length = 500)
+    private String ownerReview;
 }
