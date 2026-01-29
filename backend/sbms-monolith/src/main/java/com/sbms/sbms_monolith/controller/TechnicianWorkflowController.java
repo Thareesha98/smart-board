@@ -1,5 +1,6 @@
 package com.sbms.sbms_monolith.controller;
 
+import com.sbms.sbms_monolith.dto.maintenance.MaintenanceResponseDTO;
 import com.sbms.sbms_monolith.dto.technician.TechnicianCardDTO;
 import com.sbms.sbms_monolith.dto.technician.TechnicianProfileResponseDTO;
 import com.sbms.sbms_monolith.model.Maintenance;
@@ -8,6 +9,7 @@ import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
 import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.TechnicianWorkflowService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -60,10 +62,12 @@ public class TechnicianWorkflowController {
 
     @PostMapping("/{maintenanceId}/review")
     @PreAuthorize("hasRole('OWNER')")
-    public String reviewTechnician(@PathVariable Long maintenanceId, @RequestParam int rating, @RequestParam String comment, Authentication auth) {
-        User owner = userRepository.findByEmail(auth.getName()).orElseThrow();
-        workflowService.reviewTechnician(owner.getId(), maintenanceId, rating, comment);
-        return "Review submitted.";
+    public ResponseEntity<MaintenanceResponseDTO> reviewTechnician(
+            @PathVariable Long maintenanceId,
+            @RequestParam int rating,
+            @RequestParam String comment
+    ) {
+        return ResponseEntity.ok(workflowService.reviewTechnician(maintenanceId, rating, comment));
     }
 
     // --- TECHNICIAN ACTIONS ---
