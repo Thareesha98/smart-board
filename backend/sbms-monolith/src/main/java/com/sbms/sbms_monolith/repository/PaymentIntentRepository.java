@@ -14,6 +14,10 @@ public interface PaymentIntentRepository extends JpaRepository<PaymentIntent, Lo
     List<PaymentIntent> findByStudentId(Long studentId);
 
     List<PaymentIntent> findByBoardingId(Long boardingId);
+    
+    List<PaymentIntent> findByOwnerId(Long boardingId);
+    
+    Optional<PaymentIntent> findByMonthlyBillId(Long monthlyBillId);
 
   
     
