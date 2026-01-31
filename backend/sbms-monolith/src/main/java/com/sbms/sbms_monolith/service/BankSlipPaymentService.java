@@ -30,14 +30,14 @@ public class BankSlipPaymentService {
             throw new IllegalStateException("Payment already completed");
         }
 
-        // 1️⃣ Upload slip → URL
+        // 1️ Upload slip → URL
         String slipUrl = s3Service.uploadFile(slip, "bank-slips/");
 
-        // 2️⃣ Store URL (choose ONE place — intent OR transaction)
+        // 2️ Store URL (choose ONE place — intent OR transaction)
         // Recommended: PaymentTransaction (later step)
         intent.setReferenceId(slipUrl);
 
-        // 3️⃣ Mark as awaiting owner verification
+        // 3️ Mark as awaiting owner verification
         
         intent.setMethod(PaymentMethod.BANK_SLIP);
         intent.setReferenceId(slipUrl);
