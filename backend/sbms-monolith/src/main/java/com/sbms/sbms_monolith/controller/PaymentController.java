@@ -208,9 +208,10 @@ public class PaymentController {
 
         PaymentIntent intent = tx.getIntent();
         intent.setStatus(PaymentIntentStatus.SUCCESS);
+        intent.setMethod(tx.getMethod());
         intent.setCompletedAt(LocalDateTime.now());
 
-        paymentIntentRepo.save(intent); // ✅ FIXED
+        paymentIntentRepo.save(intent); //  FIXED
     }
 
 }
