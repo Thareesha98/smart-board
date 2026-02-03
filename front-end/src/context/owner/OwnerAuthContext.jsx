@@ -8,38 +8,55 @@ export const OwnerAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 1. Check for logged-in user on load
-  // In OwnerAuthContext.jsx
-
+  // --- 1. AUTO-LOGIN ON LOAD ---
   useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem("token");
-      const savedUser = localStorage.getItem("user_data");
+    const checkLoggedIn = async () => {
+      const refreshToken = localStorage.getItem("refresh_token");
 
-      if (token && savedUser) {
-        try {
-          const parsedUser = JSON.parse(savedUser);
-
-          // ✅ ADD THIS CHECK: Only load if it's actually an OWNER
-          if (parsedUser.role === "OWNER") {
-            setCurrentOwner(parsedUser);
-            setIsAuthenticated(true);
-          }
-          // If it's not an owner, we do nothing.
-          // We do NOT clear local storage here either.
-        } catch (e) {
-          console.error("Failed to parse user data", e);
-          // Only clear if the JSON is actually corrupt
-          // localStorage.clear();
-        }
+      if (!refreshToken) {
+        setIsLoading(false);
+        return;
       }
-      setIsLoading(false);
+
+      try {
+        // Attempt to refresh the session using the stored Refresh Token
+        const response = await api.post("/auth/refresh", {
+          refreshToken: refreshToken,
+        });
+
+        if (response.status === 200) {
+          const { token, refreshToken: newRefreshToken, user } = response.data;
+
+          // ✅ CHECK ROLE: Only log in if it is an OWNER
+          if (user.role === "OWNER") {
+            // Update storage with fresh tokens
+            localStorage.setItem("token", token);
+            localStorage.setItem("refresh_token", newRefreshToken);
+            localStorage.setItem("user_data", JSON.stringify(user));
+
+            setCurrentOwner(user);
+            setIsAuthenticated(true);
+          } else {
+            // If the token belongs to a Student, we do NOT clear storage.
+            // We just don't authenticate this specific Owner context.
+            console.warn("Found valid session, but user is not an Owner.");
+          }
+        }
+      } catch (error) {
+        console.error("Auto-login failed:", error);
+        // If the refresh token is expired or invalid (401/403), clear storage
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          localStorage.clear();
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    initializeAuth();
+    checkLoggedIn();
   }, []);
 
-  // 2. Login
+  // --- 2. LOGIN ---
   const login = async (email, password) => {
     try {
       const response = await api.post("/auth/login", { email, password });
@@ -67,17 +84,10 @@ export const OwnerAuthProvider = ({ children }) => {
     }
   };
 
-  // 3. Signup Step 1: Request OTP
+  // --- 3. SIGNUP (Request OTP) ---
   const signup = async (userData) => {
     try {
-      // 🚀 FIX: We manually override the headers for this request.
-      // Setting Authorization to undefined removes it completely.
-      const config = {
-        headers: {
-          Authorization: undefined,
-        },
-      };
-
+      const config = { headers: { Authorization: undefined } };
       const response = await api.post(
         "/auth/register/request",
         userData,
@@ -92,7 +102,8 @@ export const OwnerAuthProvider = ({ children }) => {
       };
     }
   };
-  // 4. Signup Step 2: Verify OTP
+
+  // --- 4. VERIFY OTP ---
   const verifyRegistration = async (email, otp) => {
     try {
       const response = await api.post("/auth/register/verify", { email, otp });
@@ -114,6 +125,7 @@ export const OwnerAuthProvider = ({ children }) => {
     localStorage.clear();
     setCurrentOwner(null);
     setIsAuthenticated(false);
+    // Force redirect or let the protected route handle it
     window.location.href = "/login";
   };
 
