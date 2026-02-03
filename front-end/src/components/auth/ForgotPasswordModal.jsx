@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaEnvelope, FaLock, FaKey, FaTimes } from "react-icons/fa";
-import axios from "axios"; // Ensure you have axios installed
+import api from "../../api/api";
 
-// Replace with your actual API base URL if different
-const API_BASE_URL = "http://localhost:8080/api/auth";
+
+
 
 const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1); // 1: Email, 2: OTP & New Password
@@ -32,7 +32,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 
     try {
       // Calls AuthController.java -> forgotPassword()
-      await axios.post(`${API_BASE_URL}/forgot-password`, { email });
+      await api.post(`/auth/forgot-password`, { email });
       setMessage({ type: "success", text: "OTP sent to your email!" });
       setStep(2);
     } catch (error) {
@@ -53,7 +53,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
 
     try {
       // Calls AuthController.java -> resetPassword()
-      await axios.post(`${API_BASE_URL}/reset-password`, {
+      await api.post(`/auth/reset-password`, {
         email,
         otp,
         newPassword,
