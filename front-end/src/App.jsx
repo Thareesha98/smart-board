@@ -24,6 +24,7 @@ function App() {
     <>
       <StudentAuthProvider>
         <OwnerAuthProvider>
+          <TechnicianAuthProvider>
           <ScrollToTop />
           <Toaster
             position="top-right"
@@ -48,12 +49,16 @@ function App() {
             {/* Owner routes (Dashboard, My Ads, etc.) */}
             <Route path="/owner/*" element={<OwnerAppRoutes />} />
 
+            {/* Technician routes (Dashboard, Profile, Reports) */}
+            <Route path="/technician/*" element={<TechnicianAppRoutes />} />
+
              {/* Public Profile view */}
             <Route path="/profile/view/:id" element={<PublicProfileView />} />
 
             {/* ==================== LANDING PAGE ==================== */}
             <Route path="/" element={<Home />} />
           </Routes>
+          </TechnicianAuthProvider>
         </OwnerAuthProvider>
       </StudentAuthProvider>
     </>
