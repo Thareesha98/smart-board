@@ -229,3 +229,28 @@ export const updateAppointmentStatus = async (ownerId, appointmentId, decisionDa
     throw error;
   }
 };
+
+// --- TECHNICIAN DISCOVERY & WORKFLOW ---
+
+// 1. Search Technicians
+export const searchTechnicians = async (skill, city = "") => {
+  const response = await api.get("/technician-workflow/search", {
+    params: { skill: skill.toUpperCase(), city }
+  });
+  return response.data;
+};
+
+// 2. Assign Technician
+export const assignTechnician = async (maintenanceId, technicianId) => {
+  const response = await api.put(`/technician-workflow/${maintenanceId}/assign/${technicianId}`);
+  return response.data;
+};
+
+// 3. Review Technician (Job Complete)
+export const reviewTechnician = async (maintenanceId, rating, comment) => {
+    // Note: The controller now takes params directly, no ownerId needed in path
+    const response = await api.post(`/technician-workflow/${maintenanceId}/review`, null, {
+        params: { rating, comment }
+    });
+    return response.data;
+};
