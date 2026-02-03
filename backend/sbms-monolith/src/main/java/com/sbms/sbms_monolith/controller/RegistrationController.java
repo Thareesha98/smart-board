@@ -1,3 +1,4 @@
+
 package com.sbms.sbms_monolith.controller;
 
 import com.sbms.sbms_monolith.dto.dashboard.StudentBoardingDashboardDTO;
@@ -108,20 +109,11 @@ public class RegistrationController {
         RegistrationResponseDTO response = registrationService.decide(ownerId, regId, dto);
         return ResponseEntity.ok(response);
     }
-
-    // ================= DASHBOARD =================
-
-    @GetMapping("/{regId}/dashboard")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
-            @PathVariable Long regId,
-            Authentication authentication
-    ) {
-        String email = authentication.getName(); // from JWT
-
- 
-
     
+    
+
+
+   
     
     
    
