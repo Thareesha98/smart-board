@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../../api/api";
-import { getTechnicianProfile } from "../../api/technician/technicianService";
+import { updateTechnicianProfile } from "../../api/technician/technicianService"; // ✅ Fixed Import
 
 const TechnicianAuthContext = createContext(null);
 
@@ -9,7 +9,7 @@ export const TechnicianAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 1. Check for logged-in user on load
+  // 1. Check for logged-in user on load (Using LocalStorage for speed)
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("token");
@@ -138,23 +138,19 @@ export const TechnicianAuthProvider = ({ children }) => {
     window.location.href = "/login";
   };
 
-  // 5. Update Profile (Uses TechnicianService)
+  // 5. Update Profile (Uses the Service Function)
   const updateProfile = async (updatedData) => {
     try {
-      // Assuming you added updateTechnicianProfile to technicianService.js
-      // If not, you can use api.put('/technician/profile', updatedData) here directly
-      const response = await api.put(
-        "/technician-workflow/profile",
-        updatedData,
-      );
+      // ✅ Call the API service
+      await updateTechnicianProfile(updatedData);
 
-      // Merge and Save
-      // Note: The backend endpoint might return the full user or just a success message.
-      // Adjust based on your backend return type. Assuming it returns updated User DTO:
+      // ✅ Merge changes with current state (Optimistic Update)
       const newUser = { ...currentTech, ...updatedData };
 
+      // ✅ Update Storage and State
       localStorage.setItem("user_data", JSON.stringify(newUser));
       setCurrentTech(newUser);
+
       return { success: true };
     } catch (error) {
       console.error("Profile Update Failed", error);
