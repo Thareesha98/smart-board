@@ -1,6 +1,6 @@
-import React from 'react';
-import TechnicianSidebar from './TechnicianSidebar';
-import TechnicianHeader from './TechnicianHeader';
+import React from "react";
+import TechnicianSidebar from "./TechnicianSidebar";
+import TechnicianHeader from "./TechnicianHeader";
 
 const TechnicianLayout = ({ children, title, subtitle }) => {
   return (

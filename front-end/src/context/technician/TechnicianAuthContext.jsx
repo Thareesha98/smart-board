@@ -44,15 +44,16 @@ export const TechnicianAuthProvider = ({ children }) => {
       const response = await api.post(
         "/auth/login",
         { email, password },
-        { headers: { Authorization: undefined } }
+        { headers: { Authorization: undefined } },
       );
-      
+
       const { token, refreshToken, user } = response.data;
 
       if (user.role !== "TECHNICIAN") {
         return {
           success: false,
-          message: "Access Denied: This account is not registered as a Technician.",
+          message:
+            "Access Denied: This account is not registered as a Technician.",
         };
       }
 
@@ -65,7 +66,8 @@ export const TechnicianAuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error("Login Error:", error);
-      const msg = error.response?.status === 401 ? "Invalid credentials" : "Login failed";
+      const msg =
+        error.response?.status === 401 ? "Invalid credentials" : "Login failed";
       return { success: false, message: msg };
     }
   };
@@ -82,7 +84,11 @@ export const TechnicianAuthProvider = ({ children }) => {
         headers: { Authorization: undefined },
       };
 
-      const response = await api.post("/auth/register/request", payload, config);
+      const response = await api.post(
+        "/auth/register/request",
+        payload,
+        config,
+      );
 
       return {
         success: true,
@@ -104,7 +110,10 @@ export const TechnicianAuthProvider = ({ children }) => {
       const { token, refreshToken, user } = response.data;
 
       if (user.role !== "TECHNICIAN") {
-        return { success: false, message: "Role mismatch during verification." };
+        return {
+          success: false,
+          message: "Role mismatch during verification.",
+        };
       }
 
       localStorage.setItem("token", token);
@@ -134,13 +143,16 @@ export const TechnicianAuthProvider = ({ children }) => {
     try {
       // Assuming you added updateTechnicianProfile to technicianService.js
       // If not, you can use api.put('/technician/profile', updatedData) here directly
-      const response = await api.put("/technician-workflow/profile", updatedData); 
-      
+      const response = await api.put(
+        "/technician-workflow/profile",
+        updatedData,
+      );
+
       // Merge and Save
       // Note: The backend endpoint might return the full user or just a success message.
       // Adjust based on your backend return type. Assuming it returns updated User DTO:
-      const newUser = { ...currentTech, ...updatedData }; 
-      
+      const newUser = { ...currentTech, ...updatedData };
+
       localStorage.setItem("user_data", JSON.stringify(newUser));
       setCurrentTech(newUser);
       return { success: true };
@@ -158,7 +170,7 @@ export const TechnicianAuthProvider = ({ children }) => {
     logout,
     signup,
     verifyRegistration,
-    updateProfile
+    updateProfile,
   };
 
   return (
