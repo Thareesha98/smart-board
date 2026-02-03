@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import TechnicianLayout from "../../components/technician/common/TechnicianLayout";
 import { useTechAuth } from "../../context/technician/TechnicianAuthContext";
-import { FaStar, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import {
+  FaStar,
+  FaEnvelope,
+  FaPhone,
+  FaMapMarkerAlt,
+  FaEdit,
+  FaMoneyBillWave,
+} from "react-icons/fa";
+import EditProfileModal from "../../components/technician/profile/EditProfileModal"; // Import Modal
 
 const TechnicianProfile = () => {
-  const { currentTech } = useTechAuth();
-  // Mock Data for display
+  const { currentTech, login } = useTechAuth(); // Use login to refresh context if needed, or window.location.reload
+  const [showEdit, setShowEdit] = useState(false);
+
+  // Mock Reviews
   const reviews = [
     {
       id: 1,
@@ -13,6 +23,13 @@ const TechnicianProfile = () => {
       rating: 5,
       comment: "Fixed the tap quickly. Great job!",
       date: "2026-01-29",
+    },
+    {
+      id: 2,
+      ownerName: "Sarah M.",
+      rating: 4,
+      comment: "Good work but arrived slightly late.",
+      date: "2026-01-15",
     },
   ];
 
@@ -22,9 +39,19 @@ const TechnicianProfile = () => {
       subtitle="Manage your account and view performance"
     >
       <div className="grid md:grid-cols-3 gap-6">
+        {/* Left Column: Profile Card */}
         <div className="md:col-span-1 space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-24 bg-primary/10"></div>
+
+            {/* Edit Button */}
+            <button
+              onClick={() => setShowEdit(true)}
+              className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-sm text-gray-500 hover:text-accent z-10"
+            >
+              <FaEdit />
+            </button>
+
             <img
               src={
                 currentTech?.profileImageUrl
@@ -34,12 +61,14 @@ const TechnicianProfile = () => {
               alt="Profile"
               className="w-28 h-28 rounded-full border-4 border-white shadow-md mx-auto relative z-10 object-cover"
             />
+
             <h2 className="text-xl font-bold mt-4 text-gray-800">
               {currentTech?.fullName}
             </h2>
             <p className="text-primary font-medium">
               {currentTech?.skills?.join(" • ") || "General Technician"}
             </p>
+
             <div className="mt-6 flex justify-center gap-2">
               <div className="bg-orange-50 px-4 py-2 rounded-xl text-center">
                 <span className="block font-black text-xl text-orange-600 flex items-center justify-center gap-1">
@@ -60,12 +89,35 @@ const TechnicianProfile = () => {
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="font-bold text-gray-800 mb-4">Contact Info</h3>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li className="flex items-center gap-3">
+                <FaEnvelope className="text-gray-400" /> {currentTech?.email}
+              </li>
+              <li className="flex items-center gap-3">
+                <FaPhone className="text-gray-400" /> {currentTech?.phone}
+              </li>
+              <li className="flex items-center gap-3">
+                <FaMapMarkerAlt className="text-gray-400" />{" "}
+                {currentTech?.city || "Colombo"}
+              </li>
+              <li className="flex items-center gap-3">
+                <FaMoneyBillWave className="text-green-600" /> LKR{" "}
+                {currentTech?.basePrice} / visit
+              </li>
+            </ul>
+          </div>
         </div>
+
+        {/* Right Column: Reviews */}
         <div className="md:col-span-2 space-y-6">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
               <FaStar className="text-yellow-400" /> Reviews from Owners
             </h3>
+
             <div className="space-y-4">
               {reviews.map((review) => (
                 <div
@@ -99,6 +151,15 @@ const TechnicianProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEdit && (
+        <EditProfileModal
+          user={currentTech}
+          onClose={() => setShowEdit(false)}
+          onUpdate={() => window.location.reload()} // Simple reload to fetch fresh data
+        />
+      )}
     </TechnicianLayout>
   );
 };
