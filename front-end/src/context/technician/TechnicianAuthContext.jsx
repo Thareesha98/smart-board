@@ -1,53 +1,176 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import api from "../../api/api";
 import { getTechnicianProfile } from "../../api/technician/technicianService";
 
-const TechnicianAuthContext = createContext();
+const TechnicianAuthContext = createContext(null);
 
 export const TechnicianAuthProvider = ({ children }) => {
   const [currentTech, setCurrentTech] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // 1. Check for logged-in user on load
   useEffect(() => {
-    checkAuth();
+    const initializeAuth = async () => {
+      const token = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user_data");
+
+      if (token && savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+
+          // 🔒 Security Check: Ensure the saved user is a TECHNICIAN
+          if (user.role === "TECHNICIAN") {
+            setCurrentTech(user);
+            setIsAuthenticated(true);
+          } else {
+            localStorage.clear();
+          }
+        } catch (e) {
+          console.error("Failed to parse user data", e);
+          localStorage.clear();
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
-  const checkAuth = async () => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
-    
-    if (token && role === "TECHNICIAN") {
-      try {
-        const profile = await getTechnicianProfile();
-        setCurrentTech(profile);
-      } catch (error) {
-        console.error("Tech auth failed", error);
-        logout();
+  // 2. Login
+  const login = async (email, password) => {
+    try {
+      // 🚀 Explicitly remove Auth header for login
+      const response = await api.post(
+        "/auth/login",
+        { email, password },
+        { headers: { Authorization: undefined } }
+      );
+      
+      const { token, refreshToken, user } = response.data;
+
+      if (user.role !== "TECHNICIAN") {
+        return {
+          success: false,
+          message: "Access Denied: This account is not registered as a Technician.",
+        };
       }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_data", JSON.stringify(user));
+
+      setCurrentTech(user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      console.error("Login Error:", error);
+      const msg = error.response?.status === 401 ? "Invalid credentials" : "Login failed";
+      return { success: false, message: msg };
     }
-    setLoading(false);
   };
 
-  const login = async (token, role) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("role", role);
-    await checkAuth();
-    navigate("/technician/dashboard");
+  // 3. Signup Step 1: Request OTP
+  const signup = async (userData) => {
+    try {
+      const payload = {
+        ...userData,
+        role: "TECHNICIAN", // 👈 IMPORTANT: Force role here
+      };
+
+      const config = {
+        headers: { Authorization: undefined },
+      };
+
+      const response = await api.post("/auth/register/request", payload, config);
+
+      return {
+        success: true,
+        message: response.data?.message || "OTP sent successfully!",
+      };
+    } catch (error) {
+      console.error("Signup Error:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Registration failed.",
+      };
+    }
+  };
+
+  // 4. Signup Step 2: Verify OTP
+  const verifyRegistration = async (email, otp) => {
+    try {
+      const response = await api.post("/auth/register/verify", { email, otp });
+      const { token, refreshToken, user } = response.data;
+
+      if (user.role !== "TECHNICIAN") {
+        return { success: false, message: "Role mismatch during verification." };
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_data", JSON.stringify(user));
+
+      setCurrentTech(user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data || "Invalid OTP Code",
+      };
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    localStorage.clear();
     setCurrentTech(null);
-    navigate("/login");
+    setIsAuthenticated(false);
+    window.location.href = "/login";
+  };
+
+  // 5. Update Profile (Uses TechnicianService)
+  const updateProfile = async (updatedData) => {
+    try {
+      // Assuming you added updateTechnicianProfile to technicianService.js
+      // If not, you can use api.put('/technician/profile', updatedData) here directly
+      const response = await api.put("/technician-workflow/profile", updatedData); 
+      
+      // Merge and Save
+      // Note: The backend endpoint might return the full user or just a success message.
+      // Adjust based on your backend return type. Assuming it returns updated User DTO:
+      const newUser = { ...currentTech, ...updatedData }; 
+      
+      localStorage.setItem("user_data", JSON.stringify(newUser));
+      setCurrentTech(newUser);
+      return { success: true };
+    } catch (error) {
+      console.error("Profile Update Failed", error);
+      return { success: false, message: "Update failed" };
+    }
+  };
+
+  const value = {
+    currentTech,
+    isAuthenticated,
+    isLoading,
+    login,
+    logout,
+    signup,
+    verifyRegistration,
+    updateProfile
   };
 
   return (
-    <TechnicianAuthContext.Provider value={{ currentTech, loading, login, logout }}>
+    <TechnicianAuthContext.Provider value={value}>
       {children}
     </TechnicianAuthContext.Provider>
   );
 };
 
-export const useTechAuth = () => useContext(TechnicianAuthContext);
+export const useTechAuth = () => {
+  const context = useContext(TechnicianAuthContext);
+  if (!context)
+    throw new Error("useTechAuth must be used within a TechnicianAuthProvider");
+  return context;
+};
