@@ -35,3 +35,9 @@ export const createTechnicianReport = async (formData) => {
   });
   return response.data;
 };
+
+// 6. Update Profile
+export const updateTechnicianProfile = async (data) => {
+  const response = await api.put("/users/profile", data); // Assuming generic user profile endpoint
+  return response.data;
+};
