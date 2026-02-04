@@ -113,9 +113,9 @@ const useReportLogic = () => {
     setLoading(true);
     try {
       const data = await getOwnerReports(currentOwner.id);
-      
+
       // Map Backend DTO to Frontend UI Structure
-      const mappedData = data.map(r => ({
+      const mappedData = data.map((r) => ({
         id: r.id,
         title: r.reportTitle,
         description: r.reportDescription,
@@ -126,7 +126,7 @@ const useReportLogic = () => {
         student: r.reportedUserName || "Unknown User", // Works for Student or Tech
         studentId: r.reportedUserId,
         property: r.boardingTitle || "General",
-        evidenceCount: 0 // You can update this if backend sends file count
+        evidenceCount: 0, // You can update this if backend sends file count
       }));
 
       setReports(mappedData);
@@ -145,7 +145,10 @@ const useReportLogic = () => {
   const filteredReports = useMemo(() => {
     if (filter === "All") return reports;
     // Simple status matching
-    return reports.filter(r => r.status === filter || (filter === 'New' && r.status === 'PENDING'));
+    return reports.filter(
+      (r) =>
+        r.status === filter || (filter === "New" && r.status === "PENDING"),
+    );
   }, [reports, filter]);
 
   // 3. Submit Logic (Wraps the API)
@@ -166,7 +169,7 @@ const useReportLogic = () => {
     filteredReports,
     setFilter,
     submitNewReport,
-    loading
+    loading,
   };
 };
 
