@@ -58,11 +58,31 @@ export const OwnerAuthProvider = ({ children }) => {
 
   // --- 2. LOGIN ---
   const login = async (email, password) => {
-    const res = await api.post(
-      "/auth/login",
-      { email, password },
-      { headers: { Authorization: undefined } }
-    );
+    try {
+      const response = await api.post("/auth/login", { email, password });
+      const { token, refreshToken, user } = response.data;
+
+      if (user.role !== "OWNER") {
+        return {
+          success: false,
+          message: "Access Denied: This account is not a Partner account.",
+        };
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_data", JSON.stringify(user));
+
+      setCurrentOwner(user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      console.error("Login Error:", error);
+      const msg =
+        error.response?.status === 401 ? "Invalid credentials" : "Login failed";
+      return { success: false, message: msg };
+    }
+  };
 
   // --- 3. SIGNUP (Request OTP) ---
   const signup = async (userData) => {
@@ -89,14 +109,16 @@ export const OwnerAuthProvider = ({ children }) => {
       const response = await api.post("/auth/register/verify", { email, otp });
       const { token, refreshToken, user } = response.data;
 
-    localStorage.setItem("token", token);
-    localStorage.setItem("refreshToken", refreshToken);
-    localStorage.setItem("user_data", JSON.stringify(user));
-    localStorage.setItem("userId", user.id.toString());
+      localStorage.setItem("token", token);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user_data", JSON.stringify(user));
 
-    setCurrentOwner(user);
-    setIsAuthenticated(true);
-    return { success: true };
+      setCurrentOwner(user);
+      setIsAuthenticated(true);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: "Invalid OTP" };
+    }
   };
 
   const logout = () => {
@@ -107,17 +129,26 @@ export const OwnerAuthProvider = ({ children }) => {
     window.location.href = "/login";
   };
 
+  const value = {
+    currentOwner,
+    isAuthenticated,
+    isLoading,
+    login,
+    logout,
+    signup,
+    verifyRegistration,
+  };
+
   return (
-    <OwnerAuthContext.Provider
-      value={{ currentOwner, isAuthenticated, isLoading, login, logout }}
-    >
+    <OwnerAuthContext.Provider value={value}>
       {children}
     </OwnerAuthContext.Provider>
   );
 };
 
 export const useOwnerAuth = () => {
-  const ctx = useContext(OwnerAuthContext);
-  if (!ctx) throw new Error("useOwnerAuth must be used inside OwnerAuthProvider");
-  return ctx;
+  const context = useContext(OwnerAuthContext);
+  if (!context)
+    throw new Error("useOwnerAuth must be used within an OwnerAuthProvider");
+  return context;
 };

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
+import api from "../../api/api"; // adjust path if needed
+
 import {
   FaArrowLeft,
   FaWifi,
@@ -48,6 +50,8 @@ const amenityIcons = {
   bicycle: FaBicycle,
 };
 
+
+
 const mapAmenitiesWithIcons = (amenities) => {
   if (!amenities || !Array.isArray(amenities)) return [];
   const amenityIconMap = {
@@ -77,6 +81,43 @@ const BoardingDetailsPage = () => {
   const [currentBoarding, setCurrentBoarding] = useState(
     passedBoarding || null
   );
+
+  const navigate = useNavigate();
+
+const startChat = async () => {
+  try {
+    if (!currentUser) {
+      alert("You must be logged in to start a chat.");
+      return;
+    }
+
+    if (!id) {
+      console.error("Boarding ID missing");
+      return;
+    }
+
+    const res = await api.post("/chats", {
+      boardingId: Number(id),
+    });
+
+    console.log("CHAT API RESPONSE:", res.data);
+
+    if (!res.data?.chatRoomId) {
+      throw new Error("Chat room ID missing");
+    }
+
+    navigate(`/student/chat/${res.data.chatRoomId}`, {
+  state: {
+    name: currentBoarding?.owner?.name || "Owner",
+  },
+});
+
+  } catch (e) {
+    console.error("Chat start failed", e);
+    alert("Unable to start conversation. Please try again.");
+  }
+};
+
 
   // 2. Fetch Real Data & OVERWRITE Mock Data
   useEffect(() => {
@@ -164,10 +205,11 @@ const BoardingDetailsPage = () => {
   };
 
   const handleContact = (type) => {
-    if (type === 'message') {
-        alert(`Message feature for ${currentBoarding?.owner?.email} coming soon!`);
-    }
-  };
+  if (type === "message") {
+    startChat();
+  }
+};
+
 
   const headerRightContent = (
     <Link to="/student/search-boardings">
