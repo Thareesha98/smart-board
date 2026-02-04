@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 
-import { 
-  getOwnerRegistrations, 
-  decideRegistration 
+import {
+  getOwnerRegistrations,
+  decideRegistration,
 } from "../../api/owner/service";
 
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
@@ -13,7 +13,7 @@ const useRegistrationsLogic = () => {
   const { currentOwner } = useOwnerAuth();
 
   const [registrations, setRegistrations] = useState([]);
-  const [filter, setFilter] = useState("PENDING"); 
+  const [filter, setFilter] = useState("PENDING");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -28,18 +28,19 @@ const useRegistrationsLogic = () => {
       const data = await getOwnerRegistrations(currentOwner.id);
 
       const mappedData = data.map((dto) => {
-        // ✅ FIX 1: Map Backend "DECLINED" -> Frontend "REJECTED"
-        // "APPROVED" matches both sides, so no change needed there.
+        // Map Backend Status -> Frontend Status
         let uiStatus = dto.status;
-        if (dto.status === "DECLINED") uiStatus = "REJECTED"; 
+        if (dto.status === "DECLINED") uiStatus = "REJECTED";
+        // "APPROVED" stays "APPROVED"
 
         return {
           id: dto.id,
           studentName: dto.studentName || "Unknown Student",
-          boardingName: dto.boardingTitle || "Unknown Property", 
-          status: uiStatus, 
+          boardingName: dto.boardingTitle || "Unknown Property",
+          status: uiStatus,
           keyMoneyPaid: dto.keyMoneyPaid,
-          paymentTransactionRef: dto.paymentTransactionRef || dto.paymentSlipUrl,
+          paymentTransactionRef:
+            dto.paymentTransactionRef || dto.paymentSlipUrl,
           paymentMethod: dto.paymentMethod,
           studentNote: dto.studentNote,
           ownerNote: dto.ownerNote,
@@ -64,41 +65,48 @@ const useRegistrationsLogic = () => {
   }, [fetchRegistrations]);
 
   // --- 2. Action Handlers ---
-  const handleDecision = async (regId, uiStatus, ownerNote = "", signatureBase64 = null, allowPending = false) => {
+  const handleDecision = async (
+    regId,
+    uiStatus,
+    ownerNote = "",
+    signatureBase64 = null,
+    allowPending = false,
+  ) => {
     if (!currentOwner) return false;
 
-    // ✅ FIX 2: Map Frontend Status -> Correct Backend Enum
-    // Backend Error said allowed values are: [CANCELLED, DECLINED, PENDING, APPROVED]
+    // ✅ FIXED MAPPING LOGIC
+    // Allows "ACCEPTED" or "APPROVED" from UI, but ALWAYS sends "APPROVED" to backend
     let backendStatus = uiStatus;
-    
-    if (uiStatus === "APPROVED") {
-        backendStatus = "APPROVED"; // Send "APPROVED", NOT "ACCEPTED"
+
+    if (uiStatus === "APPROVED" || uiStatus === "ACCEPTED") {
+      backendStatus = "APPROVED";
     } else if (uiStatus === "REJECTED") {
-        backendStatus = "DECLINED"; // Send "DECLINED"
+      backendStatus = "DECLINED";
     }
 
     const toastId = toast.loading("Processing decision...");
 
     try {
       const decisionDTO = {
-        status: backendStatus, 
+        status: backendStatus,
         ownerNote: ownerNote,
         ownerSignatureBase64: signatureBase64,
-        approveWithPendingPayment: allowPending
+        approveWithPendingPayment: allowPending,
       };
 
       await decideRegistration(currentOwner.id, regId, decisionDTO);
-      
-      toast.success(`Request ${uiStatus.toLowerCase()} successfully!`, {
+
+      toast.success(`Request ${backendStatus.toLowerCase()} successfully!`, {
         id: toastId,
       });
 
       fetchRegistrations();
-      return true; 
-
+      return true;
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to update status.", { id: toastId });
+      toast.error(err.response?.data?.message || "Failed to update status.", {
+        id: toastId,
+      });
       return false;
     }
   };
@@ -106,8 +114,8 @@ const useRegistrationsLogic = () => {
   // --- 3. Filtering & Sorting ---
   const filteredRegistrations = useMemo(() => {
     let result = registrations.filter((reg) => {
-        if (filter === "ALL") return true; 
-        return reg.status === filter;
+      if (filter === "ALL") return true;
+      return reg.status === filter;
     });
 
     if (searchQuery) {
@@ -115,7 +123,7 @@ const useRegistrationsLogic = () => {
       result = result.filter(
         (reg) =>
           reg.studentName.toLowerCase().includes(lowerQuery) ||
-          reg.boardingName.toLowerCase().includes(lowerQuery)
+          reg.boardingName.toLowerCase().includes(lowerQuery),
       );
     }
 
@@ -131,7 +139,7 @@ const useRegistrationsLogic = () => {
   const counts = useMemo(() => {
     const initialCounts = { PENDING: 0, APPROVED: 0, REJECTED: 0 };
     return registrations.reduce((acc, reg) => {
-      const statusKey = reg.status; 
+      const statusKey = reg.status;
       if (acc[statusKey] !== undefined) acc[statusKey]++;
       return acc;
     }, initialCounts);
