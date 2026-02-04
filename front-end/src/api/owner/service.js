@@ -14,7 +14,7 @@ export const getOwnerReports = async (ownerId) => {
   }
 };
 
-export const createReport = async (reportData, files) => {
+export const createOwnerReport = async (reportData, files) => {
   try {
     const formData = new FormData();
 

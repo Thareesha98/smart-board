@@ -6,10 +6,12 @@ import Home from "./Home.jsx";
 // --- CONTEXT PROVIDERS ---
 import { StudentAuthProvider } from "./context/student/StudentAuthContext.jsx";
 import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
+import { TechnicianAuthProvider } from "./context/technician/TechnicianAuthContext.jsx";
 
 // --- ROUTE FILES ---
 import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
 import OwnerAppRoutes from "./routes/OwnerAppRoutes";
+import TechnicianAppRoutes from "./routes/TechnicianAppRoutes.jsx";
 
 // --- NEW UNIFIED PAGES ---
 // Ensure these paths match where you saved the files above
