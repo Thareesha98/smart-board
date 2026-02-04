@@ -1,16 +1,17 @@
 package com.sbms.sbms_monolith.service;
 
-import com.sbms.sbms_monolith.dto.boarding.BoardingDetailDTO;
-import com.sbms.sbms_monolith.dto.boarding.BoardingSearchRequest;
-import com.sbms.sbms_monolith.dto.boarding.BoardingSummaryDTO;
+import com.sbms.sbms_monolith.dto.boarding.*;
 import com.sbms.sbms_monolith.mapper.BoardingMapper;
 import com.sbms.sbms_monolith.model.Boarding;
+import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.Status;
 import com.sbms.sbms_monolith.repository.BoardingRepository;
 import com.sbms.sbms_monolith.repository.ReviewRepository;
+import com.sbms.sbms_monolith.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
@@ -157,4 +158,5 @@ public class BoardingService {
         Pageable pageable = PageRequest.of(page, size);
         return new PageImpl<>(content, pageable, filtered.size());
     }
+
 }

@@ -7,7 +7,7 @@ const StatCard = ({ label, value, color, subtext, icon: Icon }) => (
       <p className={`text-3xl font-black ${color} mb-1`}>{value}</p>
       <p className="text-[10px] text-muted font-medium bg-light px-2 py-0.5 rounded-full inline-block">{subtext}</p>
     </div>
-    <div className={`w-12 h-12 rounded-full flex items-center justify-center opacity-20 ${color.includes('error') ? 'bg-error' : 'bg-success'}`}>
+    <div className={`w-12 h-12 rounded-full flex items-center justify-center bg-gray-100`}>
       <Icon size={24} className={color} />
     </div>
   </div>

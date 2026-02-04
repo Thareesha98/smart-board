@@ -1,8 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCamera, FaCheckCircle, FaStar } from 'react-icons/fa';
+import { FaCamera, FaCheckCircle, FaStar, FaExternalLinkAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileHeader = ({ userData, onChangeAvatar }) => {
+
+  const navigate = useNavigate();
+
+  const handleNameClick = () => {
+    if (userData?.id) {
+        // ✅ Matches the route used in your InfoCards.jsx
+        navigate(`/profile/view/${userData.id}`);
+    }
+  };
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -29,9 +40,16 @@ const ProfileHeader = ({ userData, onChangeAvatar }) => {
           </div>
 
           <div className="text-center sm:text-left">
-            <h2 className="mb-2 text-3xl font-bold text-text-dark">
-              {userData.firstName} {userData.lastName}
-            </h2>
+            <div 
+                onClick={handleNameClick}
+                className="flex items-center justify-center gap-3 mb-2 cursor-pointer group sm:justify-start"
+                title="View Public Profile"
+            >
+                <h2 className="text-3xl font-bold transition-colors duration-200 text-text-dark group-hover:text-accent">
+                  {userData.firstName} {userData.lastName}
+                </h2>
+                <FaExternalLinkAlt className="text-sm transition-opacity duration-200 opacity-0 text-text-muted group-hover:opacity-100 group-hover:text-accent" />
+            </div>
             <p className="mb-1 text-lg text-text-muted">{userData.email}</p>
             <p className="mb-3 font-semibold text-accent">Student Member</p>
             
@@ -49,7 +67,7 @@ const ProfileHeader = ({ userData, onChangeAvatar }) => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid w-full grid-cols-2 gap-4 lg:w-auto">
+        {/* <div className="grid w-full grid-cols-2 gap-4 lg:w-auto">
           {[
             { label: 'Visits Booked', value: '12' },
             { label: 'Reviews Posted', value: '5' },
@@ -67,7 +85,7 @@ const ProfileHeader = ({ userData, onChangeAvatar }) => {
               <div className="text-sm text-text-muted">{stat.label}</div>
             </motion.div>
           ))}
-        </div>
+        </div> */}
       </div>
     </motion.section>
   );

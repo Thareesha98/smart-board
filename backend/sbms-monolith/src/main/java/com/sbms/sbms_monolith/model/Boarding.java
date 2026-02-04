@@ -33,6 +33,9 @@ public class Boarding extends BaseEntity {
 
     @Column(nullable = false)
     private String address;
+
+    private Double latitude;
+    private Double longitude;
     
     @Column(nullable = false)
     private BigDecimal pricePerMonth;
@@ -73,7 +76,3 @@ public class Boarding extends BaseEntity {
     private List<Review> reviews;
 
 }
-
-
-
-

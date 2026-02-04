@@ -19,6 +19,9 @@ public class OwnerBoardingResponseDTO {
     private String description;
     private String address;
 
+    private Double latitude;
+    private Double longitude;
+
     private BigDecimal pricePerMonth;
     private BigDecimal keyMoney;
 
@@ -26,7 +29,9 @@ public class OwnerBoardingResponseDTO {
     private BoardingType boardingType;
 
     private int availableSlots;
-    private Integer maxOccupants;
+    private int maxOccupants;
+    
+    private int currentStudents;
 
     private List<String> imageUrls;
     private List<String> amenities;

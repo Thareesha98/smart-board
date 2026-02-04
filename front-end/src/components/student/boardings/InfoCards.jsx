@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -9,6 +9,8 @@ import {
 const InfoCards = ({ boarding, onContactOwner }) => {
   const navigate = useNavigate();
 
+  const [showPhone, setShowPhone] = useState(false);
+
   const handleViewProfile = (userId) => {
     if (userId) {
         navigate(`/profile/view/${userId}`);
@@ -17,12 +19,25 @@ const InfoCards = ({ boarding, onContactOwner }) => {
     }
   };
 
+  const handleMessage = () => {
+    if (boarding.owner?.email) {
+        window.location.href = `mailto:${boarding.owner.email}`;
+    } else {
+        alert("Owner email not available.");
+        onContactOwner(); // Fallback
+    }
+  };
+
+  const handleCall = () => {
+    if (boarding.owner?.phone) {
+        setShowPhone(true); // Switches button text to phone number
+    } else {
+        alert("Owner phone number not available.");
+    }
+  };
+
   // --- MOCK MEMBERS DATA (Remove this if your backend provides boarding.members) ---
-  const membersList = boarding.members || [
-    { id: 101, name: "Kasun Perera", joinedDate: "Jan 2024", avatar: "https://ui-avatars.com/api/?name=Kasun+Perera&background=random" },
-    { id: 102, name: "Amal Silva", joinedDate: "Feb 2024", avatar: "https://ui-avatars.com/api/?name=Amal+Silva&background=random" },
-    { id: 103, name: "Nimali Fernando", joinedDate: "Mar 2024", avatar: "https://ui-avatars.com/api/?name=Nimali+Fernando&background=random" },
-  ];
+  const membersList = boarding?.members || [];
   // --------------------------------------------------------------------------------
 
   return (
@@ -38,10 +53,9 @@ const InfoCards = ({ boarding, onContactOwner }) => {
         title="Details"
         content={
           <div className="space-y-3">
-            <DetailItem label="Room Type" value={boarding.details?.roomType || 'N/A'} />
-            <DetailItem label="Bathroom" value={boarding.details?.bathroom || 'N/A'} />
-            <DetailItem label="Kitchen" value={boarding.details?.kitchen || 'N/A'} />
-            <DetailItem label="Lease" value={boarding.details?.leasePeriod || 'N/A'} />
+            <DetailItem label="Status" value={boarding.status === 'APPROVED' ? 'Active' : 'Pending'} />
+            <DetailItem label="Joined" value={boarding.joinedDate || 'N/A'} />
+            <DetailItem label="Rent" value={`LKR ${boarding.monthlyRent?.toLocaleString()}`} />
           </div>
         }
       />
@@ -57,7 +71,7 @@ const InfoCards = ({ boarding, onContactOwner }) => {
               {/* --- CLICKABLE AVATAR --- */}
               <img
                 onClick={() => handleViewProfile(boarding.owner?.id)}
-                src={boarding.owner?.avatar || "https://via.placeholder.com/50"}
+                src={boarding.owner?.avatar}
                 alt={boarding.owner?.name}
                 className="w-14 h-14 rounded-full object-cover border-2 border-accent p-0.5 flex-shrink-0 cursor-pointer hover:border-primary transition-colors duration-300"
               />
@@ -84,20 +98,22 @@ const InfoCards = ({ boarding, onContactOwner }) => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={onContactOwner}
+                onClick={handleMessage}
                 className="flex-1 min-w-[100px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-bold text-xs bg-accent text-white hover:bg-primary transition-all whitespace-nowrap"
               >
                 <FaEnvelope size={12} />
                 Message
               </motion.button>
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={onContactOwner}
-                className="flex-1 min-w-[80px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-bold text-xs border border-gray-300 text-text-dark hover:bg-gray-50 transition-all whitespace-nowrap"
+                onClick={handleCall}
+                className={`flex-1 min-w-[80px] flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-bold text-xs border border-gray-300 text-text-dark hover:bg-gray-50 transition-all whitespace-nowrap ${showPhone ? 'bg-gray-100' : ''}`}
               >
                 <FaPhone size={12} />
-                Call
+                {/* Logic: Show Phone Number if clicked, otherwise 'Call' */}
+                {showPhone ? boarding.owner?.phone : "Call"}
               </motion.button>
             </div>
           </div>

@@ -153,6 +153,18 @@ const Sidebar = () => {
                 </Link>
               );
             })}
+
+            <button
+               onClick={handleLogout}
+               className="
+                 flex flex-col items-center justify-center p-2 min-w-[75px] flex-shrink-0
+                 text-center transition-all duration-300 rounded-lg whitespace-nowrap
+                 hover:bg-white/10 text-accent
+               "
+             >
+               <FaSignOutAlt className="text-xl mb-1" />
+               <span className="text-[10px] font-medium leading-tight">Logout</span>
+             </button>
           </div>
         </div>
       </nav>

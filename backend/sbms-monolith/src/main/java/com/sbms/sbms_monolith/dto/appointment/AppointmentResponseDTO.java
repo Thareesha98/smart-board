@@ -3,6 +3,7 @@ package com.sbms.sbms_monolith.dto.appointment;
 import com.sbms.sbms_monolith.model.enums.AppointmentStatus;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,6 +17,8 @@ public class AppointmentResponseDTO {
     private String distance;
 
     private String boardingImage;
+
+    private BigDecimal keyMoney;
 
     private Long studentId;
     private String studentName;

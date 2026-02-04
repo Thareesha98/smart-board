@@ -149,6 +149,8 @@ const useMyAdsLogic = () => {
         availableSlots: parseInt(formData.availableSlots || 1),
         maxOccupants: parseInt(formData.maxOccupants || 1),
         amenities: formData.amenities,
+        latitude: parseFloat(formData.latitude),
+        longitude: parseFloat(formData.longitude),
         nearbyPlaces: {}, 
         imageUrls: uploadedUrls,
       };
@@ -191,6 +193,8 @@ const useMyAdsLogic = () => {
         availableSlots: parseInt(formData.availableSlots),
         maxOccupants: parseInt(formData.maxOccupants),
         amenities: formData.amenities,
+        latitude: parseFloat(formData.latitude),
+        longitude: parseFloat(formData.longitude),
         nearbyPlaces: {}, 
         imageUrls: finalImages,
         
@@ -242,7 +246,9 @@ const useMyAdsLogic = () => {
         rent: data.pricePerMonth,
         deposit: data.keyMoney,
         currentImages: data.imageUrls || [],
-        status: normalizeStatus(data.status)
+        status: normalizeStatus(data.status),
+        latitude: data.latitude || 6.9271,
+        longitude: data.longitude || 79.8612
       };
     } catch (err) {
       console.error(err);

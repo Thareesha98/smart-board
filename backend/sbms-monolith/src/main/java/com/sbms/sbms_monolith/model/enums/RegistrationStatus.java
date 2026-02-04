@@ -4,6 +4,7 @@ public enum RegistrationStatus {
 	PENDING,
     APPROVED,
     DECLINED,
-    CANCELLED
-
+    CANCELLED,
+    LEAVE_REQUESTED,
+    LEFT
 }

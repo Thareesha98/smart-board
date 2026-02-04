@@ -197,7 +197,15 @@ public class AuthController {
                         .authorities("ROLE_" + user.getRole().name())
                         .build();
 
-        return jwtService.generateToken(userDetails);
+       // return jwtService.generateToken(userDetails);
+        
+        String token = jwtService.generateToken(
+                userDetails,
+                user.getId(),
+                user.getRole().name()
+        );
+
+        return token;
     }
 
     @PostMapping("/change-password")

@@ -52,6 +52,10 @@ public class BoardingMapper {
         dto.setTitle(b.getTitle());
         dto.setDescription(b.getDescription());
         dto.setAddress(b.getAddress());
+
+        dto.setLatitude(b.getLatitude());
+        dto.setLongitude(b.getLongitude());
+
         dto.setPricePerMonth(b.getPricePerMonth());
         dto.setKeyMoney(b.getKeyMoney());
 
@@ -106,6 +110,10 @@ public class BoardingMapper {
         b.setTitle(dto.getTitle());
         b.setDescription(dto.getDescription());
         b.setAddress(dto.getAddress());
+
+        b.setLatitude(dto.getLatitude());
+        b.setLongitude(dto.getLongitude());
+
         b.setPricePerMonth(dto.getPricePerMonth());
         b.setKeyMoney(dto.getKeyMoney());
         b.setGenderType(dto.getGenderType());
@@ -125,10 +133,18 @@ public class BoardingMapper {
     public static OwnerBoardingResponseDTO toOwnerResponse(Boarding b) {
         OwnerBoardingResponseDTO dto = new OwnerBoardingResponseDTO();
 
+        int max = b.getMaxOccupants();
+        int now = b.getAvailable_slots();
+        
+        
         dto.setId(b.getId());
         dto.setTitle(b.getTitle());
         dto.setDescription(b.getDescription());
         dto.setAddress(b.getAddress());
+
+        dto.setLatitude(b.getLatitude());
+        dto.setLongitude(b.getLongitude());
+
         dto.setPricePerMonth(b.getPricePerMonth());
         dto.setKeyMoney(b.getKeyMoney());
         dto.setGenderType(b.getGenderType());
@@ -138,6 +154,7 @@ public class BoardingMapper {
         dto.setImageUrls(b.getImageUrls());
         dto.setAmenities(b.getAmenities());
         dto.setNearbyPlaces(b.getNearbyPlaces());
+        dto.setCurrentStudents(max - now);
 
         dto.setStatus(b.getStatus());
         dto.setBoosted(b.isBosted());

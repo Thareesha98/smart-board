@@ -48,4 +48,12 @@ public class PaymentTransaction {
 
     private LocalDateTime paidAt;
     private String receiptPath;
+    
+    
+    
+    @Column(length = 500)
+    private String slipUrl; 
+    
+    private LocalDateTime verifiedAt;
+    private Long verifiedByOwnerId;
 }
