@@ -1,88 +1,72 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
-import UtilityCard from "../../components/Owner/utilities/UtilityCard";
 import HeaderBar from "../../components/Owner/common/HeaderBar";
+import UtilityCard from "../../components/Owner/utilities/UtilityCard";
 
 export default function UtilityPage() {
-
-  const [boardings, setBoardings] = useState([]);
-  const [selectedBoarding, setSelectedBoarding] = useState(null);
+  const navigate = useNavigate();
   const [utilities, setUtilities] = useState([]);
-
-  const [form, setForm] = useState({
-    month: "",
-    electricity: "",
-    water: "",
-  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadData();
+    loadUtilities();
   }, []);
 
-  const loadData = async () => {
-    const [bRes, uRes] = await Promise.all([
-      api.get("boardings/owner"),
-      api.get("/owner/utilities"),
-    ]);
-
-    setBoardings(bRes.data);
-    setUtilities(uRes.data);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    await api.post("/owner/utilities", {
-      boardingId: selectedBoarding.id,
-      month: form.month,
-      electricityAmount: form.electricity,
-      waterAmount: form.water,
-    });
-
-    setSelectedBoarding(null);
-    loadData();
+  const loadUtilities = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/owner/utilities");
+      setUtilities(res.data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="p-6">
-      <HeaderBar title="Utility Management" />
+    <div className="p-6 space-y-6">
+      <HeaderBar title="Utilities" />
 
-      <div className="grid grid-cols-3 gap-6">
-        {boardings.map(b => (
-          <UtilityCard
-  key={b.id}
-  boarding={b}
-  utility={utilities.find(u => u.boardingId === b.id)}
-  onSaved={loadData}
-/>
-
-        ))}
-      </div>
-
-      {selectedBoarding && (
-        <form onSubmit={handleSubmit} className="modal">
-          <h3>{selectedBoarding.title}</h3>
-
-          <input type="month"
-            value={form.month}
-            onChange={e => setForm({ ...form, month: e.target.value })}
-          />
-
-          <input type="number"
-            placeholder="Electricity"
-            value={form.electricity}
-            onChange={e => setForm({ ...form, electricity: e.target.value })}
-          />
-
-          <input type="number"
-            placeholder="Water"
-            value={form.water}
-            onChange={e => setForm({ ...form, water: e.target.value })}
-          />
-
-          <button type="submit">Save Utilities</button>
-        </form>
+      {loading ? (
+        <div className="text-center text-gray-500">
+          Loading utilities...
+        </div>
+      ) : utilities.length === 0 ? (
+        <div className="text-center text-gray-500">
+          No utility bills yet
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {utilities.map((u) => (
+            <UtilityCard
+              key={u.id}
+              utility={u}
+              onView={() =>
+                navigate(
+                  `/owner/utility/details?boardingId=${u.boardingId}&month=${u.month}&boardingName=${u.boarding?.title || u.boardingTitle}`
+                )
+              }
+            />
+          ))}
+        </div>
       )}
+
+      {/* ACTION BUTTONS */}
+      <div className="flex gap-4 pt-6">
+        <button
+          onClick={() => navigate("/owner/utility/payment-verify")}
+          className="px-5 py-3 bg-blue-600 text-white rounded-lg font-semibold"
+        >
+          Payment Approvals
+        </button>
+
+        <button
+          onClick={() => navigate("/owner/utility/add")}
+          className="px-5 py-3 bg-emerald-600 text-white rounded-lg font-semibold"
+        >
+          + Add / Update Utilities
+        </button>
+      </div>
     </div>
   );
 }

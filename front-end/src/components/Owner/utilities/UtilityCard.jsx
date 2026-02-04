@@ -1,26 +1,40 @@
 import { useState } from "react";
 import api from "../../../api/api";
 
-const UtilityCard = ({ boarding, utility, onSaved }) => {
+const UtilityCard = ({ utility, onSaved, onView }) => {
+  if (!utility) return null;
+
   const [month, setMonth] = useState(
-    utility?.month || new Date().toISOString().slice(0, 7)
+    utility.month || new Date().toISOString().slice(0, 7)
   );
   const [electricity, setElectricity] = useState(
-    utility?.electricityAmount || ""
+    utility.electricityAmount ?? ""
   );
   const [water, setWater] = useState(
-    utility?.waterAmount || ""
+    utility.waterAmount ?? ""
   );
   const [loading, setLoading] = useState(false);
 
-  const studentCount = boarding.currentStudents || 0;
-  const baseRent = boarding.pricePerMonth || 0;
+  /* =======================
+     🔥 MATCH MOBILE DATA
+     ======================= */
+
+  const boardingName =
+    utility.boardingName || utility.boarding?.title || "Unknown Boarding";
+
+  const baseRent =
+    Number(utility.boarding?.pricePerMonth || 0);
+
+  const studentCount =
+    Number(utility.boarding?.currentStudents || 0);
+
+  const perStudentUtility =
+    Number(utility.perStudentUtility || 0);
 
   const totalUtility =
     Number(electricity || 0) + Number(water || 0);
 
-  const perStudentUtility =
-    studentCount > 0 ? totalUtility / studentCount : 0;
+  /* ======================= */
 
   const handleSave = async () => {
     if (!month || electricity === "" || water === "") {
@@ -32,13 +46,13 @@ const UtilityCard = ({ boarding, utility, onSaved }) => {
       setLoading(true);
 
       await api.post("/owner/utilities", {
-        boardingId: boarding.id,
+        boardingId: utility.boardingId,
         month,
         electricityAmount: Number(electricity),
         waterAmount: Number(water),
       });
 
-      onSaved();
+      onSaved?.();
     } catch (err) {
       console.error(err);
       alert("Failed to save utility data");
@@ -53,23 +67,14 @@ const UtilityCard = ({ boarding, utility, onSaved }) => {
       {/* HEADER */}
       <div>
         <h3 className="text-sm font-bold text-text">
-          {boarding.title /* adjust if DTO uses another field */}
+          {boardingName}
         </h3>
 
-        <h5 className="text-sm font-bold text-text">
-          {boarding.address /* adjust if DTO uses another field */}
-        </h5>
-        <p className="text-xs text-muted">
-          Base Rent: LKR {baseRent.toLocaleString()}
-        </p>
-        <p className="text-xs text-muted">
-          Students: {studentCount}
-        </p>
+       
       </div>
 
       {/* INPUTS */}
       <div className="space-y-3">
-
         <div>
           <label className="text-xs font-semibold">Billing Month</label>
           <input
@@ -113,18 +118,29 @@ const UtilityCard = ({ boarding, utility, onSaved }) => {
         </div>
       </div>
 
-      {/* ACTION */}
-      <button
-        onClick={handleSave}
-        disabled={loading}
-        className={`w-full py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition ${
-          loading
-            ? "bg-gray-300"
-            : "bg-accent text-white hover:bg-primary"
-        }`}
-      >
-        {utility ? "Update Utilities" : "Save Utilities"}
-      </button>
+      {/* ACTIONS */}
+      <div className="flex gap-2">
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase transition ${
+            loading
+              ? "bg-gray-300"
+              : "bg-accent text-white hover:bg-primary"
+          }`}
+        >
+          Update Utilities
+        </button>
+
+        {onView && (
+          <button
+            onClick={onView}
+            className="px-3 py-2 rounded-lg text-xs font-bold border"
+          >
+            View
+          </button>
+        )}
+      </div>
     </div>
   );
 };
