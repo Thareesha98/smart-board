@@ -8,96 +8,48 @@ export const OwnerAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 1. Check for logged-in user on load
   useEffect(() => {
-    const initializeAuth = async () => {
+    try {
       const token = localStorage.getItem("token");
-      const savedUser = localStorage.getItem("user_data");
+      const userData = localStorage.getItem("user_data");
 
-      if (token && savedUser) {
-        try {
-          setCurrentOwner(JSON.parse(savedUser));
+      if (token && userData) {
+        const user = JSON.parse(userData);
+        if (user.role === "OWNER") {
+          setCurrentOwner(user);
           setIsAuthenticated(true);
-        } catch (e) {
-          console.error("Failed to parse user data", e);
+        } else {
           localStorage.clear();
         }
       }
+    } catch {
+      localStorage.clear();
+    } finally {
       setIsLoading(false);
-    };
-
-    initializeAuth();
+    }
   }, []);
 
-  // 2. Login
   const login = async (email, password) => {
-    try {
-      const response = await api.post("/auth/login", { email, password });
-      const { token, refreshToken, user } = response.data;
+    const res = await api.post(
+      "/auth/login",
+      { email, password },
+      { headers: { Authorization: undefined } }
+    );
 
-      if (user.role !== "OWNER") {
-        return {
-          success: false,
-          message: "Access Denied: This account is not a Partner account.",
-        };
-      }
+    const { token, refreshToken, user } = res.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("refresh_token", refreshToken);
-      localStorage.setItem("user_data", JSON.stringify(user));
-
-      setCurrentOwner(user);
-      setIsAuthenticated(true);
-      return { success: true };
-    } catch (error) {
-      console.error("Login Error:", error);
-      const msg =
-        error.response?.status === 401 ? "Invalid credentials" : "Login failed";
-      return { success: false, message: msg };
+    if (user.role !== "OWNER") {
+      return { success: false, message: "Not owner account" };
     }
-  };
 
-  // 3. Signup Step 1: Request OTP
-  const signup = async (userData) => {
-    try {
-      // 🚀 FIX: We manually override the headers for this request.
-      // Setting Authorization to undefined removes it completely.
-      const config = {
-        headers: {
-          Authorization: undefined,
-        },
-      };
+    localStorage.setItem("token", token);
+    localStorage.setItem("refreshToken", refreshToken);
+    localStorage.setItem("user_data", JSON.stringify(user));
+    localStorage.setItem("userId", user.id.toString());
 
-      const response = await api.post(
-        "/auth/register/request",
-        userData,
-        config
-      );
-      return { success: true, message: response.data };
-    } catch (error) {
-      console.error("Owner Signup Error:", error);
-      return {
-        success: false,
-        message: error.response?.data || "Registration failed",
-      };
-    }
-  };
-  // 4. Signup Step 2: Verify OTP
-  const verifyRegistration = async (email, otp) => {
-    try {
-      const response = await api.post("/auth/register/verify", { email, otp });
-      const { token, refreshToken, user } = response.data;
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("refresh_token", refreshToken);
-      localStorage.setItem("user_data", JSON.stringify(user));
-
-      setCurrentOwner(user);
-      setIsAuthenticated(true);
-      return { success: true };
-    } catch (error) {
-      return { success: false, message: "Invalid OTP" };
-    }
+    setCurrentOwner(user);
+    setIsAuthenticated(true);
+    return { success: true };
   };
 
   const logout = () => {
@@ -107,26 +59,17 @@ export const OwnerAuthProvider = ({ children }) => {
     window.location.href = "/login";
   };
 
-  const value = {
-    currentOwner,
-    isAuthenticated,
-    isLoading,
-    login,
-    logout,
-    signup,
-    verifyRegistration,
-  };
-
   return (
-    <OwnerAuthContext.Provider value={value}>
+    <OwnerAuthContext.Provider
+      value={{ currentOwner, isAuthenticated, isLoading, login, logout }}
+    >
       {children}
     </OwnerAuthContext.Provider>
   );
 };
 
 export const useOwnerAuth = () => {
-  const context = useContext(OwnerAuthContext);
-  if (!context)
-    throw new Error("useOwnerAuth must be used within an OwnerAuthProvider");
-  return context;
+  const ctx = useContext(OwnerAuthContext);
+  if (!ctx) throw new Error("useOwnerAuth must be used inside OwnerAuthProvider");
+  return ctx;
 };

@@ -1,30 +1,32 @@
-import axios from 'axios';
+import axios from "axios";
 
 const baseURL = import.meta.env.VITE_API_BASE;
 
 const api = axios.create({
-  baseURL: baseURL,
+
+  baseURL: import.meta.env.VITE_API_BASE,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    
-    // 🔒 STRICT CHECK: Ensure token is real string and not "null"/"undefined" text
-    if (token && token !== "null" && token !== "undefined" && token.length > 10) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      // 🚀 CRITICAL: Delete the header to force a clean public request
-      delete config.headers.Authorization;
-      config.headers.Authorization = undefined; 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  const rawUser = localStorage.getItem("user_data");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  // ✅ ALWAYS attach numeric student ID
+  if (rawUser) {
+    const user = JSON.parse(rawUser);
+    if (user?.id) {
+      config.headers["X-User-Id"] = user.id;
     }
-    
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  }
+
+  return config;
+});
 
 export default api;
