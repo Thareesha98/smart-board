@@ -99,7 +99,7 @@ const useMyAdsLogic = () => {
         status: newStatus 
       };
 
-      console.log("Sending Payload:", payload); // Debugging
+      
 
       // 3. Send Update
       await updateBoarding(id, payload); 
@@ -108,7 +108,7 @@ const useMyAdsLogic = () => {
       // Using a small timeout ensures the DB transaction clears before we fetch
       setTimeout(() => {
         fetchAds();
-        toast.success(`Ad marked as ${newStatus}`, { id: toastId });
+        toast.success(isCurrentlyActive ? "Ad deactivated" : "Ad is now Active!", { id: toastId });
       }, 500);
 
     } catch (err) {
