@@ -27,7 +27,6 @@ public class BoardingDetailDTO {
     private String description;
     private String address;
 
- 
     private BigDecimal pricePerMonth;
     private BigDecimal keyMoney;
     

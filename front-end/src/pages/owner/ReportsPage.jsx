@@ -81,7 +81,7 @@ const ReportsPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, height: "auto" }}
         >
-          <h2 className="text-2xl font-bold text-primary mb-6">
+          <h2 className="mb-6 text-2xl font-bold text-primary">
             Create New Report
           </h2>
           <ReportTypesGrid onSelectType={handleSelectType} />

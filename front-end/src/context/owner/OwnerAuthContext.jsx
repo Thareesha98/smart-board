@@ -8,27 +8,55 @@ export const OwnerAuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // --- 1. AUTO-LOGIN ON LOAD ---
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("token");
-      const userData = localStorage.getItem("user_data");
+    const checkLoggedIn = async () => {
+      const refreshToken = localStorage.getItem("refresh_token");
 
-      if (token && userData) {
-        const user = JSON.parse(userData);
-        if (user.role === "OWNER") {
-          setCurrentOwner(user);
-          setIsAuthenticated(true);
-        } else {
+      if (!refreshToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Attempt to refresh the session using the stored Refresh Token
+        const response = await api.post("/auth/refresh", {
+          refreshToken: refreshToken,
+        });
+
+        if (response.status === 200) {
+          const { token, refreshToken: newRefreshToken, user } = response.data;
+
+          // ✅ CHECK ROLE: Only log in if it is an OWNER
+          if (user.role === "OWNER") {
+            // Update storage with fresh tokens
+            localStorage.setItem("token", token);
+            localStorage.setItem("refresh_token", newRefreshToken);
+            localStorage.setItem("user_data", JSON.stringify(user));
+
+            setCurrentOwner(user);
+            setIsAuthenticated(true);
+          } else {
+            // If the token belongs to a Student, we do NOT clear storage.
+            // We just don't authenticate this specific Owner context.
+            console.warn("Found valid session, but user is not an Owner.");
+          }
+        }
+      } catch (error) {
+        console.error("Auto-login failed:", error);
+        // If the refresh token is expired or invalid (401/403), clear storage
+        if (error.response?.status === 401 || error.response?.status === 403) {
           localStorage.clear();
         }
+      } finally {
+        setIsLoading(false);
       }
-    } catch {
-      localStorage.clear();
-    } finally {
-      setIsLoading(false);
-    }
+    };
+
+    checkLoggedIn();
   }, []);
 
+  // --- 2. LOGIN ---
   const login = async (email, password) => {
     const res = await api.post(
       "/auth/login",
@@ -36,11 +64,30 @@ export const OwnerAuthProvider = ({ children }) => {
       { headers: { Authorization: undefined } }
     );
 
-    const { token, refreshToken, user } = res.data;
-
-    if (user.role !== "OWNER") {
-      return { success: false, message: "Not owner account" };
+  // --- 3. SIGNUP (Request OTP) ---
+  const signup = async (userData) => {
+    try {
+      const config = { headers: { Authorization: undefined } };
+      const response = await api.post(
+        "/auth/register/request",
+        userData,
+        config,
+      );
+      return { success: true, message: response.data };
+    } catch (error) {
+      console.error("Owner Signup Error:", error);
+      return {
+        success: false,
+        message: error.response?.data || "Registration failed",
+      };
     }
+  };
+
+  // --- 4. VERIFY OTP ---
+  const verifyRegistration = async (email, otp) => {
+    try {
+      const response = await api.post("/auth/register/verify", { email, otp });
+      const { token, refreshToken, user } = response.data;
 
     localStorage.setItem("token", token);
     localStorage.setItem("refreshToken", refreshToken);
@@ -56,6 +103,7 @@ export const OwnerAuthProvider = ({ children }) => {
     localStorage.clear();
     setCurrentOwner(null);
     setIsAuthenticated(false);
+    // Force redirect or let the protected route handle it
     window.location.href = "/login";
   };
 
