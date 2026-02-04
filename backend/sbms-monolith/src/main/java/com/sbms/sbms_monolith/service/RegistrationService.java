@@ -16,6 +16,7 @@ import com.sbms.sbms_monolith.model.enums.RegistrationStatus;
 import com.sbms.sbms_monolith.repository.BoardingRepository;
 import com.sbms.sbms_monolith.repository.PaymentIntentRepository;
 import com.sbms.sbms_monolith.repository.RegistrationRepository;
+import com.sbms.sbms_monolith.repository.ReviewRepository;
 import com.sbms.sbms_monolith.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RegistrationService {
@@ -35,6 +37,9 @@ public class RegistrationService {
     @Autowired private PaymentIntentRepository paymentIntentRepo;
     @Autowired private AgreementPdfService agreementPdfService;
     @Autowired private AgreementBlockchainService agreementBlockchainService;
+    
+    @Autowired
+    private ReviewRepository reviewRepo;
 
     // ================= STUDENT REGISTER =================
 
@@ -206,9 +211,9 @@ public class RegistrationService {
 
     // ================= DASHBOARD =================
 
+    @Transactional(readOnly = true)
     public StudentBoardingDashboardDTO getDashboard(Long regId, Long loggedStudentId) {
-
-    	Registration reg = registrationRepo.findById(regId)
+        Registration reg = registrationRepo.findById(regId)
                 .orElseThrow(() -> new RuntimeException("Registration not found"));
 
         if (!reg.getStudent().getId().equals(loggedStudentId)) {
@@ -216,17 +221,103 @@ public class RegistrationService {
         }
 
         BigDecimal currentMonthDue = reg.getBoarding().getPricePerMonth();
+        String paymentStatus = "PENDING";
+        LocalDate lastPaymentDate = null;
+        int openIssues = 0;
+        int resolvedIssues = 0;
+        LocalDate lastIssueDate = null;
 
-        return StudentBoardingDashboardMapper.toDTO(
-                reg,
-                currentMonthDue,
-                "PENDING",
-                null,
-                0,
-                0,
-                null,
-                0.0,
-                false
+        Double avg = reviewRepo.getAverageRatingForBoarding(reg.getBoarding().getId());
+        Double avgRating = (avg != null) ? Math.round(avg * 10.0) / 10.0 : 0.0; // Round to 1 decimal
+
+        int reviewCount = reviewRepo.countByBoardingId(reg.getBoarding().getId());
+
+        boolean reviewSubmitted = reviewRepo.existsByStudentIdAndBoardingId(loggedStudentId, reg.getBoarding().getId());
+
+        StudentBoardingDashboardDTO dto = StudentBoardingDashboardMapper.toDTO(
+                reg, currentMonthDue, paymentStatus, lastPaymentDate,
+                openIssues, resolvedIssues, lastIssueDate, avgRating, reviewSubmitted
         );
+
+        List<Registration> activeRegistrations = registrationRepo.findByBoarding_IdAndStatus(
+                reg.getBoarding().getId(), RegistrationStatus.APPROVED
+        );
+
+        List<StudentBoardingDashboardDTO.MemberDTO> members = activeRegistrations.stream()
+                .map(r -> {
+                    StudentBoardingDashboardDTO.MemberDTO m = new StudentBoardingDashboardDTO.MemberDTO();
+                    m.setId(r.getStudent().getId());
+                    m.setName(r.getStudent().getFullName());
+                    m.setPhone(r.getStudent().getPhone());
+                    m.setJoinedDate(r.getCreatedAt().toLocalDate().toString());
+                    m.setAvatar(r.getStudent().getProfileImageUrl());
+                    return m;
+                }).collect(Collectors.toList());
+
+        dto.setMembers(members);
+
+        if (reg.getBoarding().getImageUrls() != null && !reg.getBoarding().getImageUrls().isEmpty()) {
+            dto.setBoardingImage(reg.getBoarding().getImageUrls().get(0));
+        }
+
+        if (reg.getBoarding().getCreatedAt() != null) {
+            dto.setBoardingCreatedDate(reg.getBoarding().getCreatedAt().toLocalDate().toString());
+        } else {
+            dto.setBoardingCreatedDate(LocalDate.now().toString()); // Fallback
+        }
+
+        if (reg.getBoarding().getOwner() != null) {
+            dto.setOwnerId(reg.getBoarding().getOwner().getId());
+            dto.setOwnerName(reg.getBoarding().getOwner().getFullName());
+            // ✅ Fix: Set Owner Profile Image
+            dto.setOwnerProfileImage(reg.getBoarding().getOwner().getProfileImageUrl());
+            dto.setOwnerEmail(reg.getBoarding().getOwner().getEmail());
+            dto.setOwnerPhone(reg.getBoarding().getOwner().getPhone());
+        }
+
+        dto.setAverageRating(avgRating);
+        dto.setReviewCount(reviewCount);
+
+        return dto;
     }
+    
+    public void approveLeave(Long ownerId, Long regId) {
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!r.getBoarding().getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        // Logic: Free up slot
+        if (r.getStatus() == RegistrationStatus.LEAVE_REQUESTED || r.getStatus() == RegistrationStatus.APPROVED) {
+            Boarding b = r.getBoarding();
+            b.setAvailable_slots(b.getAvailable_slots() + r.getNumberOfStudents());
+            boardingRepo.save(b);
+
+            r.setStatus(RegistrationStatus.LEFT);
+            registrationRepo.save(r);
+        } else {
+            throw new RuntimeException("Cannot approve leave for this registration status.");
+        }
+    }
+    
+    @Transactional
+    public void requestLeave(Long studentId, Long regId) {
+        Registration r = registrationRepo.findById(regId)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        if (!r.getStudent().getId().equals(studentId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        if (r.getStatus() != RegistrationStatus.APPROVED) {
+            throw new RuntimeException("You can only request leave if you are currently approved.");
+        }
+
+        r.setStatus(RegistrationStatus.LEAVE_REQUESTED);
+        registrationRepo.save(r);
+    }
+
+
 }
