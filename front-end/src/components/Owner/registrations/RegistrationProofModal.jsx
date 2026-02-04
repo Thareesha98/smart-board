@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaCheck, FaTimes, FaReceipt, FaInfoCircle } from "react-icons/fa";
+import { FaCheck, FaTimes, FaReceipt, FaPenNib, FaUndo } from "react-icons/fa";
+import SignatureCanvas from "react-signature-canvas";
 
 const RegistrationProofModal = ({
   isOpen,
@@ -10,18 +11,46 @@ const RegistrationProofModal = ({
 }) => {
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const sigPad = useRef(null);
 
   if (!isOpen || !registration) return null;
 
   const handleSubmit = async (status) => {
+    // 1. Validate Signature for Approval
+    if (status === "APPROVED") {
+      if (sigPad.current.isEmpty()) {
+        alert("Please sign the agreement to approve.");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
-    // Call the hook function passed via props
-    const success = await onDecide(registration.id, status, note);
+
+    // 2. Get Signature
+    const signature =
+      sigPad.current && !sigPad.current.isEmpty()
+        ? sigPad.current.getTrimmedCanvas().toDataURL("image/png")
+        : null;
+
+    // 3. Send Decision
+    const success = await onDecide(
+      registration.id,
+      status,
+      note,
+      signature,
+      true,
+    );
+
     setIsSubmitting(false);
     if (success) {
-      setNote(""); // Reset note
-      onClose(); // Close modal
+      setNote("");
+      if (sigPad.current) sigPad.current.clear();
+      onClose();
     }
+  };
+
+  const clearSignature = () => {
+    if (sigPad.current) sigPad.current.clear();
   };
 
   return (
@@ -31,81 +60,93 @@ const RegistrationProofModal = ({
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md overflow-hidden bg-white shadow-2xl rounded-3xl"
+          className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden relative flex flex-col max-h-[90vh]"
         >
           {/* Header */}
-          <div className="flex items-center gap-4 px-6 py-5 bg-primary">
+          <div className="flex items-center gap-4 px-6 py-5 bg-primary shrink-0">
             <div className="bg-white/20 p-2.5 rounded-xl text-white shadow-inner">
               <FaReceipt size={24} />
             </div>
             <div>
               <h3 className="mb-1 text-lg font-black leading-none text-white">
-                Payment Review
+                Verify Payment
               </h3>
               <p className="text-xs font-medium text-white/80">
-                Verify transaction details below
+                Review key money & Sign agreement
               </p>
             </div>
           </div>
 
-          <div className="p-6 space-y-5">
-            {/* Student Note (if any) */}
-            {registration.studentNote && (
-              <div className="flex items-start gap-3 p-3 border border-blue-100 bg-blue-50 rounded-xl">
-                <FaInfoCircle className="text-blue-500 mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-blue-400 mb-0.5">
-                    Student Note
-                  </p>
-                  <p className="text-xs font-medium text-blue-900">
-                    {registration.studentNote}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Proof Section */}
+          <div className="p-6 space-y-5 overflow-y-auto">
+            {/* Transaction Proof */}
             <div className="space-y-2">
               <label className="ml-1 text-xs font-black tracking-wider uppercase text-muted">
-                Transaction Reference
+                Transaction Ref ({registration.paymentMethod || "N/A"})
               </label>
               <div className="p-4 font-mono text-sm font-bold text-center break-all border-2 border-gray-200 border-dashed text-primary bg-gray-50 rounded-xl">
                 {registration.paymentTransactionRef || "No reference provided"}
               </div>
             </div>
 
-            {/* Owner Note Input */}
+            {/* Note Input */}
             <div className="space-y-2">
               <label className="ml-1 text-xs font-black tracking-wider uppercase text-muted">
-                Your Response Note
+                Owner Note
               </label>
               <textarea
-                className="w-full text-sm p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white placeholder:text-muted/50 font-medium text-text min-h-[80px]"
-                placeholder="E.g., Payment received, welcome! OR Invalid transaction ID."
+                className="w-full text-sm p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white min-h-[60px]"
+                placeholder="Message to student..."
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
+            </div>
+
+            {/* Signature Section (Required for Approval) */}
+            <div className="space-y-2">
+              <div className="flex items-end justify-between">
+                <label className="flex items-center gap-1 ml-1 text-xs font-black tracking-wider uppercase text-muted">
+                  <FaPenNib /> Signature (Required for Approval)
+                </label>
+                <button
+                  onClick={clearSignature}
+                  className="text-[10px] text-primary font-bold flex items-center gap-1 hover:underline"
+                >
+                  <FaUndo /> Clear
+                </button>
+              </div>
+              <div className="overflow-hidden transition-colors border-2 border-gray-200 rounded-xl bg-gray-50 hover:border-primary/50">
+                <SignatureCanvas
+                  ref={sigPad}
+                  penColor="black"
+                  canvasProps={{ className: "w-full h-32 bg-white" }}
+                />
+              </div>
+              <p className="text-[10px] text-muted leading-tight">
+                By signing, you agree to the Terms of Service and generate a
+                binding rental agreement.
+              </p>
             </div>
 
             {/* Actions */}
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 disabled={isSubmitting}
-                onClick={() => handleSubmit("REJECTED")}
+                onClick={() => handleSubmit("REJECTED")} // ⚠️ Sends "REJECTED"
                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-error/10 bg-error/5 text-error font-bold text-sm hover:bg-error hover:text-white hover:border-error transition-all disabled:opacity-50"
               >
                 <FaTimes /> Reject
               </button>
               <button
                 disabled={isSubmitting}
-                onClick={() => handleSubmit("ACCEPTED")}
+                // ✅ FIXED: Sends "APPROVED" (Matches Backend Enum)
+                onClick={() => handleSubmit("APPROVED")}
                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-success text-white font-bold text-sm shadow-lg shadow-success/30 hover:bg-success-dark hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <div className="w-4 h-4 border-2 rounded-full border-white/30 border-t-white animate-spin" />
+                  "Processing..."
                 ) : (
                   <>
-                    <FaCheck /> Accept & Verify
+                    <FaCheck /> Approve & Sign
                   </>
                 )}
               </button>
