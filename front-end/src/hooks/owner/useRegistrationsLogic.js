@@ -6,21 +6,17 @@ import {
   decideRegistration 
 } from "../../api/owner/service";
 
-// 2. Auth Context Import
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
-
-// 3. Mock Data (Fallback)
 import { ownerData as mockOwnerData } from "../../data/mockData";
 
 const useRegistrationsLogic = () => {
   const { currentOwner } = useOwnerAuth();
 
   const [registrations, setRegistrations] = useState([]);
-  const [filter, setFilter] = useState("PENDING"); // Default tab
+  const [filter, setFilter] = useState("PENDING"); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Search & Sort State
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
 
@@ -31,25 +27,25 @@ const useRegistrationsLogic = () => {
     try {
       const data = await getOwnerRegistrations(currentOwner.id);
 
-      // Map Backend DTO to Frontend Structure
       const mappedData = data.map((dto) => {
-        
+        // ✅ FIX 1: Map Backend "DECLINED" -> Frontend "REJECTED"
+        // "APPROVED" matches both sides, so no change needed there.
         let uiStatus = dto.status;
-        if (dto.status === "ACCEPTED") uiStatus = "APPROVED";
-        if (dto.status === "DECLINED") uiStatus = "REJECTED"; // Optional safety
+        if (dto.status === "DECLINED") uiStatus = "REJECTED"; 
 
         return {
           id: dto.id,
           studentName: dto.studentName || "Unknown Student",
-          boardingName: dto.boardingTitle || "Unknown Property",
+          boardingName: dto.boardingTitle || "Unknown Property", 
           status: uiStatus, 
           keyMoneyPaid: dto.keyMoneyPaid,
-          paymentTransactionRef: dto.paymentTransactionRef,
+          paymentTransactionRef: dto.paymentTransactionRef || dto.paymentSlipUrl,
+          paymentMethod: dto.paymentMethod,
           studentNote: dto.studentNote,
           ownerNote: dto.ownerNote,
           date: dto.createdAt || new Date().toISOString(),
           numberOfStudents: dto.numberOfStudents,
-          
+          moveInDate: dto.moveInDate,
         };
       });
 
@@ -68,52 +64,52 @@ const useRegistrationsLogic = () => {
   }, [fetchRegistrations]);
 
   // --- 2. Action Handlers ---
-  const handleDecision = async (regId, uiStatus, ownerNote = "") => {
+  const handleDecision = async (regId, uiStatus, ownerNote = "", signatureBase64 = null, allowPending = false) => {
     if (!currentOwner) return false;
 
+    // ✅ FIX 2: Map Frontend Status -> Correct Backend Enum
+    // Backend Error said allowed values are: [CANCELLED, DECLINED, PENDING, APPROVED]
     let backendStatus = uiStatus;
-    if (uiStatus === "APPROVED") backendStatus = "ACCEPTED";
-    if (uiStatus === "REJECTED") backendStatus = "REJECTED";
-
-    // Optimistic Update
-    const previousState = [...registrations];
-    setRegistrations((prev) =>
-      prev.map((reg) =>
-        reg.id === regId ? { ...reg, status: uiStatus } : reg
-      )
-    );
+    
+    if (uiStatus === "APPROVED") {
+        backendStatus = "APPROVED"; // Send "APPROVED", NOT "ACCEPTED"
+    } else if (uiStatus === "REJECTED") {
+        backendStatus = "DECLINED"; // Send "DECLINED"
+    }
 
     const toastId = toast.loading("Processing decision...");
 
     try {
       const decisionDTO = {
-        status: backendStatus, // "ACCEPTED" or "REJECTED"
+        status: backendStatus, 
         ownerNote: ownerNote,
+        ownerSignatureBase64: signatureBase64,
+        approveWithPendingPayment: allowPending
       };
 
       await decideRegistration(currentOwner.id, regId, decisionDTO);
+      
       toast.success(`Request ${uiStatus.toLowerCase()} successfully!`, {
         id: toastId,
       });
-      return true; // Return true to close modal
+
+      fetchRegistrations();
+      return true; 
+
     } catch (err) {
       console.error(err);
-      // Revert on error
-      setRegistrations(previousState);
-      toast.error("Failed to update status.", { id: toastId });
+      toast.error(err.response?.data?.message || "Failed to update status.", { id: toastId });
       return false;
     }
   };
 
-  // --- 3. Filtering & Sorting Logic ---
+  // --- 3. Filtering & Sorting ---
   const filteredRegistrations = useMemo(() => {
-    // 1. Filter by Status Tab
     let result = registrations.filter((reg) => {
-      if (filter === "ALL") return true; // Optional: if you have an "ALL" tab
-      return reg.status === filter;
+        if (filter === "ALL") return true; 
+        return reg.status === filter;
     });
 
-    // 2. Filter by Search Query
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
       result = result.filter(
@@ -123,31 +119,20 @@ const useRegistrationsLogic = () => {
       );
     }
 
-    // 3. Sort by Date
     result.sort((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
-
-      if (sortBy === "newest") {
-        return dateB - dateA;
-      } else if (sortBy === "oldest") {
-        return dateA - dateB;
-      }
-      return 0;
+      return sortBy === "newest" ? dateB - dateA : dateA - dateB;
     });
 
     return result;
   }, [registrations, filter, searchQuery, sortBy]);
 
-  // --- Helpers ---
   const counts = useMemo(() => {
-    // Initialize with 0 for all required tabs
     const initialCounts = { PENDING: 0, APPROVED: 0, REJECTED: 0 };
     return registrations.reduce((acc, reg) => {
       const statusKey = reg.status; 
-      if (acc[statusKey] !== undefined) {
-        acc[statusKey]++;
-      }
+      if (acc[statusKey] !== undefined) acc[statusKey]++;
       return acc;
     }, initialCounts);
   }, [registrations]);
@@ -157,7 +142,7 @@ const useRegistrationsLogic = () => {
       PENDING: {
         textClass: "text-warning",
         bgClass: "bg-warning/10",
-        colorClass: "bg-warning", // Solid color for icons/active indicators
+        colorClass: "bg-warning",
         border: "border-warning/20",
       },
       APPROVED: {
@@ -176,22 +161,16 @@ const useRegistrationsLogic = () => {
     return styles[status] || styles.PENDING;
   };
 
-  const activeOwnerData = {
-    ...mockOwnerData,
-    ...currentOwner,
-  };
-
   return {
     registrations: filteredRegistrations,
     counts,
-    ownerData: activeOwnerData,
+    ownerData: { ...mockOwnerData, ...currentOwner },
     filter,
     setFilter,
     handleDecision,
     getStatusStyle,
     loading,
     error,
-    // Search & Sort Exports
     searchQuery,
     setSearchQuery,
     sortBy,
