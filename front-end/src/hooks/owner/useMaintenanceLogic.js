@@ -41,7 +41,9 @@ const useMaintenanceLogic = () => {
           urgency: item.maintenanceUrgency, // Map 'maintenanceUrgency' -> 'urgency'
           image: item.imageUrls || [], // Map 'imageUrls' -> 'image'
           roomNumber: item.roomNumber,
-          date: item.createdDate, 
+          createdDate: item.createdAt, 
+          updatedDate: item.updatedAt,
+
         }));
 
         setRequests(mappedData);
@@ -58,20 +60,30 @@ const useMaintenanceLogic = () => {
   }, [currentOwner]);
 
   const handleStatusUpdate = async (id, newStatus) => {
-    // 1. Optimistic Update
+    // 1. Capture the current date immediately
+    const now = new Date();
+    const isoDate = now.toISOString(); // e.g., "2023-10-27T10:00:00.000Z"
+
+    // 2. Optimistic Update
     const originalRequests = [...requests];
     const statusToSend = newStatus.toUpperCase();
 
     setRequests((prev) =>
       prev.map((req) =>
-        req.id === id ? { ...req, status: statusToSend } : req
+        req.id === id 
+          ? { 
+              ...req, 
+              status: statusToSend, 
+              updatedDate: isoDate // <--- ADDS THE DATE TO UI INSTANTLY
+            } 
+          : req
       )
     );
 
     try {
-      // 2. Send to Backend
-      // Passing empty note "" for now as UI doesn't have a note input yet
-      await updateMaintenanceStatus(id, statusToSend, "");
+      // 3. Send to Backend
+      // Ensure your updateMaintenanceStatus function accepts this 4th parameter
+      await updateMaintenanceStatus(id, statusToSend, "", isoDate);
     } catch (err) {
       console.error("Update failed:", err);
       setRequests(originalRequests); // Revert on error

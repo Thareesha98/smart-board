@@ -1,4 +1,5 @@
 package com.sbms.sbms_monolith.dto.maintenance;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.sbms.sbms_monolith.model.enums.MaintenanceStatus;
@@ -27,4 +28,6 @@ public class MaintenanceResponseDTO {
 
     private String studentNote;
     private String ownerNote;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
