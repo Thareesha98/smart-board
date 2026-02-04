@@ -18,6 +18,7 @@ import ReportStudentPage from "../pages/owner/AddReportPage";
 import SubscriptionPlanPage from "../pages/owner/SubscriptionPlanPage";
 import PaymentPage from "../pages/owner/PaymentPage";
 import MaintenancePage from "../pages/owner/MaintenancePage.jsx";
+import RegistrationPage from "../pages/owner/RegistrationPage.jsx";
 
 const OwnerAppRoutes = () => {
   return (
@@ -33,6 +34,7 @@ const OwnerAppRoutes = () => {
           <Route path="myAds/editAd/:adId" element={<EditAdPage />} />
 
           <Route path="appointments" element={<AppointmentsPage />} />
+          <Route path="registrations" element={<RegistrationPage />} />
           <Route path="myboardings" element={<MyBoardingsPage />} />
           <Route path="utility" element={<UtilityPage />} />
           <Route path="maintenance" element={<MaintenancePage />} />
