@@ -41,7 +41,7 @@ const useRegistrationsLogic = () => {
         return {
           id: dto.id,
           studentName: dto.studentName || "Unknown Student",
-          boardingName: dto.boardingName || "Unknown Property",
+          boardingName: dto.boardingTitle || "Unknown Property",
           status: uiStatus, 
           keyMoneyPaid: dto.keyMoneyPaid,
           paymentTransactionRef: dto.paymentTransactionRef,
@@ -49,7 +49,7 @@ const useRegistrationsLogic = () => {
           ownerNote: dto.ownerNote,
           date: dto.createdAt || new Date().toISOString(),
           numberOfStudents: dto.numberOfStudents,
-          moveInDate: dto.moveInDate,
+          
         };
       });
 
