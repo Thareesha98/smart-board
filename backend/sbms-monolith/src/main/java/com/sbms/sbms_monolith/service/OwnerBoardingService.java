@@ -64,6 +64,10 @@ public class OwnerBoardingService {
         if(dto.getLatitude() != null) b.setLatitude(dto.getLatitude());
         if(dto.getLongitude() != null) b.setLongitude(dto.getLongitude());
 
+        if (dto.getStatus() != null) {
+        b.setStatus(dto.getStatus());
+    }
+
 
         Boarding saved = boardingRepository.save(b);
         return BoardingMapper.toOwnerResponse(saved);
