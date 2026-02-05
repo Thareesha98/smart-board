@@ -1,5 +1,63 @@
 import api from "../api";
 
+Based on the files provided, NO, your Dashboard is NOT connected to the backend yet.
+
+It is currently running entirely on Mock Data (fake data).
+
+Evidence:
+Dashboard.jsx: Line 11 imports recentAppointments and ownerData from ../../data/mockData.js. The useEffect just waits 0.5 seconds and does nothing with the API.
+
+RevenueChart.jsx: Lines 12-25 define a hardcoded data array (Jan-Dec). It ignores any real data.
+
+RecentTransactions.jsx: Lines 5-46 define a hardcoded transactions array.
+
+service.js: While you have many API calls here, you are missing the specific ones for the Dashboard (Earnings, Chart, Transactions).
+
+Step 1: Update service.js
+Add these 3 new functions to the bottom of your service.js file. These match the backend Controller we created earlier.
+
+JavaScript
+// =================================================================
+// 💰 DASHBOARD & EARNINGS SERVICES
+// =================================================================
+
+// 1. Get Dashboard Summary (Stats)
+// Matches Java: @GetMapping("/api/owner/earnings/summary")
+export const getDashboardStats = async () => {
+  try {
+    const response = await api.get("/owner/earnings/summary");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    throw error;
+  }
+};
+
+// 2. Get Revenue Chart Data
+// Matches Java: @GetMapping("/api/owner/earnings/chart")
+export const getRevenueChartData = async () => {
+  try {
+    const response = await api.get("/owner/earnings/chart");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching chart data:", error);
+    return []; // Return empty array on error so chart doesn't crash
+  }
+};
+
+// 3. Get Recent Transactions (Table)
+// Matches Java: @GetMapping("/api/owner/earnings/dashboard-transactions")
+export const getDashboardTransactions = async () => {
+  try {
+    const response = await api.get("/owner/earnings/dashboard-transactions");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    return [];
+  }
+};
+
+
 // =================================================================
 // 🚩 REPORT SERVICES
 // =================================================================
