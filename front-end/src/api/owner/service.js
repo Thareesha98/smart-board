@@ -1,22 +1,6 @@
 import api from "../api";
 
-Based on the files provided, NO, your Dashboard is NOT connected to the backend yet.
 
-It is currently running entirely on Mock Data (fake data).
-
-Evidence:
-Dashboard.jsx: Line 11 imports recentAppointments and ownerData from ../../data/mockData.js. The useEffect just waits 0.5 seconds and does nothing with the API.
-
-RevenueChart.jsx: Lines 12-25 define a hardcoded data array (Jan-Dec). It ignores any real data.
-
-RecentTransactions.jsx: Lines 5-46 define a hardcoded transactions array.
-
-service.js: While you have many API calls here, you are missing the specific ones for the Dashboard (Earnings, Chart, Transactions).
-
-Step 1: Update service.js
-Add these 3 new functions to the bottom of your service.js file. These match the backend Controller we created earlier.
-
-JavaScript
 // =================================================================
 // 💰 DASHBOARD & EARNINGS SERVICES
 // =================================================================
