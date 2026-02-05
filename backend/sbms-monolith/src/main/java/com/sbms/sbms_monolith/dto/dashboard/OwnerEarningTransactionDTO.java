@@ -15,4 +15,5 @@ public class OwnerEarningTransactionDTO {
 
     private String tenantName;
     private String propertyTitle;
+    private String status;
 }
