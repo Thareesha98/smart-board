@@ -131,6 +131,10 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public boolean hasAdmins() {
+        return userRepository.countByRole(UserRole.ADMIN) > 0;
+    }
+
     // ---------------------------------------------------------
     // REGISTRATION WITH OTP
     // ---------------------------------------------------------
@@ -190,7 +194,8 @@ public class UserService {
         user.setAccNo(p.getAccNo());
         user.setStudentUniversity(p.getStudentUniversity());
         user.setRole(p.getRole());
-        user.setVerifiedOwner(p.getRole() == UserRole.OWNER);
+        // Admins and Owners are verified by default, Students need verification later
+        user.setVerifiedOwner(p.getRole() == UserRole.OWNER || p.getRole() == UserRole.ADMIN);
 
         User saved = userRepository.save(user);
         pendingRepo.delete(p);
@@ -232,27 +237,5 @@ public class UserService {
         userRepository.save(user);
 
         return "Password reset successful";
-    }
-
-    // ---------------------------------------------------------
-    // CHANGE PASSWORD (LOGGED IN)
-    // ---------------------------------------------------------
-
-    public String changePassword(String email, String currentPassword, String newPassword) {
-        
-        // 1. Fetch User
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // 2. Check if current password matches DB password
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            throw new RuntimeException("Invalid current password");
-        }
-
-        // 3. Encode and Set New Password
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-
-        return "Password changed successfully";
     }
 }
