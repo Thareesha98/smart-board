@@ -1,32 +1,35 @@
 import { useState, useEffect } from "react";
-import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext"; 
 import {
   getDashboardStats,
   getRevenueChartData,
   getDashboardTransactions,
-  getRecentAppointments, // ✅ CHANGE 1: Import the new service
-  getOwnerProfile,
+  getRecentAppointments, // ✅ Using the specific endpoint we created
+  getOwnerProfile
 } from "../../api/owner/service";
 
 export const useDashboardLogic = () => {
-  const { currentOwner, isLoading: authLoading } = useOwnerAuth();
+  const { currentOwner, isLoading: authLoading } = useOwnerAuth(); 
 
   const [loading, setLoading] = useState(true);
-
-  const [stats, setStats] = useState({
-    totalEarnings: 0,
-    monthlyEarnings: 0,
+  
+  // State for dashboard widgets
+  const [stats, setStats] = useState({ 
+    totalEarnings: 0, 
+    monthlyEarnings: 0, 
     walletBalance: 0,
-    totalPlatformFees: 0,
+    totalPlatformFees: 0
   });
-
+  
   const [chartData, setChartData] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [user, setUser] = useState({
-    firstName: "Owner",
-    fullName: "Owner",
-    avatar: "",
+  
+  // Initialize user with context data (fallback)
+  const [user, setUser] = useState({ 
+    firstName: currentOwner?.fullName?.split(" ")[0] || "Owner", 
+    fullName: currentOwner?.fullName || "Owner", 
+    avatar: currentOwner?.profileImageUrl || "" 
   });
 
   useEffect(() => {
@@ -35,50 +38,86 @@ export const useDashboardLogic = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const ownerId = currentOwner.id;
+        const ownerId = currentOwner.id; 
 
-        console.log("Fetching Dashboard Data for Owner ID:", ownerId);
+        // =================================================================
+        // 🚀 INDEPENDENT FETCHING STRATEGY
+        // =================================================================
 
-        // Execute all API calls in parallel
-        const [
-          statsRes,
-          chartRes,
-          txRes,
-          appRes, // This will now be the Top 5 Recent
-          profileRes,
-        ] = await Promise.all([
-          getDashboardStats(),
-          getRevenueChartData(),
-          getDashboardTransactions(),
-          getRecentAppointments(ownerId), // ✅ CHANGE 2: Call the correct API
-          getOwnerProfile(),
+        // 1. Stats
+        const statsPromise = getDashboardStats()
+            .then(data => setStats(data))
+            .catch(err => console.error("Stats Failed:", err));
+
+        // 2. Chart (Returns empty array on fail)
+        const chartPromise = getRevenueChartData()
+            .then(data => setChartData(data))
+            .catch(err => {
+                console.error("Chart Failed:", err);
+                setChartData([]); // Safe Fallback
+            });
+
+        // 3. Transactions (Returns empty array on fail)
+        const txPromise = getDashboardTransactions()
+            .then(data => setTransactions(data))
+            .catch(err => {
+                console.error("Transactions Failed:", err);
+                setTransactions([]);
+            });
+
+        // 4. Appointments (Top 5 Recent)
+        const appPromise = getRecentAppointments(ownerId)
+            .then(data => {
+                // Sort just in case backend didn't
+                const sorted = data.sort((a, b) => 
+                   new Date(b.requestedStartTime) - new Date(a.requestedStartTime)
+                );
+                setAppointments(sorted);
+            })
+            .catch(err => {
+                console.error("Appointments Failed:", err);
+                setAppointments([]);
+            });
+
+        // 5. Profile
+        const profilePromise = getOwnerProfile()
+            .then(data => {
+                if (data) {
+                    setUser({
+                        fullName: data.fullName,
+                        firstName: data.fullName ? data.fullName.split(" ")[0] : "Owner",
+                        avatar: data.profileImageUrl || ""
+                    });
+                }
+            })
+            .catch(err => console.error("Profile Failed:", err));
+
+        // ✅ Wait for all of them to "settle" (finish success or fail)
+        // We use Promise.all here only to know when to turn off 'loading'
+        await Promise.all([
+            statsPromise, 
+            chartPromise, 
+            txPromise, 
+            appPromise, 
+            profilePromise
         ]);
 
-        if (statsRes) setStats(statsRes);
-        if (chartRes) setChartData(chartRes);
-        if (txRes) setTransactions(txRes);
-        if (profileRes) setUser(profileRes);
-
-        // ✅ CHANGE 3: No need to sort manually, Backend does it.
-        if (appRes) {
-          setAppointments(appRes);
-        }
       } catch (error) {
-        console.error("Dashboard Logic Error:", error);
+        console.error("Critical Dashboard Error:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [currentOwner, authLoading]);
+  }, [currentOwner, authLoading]); 
 
-  return {
-    loading: loading || authLoading,
-    stats,
-    chartData,
-    transactions,
-    appointments,
-    user,
+  return { 
+    loading: loading || authLoading, 
+    stats, 
+    chartData, 
+    transactions, 
+    appointments, 
+    user 
   };
 };
