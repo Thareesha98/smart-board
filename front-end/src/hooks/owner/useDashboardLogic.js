@@ -6,7 +6,7 @@ import {
   getDashboardTransactions,
   getOwnerAppointments,
   getOwnerProfile
-} from "../../services/service";
+} from "../../api/owner/service";
 
 export const useDashboardLogic = () => {
   const { currentOwner, isLoading: authLoading } = useOwnerAuth(); // 2. Get Real User
