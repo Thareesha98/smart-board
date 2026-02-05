@@ -4,72 +4,65 @@ import {
   getDashboardStats,
   getRevenueChartData,
   getDashboardTransactions,
-  getOwnerAppointments,
-  getOwnerProfile
+  getRecentAppointments, // ✅ CHANGE 1: Import the new service
+  getOwnerProfile,
 } from "../../api/owner/service";
 
 export const useDashboardLogic = () => {
-  const { currentOwner, isLoading: authLoading } = useOwnerAuth(); // 2. Get Real User
+  const { currentOwner, isLoading: authLoading } = useOwnerAuth();
 
   const [loading, setLoading] = useState(true);
-  
-  // State for dashboard widgets
-  const [stats, setStats] = useState({ 
-    totalEarnings: 0, 
-    monthlyEarnings: 0, 
+
+  const [stats, setStats] = useState({
+    totalEarnings: 0,
+    monthlyEarnings: 0,
     walletBalance: 0,
-    totalPlatformFees: 0
+    totalPlatformFees: 0,
   });
-  
+
   const [chartData, setChartData] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [user, setUser] = useState({ 
-    firstName: "Owner", 
-    fullName: "Owner", 
-    avatar: "" 
+  const [user, setUser] = useState({
+    firstName: "Owner",
+    fullName: "Owner",
+    avatar: "",
   });
 
   useEffect(() => {
-    // 3. Wait until Auth is finished and we have a User
     if (authLoading || !currentOwner?.id) return;
 
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // 4. Use the REAL ID from context
-        const ownerId = currentOwner.id; 
+        const ownerId = currentOwner.id;
 
         console.log("Fetching Dashboard Data for Owner ID:", ownerId);
 
         // Execute all API calls in parallel
         const [
-          statsRes, 
-          chartRes, 
-          txRes, 
-          appRes, 
-          profileRes
+          statsRes,
+          chartRes,
+          txRes,
+          appRes, // This will now be the Top 5 Recent
+          profileRes,
         ] = await Promise.all([
-           getDashboardStats(),             // Backend gets ID from Token automatically
-           getRevenueChartData(),           // Backend gets ID from Token automatically
-           getDashboardTransactions(),      // Backend gets ID from Token automatically
-           getOwnerAppointments(ownerId),   // This one requires ID in URL
-           getOwnerProfile()                // Backend gets ID from Token
+          getDashboardStats(),
+          getRevenueChartData(),
+          getDashboardTransactions(),
+          getRecentAppointments(ownerId), // ✅ CHANGE 2: Call the correct API
+          getOwnerProfile(),
         ]);
 
-        if(statsRes) setStats(statsRes);
-        if(chartRes) setChartData(chartRes);
-        if(txRes) setTransactions(txRes);
-        if(profileRes) setUser(profileRes);
+        if (statsRes) setStats(statsRes);
+        if (chartRes) setChartData(chartRes);
+        if (txRes) setTransactions(txRes);
+        if (profileRes) setUser(profileRes);
 
-        if(appRes) {
-           const sortedApps = appRes.sort((a, b) => 
-             new Date(b.requestedStartTime) - new Date(a.requestedStartTime)
-           );
-           setAppointments(sortedApps);
+        // ✅ CHANGE 3: No need to sort manually, Backend does it.
+        if (appRes) {
+          setAppointments(appRes);
         }
-
       } catch (error) {
         console.error("Dashboard Logic Error:", error);
       } finally {
@@ -78,14 +71,14 @@ export const useDashboardLogic = () => {
     };
 
     fetchData();
-  }, [currentOwner, authLoading]); // 5. Re-run when user loads
+  }, [currentOwner, authLoading]);
 
-  return { 
-    loading: loading || authLoading, // Show loading if either Auth or Data is fetching
-    stats, 
-    chartData, 
-    transactions, 
-    appointments, 
-    user 
+  return {
+    loading: loading || authLoading,
+    stats,
+    chartData,
+    transactions,
+    appointments,
+    user,
   };
 };

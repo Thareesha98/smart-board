@@ -3,7 +3,7 @@ import React from "react";
 const AppointmentItem = ({ appointment }) => {
   // Mapping statuses to Tailwind utility classes
   const statusStyles = {
-    PENDING: "bg-orange-100 text-orange-700", // Uppercase to match Java Enum
+    PENDING: "bg-orange-100 text-orange-700",
     CONFIRMED: "bg-green-100 text-green-700",
     VISITED: "bg-indigo-100 text-indigo-700",
     CANCELLED: "bg-red-100 text-red-700",
@@ -15,16 +15,12 @@ const AppointmentItem = ({ appointment }) => {
     : "PENDING";
   const currentStatusStyle = statusStyles[status] || statusStyles.PENDING;
 
-  // ✅ FIX: Use 'studentName' and 'boardingTitle' from Backend DTO
-  const studentName =
-    appointment.studentName || appointment.student || "Unknown";
-  const propertyName =
-    appointment.boardingTitle || appointment.property || "Unknown Property";
-  const avatarUrl =
-    appointment.studentAvatar ||
-    appointment.avatar ||
-    "https://i.pravatar.cc/150";
-  // Note: Backend doesn't send time yet, so we format the date
+  // ✅ MATCHING BACKEND DTO:
+  // Backend sends: studentName, boardingTitle, requestedStartTime
+  const studentName = appointment.studentName || "Unknown Student";
+  const propertyName = appointment.boardingTitle || "Unknown Property";
+
+  // Format Date
   const timeDisplay = appointment.requestedStartTime
     ? new Date(appointment.requestedStartTime).toLocaleTimeString([], {
         hour: "2-digit",
@@ -33,14 +29,10 @@ const AppointmentItem = ({ appointment }) => {
     : "TBD";
 
   return (
-    <div className="relative flex items-center gap-3 p-4 transition-colors duration-200 border-b md:gap-4 border-light hover:bg-light/30 bg-card-bg">
-      {/* Avatar */}
-      <div className="w-10 h-10 overflow-hidden border rounded-full shadow-sm md:w-11 md:h-11 shrink-0 border-light">
-        <img
-          src={avatarUrl}
-          alt={studentName}
-          className="object-cover w-full h-full"
-        />
+    <div className="flex items-center gap-3 p-4 transition-colors duration-200 border-b md:gap-4 border-light hover:bg-light/30 bg-card-bg">
+      {/* Icon Placeholder (Since we removed Avatar) */}
+      <div className="flex items-center justify-center w-10 h-10 rounded-full shrink-0 bg-light/50 text-muted/50">
+        <i className="text-lg fas fa-calendar-check"></i>
       </div>
 
       {/* Info Container */}

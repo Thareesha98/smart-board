@@ -41,6 +41,16 @@ export const getDashboardTransactions = async () => {
   }
 };
 
+export const getRecentAppointments = async (ownerId) => {
+  try {
+    const response = await api.get(`/appointments/owner/${ownerId}/recent`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching recent appointments:", error);
+    throw error; // Propagate error or return [] depending on preference
+  }
+};
+
 
 // =================================================================
 // 🚩 REPORT SERVICES
