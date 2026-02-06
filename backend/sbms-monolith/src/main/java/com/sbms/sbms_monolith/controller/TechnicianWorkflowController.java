@@ -28,81 +28,7 @@ public class TechnicianWorkflowController {
     @Autowired
     private UserRepository userRepository;
 
-    // --- OWNER ACTIONS ---
-
-    @GetMapping("/search")
-    @PreAuthorize("hasRole('OWNER')")
-    public List<TechnicianCardDTO> findTechnicians(
-            @RequestParam MaintenanceIssueType skill,
-            @RequestParam(required = false) String city
-    ) {
-        return workflowService.findTechniciansForIssue(skill, city).stream()
-                .map(user -> {
-                    TechnicianCardDTO dto = new TechnicianCardDTO();
-                    dto.setId(user.getId());
-                    dto.setFullName(user.getFullName());
-                    dto.setProfileImageUrl(user.getProfileImageUrl());
-                    dto.setCity(user.getCity());
-                    dto.setBasePrice(user.getBasePrice());
-                    dto.setSkills(user.getSkills());
-                    dto.setAverageRating(user.getTechnicianAverageRating());
-                    dto.setTotalJobs(user.getTechnicianTotalJobs());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
-
-    @PutMapping("/{maintenanceId}/assign/{technicianId}")
-    @PreAuthorize("hasRole('OWNER')")
-    public String assignTechnician(@PathVariable Long maintenanceId, @PathVariable Long technicianId, Authentication auth) {
-        User owner = userRepository.findByEmail(auth.getName()).orElseThrow();
-        workflowService.assignTechnician(maintenanceId, technicianId, owner.getId());
-        return "Assigned successfully.";
-    }
-
-    @PostMapping("/{maintenanceId}/review")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<MaintenanceResponseDTO> reviewTechnician(
-            @PathVariable Long maintenanceId,
-            @RequestParam int rating,
-            @RequestParam String comment
-    ) {
-        return ResponseEntity.ok(workflowService.reviewTechnician(maintenanceId, rating, comment));
-    }
-
-    // --- TECHNICIAN ACTIONS ---
-
-    @GetMapping("/my-jobs")
-    @PreAuthorize("hasRole('TECHNICIAN')")
-    public List<Maintenance> getMyJobs(Authentication auth) {
-        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
-        return workflowService.getAssignedJobs(tech.getId());
-    }
-
-    @PutMapping("/{maintenanceId}/decision")
-    @PreAuthorize("hasRole('TECHNICIAN')")
-    public String technicianDecision(@PathVariable Long maintenanceId, @RequestParam boolean accept, @RequestParam(required = false) String reason, Authentication auth) {
-        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
-
-        if (!accept && (reason == null || reason.trim().isEmpty())) {
-            throw new RuntimeException("Rejection reason is required.");
-        }
-
-        workflowService.technicianDecision(maintenanceId, tech.getId(), accept, reason);
-        return accept ? "Accepted" : "Rejected";
-    }
-
-    @PutMapping("/{maintenanceId}/complete")
-    @PreAuthorize("hasRole('TECHNICIAN')")
-    public String markWorkDone(
-            @PathVariable Long maintenanceId,
-            @RequestParam BigDecimal amount,
-            Authentication auth
-    ) {
-        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
-        workflowService.markWorkDone(maintenanceId, tech.getId(), amount);
-        return "Marked as done. Final bill set to: " + amount;
-    }
+    // STATIC ROUTES (Top Priority)
 
     @GetMapping("/profile")
     @PreAuthorize("hasRole('TECHNICIAN')")
@@ -125,5 +51,64 @@ public class TechnicianWorkflowController {
         dto.setAverageRating(tech.getTechnicianAverageRating());
         dto.setTotalJobsCompleted(tech.getTechnicianTotalJobs());
         return dto;
+    }
+
+    @GetMapping("/my-jobs")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public List<Maintenance> getMyJobs(Authentication auth) {
+        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+        return workflowService.getAssignedJobs(tech.getId());
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('OWNER')")
+    public List<TechnicianCardDTO> findTechnicians(@RequestParam MaintenanceIssueType skill, @RequestParam(required = false) String city) {
+        return workflowService.findTechniciansForIssue(skill, city).stream()
+                .map(user -> {
+                    TechnicianCardDTO dto = new TechnicianCardDTO();
+                    dto.setId(user.getId());
+                    dto.setFullName(user.getFullName());
+                    dto.setProfileImageUrl(user.getProfileImageUrl());
+                    dto.setCity(user.getCity());
+                    dto.setBasePrice(user.getBasePrice());
+                    dto.setSkills(user.getSkills());
+                    dto.setAverageRating(user.getTechnicianAverageRating());
+                    dto.setTotalJobs(user.getTechnicianTotalJobs());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    // DYNAMIC ROUTES (Lower Priority)
+
+    @PutMapping("/{maintenanceId}/assign/{technicianId}")
+    @PreAuthorize("hasRole('OWNER')")
+    public String assignTechnician(@PathVariable Long maintenanceId, @PathVariable Long technicianId, Authentication auth) {
+        User owner = userRepository.findByEmail(auth.getName()).orElseThrow();
+        workflowService.assignTechnician(maintenanceId, technicianId, owner.getId());
+        return "Assigned successfully.";
+    }
+
+    @PostMapping("/{maintenanceId}/review")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<MaintenanceResponseDTO> reviewTechnician(@PathVariable Long maintenanceId, @RequestParam int rating, @RequestParam String comment) {
+        return ResponseEntity.ok(workflowService.reviewTechnician(maintenanceId, rating, comment));
+    }
+
+    @PutMapping("/{maintenanceId}/decision")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public String technicianDecision(@PathVariable Long maintenanceId, @RequestParam boolean accept, @RequestParam(required = false) String reason, Authentication auth) {
+        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+        if (!accept && (reason == null || reason.trim().isEmpty())) throw new RuntimeException("Rejection reason is required.");
+        workflowService.technicianDecision(maintenanceId, tech.getId(), accept, reason);
+        return accept ? "Accepted" : "Rejected";
+    }
+
+    @PutMapping("/{maintenanceId}/complete")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public String markWorkDone(@PathVariable Long maintenanceId, @RequestParam BigDecimal amount, Authentication auth) {
+        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+        workflowService.markWorkDone(maintenanceId, tech.getId(), amount);
+        return "Marked as done. Final bill set to: " + amount;
     }
 }
