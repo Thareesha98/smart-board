@@ -4,6 +4,16 @@ import { FaTimes, FaSave } from "react-icons/fa";
 import { updateTechnicianProfile } from "../../../api/technician/technicianService";
 import toast from "react-hot-toast";
 
+const SKILL_OPTIONS = [
+  { value: "PLUMBING", label: "Plumbing" },
+  { value: "ELECTRICAL", label: "Electrical" },
+  { value: "FURNITURE", label: "Furniture Repair" },
+  { value: "APPLIANCE", label: "Appliance Repair" },
+  { value: "CLEANING", label: "Cleaning Services" },
+  { value: "PEST", label: "Pest Control" },
+  { value: "OTHER", label: "General / Other" }
+];
+
 const EditProfileModal = ({ user, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
     fullName: user.fullName || "",

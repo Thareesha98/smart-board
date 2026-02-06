@@ -294,6 +294,7 @@ import OwnerSignupForm from "../../components/Owner/auth/OwnerSignupForm";
 import TechnicianSignupForm from "../../components/technician/auth/TechnicianSignupForm"; // ✅ Added
 
 import backgroundImage from "../../assets/s5.jpg";
+import logo from "../../assets/logo.png";
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -349,7 +350,7 @@ const SignupPage = () => {
         result = await verifyOwner(emailForOtp, otpCode);
         if (result?.success) navigate("/owner/dashboard", { replace: true });
       } else if (role === "technician") {
-        // ✅ Tech
+        //  Tech
         result = await verifyTech(emailForOtp, otpCode);
         if (result?.success)
           navigate("/technician/dashboard", { replace: true });
@@ -394,7 +395,14 @@ const SignupPage = () => {
           className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-12 border border-white/20 max-h-[90vh] overflow-y-auto"
         >
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-primary">SmartBoAD</h1>
+
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <img src={logo} alt="Logo" className="w-[60px] h-[60px]" />
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                SmartBoAD
+              </h1>
+            </div>
+
             <h2 className="text-xl font-bold text-gray-700 mt-2">
               {step === 2 ? "Verify Email" : "Create Account"}
             </h2>

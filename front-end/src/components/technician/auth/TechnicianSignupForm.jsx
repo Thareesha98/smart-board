@@ -14,7 +14,7 @@ import {
   FaTools,
 } from "react-icons/fa";
 
-// Reusing your helpers (Assuming they exist in utils)
+// Reusing your helpers
 import {
   validateEmail,
   validatePassword,
@@ -49,6 +49,7 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,19 +63,29 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
     } else {
       setSelectedSkills([...selectedSkills, skill]);
     }
+    // Clear error if user selects a skill
+    if (errors.skills) setErrors((prev) => ({ ...prev, skills: "" }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!validateRequired(formData.firstName)) newErrors.firstName = "Required";
-    if (!validateRequired(formData.lastName)) newErrors.lastName = "Required";
-    if (!validateEmail(formData.email)) newErrors.email = "Invalid Email";
+    if (!validateRequired(formData.firstName))
+      newErrors.firstName = "First name is required";
+    if (!validateRequired(formData.lastName))
+      newErrors.lastName = "Last name is required";
+    if (!validateEmail(formData.email))
+      newErrors.email = "Valid email is required";
     if (!validatePassword(formData.password))
-      newErrors.password = "Min 6 chars";
+      newErrors.password = "Password must be at least 6 characters";
     if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = "Mismatch";
-    if (!validatePhone(formData.phone)) newErrors.phone = "Invalid Phone";
-    if (!validateRequired(formData.city)) newErrors.city = "City Required";
+      newErrors.confirmPassword = "Passwords do not match";
+    if (!validatePhone(formData.phone))
+      newErrors.phone = "Valid phone number is required";
+    if (!validateRequired(formData.nicNumber))
+      newErrors.nicNumber = "NIC is required";
+    if (!validateRequired(formData.city)) newErrors.city = "City is required";
+    if (!validateRequired(formData.address))
+      newErrors.address = "Address is required";
     if (selectedSkills.length === 0)
       newErrors.skills = "Select at least 1 skill";
 
@@ -101,35 +112,18 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
     }
   };
 
-  const InputField = ({ icon: Icon, label, name, type = "text", ...props }) => (
-    <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1">
-        {label}
-      </label>
-      <div className="relative">
-        <Icon className="absolute left-3 top-3.5 text-gray-400" />
-        <input
-          name={name}
-          type={type}
-          {...props}
-          className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-accent focus:outline-none"
-        />
-      </div>
-      {errors[name] && (
-        <p className="text-red-500 text-xs mt-1">{errors[name]}</p>
-      )}
-    </div>
-  );
-
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      {/* Name Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           icon={FaUser}
           label="First Name"
           name="firstName"
           value={formData.firstName}
           onChange={handleChange}
+          error={errors.firstName}
+          required
         />
         <InputField
           icon={FaUser}
@@ -137,76 +131,82 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
           name="lastName"
           value={formData.lastName}
           onChange={handleChange}
+          error={errors.lastName}
+          required
         />
       </div>
+
+      {/* Email */}
       <InputField
         icon={FaEnvelope}
-        label="Email"
+        label="Email Address"
+        type="email"
         name="email"
         value={formData.email}
         onChange={handleChange}
+        error={errors.email}
+        required
       />
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="relative">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Password
-          </label>
-          <FaLock className="absolute left-3 top-9 text-gray-400" />
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-accent outline-none"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-9 text-gray-400"
-          >
-            <FaEye />
-          </button>
-          {errors.password && (
-            <p className="text-red-500 text-xs">{errors.password}</p>
-          )}
-        </div>
-        <InputField
-          icon={FaLock}
-          label="Confirm"
-          type="password"
+      {/* Password Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <PasswordField
+          label="Password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          error={errors.password}
+          showPassword={showPassword}
+          toggleShow={() => setShowPassword(!showPassword)}
+          required
+        />
+        <PasswordField
+          label="Confirm Password"
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
+          error={errors.confirmPassword}
+          showPassword={showConfirmPassword}
+          toggleShow={() => setShowConfirmPassword(!showConfirmPassword)}
+          required
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      {/* Phone & NIC */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           icon={FaPhone}
-          label="Phone"
+          label="Phone Number"
+          type="tel"
           name="phone"
           value={formData.phone}
           onChange={handleChange}
+          error={errors.phone}
+          placeholder="+94 77 123 4567"
+          required
         />
         <InputField
           icon={FaIdCard}
-          label="NIC"
+          label="NIC Number"
           name="nicNumber"
           value={formData.nicNumber}
           onChange={handleChange}
+          error={errors.nicNumber}
+          required
         />
       </div>
 
-      {/* Technician Specific Fields */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Technician Specific: City & Base Price */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InputField
           icon={FaCity}
           label="City (Operating Area)"
           name="city"
           value={formData.city}
           onChange={handleChange}
+          error={errors.city}
           placeholder="e.g. Colombo"
+          required
         />
         <InputField
           icon={FaMoneyBillWave}
@@ -219,51 +219,159 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
         />
       </div>
 
-      <InputField
+      {/* Address */}
+      <TextAreaField
         icon={FaMapMarkerAlt}
-        label="Address"
+        label="Permanent Address"
         name="address"
         value={formData.address}
         onChange={handleChange}
+        error={errors.address}
+        required
       />
 
-      {/* SKILLS SELECTION */}
-      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-        <label className="block text-sm font-bold text-gray-700 mb-3  items-center gap-2">
-          <FaTools className="text-accent" /> Select Your Skills (Required)
+      {/* SKILLS SELECTION (Custom Styling to Match Theme) */}
+      <div
+        className={`p-4 border-2 rounded-large transition-colors duration-200 ${
+          errors.skills
+            ? "border-error bg-red-50/10"
+            : "border-gray-200 bg-gray-50/30"
+        }`}
+      >
+        <label className="block text-sm font-semibold text-text-dark mb-3  items-center gap-2">
+          <FaTools className="text-text-muted" /> Select Your Skills{" "}
+          <span className="text-error">*</span>
         </label>
-        <div className="grid grid-cols-2 gap-2">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {SKILL_OPTIONS.map((skill) => (
             <label
               key={skill.value}
-              className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${selectedSkills.includes(skill.value) ? "bg-accent/10 border-accent text-accent" : "bg-white border-gray-200 text-gray-600"}`}
+              className={`
+                flex items-center gap-3 p-3 rounded-large border-2 cursor-pointer transition-all duration-200
+                ${
+                  selectedSkills.includes(skill.value)
+                    ? "bg-accent/10 border-accent text-accent font-semibold"
+                    : "bg-white border-gray-200 text-text-muted hover:border-gray-300"
+                }
+              `}
             >
               <input
                 type="checkbox"
                 checked={selectedSkills.includes(skill.value)}
                 onChange={() => handleSkillChange(skill.value)}
-                className="accent-accent w-4 h-4"
+                className="w-4 h-4 accent-accent cursor-pointer"
               />
-              <span className="text-xs font-bold">{skill.label}</span>
+              <span className="text-sm">{skill.label}</span>
             </label>
           ))}
         </div>
         {errors.skills && (
-          <p className="text-red-500 text-xs mt-2 font-bold">{errors.skills}</p>
+          <p className="text-error text-xs mt-2 font-medium">{errors.skills}</p>
         )}
       </div>
 
+      {/* Submit Button */}
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={handleSubmit}
         disabled={isLoading}
-        className="w-full py-4 bg-accent text-white font-bold rounded-lg shadow-lg hover:bg-primary transition-all disabled:bg-gray-400 mt-4"
+        className={`w-full py-4 rounded-large font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${
+          isLoading
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-accent text-white hover:bg-primary shadow-lg"
+        }`}
       >
-        {isLoading ? "Registering..." : "Register as Technician"}
+        {isLoading ? (
+          <>
+            <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+            Registering...
+          </>
+        ) : (
+          "Register as Technician"
+        )}
       </motion.button>
     </div>
   );
 };
+
+// --- Reusable Component Styles (Matching Student/Owner Forms) ---
+
+const InputField = ({ icon: Icon, label, error, required, ...props }) => (
+  <div>
+    <label className="block text-sm font-semibold text-text-dark mb-2">
+      {label} {required && <span className="text-error">*</span>}
+    </label>
+    <div className="relative">
+      <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
+      <input
+        {...props}
+        className={`w-full pl-12 pr-4 py-3 border-2 rounded-large transition-colors duration-200 focus:outline-none ${
+          error
+            ? "border-error focus:border-error"
+            : "border-gray-200 focus:border-accent"
+        }`}
+      />
+    </div>
+    {error && <p className="text-error text-xs mt-1">{error}</p>}
+  </div>
+);
+
+const PasswordField = ({
+  label,
+  error,
+  required,
+  showPassword,
+  toggleShow,
+  ...props
+}) => (
+  <div>
+    <label className="block text-sm font-semibold text-text-dark mb-2">
+      {label} {required && <span className="text-error">*</span>}
+    </label>
+    <div className="relative">
+      <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
+      <input
+        {...props}
+        type={showPassword ? "text" : "password"}
+        className={`w-full pl-12 pr-12 py-3 border-2 rounded-large transition-colors duration-200 focus:outline-none ${
+          error
+            ? "border-error focus:border-error"
+            : "border-gray-200 focus:border-accent"
+        }`}
+      />
+      <button
+        type="button"
+        onClick={toggleShow}
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-dark"
+      >
+        {showPassword ? <FaEyeSlash /> : <FaEye />}
+      </button>
+    </div>
+    {error && <p className="text-error text-xs mt-1">{error}</p>}
+  </div>
+);
+
+const TextAreaField = ({ icon: Icon, label, error, required, ...props }) => (
+  <div>
+    <label className="block text-sm font-semibold text-text-dark mb-2">
+      {label} {required && <span className="text-error">*</span>}
+    </label>
+    <div className="relative">
+      <Icon className="absolute left-4 top-4 text-text-muted" />
+      <textarea
+        {...props}
+        rows="3"
+        className={`w-full pl-12 pr-4 py-3 border-2 rounded-large transition-colors duration-200 focus:outline-none resize-vertical ${
+          error
+            ? "border-error focus:border-error"
+            : "border-gray-200 focus:border-accent"
+        }`}
+      />
+    </div>
+    {error && <p className="text-error text-xs mt-1">{error}</p>}
+  </div>
+);
 
 export default TechnicianSignupForm;
