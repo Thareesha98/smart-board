@@ -20,10 +20,11 @@ export const TechnicianAuthProvider = ({ children }) => {
           const user = JSON.parse(savedUser);
 
           // 🔒 Security Check: Ensure the saved user is a TECHNICIAN
-          if (user.role === "TECHNICIAN") {
+          if (user.role && user.role.toUpperCase() === "TECHNICIAN") {
             setCurrentTech(user);
             setIsAuthenticated(true);
           } else {
+            console.warn("Invalid Role in Storage, clearing...");
             localStorage.clear();
           }
         } catch (e) {
