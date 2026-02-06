@@ -11,6 +11,7 @@ import {
   FaCity,
   FaEye,
   FaEyeSlash,
+  FaTools,
 } from "react-icons/fa";
 
 // Reusing your helpers (Assuming they exist in utils)
@@ -20,6 +21,16 @@ import {
   validatePhone,
   validateRequired,
 } from "../../../utils/student/validation.js";
+
+const SKILL_OPTIONS = [
+  { value: "PLUMBING", label: "Plumbing" },
+  { value: "ELECTRICAL", label: "Electrical" },
+  { value: "FURNITURE", label: "Furniture Repair" },
+  { value: "APPLIANCE", label: "Appliance Repair" },
+  { value: "CLEANING", label: "Cleaning Services" },
+  { value: "PEST", label: "Pest Control" },
+  { value: "OTHER", label: "General / Other" },
+];
 
 const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
@@ -35,6 +46,7 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
     basePrice: "",
   });
 
+  const [selectedSkills, setSelectedSkills] = useState([]);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
@@ -42,6 +54,14 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleSkillChange = (skill) => {
+    if (selectedSkills.includes(skill)) {
+      setSelectedSkills(selectedSkills.filter((s) => s !== skill));
+    } else {
+      setSelectedSkills([...selectedSkills, skill]);
+    }
   };
 
   const validateForm = () => {
@@ -55,6 +75,8 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
       newErrors.confirmPassword = "Mismatch";
     if (!validatePhone(formData.phone)) newErrors.phone = "Invalid Phone";
     if (!validateRequired(formData.city)) newErrors.city = "City Required";
+    if (selectedSkills.length === 0)
+      newErrors.skills = "Select at least 1 skill";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -73,6 +95,7 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
         basePrice: formData.basePrice,
         nicNumber: formData.nicNumber,
         role: "TECHNICIAN",
+        skills: selectedSkills,
       };
       onSubmit(payload);
     }
@@ -203,6 +226,32 @@ const TechnicianSignupForm = ({ onSubmit, isLoading }) => {
         value={formData.address}
         onChange={handleChange}
       />
+
+      {/* SKILLS SELECTION */}
+      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+        <label className="block text-sm font-bold text-gray-700 mb-3  items-center gap-2">
+          <FaTools className="text-accent" /> Select Your Skills (Required)
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {SKILL_OPTIONS.map((skill) => (
+            <label
+              key={skill.value}
+              className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${selectedSkills.includes(skill.value) ? "bg-accent/10 border-accent text-accent" : "bg-white border-gray-200 text-gray-600"}`}
+            >
+              <input
+                type="checkbox"
+                checked={selectedSkills.includes(skill.value)}
+                onChange={() => handleSkillChange(skill.value)}
+                className="accent-accent w-4 h-4"
+              />
+              <span className="text-xs font-bold">{skill.label}</span>
+            </label>
+          ))}
+        </div>
+        {errors.skills && (
+          <p className="text-red-500 text-xs mt-2 font-bold">{errors.skills}</p>
+        )}
+      </div>
 
       <motion.button
         whileHover={{ scale: 1.02 }}

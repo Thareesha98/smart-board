@@ -69,7 +69,7 @@ const TechnicianSidebar = () => {
       </div>
       <nav className="flex-1">
         <h3 className="px-6 pb-2 pt-1 uppercase text-sm tracking-wider text-orange-200 border-b border-white/10 mb-2 font-semibold">
-          MENU
+          MAIN NAVIGATION
         </h3>
         {navItems.map((item) => (
           <SidebarItem
