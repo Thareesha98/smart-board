@@ -1,9 +1,12 @@
 package com.sbms.sbms_monolith.controller;
 
 import com.sbms.sbms_monolith.dto.user.*;
+import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +17,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
 
 
     @PostMapping("/register")
@@ -57,4 +63,15 @@ public class UserController {
     public List<AdminUserDTO> getAllOwners() {
         return userService.getAllOwners();
     }
+
+    @PutMapping("/profile")
+    public UserResponseDTO updateMyProfile(@RequestBody UserRegisterDTO dto, Authentication auth) {
+        // Find the user who is currently logged in
+        User currentUser = userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Reuse the existing update logic using their ID
+        return userService.updateUser(currentUser.getId(), dto);
+    }
+
 }
