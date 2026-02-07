@@ -1,15 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
 import TechnicianLayout from "../../components/technician/common/TechnicianLayout"; // Check casing!
+import { useNavigate } from "react-router-dom";
 import { useTechAuth } from "../../context/technician/TechnicianAuthContext";
 import { getTechnicianProfile, getTechnicianReviews, updateTechnicianProfile } from "../../api/technician/technicianService";
-import { FaStar, FaEnvelope, FaPhone, FaMapMarkerAlt, FaEdit, FaMoneyBillWave, FaCamera } from "react-icons/fa";
+import { 
+  FaStar, 
+  FaEnvelope, 
+  FaPhone, 
+  FaMapMarkerAlt, 
+  FaEdit, 
+  FaMoneyBillWave, 
+  FaCamera, 
+  FaExternalLinkAlt 
+} from "react-icons/fa";
 import EditProfileModal from "../../components/technician/profile/EditProfileModal"; // Check casing!
 import toast from "react-hot-toast";
 
 const TechnicianProfile = () => {
   //  Destructure isLoading
   const { currentTech, isLoading: authLoading, refreshUser } = useTechAuth(); 
-  
+  const navigate = useNavigate();
+
   const [technician, setTechnician] = useState({});
   const [reviews, setReviews] = useState([]);
   const [showEdit, setShowEdit] = useState(false);
@@ -83,6 +94,13 @@ const TechnicianProfile = () => {
     };
   };
 
+  const handleNameClick = () => {
+    if (technician?.id) {
+       // Navigate to the public view route (Make sure this route exists in AppRoutes!)
+       navigate(`/profile/view/${technician.id}`);
+    }
+  };
+
 
   // Variables with Fallback Logic
   const displayName = technician.fullName || "Technician";
@@ -146,9 +164,16 @@ const TechnicianProfile = () => {
               />
             </div>
 
-            <h2 className="text-xl font-bold text-gray-800">
-              {displayName}
-            </h2>
+            <div 
+                onClick={handleNameClick}
+                className="group/name flex items-center justify-center gap-2 cursor-pointer mb-2 relative z-10"
+                title="View what others see"
+            >
+                <h2 className="text-xl font-bold text-gray-800 group-hover/name:text-accent transition-colors">
+                  {displayName}
+                </h2>
+                <FaExternalLinkAlt className="text-xs text-gray-400 opacity-0 group-hover/name:opacity-100 transition-all group-hover/name:text-accent" />
+            </div>
             
             {/* Skills */}
             <div className="mt-2 flex flex-wrap justify-center gap-2">
