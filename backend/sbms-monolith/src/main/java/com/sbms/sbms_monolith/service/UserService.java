@@ -16,7 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -104,6 +110,51 @@ public class UserService {
 
         if(dto.getProfileImageUrl() != null) {
             user.setProfileImageUrl(dto.getProfileImageUrl());
+        }
+
+        if (dto.getProfileImageBase64() != null && !dto.getProfileImageBase64().isEmpty()) {
+            try {
+                System.out.println("LOG: Received Image String. Length: " + dto.getProfileImageBase64().length());
+
+                String base64String = dto.getProfileImageBase64();
+
+                // Remove prefix if present (e.g., "data:image/jpeg;base64,")
+                if (base64String.contains(",")) {
+                    base64String = base64String.split(",")[1];
+                }
+
+                //  Decode
+                byte[] imageBytes = Base64.getDecoder().decode(base64String);
+                System.out.println("LOG: Image Decoded. Size: " + imageBytes.length + " bytes");
+
+                //  Save File
+                String filename = UUID.randomUUID().toString() + ".jpg";
+
+                // CHECK THIS PATH: Is it creating the folder?
+                String projectRoot = System.getProperty("user.dir");
+                String uploadDir = projectRoot + "/uploads/";
+
+                System.out.println("LOG: Saving to folder: " + uploadDir);
+
+                Path uploadPath = Paths.get(uploadDir);
+
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                    System.out.println("LOG: Created uploads directory.");
+                }
+                try (FileOutputStream fos = new FileOutputStream(uploadDir + filename)) {
+                    fos.write(imageBytes);
+                }
+                System.out.println("LOG: File saved successfully: " + filename);
+
+                user.setProfileImageUrl(filename);
+
+            } catch (Exception e) {
+                e.printStackTrace(); // Print full error to console
+                throw new RuntimeException("IMAGE UPLOAD FAILED: " + e.getMessage());
+            }
+        } else {
+            System.out.println("LOG: No image data found in request.");
         }
 
         if (user.getRole() == UserRole.TECHNICIAN) {
