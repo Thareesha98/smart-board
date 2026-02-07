@@ -1,14 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 import TechnicianDashboard from "../pages/technician/TechnicianDashboard";
 import TechnicianProfile from "../pages/technician/TechnicianProfile";
-import TechnicianReports from "../pages/technician/TechnicianReports";
+import TechnicianHistory from "../pages/technician/TechnicianHistory";
 
 const TechnicianAppRoutes = () => {
   return (
     <Routes>
        <Route path="dashboard" element={<TechnicianDashboard />} />
        <Route path="profile" element={<TechnicianProfile />} />
-       <Route path="reports" element={<TechnicianReports />} />
+       <Route path="history" element={<TechnicianHistory />} />
     </Routes>
   );
 };
