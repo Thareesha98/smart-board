@@ -49,6 +49,9 @@ public class UserRegisterDTO {
     @Schema(example = "https://example.com/image.jpg")
     private String profileImageUrl;
 
+    @Schema(description = "Base64 encoded image string for profile picture update")
+    private String profileImageBase64;
+
     // -------- OWNER FIELDS --------
 
     @Schema(
