@@ -15,3 +15,4 @@ const TechnicianLayout = ({ children, title, subtitle }) => {
 };
 
 export default TechnicianLayout;
+                                
