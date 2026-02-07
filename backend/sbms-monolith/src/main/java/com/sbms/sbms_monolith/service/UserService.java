@@ -43,6 +43,9 @@ public class UserService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private S3Service s3Service;
+
     // ---------------------------------------------------------
     // BASIC USER OPERATIONS
     // ---------------------------------------------------------
@@ -114,47 +117,34 @@ public class UserService {
 
         if (dto.getProfileImageBase64() != null && !dto.getProfileImageBase64().isEmpty()) {
             try {
-                System.out.println("LOG: Received Image String. Length: " + dto.getProfileImageBase64().length());
-
                 String base64String = dto.getProfileImageBase64();
 
-                // Remove prefix if present (e.g., "data:image/jpeg;base64,")
+                // 1. Detect Type & Clean String
+                String contentType = "image/jpeg";
+                if (base64String.contains("data:image/png;")) contentType = "image/png";
+
                 if (base64String.contains(",")) {
                     base64String = base64String.split(",")[1];
                 }
 
-                //  Decode
+                // 2. Decode
                 byte[] imageBytes = Base64.getDecoder().decode(base64String);
-                System.out.println("LOG: Image Decoded. Size: " + imageBytes.length + " bytes");
 
-                //  Save File
-                String filename = UUID.randomUUID().toString() + ".jpg";
+                // 3. Generate S3 Key
+                String extension = contentType.equals("image/png") ? ".png" : ".jpg";
+                String s3Key = "profiles/" + UUID.randomUUID().toString() + "_upload" + extension;
 
-                // CHECK THIS PATH: Is it creating the folder?
-                String projectRoot = System.getProperty("user.dir");
-                String uploadDir = projectRoot + "/uploads/";
+                // 4. Upload to S3
+                String s3Url = s3Service.uploadBytes(imageBytes, s3Key, contentType);
+                System.out.println("LOG: Uploaded to S3: " + s3Url);
 
-                System.out.println("LOG: Saving to folder: " + uploadDir);
-
-                Path uploadPath = Paths.get(uploadDir);
-
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                    System.out.println("LOG: Created uploads directory.");
-                }
-                try (FileOutputStream fos = new FileOutputStream(uploadDir + filename)) {
-                    fos.write(imageBytes);
-                }
-                System.out.println("LOG: File saved successfully: " + filename);
-
-                user.setProfileImageUrl(filename);
+                // 5. Save S3 URL to Database
+                user.setProfileImageUrl(s3Url);
 
             } catch (Exception e) {
-                e.printStackTrace(); // Print full error to console
-                throw new RuntimeException("IMAGE UPLOAD FAILED: " + e.getMessage());
+                System.err.println("S3 Upload Failed: " + e.getMessage());
+                e.printStackTrace();
             }
-        } else {
-            System.out.println("LOG: No image data found in request.");
         }
 
         if (user.getRole() == UserRole.TECHNICIAN) {
