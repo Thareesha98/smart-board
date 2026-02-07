@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import TechnicianLayout from "../../components/technician/common/TechnicianLayout"; // Check casing!
 import { useTechAuth } from "../../context/technician/TechnicianAuthContext";
-import { getTechnicianProfile, getTechnicianReviews } from "../../api/technician/technicianService";
-import { FaStar, FaEnvelope, FaPhone, FaMapMarkerAlt, FaEdit, FaMoneyBillWave } from "react-icons/fa";
+import { getTechnicianProfile, getTechnicianReviews, updateTechnicianProfile } from "../../api/technician/technicianService";
+import { FaStar, FaEnvelope, FaPhone, FaMapMarkerAlt, FaEdit, FaMoneyBillWave, FaCamera } from "react-icons/fa";
 import EditProfileModal from "../../components/technician/profile/EditProfileModal"; // Check casing!
+import toast from "react-hot-toast";
 
 const TechnicianProfile = () => {
   //  Destructure isLoading
@@ -13,6 +14,8 @@ const TechnicianProfile = () => {
   const [reviews, setReviews] = useState([]);
   const [showEdit, setShowEdit] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
+
+  const fileInputRef = useRef(null);
 
   const getDisplayValue = (keyA, keyB, fallback) => {
     if (technician[keyA] !== undefined && technician[keyA] !== null) return technician[keyA];
@@ -56,12 +59,46 @@ const TechnicianProfile = () => {
     }
   }, [authLoading, currentTech]);
 
+  // 2. Handle Photo Upload (Convert to Base64 & Send)
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const toastId = toast.loading("Processing image...");
+
+    // Convert file to Base64 string
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onloadend = async () => {
+      const base64String = reader.result;
+
+      try {
+        // Send via the NORMAL update profile function
+        await updateTechnicianProfile({
+           ...technician, 
+           profileImageBase64: base64String // This matches the new DTO field
+        });
+
+        toast.success("Profile photo updated!", { id: toastId });
+        loadAllData(); // Refresh to see the change
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to update photo", { id: toastId });
+      }
+    };
+  };
+
 
   // Variables with Fallback Logic
   const displayName = technician.fullName || "Technician";
   const displayRating = getDisplayValue("averageRating", "technicianAverageRating", "0.0");
   const displayJobs = getDisplayValue("totalJobsCompleted", "technicianTotalJobs", 0);
   const displayBasePrice = technician.basePrice || "0.00";
+
+  const profileImageSrc = technician?.profileImageUrl
+    ? `http://localhost:8086/uploads/${technician.profileImageUrl}`
+    : `https://ui-avatars.com/api/?name=${displayName.replace(" ", "+")}&background=random`;
 
   if (authLoading || isDataLoading) return <div className="p-10 text-center">Loading Profile...</div>;
 
@@ -81,18 +118,36 @@ const TechnicianProfile = () => {
               <FaEdit />
             </button>
 
-            <img
-              src={
-                technician?.profileImageUrl
-                  ? `http://localhost:8086/uploads/${technician.profileImageUrl}`
-                  : `https://ui-avatars.com/api/?name=${technician?.fullName || "Tech"}&background=random`
-              }
-              alt="Profile"
-              className="w-28 h-28 rounded-full border-4 border-white shadow-md mx-auto relative z-10 object-cover bg-white"
-            />
+            {/*  IMAGE + CAMERA BUTTON */}
+            <div className="relative inline-block mx-auto mt-2 mb-4">
+               <img
+                src={profileImageSrc}
+                alt="Profile"
+                onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${displayName}&background=random`}
+                className="w-32 h-32 rounded-full border-4 border-white shadow-md object-cover bg-white relative z-10"
+              />
+              
+              {/* Camera Icon */}
+              <button 
+                onClick={() => fileInputRef.current.click()}
+                className="absolute bottom-1 right-1 z-20 bg-accent text-white p-2 rounded-full shadow-md hover:bg-orange-600 transition-all transform hover:scale-110 cursor-pointer"
+                title="Change Photo"
+              >
+                <FaCamera size={14} />
+              </button>
+              
+              {/* Hidden Input */}
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                className="hidden" 
+                accept="image/*"
+                onChange={handlePhotoUpload}
+              />
+            </div>
 
-            <h2 className="text-xl font-bold mt-4 text-gray-800">
-              {technician?.fullName || "Loading..."}
+            <h2 className="text-xl font-bold text-gray-800">
+              {displayName}
             </h2>
             
             {/* Skills */}

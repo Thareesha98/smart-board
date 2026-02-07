@@ -5,6 +5,13 @@ import { useTechAuth } from "../../../context/technician/TechnicianAuthContext";
 const TechnicianHeader = ({ title, subtitle }) => {
   const { currentTech } = useTechAuth();
 
+  const displayName = currentTech?.fullName || "Technician";
+  
+  // 1. Reliable Image Source Logic
+  const profileImageSrc = currentTech?.profileImageUrl
+    ? `http://localhost:8086/uploads/${currentTech.profileImageUrl}`
+    : `https://ui-avatars.com/api/?name=${displayName.replace(" ", "+")}&background=random`;
+
   return (
     <header className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white/70 backdrop-blur-sm p-6 rounded-large shadow-custom static md:sticky top-0 md:top-6 z-10">
       <div>
@@ -20,16 +27,25 @@ const TechnicianHeader = ({ title, subtitle }) => {
             2
           </span>
         </div>
+
+        {/* Profile Image Area */}
         <div className="flex items-center gap-3">
           <img
-            src={
-              currentTech?.profileImageUrl
-                ? `http://localhost:8086/uploads/${currentTech.profileImageUrl}`
-                : "https://via.placeholder.com/150"
-            }
+            src={profileImageSrc}
             alt="User"
-            className="w-10 h-10 rounded-full object-cover border-2 border-accent"
+            className="w-10 h-10 rounded-full object-cover border-2 border-accent shadow-sm bg-white"
+            
+            //  CRITICAL: If image fails (403/404), force switch to Initials
+            onError={(e) => {
+              e.target.onerror = null; // Prevent infinite loop
+              e.target.src = `https://ui-avatars.com/api/?name=${displayName.replace(" ", "+")}&background=random`;
+            }}
           />
+          
+          {/* Optional: Show name next to pic on large screens */}
+          <span className="hidden md:block font-bold text-gray-700 text-sm">
+            {displayName.split(" ")[0]}
+          </span>
         </div>
       </div>
     </header>
