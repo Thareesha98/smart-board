@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../../assets/logo.png";
-import { FaHome, FaUser, FaSignOutAlt, FaFlag } from "react-icons/fa";
+import { FaHome, FaUser, FaSignOutAlt, FaHistory } from "react-icons/fa";
 import { useTechAuth } from "../../../context/technician/TechnicianAuthContext";
 
 const navItems = [
@@ -18,11 +18,11 @@ const navItems = [
     key: "Profile",
   },
   {
-    path: "/technician/reports",
-    icon: FaFlag,
-    label: "Report Issue",
-    key: "Reports",
-  }, // Added Report Link
+    path: "/technician/history", 
+    icon: FaHistory,             
+    label: "Work History",       
+    key: "History",
+  },
 ];
 
 const SidebarItem = ({ path, Icon, label, currentPath }) => {
