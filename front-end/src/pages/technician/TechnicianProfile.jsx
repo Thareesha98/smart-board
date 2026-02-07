@@ -11,32 +11,23 @@ const TechnicianProfile = () => {
   
   const [technician, setTechnician] = useState({});
   const [showEdit, setShowEdit] = useState(false);
-  const [isDataLoading, setIsDataLoading] = useState(true);
 
   // 1. SYNC: When Auth finishes loading, copy context data to local state
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      const data = await getTechnicianProfile();
-      console.log("API Fresh Data:", data); // Debug
-      
-      if (data) {
-        // 🚀 CRITICAL: Completely replace state with fresh API data. 
-        // Do NOT merge with 'prev' to avoid stale data ghosts.
-        setTechnician(data); 
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-    } finally {
-      setIsDataLoading(false);
-    }
-  };
-
-  // Run once on mount (when Auth is ready)
-  useEffect(() => {
+ useEffect(() => {
     if (!authLoading) {
+      // Ensure we display Context data first
       if (currentTech) setTechnician(currentTech);
-      fetchProfile();
+
+      // Background Fetch
+      const fetchData = async () => {
+        try {
+          const data = await getTechnicianProfile();
+          if (data) setTechnician(data); // Only update if successful
+        } catch (error) {
+          console.log("Could not fetch fresh data, showing cached data.");
+        }
+      };
+      fetchData();
     }
   }, [authLoading, currentTech]);
 

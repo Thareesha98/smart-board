@@ -46,13 +46,13 @@ export const TechnicianAuthProvider = ({ children }) => {
 
       const { token, refreshToken, user } = response.data;
 
-      if (user.role !== "TECHNICIAN") {
-        return {
-          success: false,
-          message:
-            "Access Denied: This account is not registered as a Technician.",
-        };
-      }
+      // if (user.role !== "TECHNICIAN") {
+      //   return {
+      //     success: false,
+      //     message:
+      //       "Access Denied: This account is not registered as a Technician.",
+      //   };
+      // }
 
       localStorage.setItem("token", token);
       localStorage.setItem("refresh_token", refreshToken);
