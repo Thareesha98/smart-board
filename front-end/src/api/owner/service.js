@@ -118,15 +118,17 @@ export const getOwnerBoardings = async () => {
   }
 };
 
-// 2. Get Single Boarding (For Edit Page)
+// 2. Get Single Boarding (For Edit Page & Status Toggling)
 export const getBoardingById = async (boardingId) => {
   try {
-    // ✅ CHANGED: We now use the PUBLIC endpoint found in BoardingController.java
-    // Path is "/boardings/{id}" instead of "/boardings/owner/{id}"
-    const response = await api.get(`/boardings/${boardingId}`);
+    // ✅ CHANGED: Use the OWNER endpoint (was `/boardings/${boardingId}`)
+    // This allows fetching the ad even if it is INACTIVE, PENDING, or DRAFT.
+    const response = await api.get(`/boardings/owner/${boardingId}`);
+    
+    // Map backend fields to frontend structure
+    const data = response.data;
     
     // Quick Fix: Map the typo 'bosted' from backend to 'isBoosted' for frontend
-    const data = response.data;
     if (data.bosted !== undefined) {
         data.isBoosted = data.bosted;
     }
@@ -173,6 +175,8 @@ export const deleteBoarding = async (boardingId) => {
     throw error;
   }
 };
+
+
 
 // 6. Boost Boarding
 export const boostBoarding = async (boardingId, days) => {

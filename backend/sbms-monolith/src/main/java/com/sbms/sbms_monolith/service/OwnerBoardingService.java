@@ -92,6 +92,18 @@ public class OwnerBoardingService {
                 .collect(Collectors.toList());
     }
 
+    public OwnerBoardingResponseDTO getOne(Long ownerId, Long boardingId) {
+        Boarding b = boardingRepository.findById(boardingId)
+                .orElseThrow(() -> new RuntimeException("Boarding not found"));
+
+        // Security: Ensure the logged-in user owns this ad
+        if (!b.getOwner().getId().equals(ownerId)) {
+            throw new RuntimeException("You are not allowed to view this boarding");
+        }
+
+        return BoardingMapper.toOwnerResponse(b);
+    }
+
     public OwnerBoardingResponseDTO boost(Long ownerId, Long boardingId, int days) {
 
         Boarding b = boardingRepository.findById(boardingId)
