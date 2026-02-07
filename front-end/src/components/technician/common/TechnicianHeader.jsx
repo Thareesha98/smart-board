@@ -1,11 +1,17 @@
 import React from "react";
 import { FaBell } from "react-icons/fa";
 import { useTechAuth } from "../../../context/technician/TechnicianAuthContext";
+import { useNavigate } from "react-router-dom";
 
 const TechnicianHeader = ({ title, subtitle }) => {
   const { currentTech } = useTechAuth();
+  const navigate = useNavigate();
 
   const displayName = currentTech?.fullName || "Technician";
+
+  const handleProfileClick = () => {
+    navigate("/technician/profile");
+  };
   
   const getProfileImage = () => {
     if (currentTech?.profileImageUrl) {
@@ -33,21 +39,22 @@ const TechnicianHeader = ({ title, subtitle }) => {
         </div>
 
         {/* Profile Image Area */}
-        <div className="flex items-center gap-3">
+        <div 
+            onClick={handleProfileClick}
+            className="flex items-center gap-3 cursor-pointer p-2 pr-4 rounded-large bg-background-light text-text-dark transition-all duration-300 hover:bg-accent hover:text-white group"
+        >
           <img
             src={getProfileImage()}
             alt="User"
-            className="w-10 h-10 rounded-full object-cover border-2 border-accent shadow-sm bg-white"
+            className="w-10 h-10 rounded-full object-cover border-2 border-accent group-hover:border-white shadow-sm bg-white transition-colors duration-300"
             
-            //  CRITICAL: If image fails (403/404), force switch to Initials
             onError={(e) => {
-              e.target.onerror = null; // Prevent infinite loop
+              e.target.onerror = null; 
               e.target.src = `https://ui-avatars.com/api/?name=${displayName.replace(" ", "+")}&background=random`;
             }}
           />
           
-          {/* Optional: Show name next to pic on large screens */}
-          <span className="hidden md:block font-bold text-gray-700 text-sm">
+          <span className="hidden md:block font-bold text-gray-700 text-sm group-hover:text-white transition-colors duration-300">
             {displayName.split(" ")[0]}
           </span>
         </div>
