@@ -55,6 +55,7 @@ public class S3Service {
                         .bucket(bucketName)
                         .key(key)
                         .contentType(contentType)
+                        .acl(ObjectCannedACL.PUBLIC_READ)
                         .build(),
                 software.amazon.awssdk.core.sync.RequestBody.fromBytes(data)
         );
