@@ -1,6 +1,7 @@
 package com.sbms.sbms_monolith.service;
 
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceResponseDTO;
+import com.sbms.sbms_monolith.dto.technician.TechnicianReviewDTO;
 import com.sbms.sbms_monolith.model.Maintenance;
 import com.sbms.sbms_monolith.model.TechnicianReview;
 import com.sbms.sbms_monolith.model.User;
@@ -138,6 +139,34 @@ public class TechnicianWorkflowService {
         }
 
         return mapToDTO(saved);
+    }
+
+    // 7.  Get Reviews directly from Review Table
+    public List<TechnicianReviewDTO> getReviewsForTechnician(User technician) {
+        // Uses your existing repository method: findByTechnician(User)
+        return techReviewRepo.findByTechnician(technician).stream()
+                .map(review -> {
+                    TechnicianReviewDTO dto = new TechnicianReviewDTO();
+                    dto.setId(review.getId());
+
+                    if (review.getOwner() != null) {
+                        dto.setOwnerName(review.getOwner().getFullName());
+                    } else {
+                        dto.setOwnerName("Unknown Owner");
+                    }
+
+                    dto.setRating(review.getRating());
+                    dto.setComment(review.getComment());
+
+                    // Handle Date
+                    if (review.getCreatedAt() != null) {
+                        dto.setDate(review.getCreatedAt().toLocalDate());
+                    } else {
+                        dto.setDate(java.time.LocalDate.now());
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     //  Helper Method: Calculate Stats directly from Maintenance History

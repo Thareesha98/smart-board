@@ -85,19 +85,7 @@ public class TechnicianWorkflowController {
     public List<TechnicianReviewDTO> getMyReviews(Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
 
-        return workflowService.getAssignedJobs(tech.getId()).stream()
-                .filter(job -> job.getOwnerRating() > 0 && job.getOwnerComment() != null) // Only reviewed jobs
-                .map(job -> {
-                    TechnicianReviewDTO dto = new TechnicianReviewDTO();
-                    dto.setId(job.getId());
-                    dto.setOwnerName(job.getBoarding().getOwner().getFullName());
-                    dto.setRating(job.getOwnerRating());
-                    dto.setComment(job.getOwnerComment());
-                    // Assuming 'updatedAt' or 'createdAt' is the review date, or add a reviewDate field
-                    dto.setDate(job.getUpdatedAt().toLocalDate());
-                    return dto;
-                })
-                .collect(Collectors.toList());
+        return workflowService.getReviewsForTechnician(tech);
     }
 
     // DYNAMIC ROUTES (Lower Priority)
