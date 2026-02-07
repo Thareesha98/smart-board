@@ -6,7 +6,7 @@ import { FaStar, FaEnvelope, FaPhone, FaMapMarkerAlt, FaEdit, FaMoneyBillWave } 
 import EditProfileModal from "../../components/technician/profile/EditProfileModal"; // Check casing!
 
 const TechnicianProfile = () => {
-  // ✅ Destructure isLoading
+  //  Destructure isLoading
   const { currentTech, isLoading: authLoading } = useTechAuth(); 
   
   const [technician, setTechnician] = useState({});
@@ -14,48 +14,40 @@ const TechnicianProfile = () => {
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   // 1. SYNC: When Auth finishes loading, copy context data to local state
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const data = await getTechnicianProfile();
+      console.log("API Fresh Data:", data); // Debug
+      
+      if (data) {
+        // 🚀 CRITICAL: Completely replace state with fresh API data. 
+        // Do NOT merge with 'prev' to avoid stale data ghosts.
+        setTechnician(data); 
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      setIsDataLoading(false);
+    }
+  };
+
+  // Run once on mount (when Auth is ready)
   useEffect(() => {
-    if (!authLoading && currentTech) {
-      setTechnician((prev) => ({ ...prev, ...currentTech }));
+    if (!authLoading) {
+      if (currentTech) setTechnician(currentTech);
+      fetchProfile();
     }
   }, [authLoading, currentTech]);
 
-  // 2. FETCH: Only try API after Auth is ready
-  useEffect(() => {
-    const loadData = async () => {
-      // 🛑 BLOCKER: Don't fetch if we are still checking who the user is
-      if (authLoading) return; 
-
-      try {
-        setIsDataLoading(true);
-        const data = await getTechnicianProfile();
-        if (data) {
-          setTechnician((prev) => ({ ...prev, ...data }));
-        }
-      } catch (error) {
-        console.error("API Fetch Error (using cached data):", error);
-      } finally {
-        setIsDataLoading(false);
-      }
-    };
-
-    loadData();
-  }, [authLoading]);
-
-  // 3. 🛑 RENDER GATE: Show spinner while Auth loads
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   // --- MOCK REVIEWS (Static for now) ---
   const reviews = [
     { id: 1, ownerName: "Dhananjaya J.", rating: 5, comment: "Fixed quickly!", date: "2026-01-29" },
     { id: 2, ownerName: "Sarah M.", rating: 4, comment: "Good work.", date: "2026-01-15" },
   ];
+
+  if (authLoading) return <div className="p-10 text-center">Loading Auth...</div>;
 
   return (
     <TechnicianLayout title="My Profile" subtitle="Manage your account">
@@ -166,10 +158,7 @@ const TechnicianProfile = () => {
         <EditProfileModal
           user={technician}
           onClose={() => setShowEdit(false)}
-          onUpdate={async () => {
-             const data = await getTechnicianProfile();
-             setTechnician(prev => ({...prev, ...data}));
-          }}
+          onUpdate={fetchProfile} //  Fetch FRESH data after edit
         />
       )}
     </TechnicianLayout>

@@ -20,15 +20,11 @@ export const TechnicianAuthProvider = ({ children }) => {
           const user = JSON.parse(savedUser);
 
           // 🔒 Security Check: Ensure the saved user is a TECHNICIAN
-          if (user.role && user.role.toUpperCase() === "TECHNICIAN") {
+        
             setCurrentTech(user);
             setIsAuthenticated(true);
-          } else {
-            console.warn("Invalid Role in Storage, clearing...");
-            localStorage.clear();
-          }
+          
         } catch (e) {
-          console.error("Failed to parse user data", e);
           localStorage.clear();
         }
       }
@@ -41,7 +37,7 @@ export const TechnicianAuthProvider = ({ children }) => {
   // 2. Login
   const login = async (email, password) => {
     try {
-      // 🚀 Explicitly remove Auth header for login
+      //  Explicitly remove Auth header for login
       const response = await api.post(
         "/auth/login",
         { email, password },
@@ -66,7 +62,6 @@ export const TechnicianAuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return { success: true };
     } catch (error) {
-      console.error("Login Error:", error);
       const msg =
         error.response?.status === 401 ? "Invalid credentials" : "Login failed";
       return { success: false, message: msg };
@@ -132,23 +127,18 @@ export const TechnicianAuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.clear();
-    setCurrentTech(null);
-    setIsAuthenticated(false);
-    window.location.href = "/login";
-  };
+  
 
   // 5. Update Profile (Uses the Service Function)
   const updateProfile = async (updatedData) => {
     try {
-      // ✅ Call the API service
+      //  Call the API service
       await updateTechnicianProfile(updatedData);
 
-      // ✅ Merge changes with current state (Optimistic Update)
+      //  Merge changes with current state (Optimistic Update)
       const newUser = { ...currentTech, ...updatedData };
 
-      // ✅ Update Storage and State
+      //  Update Storage and State
       localStorage.setItem("user_data", JSON.stringify(newUser));
       setCurrentTech(newUser);
 
@@ -157,6 +147,13 @@ export const TechnicianAuthProvider = ({ children }) => {
       console.error("Profile Update Failed", error);
       return { success: false, message: "Update failed" };
     }
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    setCurrentTech(null);
+    setIsAuthenticated(false);
+    window.location.href = "/login";
   };
 
   const value = {

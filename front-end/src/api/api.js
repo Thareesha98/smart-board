@@ -19,7 +19,6 @@ api.interceptors.request.use(
     if (token && token !== "null" && token !== "undefined" && token.length > 10) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-      // 🚀 CRITICAL: Delete the header to force a clean public request
       delete config.headers.Authorization; 
     }
     
@@ -28,15 +27,15 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 3. Response Interceptor (Handles Token Expiry)
+// 3. Response Interceptor (RELAXED - No Auto Logout)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // If the Backend says "401 Unauthorized" (Token Expired), log them out
+    // ⚠️ I commented out the auto-logout so you can debug without losing data
     if (error.response && error.response.status === 401) {
-      console.warn("Session expired. Clearing storage and redirecting...");
-      localStorage.clear();
-      window.location.href = "/login";
+      console.warn("Session token might be expired, but keeping data for debugging.");
+      // localStorage.clear();  <-- DISABLED FOR NOW
+      // window.location.href = "/login"; <-- DISABLED FOR NOW
     }
     return Promise.reject(error);
   }
