@@ -16,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.FileOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -118,9 +115,9 @@ public class UserService {
         if (dto.getProfileImageBase64() != null && !dto.getProfileImageBase64().isEmpty()) {
             try {
                 String base64String = dto.getProfileImageBase64();
-
-                // 1. Detect Type & Clean String
                 String contentType = "image/jpeg";
+
+                // 1. Clean Data
                 if (base64String.contains("data:image/png;")) contentType = "image/png";
 
                 if (base64String.contains(",")) {
@@ -134,16 +131,18 @@ public class UserService {
                 String extension = contentType.equals("image/png") ? ".png" : ".jpg";
                 String s3Key = "profiles/" + UUID.randomUUID().toString() + "_upload" + extension;
 
-                // 4. Upload to S3
+                // 4. Upload to Cloud (AWS)
+                System.out.println("LOG: Uploading to S3...");
                 String s3Url = s3Service.uploadBytes(imageBytes, s3Key, contentType);
-                System.out.println("LOG: Uploaded to S3: " + s3Url);
+                System.out.println("LOG: Upload Success: " + s3Url);
 
-                // 5. Save S3 URL to Database
+                // 5. Save Cloud URL to Database
                 user.setProfileImageUrl(s3Url);
 
             } catch (Exception e) {
-                System.err.println("S3 Upload Failed: " + e.getMessage());
+                System.err.println("S3 Upload Error: " + e.getMessage());
                 e.printStackTrace();
+                // Optionally throw exception if upload is mandatory
             }
         }
 
