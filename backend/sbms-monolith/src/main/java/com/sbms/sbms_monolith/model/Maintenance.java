@@ -66,8 +66,9 @@ public class Maintenance extends BaseEntity {
     private BigDecimal technicianFee;
 
 
-    private Integer technicianRating; // 1-5 stars
+    @Column(columnDefinition = "integer default 0")
+    private int ownerRating = 0;// 1-5 stars
 
     @Column(length = 500)
-    private String ownerReview;
+    private String ownerComment;
 }

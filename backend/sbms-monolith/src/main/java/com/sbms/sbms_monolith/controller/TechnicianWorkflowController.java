@@ -3,6 +3,7 @@ package com.sbms.sbms_monolith.controller;
 import com.sbms.sbms_monolith.dto.maintenance.MaintenanceResponseDTO;
 import com.sbms.sbms_monolith.dto.technician.TechnicianCardDTO;
 import com.sbms.sbms_monolith.dto.technician.TechnicianProfileResponseDTO;
+import com.sbms.sbms_monolith.dto.technician.TechnicianReviewDTO;
 import com.sbms.sbms_monolith.model.Maintenance;
 import com.sbms.sbms_monolith.model.User;
 import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
@@ -74,6 +75,26 @@ public class TechnicianWorkflowController {
                     dto.setSkills(user.getSkills());
                     dto.setAverageRating(user.getTechnicianAverageRating());
                     dto.setTotalJobs(user.getTechnicianTotalJobs());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/reviews")
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    public List<TechnicianReviewDTO> getMyReviews(Authentication auth) {
+        User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+
+        return workflowService.getAssignedJobs(tech.getId()).stream()
+                .filter(job -> job.getOwnerRating() > 0 && job.getOwnerComment() != null) // Only reviewed jobs
+                .map(job -> {
+                    TechnicianReviewDTO dto = new TechnicianReviewDTO();
+                    dto.setId(job.getId());
+                    dto.setOwnerName(job.getBoarding().getOwner().getFullName());
+                    dto.setRating(job.getOwnerRating());
+                    dto.setComment(job.getOwnerComment());
+                    // Assuming 'updatedAt' or 'createdAt' is the review date, or add a reviewDate field
+                    dto.setDate(job.getUpdatedAt().toLocalDate());
                     return dto;
                 })
                 .collect(Collectors.toList());
