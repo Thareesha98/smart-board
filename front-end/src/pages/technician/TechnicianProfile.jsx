@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 const TechnicianProfile = () => {
   //  Destructure isLoading
-  const { currentTech, isLoading: authLoading } = useTechAuth(); 
+  const { currentTech, isLoading: authLoading, refreshUser } = useTechAuth(); 
   
   const [technician, setTechnician] = useState({});
   const [reviews, setReviews] = useState([]);
@@ -32,9 +32,6 @@ const TechnicianProfile = () => {
         getTechnicianProfile(),
         getTechnicianReviews() // Fetch real reviews
       ]);
-
-      console.log("Profile Data:", profileData);
-      console.log("Reviews Data:", reviewsData);
 
       if (profileData) {
         setTechnician(profileData);
@@ -64,27 +61,24 @@ const TechnicianProfile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const toastId = toast.loading("Processing image...");
+    const toastId = toast.loading("Uploading to cloud...");
 
-    // Convert file to Base64 string
     const reader = new FileReader();
     reader.readAsDataURL(file);
 
     reader.onloadend = async () => {
       const base64String = reader.result;
-
       try {
-        // Send via the NORMAL update profile function
         await updateTechnicianProfile({
            ...technician, 
-           profileImageBase64: base64String // This matches the new DTO field
+           profileImageBase64: base64String 
         });
-
-        toast.success("Profile photo updated!", { id: toastId });
-        loadAllData(); // Refresh to see the change
+        toast.success("Photo updated!", { id: toastId });
+        await refreshUser(); // Update Header
+        loadAllData();       // Update Profile
       } catch (error) {
         console.error(error);
-        toast.error("Failed to update photo", { id: toastId });
+        toast.error("Upload failed", { id: toastId });
       }
     };
   };
@@ -96,9 +90,15 @@ const TechnicianProfile = () => {
   const displayJobs = getDisplayValue("totalJobsCompleted", "technicianTotalJobs", 0);
   const displayBasePrice = technician.basePrice || "0.00";
 
-  const profileImageSrc = technician?.profileImageUrl
-    ? `http://localhost:8086/uploads/${technician.profileImageUrl}`
-    : `https://ui-avatars.com/api/?name=${displayName.replace(" ", "+")}&background=random`;
+  const getProfileImage = () => {
+    if (technician?.profileImageUrl) {
+        // If it's a full URL (S3), use it. If it's a local filename, use localhost (legacy support)
+        return technician.profileImageUrl.startsWith("http") 
+            ? technician.profileImageUrl 
+            : `http://localhost:8086/uploads/${technician.profileImageUrl}`;
+    }
+    return `https://ui-avatars.com/api/?name=${displayName}&background=random`;
+  };
 
   if (authLoading || isDataLoading) return <div className="p-10 text-center">Loading Profile...</div>;
 
@@ -121,7 +121,7 @@ const TechnicianProfile = () => {
             {/*  IMAGE + CAMERA BUTTON */}
             <div className="relative inline-block mx-auto mt-2 mb-4">
                <img
-                src={profileImageSrc}
+                src={getProfileImage()}
                 alt="Profile"
                 onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${displayName}&background=random`}
                 className="w-32 h-32 rounded-full border-4 border-white shadow-md object-cover bg-white relative z-10"
