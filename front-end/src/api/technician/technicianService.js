@@ -12,7 +12,13 @@ export const getTechnicianJobs = async () => {
   return response.data;
 };
 
-// 3. Accept or Reject Job
+// 3. NEW: Get Reviews
+export const getTechnicianReviews = async () => {
+  const response = await api.get("/technician-workflow/reviews");
+  return response.data;
+};
+
+// 4. Accept or Reject Job
 export const respondToJob = async (maintenanceId, accept, reason = null) => {
   const response = await api.put(`/technician-workflow/${maintenanceId}/decision`, null, {
     params: { accept, reason }
@@ -20,7 +26,7 @@ export const respondToJob = async (maintenanceId, accept, reason = null) => {
   return response.data;
 };
 
-// 4. Complete Job & Send Bill
+// 5. Complete Job & Send Bill
 export const completeJob = async (maintenanceId, amount) => {
   const response = await api.put(`/technician-workflow/${maintenanceId}/complete`, null, {
     params: { amount }
@@ -28,7 +34,7 @@ export const completeJob = async (maintenanceId, amount) => {
   return response.data;
 };
 
-// 5. Create Report (Against Owner)
+// 6. Create Report (Against Owner)
 export const createTechnicianReport = async (formData) => {
   const response = await api.post("/reports", formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
@@ -36,7 +42,7 @@ export const createTechnicianReport = async (formData) => {
   return response.data;
 };
 
-// 6. Update Profile
+// 7. Update Profile
 export const updateTechnicianProfile = async (data) => {
   const response = await api.put("/users/profile", data); // Assuming generic user profile endpoint
   return response.data;
