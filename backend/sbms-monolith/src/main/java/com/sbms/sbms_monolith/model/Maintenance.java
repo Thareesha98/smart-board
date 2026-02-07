@@ -11,10 +11,12 @@ import com.sbms.sbms_monolith.model.enums.MaintenanceUrgency;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
 @Table(name = "maintenance_requests")
+@EqualsAndHashCode(callSuper = true)
 public class Maintenance extends BaseEntity {
 	
 	@ManyToOne

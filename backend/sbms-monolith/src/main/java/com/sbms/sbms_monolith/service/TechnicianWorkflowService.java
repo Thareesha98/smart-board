@@ -21,9 +21,14 @@ import java.util.stream.Collectors;
 @Service
 public class TechnicianWorkflowService {
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private MaintenanceRepository maintenanceRepo;
-    @Autowired private TechnicianReviewRepository techReviewRepo;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MaintenanceRepository maintenanceRepo;
+
+    @Autowired
+    private TechnicianReviewRepository techReviewRepo;
 
     // 1. OWNER: Find Technicians matching the issue (e.g., Plumbing)
     public List<User> findTechniciansForIssue(MaintenanceIssueType skill, String city) {
@@ -107,8 +112,8 @@ public class TechnicianWorkflowService {
         }
 
         //  IMPORTANT: Save directly to Maintenance Entity (So Controller sees it)
-        m.setTechnicianRating(rating);
-        m.setOwnerReview(comment);
+        m.setOwnerRating(rating);
+        m.setOwnerComment(comment);
         m.setStatus(MaintenanceStatus.COMPLETED);
 
         Maintenance saved = maintenanceRepo.save(m);
@@ -143,8 +148,9 @@ public class TechnicianWorkflowService {
         int count = 0;
 
         for (Maintenance job : jobs) {
-            if (job.getTechnicianRating() != null && job.getTechnicianRating() > 0) {
-                totalRating += job.getTechnicianRating();
+            //  FIX 2: Check ownerRating > 0
+            if (job.getOwnerRating() > 0) {
+                totalRating += job.getOwnerRating();
                 count++;
             }
         }
@@ -182,8 +188,8 @@ public class TechnicianWorkflowService {
         }
 
         // Map Review Info (Now reading from the correct place)
-        dto.setRating(m.getTechnicianRating());
-        dto.setReviewComment(m.getOwnerReview());
+        dto.setRating(m.getOwnerRating());
+        dto.setReviewComment(m.getOwnerComment());
 
         return dto;
     }
