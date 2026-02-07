@@ -32,7 +32,7 @@ public class TechnicianWorkflowController {
     // STATIC ROUTES (Top Priority)
 
     @GetMapping("/profile")
-    @PreAuthorize("hasRole('TECHNICIAN')")
+    @PreAuthorize("hasAuthority('TECHNICIAN')")
     public TechnicianProfileResponseDTO getMyProfile(Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
         TechnicianProfileResponseDTO dto = new TechnicianProfileResponseDTO();
@@ -55,7 +55,7 @@ public class TechnicianWorkflowController {
     }
 
     @GetMapping("/my-jobs")
-    @PreAuthorize("hasRole('TECHNICIAN')")
+    @PreAuthorize("hasAuthority('TECHNICIAN')")
     public List<Maintenance> getMyJobs(Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
         return workflowService.getAssignedJobs(tech.getId());
@@ -81,7 +81,7 @@ public class TechnicianWorkflowController {
     }
 
     @GetMapping("/reviews")
-    @PreAuthorize("hasRole('TECHNICIAN')")
+    @PreAuthorize("hasAuthority('TECHNICIAN')")
     public List<TechnicianReviewDTO> getMyReviews(Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
 
@@ -105,7 +105,7 @@ public class TechnicianWorkflowController {
     }
 
     @PutMapping("/{maintenanceId}/decision")
-    @PreAuthorize("hasRole('TECHNICIAN')")
+    @PreAuthorize("hasAuthority('TECHNICIAN')")
     public String technicianDecision(@PathVariable Long maintenanceId, @RequestParam boolean accept, @RequestParam(required = false) String reason, Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
         if (!accept && (reason == null || reason.trim().isEmpty())) throw new RuntimeException("Rejection reason is required.");
@@ -114,7 +114,7 @@ public class TechnicianWorkflowController {
     }
 
     @PutMapping("/{maintenanceId}/complete")
-    @PreAuthorize("hasRole('TECHNICIAN')")
+    @PreAuthorize("hasAuthority('TECHNICIAN')")
     public String markWorkDone(@PathVariable Long maintenanceId, @RequestParam BigDecimal amount, Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
         workflowService.markWorkDone(maintenanceId, tech.getId(), amount);

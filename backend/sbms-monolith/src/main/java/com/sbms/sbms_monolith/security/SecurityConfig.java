@@ -81,10 +81,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/technician-workflow/*/review").hasRole("OWNER")
                         .requestMatchers("/api/payments/intent/technician").hasRole("OWNER")
 
-                        .requestMatchers("/api/technician-workflow/my-jobs").hasRole("TECHNICIAN")
-                        .requestMatchers("/api/technician-workflow/*/decision").hasRole("TECHNICIAN")
-                        .requestMatchers("/api/technician-workflow/*/complete").hasRole("TECHNICIAN")
-                        .requestMatchers("/api/technician-workflow/profile").hasRole("TECHNICIAN")
+                        .requestMatchers("/api/technician-workflow/my-jobs").hasAuthority("TECHNICIAN")
+                        .requestMatchers("/api/technician-workflow/*/decision").hasAuthority("TECHNICIAN")
+                        .requestMatchers("/api/technician-workflow/*/complete").hasAuthority("TECHNICIAN")
+                        .requestMatchers("/api/technician-workflow/profile").hasAuthority("TECHNICIAN")
 
                         .anyRequest().authenticated()
                 )
