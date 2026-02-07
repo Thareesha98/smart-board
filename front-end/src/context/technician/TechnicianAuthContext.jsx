@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../../api/api";
-import { updateTechnicianProfile } from "../../api/technician/technicianService"; // ✅ Fixed Import
+import { updateTechnicianProfile, getTechnicianProfile } from "../../api/technician/technicianService"; // ✅ Fixed Import
 
 const TechnicianAuthContext = createContext(null);
 
@@ -19,7 +19,7 @@ export const TechnicianAuthProvider = ({ children }) => {
         try {
           const user = JSON.parse(savedUser);
 
-          // 🔒 Security Check: Ensure the saved user is a TECHNICIAN
+          //  Security Check: Ensure the saved user is a TECHNICIAN
         
             setCurrentTech(user);
             setIsAuthenticated(true);
@@ -73,7 +73,7 @@ export const TechnicianAuthProvider = ({ children }) => {
     try {
       const payload = {
         ...userData,
-        role: "TECHNICIAN", // 👈 IMPORTANT: Force role here
+        role: "TECHNICIAN", //  IMPORTANT: Force role here
       };
 
       const config = {
@@ -149,6 +149,20 @@ export const TechnicianAuthProvider = ({ children }) => {
     }
   };
 
+
+  const refreshUser = async () => {
+    try {
+      const updatedData = await getTechnicianProfile(); // Fetch fresh data from DB
+      
+      setCurrentTech(updatedData);
+      localStorage.setItem("user_data", JSON.stringify(updatedData)); // Sync local storage
+      
+      return updatedData;
+    } catch (error) {
+      console.error("Failed to refresh user context", error);
+    }
+  };
+
   const logout = () => {
     localStorage.clear();
     setCurrentTech(null);
@@ -165,6 +179,7 @@ export const TechnicianAuthProvider = ({ children }) => {
     signup,
     verifyRegistration,
     updateProfile,
+    refreshUser
   };
 
   return (
