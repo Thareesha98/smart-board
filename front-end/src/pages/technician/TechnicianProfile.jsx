@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import TechnicianLayout from "../../components/technician/common/TechnicianLayout"; // Check casing!
 import { useTechAuth } from "../../context/technician/TechnicianAuthContext";
-import { getTechnicianProfile } from "../../api/technician/technicianService";
+import { getTechnicianProfile, getTechnicianReviews } from "../../api/technician/technicianService";
 import { FaStar, FaEnvelope, FaPhone, FaMapMarkerAlt, FaEdit, FaMoneyBillWave } from "react-icons/fa";
 import EditProfileModal from "../../components/technician/profile/EditProfileModal"; // Check casing!
 
@@ -10,35 +10,60 @@ const TechnicianProfile = () => {
   const { currentTech, isLoading: authLoading } = useTechAuth(); 
   
   const [technician, setTechnician] = useState({});
+  const [reviews, setReviews] = useState([]);
   const [showEdit, setShowEdit] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
-  // 1. SYNC: When Auth finishes loading, copy context data to local state
+  const getDisplayValue = (keyA, keyB, fallback) => {
+    if (technician[keyA] !== undefined && technician[keyA] !== null) return technician[keyA];
+    if (technician[keyB] !== undefined && technician[keyB] !== null) return technician[keyB];
+    return fallback;
+  };
+
+  const loadAllData = async () => {
+    try {
+      setIsDataLoading(true);
+      
+      // 1. Fetch Profile and Reviews in parallel
+      const [profileData, reviewsData] = await Promise.all([
+        getTechnicianProfile(),
+        getTechnicianReviews() // Fetch real reviews
+      ]);
+
+      console.log("Profile Data:", profileData);
+      console.log("Reviews Data:", reviewsData);
+
+      if (profileData) {
+        setTechnician(profileData);
+      }
+      if (reviewsData) {
+        setReviews(reviewsData);
+      }
+
+    } catch (error) {
+      console.error("Data Fetch Error:", error);
+    } finally {
+      setIsDataLoading(false);
+    }
+  };
+
  useEffect(() => {
     if (!authLoading) {
-      // Ensure we display Context data first
+      // Load context data first for instant render
       if (currentTech) setTechnician(currentTech);
-
-      // Background Fetch
-      const fetchData = async () => {
-        try {
-          const data = await getTechnicianProfile();
-          if (data) setTechnician(data); // Only update if successful
-        } catch (error) {
-          console.log("Could not fetch fresh data, showing cached data.");
-        }
-      };
-      fetchData();
+      // Then fetch fresh data
+      loadAllData();
     }
   }, [authLoading, currentTech]);
 
 
-  // --- MOCK REVIEWS (Static for now) ---
-  const reviews = [
-    { id: 1, ownerName: "Dhananjaya J.", rating: 5, comment: "Fixed quickly!", date: "2026-01-29" },
-    { id: 2, ownerName: "Sarah M.", rating: 4, comment: "Good work.", date: "2026-01-15" },
-  ];
+  // Variables with Fallback Logic
+  const displayName = technician.fullName || "Technician";
+  const displayRating = getDisplayValue("averageRating", "technicianAverageRating", "0.0");
+  const displayJobs = getDisplayValue("totalJobsCompleted", "technicianTotalJobs", 0);
+  const displayBasePrice = technician.basePrice || "0.00";
 
-  if (authLoading) return <div className="p-10 text-center">Loading Auth...</div>;
+  if (authLoading || isDataLoading) return <div className="p-10 text-center">Loading Profile...</div>;
 
   return (
     <TechnicianLayout title="My Profile" subtitle="Manage your account">
@@ -86,13 +111,13 @@ const TechnicianProfile = () => {
             <div className="mt-6 flex justify-center gap-2">
               <div className="bg-orange-50 px-4 py-2 rounded-xl text-center">
                 <span className=" font-black text-xl text-orange-600 flex items-center justify-center gap-1">
-                  {technician?.technicianAverageRating || "0.0"} <FaStar size={14} />
+                  {displayRating} <FaStar size={12} />
                 </span>
                 <span className="text-xs text-gray-500 uppercase font-bold">Rating</span>
               </div>
               <div className="bg-blue-50 px-4 py-2 rounded-xl text-center">
                 <span className="block font-black text-xl text-blue-600">
-                  {technician?.technicianTotalJobs || "0"}
+                  {displayJobs}
                 </span>
                 <span className="text-xs text-gray-500 uppercase font-bold">Jobs</span>
               </div>
@@ -119,29 +144,32 @@ const TechnicianProfile = () => {
           </div>
         </div>
 
-        {/* REVIEWS SECTION */}
+        {/* Right Column: Reviews */}
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <FaStar className="text-yellow-400" /> Reviews
-            </h3>
-            <div className="space-y-4">
-              {reviews.map((review) => (
-                <div key={review.id} className="border-b border-gray-50 pb-4 last:border-0 last:pb-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <h4 className="font-bold text-gray-700">{review.ownerName}</h4>
-                    <span className="text-xs text-gray-400">{review.date}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-yellow-400 text-xs mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <FaStar key={i} className={i < review.rating ? "text-yellow-400" : "text-gray-200"} />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 text-sm italic">"{review.comment}"</p>
-                </div>
-              ))}
-            </div>
-          </div>
+           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+             <h3 className="font-bold mb-4 flex items-center gap-2"><FaStar className="text-yellow-400"/> Reviews from Owners</h3>
+             
+             {reviews.length > 0 ? (
+               <div className="space-y-4">
+                 {reviews.map((r) => (
+                   <div key={r.id} className="border-b pb-2 mb-2 last:border-0 last:pb-0">
+                     <div className="flex justify-between items-start mb-1">
+                        <span className="font-bold text-gray-700">{r.ownerName}</span>
+                        <span className="text-xs text-gray-400">{r.date}</span>
+                     </div>
+                     <div className="flex items-center gap-1 text-yellow-400 text-xs mb-1">
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar key={i} className={i < r.rating ? "text-yellow-400" : "text-gray-200"} />
+                        ))}
+                     </div>
+                     <p className="text-sm italic text-gray-600">"{r.comment}"</p>
+                   </div>
+                 ))}
+               </div>
+             ) : (
+               <p className="text-gray-400 italic text-center py-4">No reviews yet.</p>
+             )}
+           </div>
         </div>
       </div>
 
@@ -149,7 +177,7 @@ const TechnicianProfile = () => {
         <EditProfileModal
           user={technician}
           onClose={() => setShowEdit(false)}
-          onUpdate={fetchProfile} //  Fetch FRESH data after edit
+          onUpdate={loadAllData} //  Fetch FRESH data after edit
         />
       )}
     </TechnicianLayout>
