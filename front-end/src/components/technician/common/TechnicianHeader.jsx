@@ -7,10 +7,14 @@ const TechnicianHeader = ({ title, subtitle }) => {
 
   const displayName = currentTech?.fullName || "Technician";
   
-  // 1. Reliable Image Source Logic
-  const profileImageSrc = currentTech?.profileImageUrl
-    ? `http://localhost:8086/uploads/${currentTech.profileImageUrl}`
-    : `https://ui-avatars.com/api/?name=${displayName.replace(" ", "+")}&background=random`;
+  const getProfileImage = () => {
+    if (currentTech?.profileImageUrl) {
+        return currentTech.profileImageUrl.startsWith("http") 
+            ? currentTech.profileImageUrl 
+            : `http://localhost:8086/uploads/${currentTech.profileImageUrl}`;
+    }
+    return `https://ui-avatars.com/api/?name=${displayName.replace(" ", "+")}&background=random`;
+  };
 
   return (
     <header className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white/70 backdrop-blur-sm p-6 rounded-large shadow-custom static md:sticky top-0 md:top-6 z-10">
@@ -31,7 +35,7 @@ const TechnicianHeader = ({ title, subtitle }) => {
         {/* Profile Image Area */}
         <div className="flex items-center gap-3">
           <img
-            src={profileImageSrc}
+            src={getProfileImage()}
             alt="User"
             className="w-10 h-10 rounded-full object-cover border-2 border-accent shadow-sm bg-white"
             
