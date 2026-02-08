@@ -3,21 +3,21 @@ import { createTechnicianReport } from "../../../api/technician/technicianServic
 import { useTechAuth } from "../../../context/technician/TechnicianAuthContext";
 import toast from "react-hot-toast";
 
-// Import Sub-Components
 import ReportHeader from "./ReportHeader";
 import ReportTargetDetails from "./ReportTargetDetails";
-import ReportFormFields from "./ReportFormFields";
+import ReportFormFields from "./ReportFormFields"; 
 
 const ReportModal = ({ job, onClose }) => {
   const { currentTech } = useTechAuth();
   const [loading, setLoading] = useState(false);
 
+  // 1. State for Data
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     type: "NON_PAYMENT",
     severity: "MEDIUM",
-    evidence: null,
+    evidence: null 
   });
 
   const handleSubmit = async (e) => {
@@ -26,31 +26,34 @@ const ReportModal = ({ job, onClose }) => {
     const toastId = toast.loading("Submitting report...");
 
     try {
-      const data = new FormData();
-      
-      // Manual Inputs
-      data.append("reportTitle", formData.title);
-      data.append("reportDescription", formData.description);
-      data.append("type", formData.type);
-      data.append("severity", formData.severity);
-      
-      // ✅ READ FROM DTO (Flat Fields)
-      data.append("senderId", currentTech.id);
-      data.append("reportedUserId", job.ownerId); // Was job.boarding.owner.id
-      data.append("reportedPersonName", job.ownerName); // Was job.boarding.owner.fullName
-      data.append("boarding", job.boardingTitle); // Was job.boarding.title
-      
-      // System Data
-      data.append("incidentDate", new Date().toISOString().split("T")[0]);
-      data.append("allowContact", true);
+      // ✅ 2. CREATE THE PACKAGE (FormData)
+      const dataPackage = new FormData();
 
+      // Append Text
+      dataPackage.append("title", formData.title);
+      dataPackage.append("description", formData.description);
+      dataPackage.append("type", formData.type);
+      dataPackage.append("severity", formData.severity);
+
+      // Append IDs
+      dataPackage.append("senderId", currentTech.id);
+      dataPackage.append("reportedUserId", job.ownerId || job.boarding?.owner?.id); 
+      dataPackage.append("reportedPersonName", job.ownerName || job.boarding?.owner?.fullName);
+      dataPackage.append("boardingName", job.boardingTitle || job.boarding?.title);
+      dataPackage.append("incidentDate", new Date().toISOString().split("T")[0]);
+      dataPackage.append("allowContact", true);
+
+      // ✅ 3. APPEND FILE (CRITICAL STEP)
+      // We read from formData.evidence because ReportFormFields saves it there
       if (formData.evidence) {
-        data.append("evidence", formData.evidence);
+        dataPackage.append("evidence", formData.evidence);
       }
 
-      await createTechnicianReport(data);
+      // ✅ 4. SEND THE PACKAGE (NOT formData!)
+      // Your error happened because you were sending 'formData' here.
+      await createTechnicianReport(dataPackage);
       
-      toast.success("Report submitted to Admin!", { id: toastId });
+      toast.success("Report submitted successfully!", { id: toastId });
       onClose();
     } catch (error) {
       console.error(error);
@@ -61,36 +64,18 @@ const ReportModal = ({ job, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 animate-fadeIn">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        
-        {/* Header */}
         <ReportHeader job={job} onClose={onClose} />
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          
-          {/* Target Details */}
+        <form onSubmit={handleSubmit} className="p-6">
           <ReportTargetDetails job={job} />
-
-          {/* Form Fields */}
-          <ReportFormFields formData={formData} setFormData={setFormData} />
-
-          {/* Submit Actions */}
+          <div className="my-6">
+             {/* Pass formData and setFormData correctly */}
+             <ReportFormFields formData={formData} setFormData={setFormData} />
+          </div>
           <div className="pt-2 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:shadow-lg hover:from-red-700 hover:to-red-800 transition-all disabled:opacity-50 flex items-center gap-2"
-            >
-              {loading ? "Sending..." : "Submit Report"}
-            </button>
+            <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl">Cancel</button>
+            <button type="submit" disabled={loading} className="px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700">Submit</button>
           </div>
         </form>
       </div>
