@@ -36,6 +36,9 @@ public class MaintenanceResponseDTO {
     private int ownerRating;
     private String ownerComment;
 
+    private Double latitude;
+    private Double longitude;
+
     private String technicianName;
     private Long technicianId;
     private String ownerName;
