@@ -101,15 +101,29 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setFullName(dto.getFullName());
-        user.setPhone(dto.getPhone());
-        user.setAddress(dto.getAddress());
-        user.setGender(dto.getGender());
-        user.setStudentUniversity(dto.getStudentUniversity());
-        user.setAccNo(dto.getAccNo());
-        user.setNicNumber(dto.getNicNumber());
+        if (dto.getFullName() != null) {
+            user.setFullName(dto.getFullName());
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+        if (dto.getAddress() != null) {
+            user.setAddress(dto.getAddress());
+        }
+        if (dto.getGender() != null) {
+            user.setGender(dto.getGender());
+        }
+        if (dto.getStudentUniversity() != null) {
+            user.setStudentUniversity(dto.getStudentUniversity());
+        }
+        if (dto.getAccNo() != null) {
+            user.setAccNo(dto.getAccNo());
+        }
+        if (dto.getNicNumber() != null) {
+            user.setNicNumber(dto.getNicNumber());
+        }
 
-        if(dto.getProfileImageUrl() != null) {
+        if (dto.getProfileImageUrl() != null && !dto.getProfileImageUrl().isEmpty()) {
             user.setProfileImageUrl(dto.getProfileImageUrl());
         }
 
@@ -143,7 +157,7 @@ public class UserService {
             } catch (Exception e) {
                 System.err.println("S3 Upload Error: " + e.getMessage());
                 e.printStackTrace();
-                // Optionally throw exception if upload is mandatory
+                throw new RuntimeException("Failed to upload profile image");
             }
         }
 
