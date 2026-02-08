@@ -170,7 +170,7 @@ export const StudentAuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error("Profile Update Failed:", error);
-      return { success: false, message: "Failed to update profile." };
+      return { success: false, message: error.message || "Failed to update profile." };
     }
   };
 
