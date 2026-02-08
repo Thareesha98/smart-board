@@ -223,6 +223,9 @@ public class TechnicianWorkflowService {
         dto.setStatus(m.getStatus());
         dto.setTechnicianFee(m.getTechnicianFee());
         dto.setCreatedAt(m.getCreatedAt());
+        dto.setMaintenanceUrgency(m.getMaintenanceUrgency());
+
+        dto.setImageUrls(m.getImageUrls());
 
         // --------------------------------------------------------
         // ✅ FIX 1: Smart Review Mapping (Check both tables)
@@ -252,6 +255,7 @@ public class TechnicianWorkflowService {
         // ✅ FIX 2: Explicit Phone Mapping
         // --------------------------------------------------------
         if (m.getBoarding() != null) {
+            dto.setBoardingId(m.getBoarding().getId());
             dto.setBoardingTitle(m.getBoarding().getTitle());
             dto.setBoardingAddress(m.getBoarding().getAddress());
             // dto.setBoardingCity(m.getBoarding().getCity()); // Uncomment if your DTO has this
