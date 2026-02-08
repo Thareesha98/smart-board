@@ -8,6 +8,7 @@ import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -67,6 +68,10 @@ public class UserRegisterDTO {
     private String accNo;
 
     // -------- STUDENT FIELDS --------
+
+    private LocalDate dob;
+    private String emergencyContact;
+    private String studentIdNumber;
 
     @Schema(
         description = "University name (required if role = STUDENT)",
