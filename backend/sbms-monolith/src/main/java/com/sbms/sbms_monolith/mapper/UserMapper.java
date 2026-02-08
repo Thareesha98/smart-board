@@ -78,6 +78,8 @@ public class UserMapper {
             dto.setTechnicianTotalJobs(user.getTechnicianTotalJobs());
         }
 
+        dto.setCreatedAt(user.getCreatedAt());
+
         return dto;
     }
 

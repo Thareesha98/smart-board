@@ -13,6 +13,8 @@ public class UserResponseDTO {
     @Schema(example = "12")
     private Long id;
 
+    private java.time.LocalDateTime createdAt;
+
     @Schema(example = "Kamal Perera")
     private String fullName;
 

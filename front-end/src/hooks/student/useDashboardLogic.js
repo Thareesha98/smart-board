@@ -47,6 +47,7 @@ const useDashboardLogic = () => {
         StudentService.getMyReviews(currentUser.id).catch(() => [])
       ]);
 
+
       // 🔍 DEBUG: Check what the backend is actually sending
       console.log("🔍 Appointments Raw:", appointments);
 

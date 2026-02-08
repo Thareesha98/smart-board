@@ -34,6 +34,8 @@ const useProfileLogic = () => {
       dob: currentUser.dob || '',
       emergencyContact: currentUser.emergencyContact || '',
 
+      joinDate: currentUser.createdAt,
+
       preferences: currentUser.preferences || {
         emailNotifications: true,
         smsNotifications: false,
