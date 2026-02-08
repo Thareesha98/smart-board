@@ -2,12 +2,15 @@ import React from "react";
 import { FaTimes, FaExclamationTriangle } from "react-icons/fa";
 
 const ReportHeader = ({ job, onClose }) => {
-  // Format Date: "Feb 08, 2026"
+  // Format Date
   const formattedDate = new Date(job.createdAt).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
+
+  // ✅ READ FROM DTO (Flat Fields)
+  const boardingTitle = job.boardingTitle || "Unknown Boarding";
 
   return (
     <div className="bg-red-50 p-6 border-b border-red-100 flex justify-between items-center">
@@ -18,8 +21,7 @@ const ReportHeader = ({ job, onClose }) => {
         <div>
           <h2 className="text-xl font-bold text-red-700">Report Owner</h2>
           <p className="text-xs text-red-500 font-medium">
-            {/* ✅ NO ID displayed. Shows Date & Location instead */}
-            {formattedDate} • {job.boarding.title}
+            {formattedDate} • {boardingTitle}
           </p>
         </div>
       </div>
