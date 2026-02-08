@@ -95,15 +95,17 @@ public class TechnicianWorkflowService {
             throw new RuntimeException("Unauthorized: Job not assigned to you");
         }
 
-        // Validate Amount
         if(finalAmount == null || finalAmount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("You must enter a valid final amount.");
         }
 
         m.setStatus(MaintenanceStatus.WORK_DONE);
-        m.setTechnicianFee(finalAmount); //  Save the bill
+        m.setTechnicianFee(finalAmount);
 
         maintenanceRepo.save(m);
+
+        // ✅ ADD THIS LINE: Update the profile count immediately!
+        updateTechnicianStats(m.getAssignedTechnician());
     }
 
     // 6. OWNER: Review & Complete
@@ -175,25 +177,39 @@ public class TechnicianWorkflowService {
     }
 
     //  Helper Method: Calculate Stats directly from Maintenance History
-    private void updateTechnicianStats(User tech) {
+    public void updateTechnicianStats(User tech) {
         List<Maintenance> jobs = maintenanceRepo.findByAssignedTechnician_Id(tech.getId());
 
         double totalRating = 0;
-        int count = 0;
+        int ratingCount = 0;      // How many jobs have stars
+        int completedJobCount = 0; // How many jobs are actually finished
 
         for (Maintenance job : jobs) {
-            //  FIX 2: Check ownerRating > 0
+            // 1. Count ALL Finished Jobs (Even if not rated yet)
+            // Check if status implies the work is finished
+            if (job.getStatus() == MaintenanceStatus.WORK_DONE ||
+                    job.getStatus() == MaintenanceStatus.PAID ||
+                    job.getStatus() == MaintenanceStatus.COMPLETED) {
+                completedJobCount++;
+            }
+
+            // 2. Calculate Rating (Only if rated)
             if (job.getOwnerRating() > 0) {
                 totalRating += job.getOwnerRating();
-                count++;
+                ratingCount++;
             }
         }
 
-        if (count > 0) {
-            tech.setTechnicianAverageRating(Math.round((totalRating / count) * 10.0) / 10.0);
-            tech.setTechnicianTotalJobs(count);
-            userRepository.save(tech);
+        // 3. Update the User Entity
+        // Always update the total jobs count
+        tech.setTechnicianTotalJobs(completedJobCount);
+
+        // Only update average if we have ratings
+        if (ratingCount > 0) {
+            tech.setTechnicianAverageRating(Math.round((totalRating / ratingCount) * 10.0) / 10.0);
         }
+
+        userRepository.save(tech);
     }
 
 

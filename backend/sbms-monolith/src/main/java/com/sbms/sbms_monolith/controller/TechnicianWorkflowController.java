@@ -35,6 +35,12 @@ public class TechnicianWorkflowController {
     @PreAuthorize("hasAnyAuthority('ROLE_TECHNICIAN', 'TECHNICIAN')")
     public TechnicianProfileResponseDTO getMyProfile(Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
+
+        workflowService.updateTechnicianStats(tech);
+
+        // Refresh the 'tech' object to get the new numbers we just saved
+        tech = userRepository.findById(tech.getId()).orElseThrow();
+
         TechnicianProfileResponseDTO dto = new TechnicianProfileResponseDTO();
         dto.setId(tech.getId());
         dto.setFullName(tech.getFullName());
