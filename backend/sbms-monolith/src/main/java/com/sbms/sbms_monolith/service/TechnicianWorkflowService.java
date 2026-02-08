@@ -180,33 +180,31 @@ public class TechnicianWorkflowService {
     public void updateTechnicianStats(User tech) {
         List<Maintenance> jobs = maintenanceRepo.findByAssignedTechnician_Id(tech.getId());
 
-        double totalRating = 0;
-        int ratingCount = 0;      // How many jobs have stars
-        int completedJobCount = 0; // How many jobs are actually finished
+        int totalRatingScore = 0;
+        int ratingCount = 0;
+        int completedJobCount = 0;
 
         for (Maintenance job : jobs) {
-            // 1. Count ALL Finished Jobs (Even if not rated yet)
-            // Check if status implies the work is finished
             if (job.getStatus() == MaintenanceStatus.WORK_DONE ||
                     job.getStatus() == MaintenanceStatus.PAID ||
                     job.getStatus() == MaintenanceStatus.COMPLETED) {
                 completedJobCount++;
             }
-//
-            // 2. Calculate Rating (Only if rated)
+
             if (job.getOwnerRating() > 0) {
-                totalRating += job.getOwnerRating();
+                totalRatingScore += job.getOwnerRating();
                 ratingCount++;
             }
         }
 
-        // 3. Update the User Entity
-        // Always update the total jobs count
         tech.setTechnicianTotalJobs(completedJobCount);
 
-        // Only update average if we have ratings
         if (ratingCount > 0) {
-            tech.setTechnicianAverageRating(Math.round((totalRating / ratingCount) * 10.0) / 10.0);
+            // 🔥 The cast to (double) prevents integer division. 14/4 becomes 3.5.
+            double average = (double) totalRatingScore / ratingCount;
+            tech.setTechnicianAverageRating(Math.round(average * 10.0) / 10.0);
+        } else {
+            tech.setTechnicianAverageRating(0.0);
         }
 
         userRepository.save(tech);
