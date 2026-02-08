@@ -5,13 +5,13 @@ import toast from "react-hot-toast";
 
 import ReportHeader from "./ReportHeader";
 import ReportTargetDetails from "./ReportTargetDetails";
-import ReportFormFields from "./ReportFormFields"; 
+import ReportFormFields from "./ReportFormFields";
 
 const ReportModal = ({ job, onClose }) => {
   const { currentTech } = useTechAuth();
   const [loading, setLoading] = useState(false);
 
-  // 1. State for Data
+  // 1. State for Form Data
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -26,38 +26,42 @@ const ReportModal = ({ job, onClose }) => {
     const toastId = toast.loading("Submitting report...");
 
     try {
-      // ✅ 2. CREATE THE PACKAGE (FormData)
+      // ✅ 2. CREATE THE PACKAGE (This fixes the JSON error)
       const dataPackage = new FormData();
 
-      // Append Text
+      // Append Fields
       dataPackage.append("title", formData.title);
       dataPackage.append("description", formData.description);
       dataPackage.append("type", formData.type);
       dataPackage.append("severity", formData.severity);
-
-      // Append IDs
       dataPackage.append("senderId", currentTech.id);
-      dataPackage.append("reportedUserId", job.ownerId || job.boarding?.owner?.id); 
-      dataPackage.append("reportedPersonName", job.ownerName || job.boarding?.owner?.fullName);
-      dataPackage.append("boardingName", job.boardingTitle || job.boarding?.title);
+      
+      // Handle optional chaining safely
+      const ownerId = job.ownerId || (job.boarding && job.boarding.owner && job.boarding.owner.id);
+      const ownerName = job.ownerName || (job.boarding && job.boarding.owner && job.boarding.owner.fullName);
+      const boardingTitle = job.boardingTitle || (job.boarding && job.boarding.title);
+
+      dataPackage.append("reportedUserId", ownerId); 
+      dataPackage.append("reportedPersonName", ownerName);
+      dataPackage.append("boardingName", boardingTitle);
+      
       dataPackage.append("incidentDate", new Date().toISOString().split("T")[0]);
       dataPackage.append("allowContact", true);
 
-      // ✅ 3. APPEND FILE (CRITICAL STEP)
-      // We read from formData.evidence because ReportFormFields saves it there
+      // ✅ 3. APPEND FILE
+      // This grabs the file from the state you updated in ReportFormFields
       if (formData.evidence) {
         dataPackage.append("evidence", formData.evidence);
       }
 
-      // ✅ 4. SEND THE PACKAGE (NOT formData!)
-      // Your error happened because you were sending 'formData' here.
+      // ✅ 4. SEND 'dataPackage' (Not formData)
       await createTechnicianReport(dataPackage);
       
       toast.success("Report submitted successfully!", { id: toastId });
       onClose();
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Failed to submit report", { id: toastId });
+      console.error("Submission Error:", error);
+      toast.error("Failed to submit report", { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -70,7 +74,6 @@ const ReportModal = ({ job, onClose }) => {
         <form onSubmit={handleSubmit} className="p-6">
           <ReportTargetDetails job={job} />
           <div className="my-6">
-             {/* Pass formData and setFormData correctly */}
              <ReportFormFields formData={formData} setFormData={setFormData} />
           </div>
           <div className="pt-2 flex justify-end gap-3">
