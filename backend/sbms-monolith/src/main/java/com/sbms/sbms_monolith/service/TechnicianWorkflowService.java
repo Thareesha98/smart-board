@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -195,6 +196,7 @@ public class TechnicianWorkflowService {
         }
     }
 
+
     // Missing Helper Method: Map Entity -> DTO
     private MaintenanceResponseDTO mapToDTO(Maintenance m) {
         MaintenanceResponseDTO dto = new MaintenanceResponseDTO();
@@ -206,23 +208,45 @@ public class TechnicianWorkflowService {
         dto.setTechnicianFee(m.getTechnicianFee());
         dto.setCreatedAt(m.getCreatedAt());
 
-        // Review Info
-        dto.setRating(m.getOwnerRating()); // Make sure DTO uses 'rating' or 'ownerRating' consistently
-        dto.setReviewComment(m.getOwnerComment());
+        // --------------------------------------------------------
+        // ✅ FIX 1: Smart Review Mapping (Check both tables)
+        // --------------------------------------------------------
+        if (m.getOwnerRating() > 0) {
+            // Data exists in Main Table
+            dto.setOwnerRating(m.getOwnerRating()); // Ensure DTO has 'ownerRating' field
+            dto.setOwnerComment(m.getOwnerComment());
+        } else {
+            // Data missing in Main Table? Check Side Table!
+            Optional<TechnicianReview> sideReview = techReviewRepo.findByMaintenance(m);
+            if (sideReview.isPresent()) {
+                dto.setOwnerRating(sideReview.get().getRating());
+                dto.setOwnerComment(sideReview.get().getComment());
+            } else {
+                dto.setOwnerRating(0);
+                dto.setOwnerComment(null);
+            }
+        }
 
-        // Flatten Boarding & Owner Info
+        // For DTO field naming consistency (if your DTO uses 'rating' instead of 'ownerRating')
+        dto.setRating(dto.getOwnerRating());
+        dto.setReviewComment(dto.getOwnerComment());
+
+
+        // --------------------------------------------------------
+        // ✅ FIX 2: Explicit Phone Mapping
+        // --------------------------------------------------------
         if (m.getBoarding() != null) {
             dto.setBoardingTitle(m.getBoarding().getTitle());
-            dto.setBoardingAddress(m.getBoarding().getAddress()); // Boarding Address mapping
-            // Note: DTO field is boardingAddress, entity has getAddress()
-
-            // Assuming your DTO has boardingCity, add it:
-            // dto.setBoardingCity(m.getBoarding().getCity());
+            dto.setBoardingAddress(m.getBoarding().getAddress());
+            // dto.setBoardingCity(m.getBoarding().getCity()); // Uncomment if your DTO has this
 
             if (m.getBoarding().getOwner() != null) {
-                // dto.setOwnerId(m.getBoarding().getOwner().getId());
-                dto.setOwnerName(m.getBoarding().getOwner().getFullName());
-                // dto.setOwnerPhone(m.getBoarding().getOwner().getPhone());
+                User owner = m.getBoarding().getOwner();
+                dto.setOwnerId(owner.getId());
+                dto.setOwnerName(owner.getFullName());
+
+                // 🔥 HERE IS THE PHONE NUMBER
+                dto.setOwnerPhone(owner.getPhone());
             }
         }
 
