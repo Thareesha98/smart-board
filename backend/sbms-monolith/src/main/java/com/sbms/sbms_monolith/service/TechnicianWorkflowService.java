@@ -255,10 +255,12 @@ public class TechnicianWorkflowService {
         // ✅ FIX 2: Explicit Phone Mapping
         // --------------------------------------------------------
         if (m.getBoarding() != null) {
-            dto.setBoardingId(m.getBoarding().getId());
+
             dto.setBoardingTitle(m.getBoarding().getTitle());
             dto.setBoardingAddress(m.getBoarding().getAddress());
-            // dto.setBoardingCity(m.getBoarding().getCity()); // Uncomment if your DTO has this
+
+            dto.setLatitude(m.getBoarding().getLatitude());
+            dto.setLongitude(m.getBoarding().getLongitude());
 
             if (m.getBoarding().getOwner() != null) {
                 User owner = m.getBoarding().getOwner();
