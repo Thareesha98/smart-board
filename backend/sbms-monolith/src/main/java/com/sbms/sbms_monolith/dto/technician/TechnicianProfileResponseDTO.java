@@ -4,6 +4,7 @@ import com.sbms.sbms_monolith.model.enums.Gender;
 import com.sbms.sbms_monolith.model.enums.MaintenanceIssueType;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -21,6 +22,6 @@ public class TechnicianProfileResponseDTO {
     private String province;
     private Double basePrice;
     private List<MaintenanceIssueType> skills;
-    private Double averageRating;
+    private BigDecimal averageRating;
     private Integer totalJobsCompleted;
 }

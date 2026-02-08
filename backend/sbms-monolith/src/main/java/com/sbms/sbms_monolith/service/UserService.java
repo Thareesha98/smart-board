@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +62,7 @@ public class UserService {
             user.setProvince(dto.getProvince());
             user.setBasePrice(dto.getBasePrice());
             user.setSkills(dto.getSkills());
-            user.setTechnicianAverageRating(0.0);
+            user.setTechnicianAverageRating(BigDecimal.valueOf(0.0));
             user.setTechnicianTotalJobs(0);
         }
 
@@ -262,7 +263,7 @@ public class UserService {
             user.setSkills(p.getSkills());
 
             // Initialize Stats
-            user.setTechnicianAverageRating(0.0);
+            user.setTechnicianAverageRating(BigDecimal.valueOf(0.0));
             user.setTechnicianTotalJobs(0);
         }
 

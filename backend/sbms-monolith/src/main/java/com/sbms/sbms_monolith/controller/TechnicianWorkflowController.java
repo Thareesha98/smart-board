@@ -39,7 +39,7 @@ public class TechnicianWorkflowController {
         workflowService.updateTechnicianStats(tech);
 
         // Refresh the 'tech' object to get the new numbers we just saved
-        tech = userRepository.findById(tech.getId()).orElseThrow();
+        User updatedTech = userRepository.findById(tech.getId()).orElseThrow();
 
         TechnicianProfileResponseDTO dto = new TechnicianProfileResponseDTO();
         dto.setId(tech.getId());
@@ -55,8 +55,9 @@ public class TechnicianWorkflowController {
         dto.setProvince(tech.getProvince());
         dto.setBasePrice(tech.getBasePrice());
         dto.setSkills(tech.getSkills());
-        dto.setAverageRating(tech.getTechnicianAverageRating());
-        dto.setTotalJobsCompleted(tech.getTechnicianTotalJobs());
+
+        dto.setAverageRating(updatedTech.getTechnicianAverageRating());
+        dto.setTotalJobsCompleted(updatedTech.getTechnicianTotalJobs());
         return dto;
     }
 
@@ -79,7 +80,13 @@ public class TechnicianWorkflowController {
                     dto.setCity(user.getCity());
                     dto.setBasePrice(user.getBasePrice());
                     dto.setSkills(user.getSkills());
-                    dto.setAverageRating(user.getTechnicianAverageRating());
+
+                    if (user.getTechnicianAverageRating() != null) {
+                        dto.setAverageRating(user.getTechnicianAverageRating().doubleValue());
+                    } else {
+                        dto.setAverageRating(0.0);
+                    }
+
                     dto.setTotalJobs(user.getTechnicianTotalJobs());
                     return dto;
                 })

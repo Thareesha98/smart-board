@@ -62,7 +62,12 @@ public class UserMapper {
         }
 
         if (user.getRole() == UserRole.TECHNICIAN) {
-            dto.setTechnicianAverageRating(user.getTechnicianAverageRating());
+            // ✅ FIX: Convert BigDecimal to Double for the DTO
+            if (user.getTechnicianAverageRating() != null) {
+                dto.setTechnicianAverageRating(user.getTechnicianAverageRating().doubleValue());
+            } else {
+                dto.setTechnicianAverageRating(0.0);
+            }
             dto.setTechnicianTotalJobs(user.getTechnicianTotalJobs());
         }
 

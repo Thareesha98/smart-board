@@ -104,7 +104,11 @@ const TechnicianProfile = () => {
 
   // Variables with Fallback Logic
   const displayName = technician.fullName || "Technician";
-  const displayRating = getDisplayValue("averageRating", "technicianAverageRating", "0.0");
+  
+  //  FIX: Ensures 3.5 doesn't truncate to 3
+  const rawRating = technician.averageRating || 0;
+  const displayRating = Number(rawRating).toFixed(1);
+
   const displayJobs = getDisplayValue("totalJobsCompleted", "technicianTotalJobs", 0);
   const displayBasePrice = technician.basePrice || "0.00";
 

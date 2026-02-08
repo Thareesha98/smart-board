@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
@@ -62,7 +63,8 @@ public class User extends BaseEntity implements UserDetails {
     private List<MaintenanceIssueType> skills;
 
     // Technician Rating Stats
-    private Double technicianAverageRating = 0.0;
+    @Column(precision = 3, scale = 1)
+    private BigDecimal technicianAverageRating = BigDecimal.ZERO;
     private Integer technicianTotalJobs = 0;
  
     @Enumerated(EnumType.STRING)

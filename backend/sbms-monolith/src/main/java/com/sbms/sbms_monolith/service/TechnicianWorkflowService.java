@@ -180,7 +180,7 @@ public class TechnicianWorkflowService {
     public void updateTechnicianStats(User tech) {
         List<Maintenance> jobs = maintenanceRepo.findByAssignedTechnician_Id(tech.getId());
 
-        int totalRatingScore = 0;
+        double totalRatingScore = 0;
         int ratingCount = 0;
         int completedJobCount = 0;
 
@@ -200,14 +200,21 @@ public class TechnicianWorkflowService {
         tech.setTechnicianTotalJobs(completedJobCount);
 
         if (ratingCount > 0) {
-            // 🔥 The cast to (double) prevents integer division. 14/4 becomes 3.5.
+            // 🔥 CRITICAL FIX: Cast to double HERE so it calculates 3.5
+            // If you don't cast, Java does "Integer Division" and results in 3.0
             double average = (double) totalRatingScore / ratingCount;
-            tech.setTechnicianAverageRating(Math.round(average * 10.0) / 10.0);
+
+            // Convert to BigDecimal with 1 decimal place precision
+            tech.setTechnicianAverageRating(BigDecimal.valueOf(average)
+                    .setScale(1, java.math.RoundingMode.HALF_UP));
+
+            // Add a print statement here to see it in your IntelliJ console!
+            System.out.println("DEBUG: Tech ID " + tech.getId() + " - Sum: " + totalRatingScore + " Count: " + ratingCount + " Avg: " + average);
         } else {
-            tech.setTechnicianAverageRating(0.0);
+            tech.setTechnicianAverageRating(BigDecimal.ZERO);
         }
 
-        userRepository.save(tech);
+        userRepository.saveAndFlush(tech);
     }
 
 
