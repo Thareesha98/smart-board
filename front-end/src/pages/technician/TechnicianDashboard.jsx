@@ -8,13 +8,15 @@ import TechnicianLayout from "../../components/technician/common/TechnicianLayou
 import Map from "../../components/common/Map"; 
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  FaMapMarkerAlt, FaPhone, FaCheck, FaEye, FaTimes, FaCalendarAlt, FaTools, FaBan, FaMoneyBillWave 
+  FaMapMarkerAlt, FaPhone, FaCheck, FaEye, FaTimes, FaCalendarAlt, FaTools, 
+  FaBan, FaMoneyBillWave, FaExpand, FaUserAlt, FaInfoCircle
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const TechnicianDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [activeImage, setActiveImage] = useState(null); 
   const [rejectId, setRejectId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const [completeId, setCompleteId] = useState(null);
@@ -24,10 +26,6 @@ const TechnicianDashboard = () => {
     try {
       const data = await getTechnicianJobs();
       setJobs(data);
-      if (selectedJob) {
-        const updated = data.find(j => j.id === selectedJob.id);
-        if (updated) setSelectedJob(updated);
-      }
     } catch (error) { toast.error("Failed to load jobs"); }
   };
 
@@ -49,7 +47,7 @@ const TechnicianDashboard = () => {
       toast.success("Job Declined");
       setRejectId(null);
       setRejectReason("");
-      setSelectedJob(null);
+      setSelectedJob(null); // Close the details modal too
       fetchJobs();
     } catch (e) { toast.error("Error declining job"); }
   };
@@ -57,7 +55,7 @@ const TechnicianDashboard = () => {
   const handleComplete = async () => {
     try {
       await completeJob(completeId, billAmount);
-      toast.success("Job Completed & Billed!");
+      toast.success("Job Completed!");
       setCompleteId(null);
       fetchJobs();
     } catch (e) { toast.error("Error completing job"); }
@@ -69,185 +67,163 @@ const TechnicianDashboard = () => {
   return (
     <TechnicianLayout title="Dashboard" subtitle="Overview of your work">
       
-      {/* --- NEW REQUESTS SECTION --- */}
-      <section className="mb-10">
+      {/* --- DASHBOARD CARDS --- */}
+      <section className="mb-8">
         <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="w-2 h-8 bg-orange-500 rounded-full" /> New Requests ({newRequests.length})
+          <span className="w-2 h-8 bg-accent rounded-full" /> New Requests
         </h2>
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4">
           {newRequests.map((job) => (
-            <div key={job.id} className="bg-white p-6 rounded-3xl shadow-sm border border-orange-100 relative">
-               <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-bold text-lg text-gray-800">{job.title}</h3>
-                    <span className="text-[10px] font-black bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full uppercase">
-                      {job.maintenanceUrgency} Severity
-                    </span>
-                  </div>
-                  <button onClick={() => setSelectedJob(job)} className="p-3 bg-orange-50 text-orange-600 rounded-2xl hover:bg-orange-100 transition-colors">
-                    <FaEye size={20} />
-                  </button>
-               </div>
-               <div className="flex gap-3">
-                  <button onClick={() => handleAccept(job.id)} className="flex-1 bg-orange-600 text-white py-3 rounded-2xl font-bold shadow-lg shadow-orange-200">
-                    Accept
-                  </button>
-                  <button onClick={() => setRejectId(job.id)} className="flex-1 bg-white border border-gray-200 text-gray-600 py-3 rounded-2xl font-bold">
-                    Decline
-                  </button>
-               </div>
+            <div key={job.id} className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-orange-400" />
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-bold text-lg">{job.title}</h3>
+                <button onClick={() => setSelectedJob(job)} className="p-2 text-accent hover:bg-orange-50 rounded-full transition-colors"><FaEye size={18} /></button>
+              </div>
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{job.description}</p>
+              <div className="flex gap-3">
+                <button onClick={() => handleAccept(job.id)} className="flex-1 bg-primary text-white py-2.5 rounded-xl font-bold">Accept</button>
+                <button onClick={() => setRejectId(job.id)} className="flex-1 bg-white border border-gray-200 text-gray-600 py-2.5 rounded-xl font-bold">Decline</button>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* --- ACTIVE JOBS SECTION --- */}
+      {/* --- ACTIVE JOBS --- */}
       <section>
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span className="w-2 h-8 bg-green-500 rounded-full" /> Active Jobs ({activeJobs.length})
-        </h2>
-        <div className="grid md:grid-cols-2 gap-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-2 h-8 bg-green-500 rounded-full" /> Active Jobs</h2>
+        <div className="grid md:grid-cols-2 gap-4">
           {activeJobs.map((job) => (
-            <div key={job.id} className="bg-white p-6 rounded-3xl shadow-sm border border-green-100">
-               <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-bold text-lg text-gray-800">{job.title}</h3>
-                    <p className="text-xs text-green-600 font-bold">{job.boardingTitle}</p>
-                  </div>
-                  <button onClick={() => setSelectedJob(job)} className="p-3 bg-green-50 text-green-600 rounded-2xl">
-                    <FaEye size={20} />
-                  </button>
+            <div key={job.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+               <div className="flex justify-between mb-4">
+                  <h3 className="font-bold text-lg">{job.title}</h3>
+                  <button onClick={() => setSelectedJob(job)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-full"><FaEye /></button>
                </div>
-               <button onClick={() => setCompleteId(job.id)} className="w-full bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                 <FaCheck /> Mark Work Done
-               </button>
+               <button onClick={() => setCompleteId(job.id)} className="w-full bg-green-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2"><FaCheck /> Mark Work Done</button>
             </div>
           ))}
         </div>
       </section>
 
-      {/* --- DETAILS MODAL --- */}
+      {/* --- THE COLORED DETAILS MODAL --- */}
       <AnimatePresence>
         {selectedJob && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
-            <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
-              className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative scrollbar-hide"
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-[2rem] w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl relative scrollbar-hide"
             >
-              <div className="p-6 border-b sticky top-0 bg-white/90 backdrop-blur-md flex justify-between items-center z-10">
-                <h3 className="text-xl font-black text-gray-800">Job Specification</h3>
-                <button onClick={() => setSelectedJob(null)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"><FaTimes /></button>
+              {/* Header */}
+              <div className="p-5 border-b sticky top-0 bg-primary flex justify-between items-center z-10 text-white">
+                <div className="flex items-center gap-2">
+                    <FaInfoCircle />
+                    <h3 className="font-black tracking-tight">Job Specification</h3>
+                </div>
+                <button onClick={() => setSelectedJob(null)} className="p-1.5 bg-white/20 rounded-full hover:bg-white/40"><FaTimes /></button>
               </div>
 
-              <div className="p-8 space-y-6">
-                
-                {/* 1. DESCRIPTION (Top) */}
-                <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-bold text-gray-700">Description</h4>
-                    <span className="text-[10px] font-black text-gray-400 italic">
-                      {new Date(selectedJob.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-600 leading-relaxed italic">"{selectedJob.description}"</p>
+              <div className="p-6 space-y-5">
+                {/* 1. DESCRIPTION - CREAM */}
+                <div className="bg-[#FFFDF5] p-5 rounded-2xl border border-orange-100/50">
+                  <h4 className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-2">Problem Description</h4>
+                  <p className="text-gray-700 text-sm leading-relaxed italic">"{selectedJob.description}"</p>
                 </div>
 
-                {/* 2. OWNER & BOARDING INFO */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-50 p-6 rounded-[2rem] border border-blue-100">
-                    <p className="text-[10px] text-blue-400 font-black uppercase">Property Name</p>
-                    <h5 className="font-bold text-blue-900">{selectedJob.boardingTitle}</h5>
-                    <p className="text-xs text-blue-700 mt-1">{selectedJob.boardingAddress}</p>
+                {/* 2. BOARDING - BLUE */}
+                <div className="bg-blue-50 p-5 rounded-2xl border border-blue-100 flex items-center gap-4">
+                  <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center"><FaMapMarkerAlt size={14} /></div>
+                  <div className="flex-1">
+                    <p className="text-[9px] text-blue-500 font-black uppercase">Property</p>
+                    <h5 className="font-bold text-blue-900 text-sm">{selectedJob.boardingTitle}</h5>
+                    <p className="text-[11px] text-blue-700 truncate">{selectedJob.boardingAddress}</p>
                   </div>
-                  <div className="bg-green-50 p-6 rounded-[2rem] border border-green-100 flex justify-between items-center">
+                </div>
+
+                {/* 3. OWNER - EMERALD */}
+                <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-black"><FaUserAlt size={14} /></div>
                     <div>
-                      <p className="text-[10px] text-green-500 font-black uppercase">Owner Info</p>
-                      <h5 className="font-bold text-green-900">{selectedJob.ownerName}</h5>
-                      <p className="text-xs text-green-700">{selectedJob.ownerPhone}</p>
+                      <h5 className="font-bold text-emerald-900 text-sm">{selectedJob.ownerName}</h5>
+                      <p className="text-[11px] text-emerald-700">{selectedJob.ownerPhone}</p>
                     </div>
-                    <a href={`tel:${selectedJob.ownerPhone}`} className="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center shadow-md">
-                      <FaPhone size={14} />
-                    </a>
                   </div>
+                  <a href={`tel:${selectedJob.ownerPhone}`} className="w-9 h-9 bg-emerald-600 text-white rounded-xl flex items-center justify-center shadow-lg"><FaPhone size={12} /></a>
                 </div>
 
-                {/* 3. PHOTOS (NOW MOVED TO LAST, BEFORE MAP) */}
-                <div>
-                  <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Evidence Photos</h4>
-                  {selectedJob.imageUrls && selectedJob.imageUrls.length > 0 ? (
-                    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                {/* 4. GALLERY */}
+                {selectedJob.imageUrls?.length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-3 ml-1">Gallery</h4>
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                       {selectedJob.imageUrls.map((url, i) => (
-                        <img key={i} src={url} alt="Evidence" className="w-64 h-48 object-cover rounded-3xl border-4 border-gray-50 shadow-sm flex-shrink-0" />
+                        <div key={i} className="relative flex-shrink-0">
+                          <img src={url} alt="Evidence" className="w-32 h-32 object-cover rounded-2xl border-2 border-orange-50 shadow-sm" />
+                          <button onClick={() => setActiveImage(url)} className="absolute inset-0 bg-orange-900/40 opacity-0 hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center text-white"><FaExpand size={16} /></button>
+                        </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="p-10 bg-gray-50 rounded-3xl text-center text-gray-400 border-2 border-dashed border-gray-100">
-                       No photos provided
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* 4. MAP (Final Section) */}
-                <div className="rounded-[2.5rem] overflow-hidden h-64 border-4 border-gray-50 shadow-inner">
-                   <Map 
-                     center={{ lat: selectedJob.latitude || 6.9271, lng: selectedJob.longitude || 79.8612 }} 
-                     makerTitle={selectedJob.boardingTitle} 
-                   />
+                {/* 5. MAP */}
+                <div className="rounded-2xl overflow-hidden h-48 border-2 border-gray-50 shadow-inner">
+                   <Map center={{ lat: selectedJob.latitude || 6.9271, lng: selectedJob.longitude || 79.8612 }} makerTitle={selectedJob.boardingTitle} />
                 </div>
               </div>
               
-              {/* ACTION FOOTER */}
-              <div className="p-8 border-t bg-gray-50 flex gap-4">
+              {/* MODAL ACTIONS */}
+              <div className="p-5 border-t bg-gray-50 flex gap-3">
                  {selectedJob.status === "ASSIGNED" && (
                    <>
-                    <button onClick={() => handleAccept(selectedJob.id)} className="flex-[2] bg-orange-600 text-white py-4 rounded-2xl font-black text-lg">
-                      ACCEPT JOB
-                    </button>
-                    <button onClick={() => setRejectId(selectedJob.id)} className="flex-1 bg-white border border-gray-200 text-gray-500 py-4 rounded-2xl font-bold">
-                      Decline
-                    </button>
+                    <button onClick={() => handleAccept(selectedJob.id)} className="flex-[2] bg-primary text-white py-2.5 rounded-xl font-bold text-sm shadow-lg">Accept Job</button>
+                    {/* ✅ FIXED: Correctly calls setRejectId */}
+                    <button onClick={() => setRejectId(selectedJob.id)} className="flex-1 bg-white border border-gray-200 text-gray-500 py-2.5 rounded-xl font-bold text-sm hover:bg-red-50 hover:text-red-500 transition-all">Decline</button>
                    </>
                  )}
+                 {selectedJob.status !== "ASSIGNED" && <button onClick={() => setSelectedJob(null)} className="w-full bg-white border border-gray-200 text-gray-500 py-2.5 rounded-xl font-bold text-sm">Close View</button>}
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* --- REJECT MODAL --- */}
+      {/* --- FULL SCREEN IMAGE VIEWER --- */}
+      <AnimatePresence>
+        {activeImage && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/95 z-[300] flex items-center justify-center p-4" onClick={() => setActiveImage(null)}>
+             <button className="absolute top-6 right-6 text-white/50 hover:text-white"><FaTimes size={24} /></button>
+             <motion.img initial={{ scale: 0.9 }} animate={{ scale: 1 }} src={activeImage} className="max-w-full max-h-full rounded-lg shadow-2xl" onClick={(e) => e.stopPropagation()} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* --- REJECT MODAL (Higher Z-Index) --- */}
       {rejectId && (
-        <div className="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm">
-            <h3 className="font-black text-xl mb-4 text-red-600 flex items-center gap-2"><FaBan /> Decline Request</h3>
-            <textarea
-              className="w-full border rounded-2xl p-4 mb-6 outline-none focus:ring-2 focus:ring-red-500"
-              rows="3"
-              placeholder="Reason for declining..."
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-            ></textarea>
-            <div className="flex gap-3">
-              <button onClick={() => setRejectId(null)} className="flex-1 py-3 text-gray-500 font-bold">Cancel</button>
-              <button onClick={handleReject} className="flex-1 bg-red-600 text-white rounded-xl font-bold">Confirm</button>
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white rounded-[1.5rem] p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="font-black text-lg mb-3 text-red-600 flex items-center gap-2"><FaBan /> Decline Job</h3>
+            <textarea className="w-full border border-slate-200 rounded-xl p-3 mb-4 text-sm outline-none focus:border-red-500" rows="3" placeholder="Why are you declining?" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}></textarea>
+            <div className="flex gap-2">
+              <button onClick={() => setRejectId(null)} className="flex-1 py-2 text-slate-400 font-bold text-xs">Cancel</button>
+              <button onClick={handleReject} className="flex-1 bg-red-600 text-white rounded-lg py-2 font-bold text-xs shadow-md">Confirm</button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
 
-      {/* --- COMPLETE BILL MODAL --- */}
+      {/* --- COMPLETE MODAL --- */}
       {completeId && (
-        <div className="fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm">
-            <h3 className="font-black text-xl mb-4 text-green-600 flex items-center gap-2"><FaMoneyBillWave /> Final Bill</h3>
-            <input
-              type="number"
-              className="w-full border rounded-2xl p-4 mb-6 text-lg font-bold"
-              placeholder="LKR 0.00"
-              value={billAmount}
-              onChange={(e) => setBillAmount(e.target.value)}
-            />
-            <div className="flex gap-3">
-              <button onClick={() => setCompleteId(null)} className="flex-1 py-3 text-gray-500 font-bold">Cancel</button>
-              <button onClick={handleComplete} className="flex-1 bg-green-600 text-white rounded-xl font-bold">Send Bill</button>
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[1.5rem] p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="font-black text-lg mb-3 text-emerald-600 flex items-center gap-2"><FaMoneyBillWave /> Service Bill</h3>
+            <div className="relative mb-4">
+                <span className="absolute left-3 top-2.5 font-bold text-gray-400 text-xs">LKR</span>
+                <input type="number" className="w-full border border-gray-200 rounded-xl py-2 pl-12 pr-4 text-md font-black outline-none focus:border-emerald-500" placeholder="0.00" value={billAmount} onChange={(e) => setBillAmount(e.target.value)} />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setCompleteId(null)} className="flex-1 py-2 text-slate-400 font-bold text-xs">Cancel</button>
+              <button onClick={handleComplete} className="flex-1 bg-emerald-600 text-white rounded-lg py-2 font-bold text-xs shadow-md">Send Invoice</button>
             </div>
           </div>
         </div>
