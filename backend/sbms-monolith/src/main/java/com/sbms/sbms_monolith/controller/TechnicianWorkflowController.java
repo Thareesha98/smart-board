@@ -38,7 +38,7 @@ public class TechnicianWorkflowController {
 
         workflowService.updateTechnicianStats(tech);
 
-        // Refresh the 'tech' object to get the new numbers we just saved
+
         User updatedTech = userRepository.findById(tech.getId()).orElseThrow();
 
         TechnicianProfileResponseDTO dto = new TechnicianProfileResponseDTO();
