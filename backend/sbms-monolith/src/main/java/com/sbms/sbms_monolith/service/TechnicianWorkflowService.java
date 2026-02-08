@@ -104,7 +104,7 @@ public class TechnicianWorkflowService {
 
         maintenanceRepo.save(m);
 
-        // ✅ ADD THIS LINE: Update the profile count immediately!
+        //  ADD THIS LINE: Update the profile count immediately!
         updateTechnicianStats(m.getAssignedTechnician());
     }
 
@@ -200,16 +200,12 @@ public class TechnicianWorkflowService {
         tech.setTechnicianTotalJobs(completedJobCount);
 
         if (ratingCount > 0) {
-            // 🔥 CRITICAL FIX: Cast to double HERE so it calculates 3.5
-            // If you don't cast, Java does "Integer Division" and results in 3.0
             double average = (double) totalRatingScore / ratingCount;
 
             // Convert to BigDecimal with 1 decimal place precision
             tech.setTechnicianAverageRating(BigDecimal.valueOf(average)
                     .setScale(1, java.math.RoundingMode.HALF_UP));
 
-            // Add a print statement here to see it in your IntelliJ console!
-            System.out.println("DEBUG: Tech ID " + tech.getId() + " - Sum: " + totalRatingScore + " Count: " + ratingCount + " Avg: " + average);
         } else {
             tech.setTechnicianAverageRating(BigDecimal.ZERO);
         }
@@ -237,7 +233,7 @@ public class TechnicianWorkflowService {
         }
 
         // --------------------------------------------------------
-        // ✅ FIX 1: Smart Review Mapping (Check both tables)
+        //  FIX 1: Smart Review Mapping (Check both tables)
         // --------------------------------------------------------
         if (m.getOwnerRating() > 0) {
             // Data exists in Main Table
@@ -261,7 +257,7 @@ public class TechnicianWorkflowService {
 
 
         // --------------------------------------------------------
-        // ✅ FIX 2: Explicit Phone Mapping
+        //  FIX 2: Explicit Phone Mapping
         // --------------------------------------------------------
         if (m.getBoarding() != null) {
 
@@ -276,7 +272,7 @@ public class TechnicianWorkflowService {
                 dto.setOwnerId(owner.getId());
                 dto.setOwnerName(owner.getFullName());
 
-                // 🔥 HERE IS THE PHONE NUMBER
+                //  HERE IS THE PHONE NUMBER
                 dto.setOwnerPhone(owner.getPhone());
             }
         }
