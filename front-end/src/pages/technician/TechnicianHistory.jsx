@@ -14,14 +14,22 @@ const TechnicianHistory = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const jobs = await getTechnicianJobs();
-        const completedJobs = jobs.filter(job => 
-            ["COMPLETED", "WORK_DONE", "PAID"].includes(job.status)
-        );
+        console.log("🔄 Fetching History...");
+        const jobs = await getTechnicianJobs(); 
+        
+        console.log("✅ RAW DATA FROM BACKEND:", jobs);
+
+        if (jobs.length > 0) {
+            console.log("Job 0 Status:", jobs[0].status); // Check the status spelling
+        }
+
+        
+        const completedJobs = jobs; 
+
         completedJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setHistory(completedJobs);
       } catch (error) {
-        console.error("Failed to load history", error);
+        console.error("❌ Failed to load history", error);
       } finally {
         setLoading(false);
       }

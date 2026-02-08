@@ -157,7 +157,7 @@ const TechnicianSidebar = () => {
       </nav>
 
       {/* Hide Scrollbar Style */}
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
