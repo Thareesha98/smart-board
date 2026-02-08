@@ -225,7 +225,11 @@ public class TechnicianWorkflowService {
         dto.setCreatedAt(m.getCreatedAt());
         dto.setMaintenanceUrgency(m.getMaintenanceUrgency());
 
-        dto.setImageUrls(m.getImageUrls());
+        if (m.getImageUrls() != null && !m.getImageUrls().isEmpty()) {
+            dto.setImageUrls(m.getImageUrls());
+        } else {
+            dto.setImageUrls(new java.util.ArrayList<>());
+        }
 
         // --------------------------------------------------------
         // ✅ FIX 1: Smart Review Mapping (Check both tables)
