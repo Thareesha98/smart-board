@@ -123,6 +123,16 @@ public class UserService {
             user.setNicNumber(dto.getNicNumber());
         }
 
+        if (dto.getDob() != null) {
+            user.setDob(dto.getDob());
+        }
+        if (dto.getEmergencyContact() != null) {
+            user.setEmergencyContact(dto.getEmergencyContact());
+        }
+        if (dto.getStudentIdNumber() != null) {
+            user.setStudentIdNumber(dto.getStudentIdNumber());
+        }
+
         if (dto.getProfileImageUrl() != null && !dto.getProfileImageUrl().isEmpty()) {
             user.setProfileImageUrl(dto.getProfileImageUrl());
         }
