@@ -69,7 +69,7 @@ public class UserRegisterDTO {
 
     // -------- STUDENT FIELDS --------
 
-    private LocalDate dob;
+    private String dob;
     private String emergencyContact;
     private String studentIdNumber;
 
