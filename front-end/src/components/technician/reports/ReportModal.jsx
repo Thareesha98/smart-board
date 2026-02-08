@@ -34,11 +34,11 @@ const ReportModal = ({ job, onClose }) => {
       data.append("type", formData.type);
       data.append("severity", formData.severity);
       
-      // Auto-Filled Data
+      // ✅ READ FROM DTO (Flat Fields)
       data.append("senderId", currentTech.id);
-      data.append("reportedUserId", job.boarding.owner.id);
-      data.append("reportedPersonName", job.boarding.owner.fullName);
-      data.append("boarding", job.boarding.title);
+      data.append("reportedUserId", job.ownerId); // Was job.boarding.owner.id
+      data.append("reportedPersonName", job.ownerName); // Was job.boarding.owner.fullName
+      data.append("boarding", job.boardingTitle); // Was job.boarding.title
       
       // System Data
       data.append("incidentDate", new Date().toISOString().split("T")[0]);
@@ -64,15 +64,15 @@ const ReportModal = ({ job, onClose }) => {
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 animate-fadeIn">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         
-        {/* 1. Header Component */}
+        {/* Header */}
         <ReportHeader job={job} onClose={onClose} />
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           
-          {/* 2. Target Details Component (Read-Only) */}
+          {/* Target Details */}
           <ReportTargetDetails job={job} />
 
-          {/* 3. Form Fields Component (Editable) */}
+          {/* Form Fields */}
           <ReportFormFields formData={formData} setFormData={setFormData} />
 
           {/* Submit Actions */}
