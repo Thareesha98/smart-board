@@ -59,6 +59,10 @@ public class UserResponseDTO {
 
     // -------- STUDENT ONLY --------
 
+    private String dob;
+    private String emergencyContact;
+    private String studentIdNumber;
+
     @Schema(
         description = "Student university name",
         example = "University of Moratuwa"
