@@ -28,7 +28,7 @@ public class ReportController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ReportResponseDTO> create(
             @ModelAttribute ReportCreateDTO dto,
-            @RequestPart(value = "evidence", required = false) List<MultipartFile> evidence
+            @RequestParam(value = "evidence", required = false) List<MultipartFile> evidence
     ) throws IOException {
         return ResponseEntity.ok(reportService.create(dto, evidence));
     }
