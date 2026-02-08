@@ -58,8 +58,12 @@ public class TechnicianWorkflowService {
     }
 
     // 3. TECHNICIAN: Get Assigned Jobs
-    public List<Maintenance> getAssignedJobs(Long technicianId) {
-        return maintenanceRepo.findByAssignedTechnician_Id(technicianId);
+    public List<MaintenanceResponseDTO> getAssignedJobs(Long technicianId) {
+        List<Maintenance> jobs = maintenanceRepo.findByAssignedTechnician_Id(technicianId);
+
+        return jobs.stream()
+                .map(this::mapToDTO) // Convert Entity -> DTO
+                .collect(Collectors.toList());
     }
 
     // 4. TECHNICIAN: Accept/Reject
@@ -202,23 +206,30 @@ public class TechnicianWorkflowService {
         dto.setTechnicianFee(m.getTechnicianFee());
         dto.setCreatedAt(m.getCreatedAt());
 
-        // Map Technician Info
-        if (m.getAssignedTechnician() != null) {
-            dto.setTechnicianName(m.getAssignedTechnician().getFullName());
-            dto.setTechnicianId(m.getAssignedTechnician().getId());
-        }
+        // Review Info
+        dto.setRating(m.getOwnerRating()); // Make sure DTO uses 'rating' or 'ownerRating' consistently
+        dto.setReviewComment(m.getOwnerComment());
 
-        // Map Owner/Boarding Info
+        // Flatten Boarding & Owner Info
         if (m.getBoarding() != null) {
-            dto.setBoardingAddress(m.getBoarding().getAddress());
+            dto.setBoardingTitle(m.getBoarding().getTitle());
+            dto.setBoardingAddress(m.getBoarding().getAddress()); // Boarding Address mapping
+            // Note: DTO field is boardingAddress, entity has getAddress()
+
+            // Assuming your DTO has boardingCity, add it:
+            // dto.setBoardingCity(m.getBoarding().getCity());
+
             if (m.getBoarding().getOwner() != null) {
+                // dto.setOwnerId(m.getBoarding().getOwner().getId());
                 dto.setOwnerName(m.getBoarding().getOwner().getFullName());
+                // dto.setOwnerPhone(m.getBoarding().getOwner().getPhone());
             }
         }
 
-        // Map Review Info (Now reading from the correct place)
-        dto.setRating(m.getOwnerRating());
-        dto.setReviewComment(m.getOwnerComment());
+        if (m.getAssignedTechnician() != null) {
+            dto.setTechnicianId(m.getAssignedTechnician().getId());
+            dto.setTechnicianName(m.getAssignedTechnician().getFullName());
+        }
 
         return dto;
     }

@@ -56,7 +56,7 @@ public class TechnicianWorkflowController {
 
     @GetMapping("/my-jobs")
     @PreAuthorize("hasAnyAuthority('ROLE_TECHNICIAN', 'TECHNICIAN')")
-    public List<Maintenance> getMyJobs(Authentication auth) {
+    public List<MaintenanceResponseDTO> getMyJobs(Authentication auth) {
         User tech = userRepository.findByEmail(auth.getName()).orElseThrow();
         return workflowService.getAssignedJobs(tech.getId());
     }
