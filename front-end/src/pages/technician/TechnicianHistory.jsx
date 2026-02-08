@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import TechnicianLayout from "../../components/technician/common/TechnicianLayout";
 import ReportModal from "../../components/technician/reports/ReportModal"; 
-import HistoryItem from "../../components/technician/history/HistoryItem"; // ✅ Import new component
+import HistoryItem from "../../components/technician/history/HistoryItem"; 
 import { getTechnicianJobs } from "../../api/technician/technicianService";
 import { useTechAuth } from "../../context/technician/TechnicianAuthContext";
 
@@ -19,14 +19,16 @@ const TechnicianHistory = () => {
         
         console.log("✅ RAW DATA FROM BACKEND:", jobs);
 
-        if (jobs.length > 0) {
-            console.log("Job 0 Status:", jobs[0].status); // Check the status spelling
-        }
+        // ✅ FILTER LOGIC:
+        // We include jobs even if status is missing (!s) so you can debug them.
+        const completedJobs = jobs.filter(job => {
+            const s = job.status;
+            return !s || ["COMPLETED", "WORK_DONE", "PAID", "ACCEPTED", "IN_PROGRESS"].includes(s);
+        });
 
-        
-        const completedJobs = jobs; 
-
+        // Sort Newest First
         completedJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
         setHistory(completedJobs);
       } catch (error) {
         console.error("❌ Failed to load history", error);
@@ -47,14 +49,15 @@ const TechnicianHistory = () => {
         <div className="grid gap-6">
           {history.length === 0 ? (
             <div className="text-center p-10 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                <p className="text-gray-400">No completed jobs yet.</p>
+                <p className="text-gray-400">No jobs found.</p>
             </div>
           ) : (
-            history.map((job) => (
+            history.map((job, index) => (
               <HistoryItem 
-                key={job.id} 
+                // ✅ USE INDEX IF ID IS MISSING (Prevents Key Warning)
+                key={job.id || index} 
                 job={job} 
-                onReport={setSelectedJob} // ✅ Pass the handler
+                onReport={setSelectedJob} 
               />
             ))
           )}
