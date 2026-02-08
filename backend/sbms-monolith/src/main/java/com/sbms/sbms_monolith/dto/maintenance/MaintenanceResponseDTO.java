@@ -30,7 +30,11 @@ public class MaintenanceResponseDTO {
 
     private String studentNote;
     private String ownerNote;
+    private Long ownerId;
+    private String ownerPhone;
 
+    private int ownerRating;
+    private String ownerComment;
 
     private String technicianName;
     private Long technicianId;
