@@ -11,9 +11,11 @@ import {
   FaMapMarkerAlt, FaPhone, FaCheck, FaEye, FaTimes, FaCalendarAlt, FaTools, 
   FaBan, FaMoneyBillWave, FaExpand, FaUserAlt, FaInfoCircle
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const TechnicianDashboard = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
   const [activeImage, setActiveImage] = useState(null); 
@@ -30,6 +32,14 @@ const TechnicianDashboard = () => {
   };
 
   useEffect(() => { fetchJobs(); }, []);
+
+  const handleOwnerProfileClick = (ownerId) => {
+    if (ownerId) {
+      navigate(`/profile/view/${ownerId}`);
+    } else {
+      toast.error("Owner profile ID not found");
+    }
+  };
 
   const handleAccept = async (id) => {
     try {
@@ -140,7 +150,11 @@ const TechnicianDashboard = () => {
                 </div>
 
                 {/* 3. OWNER - EMERALD */}
-                <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex justify-between items-center">
+                <div 
+                  onClick={() => handleOwnerProfileClick(selectedJob.ownerId)}
+                  className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex justify-between items-center cursor-pointer group hover:bg-emerald-100 transition-all shadow-sm active:scale-[0.98]"
+                  title="Click to view Owner Profile"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-black"><FaUserAlt size={14} /></div>
                     <div>
