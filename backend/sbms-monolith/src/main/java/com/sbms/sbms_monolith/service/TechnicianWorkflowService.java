@@ -192,7 +192,7 @@ public class TechnicianWorkflowService {
                     job.getStatus() == MaintenanceStatus.COMPLETED) {
                 completedJobCount++;
             }
-
+//
             // 2. Calculate Rating (Only if rated)
             if (job.getOwnerRating() > 0) {
                 totalRating += job.getOwnerRating();
