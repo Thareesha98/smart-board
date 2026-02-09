@@ -39,21 +39,23 @@ const StudentDashboard = () => {
           >
             <StatWidget
               icon={<FaCalendarCheck />}
-              // ✅ Change Title dynamically
-              title={
-                stats.upcomingVisit?.isPast ? "Last Visit" : "Upcoming Visit"
-              }
+              title="Upcoming Visit"
               mainDetail={
                 stats.upcomingVisit
                   ? new Date(
-                      stats.upcomingVisit.normalizedDate
-                    ).toLocaleDateString()
-                  : "No visits found"
+                      stats.upcomingVisit.normalizedDate,
+                    ).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "No visits scheduled"
               }
               subDetail={
                 stats.upcomingVisit
-                  ? stats.upcomingVisit.displayName
-                  : "Book your first visit"
+                  ? stats.upcomingVisit.widgetDetail // This shows "Owner @ Boarding Name"
+                  : "Book a visit today"
               }
             />
           </motion.div>
@@ -102,7 +104,7 @@ const StudentDashboard = () => {
               subDetail={
                 stats.currentBoarding
                   ? `Since ${new Date(
-                      stats.currentBoarding.startDate
+                      stats.currentBoarding.startDate,
                     ).toLocaleDateString()}`
                   : "Find a place"
               }
