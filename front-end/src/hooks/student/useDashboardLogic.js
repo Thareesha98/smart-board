@@ -93,13 +93,27 @@ const useDashboardLogic = () => {
 
       // --- WIDGET 1: Next Approved Visit ---
       const nextVisit = processedAppointments
-        .filter(
-          (a) =>
-            !isNaN(a.normalizedDate) &&
-            a.normalizedDate >= today &&
-            a.status === "APPROVED",
-        )
-        .sort((a, b) => a.normalizedDate - b.normalizedDate)[0];
+        .filter((a) => {
+          // 1. Validation: Date must be valid
+          if (isNaN(a.normalizedDate.getTime())) return false;
+          
+          
+          const isConfirmed = a.status === "APPROVED" || a.status === "ACCEPTED";
+          
+          // 3. DATE FILTER: Must be today or in the future
+          const startOfToday = new Date().setHours(0, 0, 0, 0);
+          const isUpcoming = a.normalizedDate.getTime() >= startOfToday;
+
+          return isConfirmed && isUpcoming;
+        })
+        // 4. SORT: Put the earliest date at index 0
+        .sort((a, b) => a.normalizedDate - b.normalizedDate)[0]; 
+
+      // Update state
+      setStats(prev => ({
+        ...prev,
+        upcomingVisit: nextVisit 
+      }));
 
       // --- Widgets 2, 3, 4 (No changes) ---
       const activeReg = registrations.find((r) => r.status === "APPROVED");
