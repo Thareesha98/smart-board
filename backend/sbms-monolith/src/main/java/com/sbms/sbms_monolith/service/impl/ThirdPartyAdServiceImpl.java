@@ -63,6 +63,22 @@ public class ThirdPartyAdServiceImpl implements ThirdPartyAdService {
     }
 
     @Override
+    public AdResponseDTO submitAd(AdCreateDTO dto) {
+        ThirdPartyAd ad = new ThirdPartyAd();
+        ad.setTitle(dto.getTitle());
+        ad.setCompanyName(dto.getCompanyName());
+        ad.setRedirectUrl(dto.getRedirectUrl());
+        ad.setBannerImageUrl(dto.getBannerImageUrl());
+        ad.setExpiryDate(dto.getExpiryDate());
+        ad.setPlanName(dto.getPlanName());
+        ad.setPlanPrice(dto.getPlanPrice());
+        ad.setTargetPanels(dto.getTargetPanels());
+        ad.setStatus(AdStatus.PENDING);
+        ThirdPartyAd saved = adRepository.save(ad);
+        return convertToDTO(saved);
+    }
+
+    @Override
     public AdResponseDTO toggleAdStatus(Long id) {
         ThirdPartyAd ad = adRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ad not found with id: " + id));
