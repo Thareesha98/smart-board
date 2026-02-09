@@ -140,14 +140,23 @@ const AdminService = {
    */
   getPlans: async () => {
     const response = await api.get('/admin/third-party-ads/plans');
-    return response.data;
+    // Map backend PlanDTO to frontend-friendly shape
+    return (response.data || []).map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      duration: p.durationDays ? `${p.durationDays} Days` : '',
+      description: p.description,
+      features: p.features || [],
+      active: p.active
+    }));
   },
 
   /**
    * Approve a third-party ad submission
    */
   approveAd: async (adId) => {
-    const response = await api.put(`/admin/third-party-ads/${adId}/approve`);
+    const response = await api.patch(`/admin/third-party-ads/${adId}/approve`);
     return response.data;
   },
 
@@ -155,7 +164,7 @@ const AdminService = {
    * Reject a third-party ad submission
    */
   rejectAd: async (adId, reason = "") => {
-    const response = await api.put(`/admin/third-party-ads/${adId}/reject`, { reason });
+    const response = await api.patch(`/admin/third-party-ads/${adId}/reject`, { reason });
     return response.data;
   },
 
@@ -171,7 +180,7 @@ const AdminService = {
    * Toggle campaign status (ACTIVE/INACTIVE)
    */
   toggleCampaignStatus: async (campaignId) => {
-    const response = await api.put(`/admin/third-party-ads/campaigns/${campaignId}/toggle-status`);
+    const response = await api.patch(`/admin/third-party-ads/${campaignId}/toggle-status`);
     return response.data;
   },
 
@@ -179,7 +188,7 @@ const AdminService = {
    * Update campaign details
    */
   updateCampaign: async (campaignId, data) => {
-    const response = await api.put(`/admin/third-party-ads/campaigns/${campaignId}`, data);
+    const response = await api.put(`/admin/third-party-ads/${campaignId}`, data);
     return response.data;
   },
 
@@ -195,7 +204,15 @@ const AdminService = {
    * Add a new pricing plan
    */
   addPlan: async (planData) => {
-    const response = await api.post('/admin/third-party-ads/plans', planData);
+    const payload = {
+      name: planData.name,
+      price: Number(planData.price) || 0,
+      durationDays: parseInt(String(planData.duration || '').match(/\d+/)?.[0] || '0', 10),
+      description: planData.description || '',
+      features: planData.features || [],
+      active: planData.active !== undefined ? planData.active : true
+    };
+    const response = await api.post('/admin/third-party-ads/plans', payload);
     return response.data;
   },
 
@@ -203,7 +220,15 @@ const AdminService = {
    * Update pricing plan
    */
   updatePlan: async (planId, planData) => {
-    const response = await api.put(`/admin/third-party-ads/plans/${planId}`, planData);
+    const payload = {
+      name: planData.name,
+      price: Number(planData.price) || 0,
+      durationDays: parseInt(String(planData.duration || '').match(/\d+/)?.[0] || '0', 10),
+      description: planData.description || '',
+      features: planData.features || [],
+      active: planData.active !== undefined ? planData.active : true
+    };
+    const response = await api.put(`/admin/third-party-ads/plans/${planId}`, payload);
     return response.data;
   },
 
@@ -225,7 +250,56 @@ const AdminService = {
       }
     });
     return response.data;
-  }
+  },
+
+  // ==========================================
+  // 6. ADMIN PROFILE MANAGEMENT
+  // ==========================================
+
+  /**
+   * Get admin profile details
+   */
+  getAdminProfile: async (adminId) => {
+    const response = await api.get(`/admin/profile/${adminId}`);
+    return response.data;
+  },
+
+  /**
+   * Update admin profile information
+   */
+  updateAdminProfile: async (adminId, profileData) => {
+    const response = await api.put(`/admin/profile/${adminId}`, profileData);
+    return response.data;
+  },
+
+  /**
+   * Change admin password
+   */
+  changeAdminPassword: async (adminId, passwordData) => {
+    const response = await api.post(`/admin/profile/${adminId}/change-password`, passwordData);
+    return response.data;
+  },
+
+  /**
+   * Upload avatar image (multipart/form-data)
+   * Expects backend to return the uploaded image URL (string) in response.data
+   */
+  uploadAvatar: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/admin/profile/upload-avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  /**
+   * Update profile (uses token to identify admin)
+   */
+  updateProfile: async (profileData) => {
+    const response = await api.put('/admin/profile', profileData);
+    return response.data;
+  },
 
 };
 
