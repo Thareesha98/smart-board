@@ -42,20 +42,19 @@ const StudentDashboard = () => {
               title="Upcoming Visit"
               mainDetail={
                 stats.upcomingVisit
-                  ? new Date(
-                      stats.upcomingVisit.normalizedDate,
-                    ).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "No visits scheduled"
+                  ? stats.upcomingVisit.normalizedDate.toLocaleDateString(
+                      "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                      },
+                    )
+                  : "No approved visits"
               }
               subDetail={
                 stats.upcomingVisit
-                  ? stats.upcomingVisit.widgetDetail // This shows "Owner @ Boarding Name"
-                  : "Book a visit today"
+                  ? `${stats.upcomingVisit.normalizedDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${stats.upcomingVisit.widgetDetail}`
+                  : "Check your activity for updates"
               }
             />
           </motion.div>
