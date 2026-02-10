@@ -22,6 +22,7 @@ const ReportModal = ({ job, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
     const toastId = toast.loading("Submitting report...");
 
@@ -48,13 +49,25 @@ const ReportModal = ({ job, onClose }) => {
       dataPackage.append("incidentDate", new Date().toISOString().split("T")[0]);
       dataPackage.append("allowContact", true);
 
-      // ✅ 3. APPEND FILE
+      //  3. APPEND FILE
       // This grabs the file from the state you updated in ReportFormFields
       if (formData.evidence) {
         dataPackage.append("evidence", formData.evidence);
       }
 
-      // ✅ 4. SEND 'dataPackage' (Not formData)
+
+      // 🔍 DEBUG: Log what we're sending
+      console.log("📦 Sending FormData:");
+      for (let [key, value] of dataPackage.entries()) {
+        console.log(`  ${key}:`, value);
+      }
+      
+      console.log("📦 Is FormData?", dataPackage instanceof FormData);
+
+      await createTechnicianReport(dataPackage);
+
+
+      //  4. SEND 'dataPackage' (Not formData)
       await createTechnicianReport(dataPackage);
       
       toast.success("Report submitted successfully!", { id: toastId });
