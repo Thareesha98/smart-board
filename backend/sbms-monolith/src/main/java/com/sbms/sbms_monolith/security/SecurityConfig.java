@@ -86,6 +86,10 @@ public class SecurityConfig {
                                            "ROLE_STUDENT", "STUDENT",
                                            "ROLE_ADMIN", "ADMIN"
                         )
+//
+//                        .requestMatchers(HttpMethod.POST, "/api/reports").authenticated()
+//                        .requestMatchers("/api/reports/**").authenticated()
+
                         .requestMatchers("/api/student/**").hasRole("STUDENT")
                         .requestMatchers("/api/registrations/**").authenticated()
                         .requestMatchers("/api/payment/**").authenticated()
