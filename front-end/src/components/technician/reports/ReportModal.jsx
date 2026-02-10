@@ -64,9 +64,6 @@ const ReportModal = ({ job, onClose }) => {
       
       console.log("📦 Is FormData?", dataPackage instanceof FormData);
 
-      await createTechnicianReport(dataPackage);
-
-
       //  4. SEND 'dataPackage' (Not formData)
       await createTechnicianReport(dataPackage);
       
