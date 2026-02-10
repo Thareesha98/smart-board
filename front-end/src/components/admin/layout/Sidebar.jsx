@@ -1,7 +1,9 @@
 import React from 'react';
 import logo from '../../../assets/logo.jpg';
+import { useAuth } from '../../../context/admin/AdminAuthContext';
 
 const Sidebar = ({ onNavigate, activePage, onLogout }) => {
+  const { currentUser } = useAuth();
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'fa-tachometer-alt' },
     { id: 'users', label: 'User Management', icon: 'fa-users' },
@@ -46,13 +48,20 @@ const Sidebar = ({ onNavigate, activePage, onLogout }) => {
       </nav>
 
       <div className="mt-auto p-4 border-t border-white/10">
-        <div className="flex items-center gap-3 p-3 mb-1 rounded-[15px] hover:bg-white/10 transition-colors cursor-pointer">
-          <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="User" className="w-8 h-8 rounded-full border-2 border-white/20 object-cover" />
+        <button 
+          onClick={() => onNavigate('profile')}
+          className="w-full flex items-center gap-3 p-3 mb-1 rounded-[15px] hover:bg-white/10 transition-colors cursor-pointer"
+        >
+          <img 
+            src={currentUser?.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.fullName || 'Admin')}&background=random`}
+            alt="User" 
+            className="w-8 h-8 rounded-full border-2 border-white/20 object-cover" 
+          />
           <div className="flex flex-col items-start">
-            <span className="font-semibold text-xs leading-none text-white">Alex Morgan</span>
+            <span className="font-semibold text-xs leading-none text-white">{currentUser?.fullName || 'Admin'}</span>
             <span className="text-[10px] text-white/50 mt-1 uppercase">Administrator</span>
           </div>
-        </div>
+        </button>
         
         {/* Updated text-xs to text-[15px] and added slightly more padding (p-3) */}
         <button 
