@@ -14,6 +14,7 @@ import com.sbms.sbms_monolith.dto.admin.AdminReportResponseDTO;
 import com.sbms.sbms_monolith.dto.admin.AdminUserResponseDTO;
 import com.sbms.sbms_monolith.dto.admin.ReportDecisionDTO;
 import com.sbms.sbms_monolith.dto.admin.UserVerificationDTO;
+import com.sbms.sbms_monolith.dto.admin.AnalyticsResponseDTO;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -74,6 +75,11 @@ public class AdminController {
             @RequestParam(required = false) ReportStatus status
     ) {
         return adminService.getReports(status);
+    }
+
+    @GetMapping("/analytics")
+    public AnalyticsResponseDTO getAnalytics(@RequestParam(required = false) String range) {
+        return adminService.getAnalytics(range);
     }
 
     @PutMapping("/reports/{reportId}/resolve")

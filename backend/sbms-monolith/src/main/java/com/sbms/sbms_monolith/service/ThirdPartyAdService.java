@@ -10,6 +10,7 @@ public interface ThirdPartyAdService {
     AdResponseDTO updateAdStatus(Long id, AdStatus status);
     List<AdResponseDTO> getActiveCampaigns();
     AdResponseDTO createActiveAd(AdCreateDTO dto);
+    AdResponseDTO submitAd(AdCreateDTO dto);
     AdResponseDTO toggleAdStatus(Long id);
     AdResponseDTO updateAdDetails(Long id, AdCreateDTO dto);
     void deleteAd(Long id);

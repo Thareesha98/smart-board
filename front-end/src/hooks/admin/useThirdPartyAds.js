@@ -63,17 +63,17 @@ export const useThirdPartyAds = () => {
     const handleApprove = async (id) => {
         try {
             await AdminService.approveAd(id);
-            showToast("Ad approved successfully");
+            showToast("Ad approved successfully", 'success');
             fetchData();
-        } catch (err) { showToast("Approval failed", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Approval failed", "error"); }
     };
 
     const handleReject = async (id) => {
         try {
             await AdminService.rejectAd(id);
-            showToast("Ad rejected");
+            showToast("Ad rejected", 'success');
             fetchData();
-        } catch (err) { showToast("Rejection failed", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Rejection failed", "error"); }
     };
 
     // 6. CAMPAIGN ACTIONS
@@ -85,60 +85,60 @@ export const useThirdPartyAds = () => {
     const createAd = async (data) => {
         try {
             await AdminService.publishAd(data);
-            showToast("Campaign is now LIVE!");
+            showToast("Campaign is now LIVE!", 'success');
             setPrefillAdData(null);
             setActiveTab('campaigns');
             fetchData();
-        } catch (err) { showToast("Failed to publish", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Failed to publish", "error"); }
     };
 
     const toggleCampaignStatus = async (id) => {
         try {
             await AdminService.toggleCampaignStatus(id);
-            showToast("Status updated");
+            showToast("Status updated", 'success');
             fetchData();
-        } catch (err) { showToast("Update failed", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Update failed", "error"); }
     };
 
     const updateCampaign = async (id, data) => {
         try {
             await AdminService.updateCampaign(id, data);
-            showToast("Campaign updated");
+            showToast("Campaign updated", 'success');
             fetchData();
-        } catch (err) { showToast("Update failed", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Update failed", "error"); }
     };
 
     const deleteAd = async (id) => {
         try {
             await AdminService.deleteAd(id);
-            showToast("Ad deleted");
+            showToast("Ad deleted", 'success');
             fetchData();
-        } catch (err) { showToast("Delete failed", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Delete failed", "error"); }
     };
 
     // 7. PLAN ACTIONS
     const addPlan = async (data) => {
         try {
             await AdminService.addPlan(data);
-            showToast("New plan added");
+            showToast("New plan added", 'success');
             fetchData();
-        } catch (err) { showToast("Could not add plan", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Could not add plan", "error"); }
     };
 
     const updatePlan = async (id, data) => {
         try {
             await AdminService.updatePlan(id, data);
-            showToast("Plan updated");
+            showToast("Plan updated", 'success');
             fetchData();
-        } catch (err) { showToast("Update failed", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Update failed", "error"); }
     };
 
     const deletePlan = async (id) => {
         try {
             await AdminService.deletePlan(id);
-            showToast("Plan deleted");
+            showToast("Plan deleted", 'success');
             fetchData();
-        } catch (err) { showToast("Delete failed", "error"); }
+        } catch (err) { showToast(err.response?.data?.message || err.message || "Delete failed", "error"); }
     };
 
     return {

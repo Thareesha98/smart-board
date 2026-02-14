@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import AdminService from '../../api/admin/AdminService';
 
 export const useReports = () => {
@@ -6,7 +6,7 @@ export const useReports = () => {
   const [currentTab, setCurrentTab] = useState('PENDING'); // PENDING, RESOLVED, DISMISSED
   const [category, setCategory] = useState('all'); 
   const [selectedReport, setSelectedReport] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Initialize as true for initial load state
   const [toast, setToast] = useState(null);
 
   const showToast = (message, type = 'info') => {
@@ -14,34 +14,36 @@ export const useReports = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     setLoading(true);
     try {
       const data = await AdminService.getReports(currentTab);
       // Map Backend DTO to Frontend UI structure
-      const mapped = data.map(r => ({
+      const mapped = (Array.isArray(data) ? data : []).map(r => ({
         ...r,
         id: r.id,
         title: r.title,
         priority: r.severity, // High, Medium, Low
         date: new Date(r.submissionDate).toLocaleDateString(),
         reporter: {
-          name: r.senderName,
+          name: r.senderName || 'Unknown',
           role: "USER", // You can refine this logic
-          avatar: `https://ui-avatars.com/api/?name=${r.senderName}&background=random`
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(r.senderName || 'User')}&background=random`
         }
       }));
       setReports(mapped);
     } catch (error) {
-      showToast("Could not load reports", "error");
+      console.error('Error fetching reports:', error);
+      setReports([]); // Set empty array on error
+      showToast("Could not load reports: " + (error.message || 'Unknown error'), "error");
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentTab]);
 
   useEffect(() => {
     fetchReports();
-  }, [currentTab]);
+  }, [fetchReports]); // Include fetchReports in dependency array
 
   const filteredReports = useMemo(() => {
     if (category === 'all') return reports;

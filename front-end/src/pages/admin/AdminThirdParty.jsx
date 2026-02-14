@@ -113,7 +113,45 @@ const AdminThirdParty = () => {
                         >
                             + Add New Plan
                         </button>
-                        {/* Plans list would be rendered here */}
+                        {(plans || []).length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {plans.map(plan => (
+                                    <div key={plan.id} className="p-4 border rounded-[18px] flex flex-col gap-3">
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <h4 className="font-bold text-lg text-[#332720]">{plan.name}</h4>
+                                                <div className="text-sm text-gray-500">{plan.duration}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-black text-lg text-[#D84C38]">LKR {Number(plan.price).toLocaleString()}</div>
+                                                <div className="text-xs text-gray-400">{plan.active ? 'Active' : 'Inactive'}</div>
+                                            </div>
+                                        </div>
+                                        {plan.description && <div className="text-sm text-gray-600">{plan.description}</div>}
+                                        <div className="flex gap-3 mt-2">
+                                            <button
+                                                onClick={() => { setPlanToEdit(plan); setIsPlanModalOpen(true); }}
+                                                className="px-4 py-2 bg-white border rounded-lg text-sm font-bold hover:bg-gray-50"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (window.confirm('Delete this plan? This action cannot be undone.')) {
+                                                        deletePlan(plan.id);
+                                                    }
+                                                }}
+                                                className="px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm font-bold hover:bg-red-100"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="py-20 text-center text-gray-400 italic font-bold">No pricing plans available.</div>
+                        )}
                     </div>
                 )}
 

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import AdminService from '../../api/admin/AdminService'; // Updated Import Path
 
 export const useUsers = () => {
@@ -16,7 +16,7 @@ export const useUsers = () => {
     };
 
     // Load users from Backend
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             setLoading(true);
             console.log('🔄 Fetching users from backend...');
@@ -33,13 +33,24 @@ export const useUsers = () => {
             
             // MAP BACKEND TO FRONTEND:
             // Java DTO uses 'fullName', React UI uses 'name'
-            const mappedUsers = data.map(u => ({
-                ...u,
-                name: u.fullName || u.name || 'Unknown',
-                // If verifiedOwner is false for an owner, show 'pending'
-                status: (u.role === 'OWNER' && !u.verifiedOwner) ? 'pending' : 'active',
-                avatar: `https://ui-avatars.com/api/?name=${u.fullName || u.name || 'User'}&background=random`
-            }));
+            const mappedUsers = data.map(u => {
+                const registrationDate = u.createdAt 
+                    ? new Date(u.createdAt).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })
+                    : 'N/A';
+                
+                return {
+                    ...u,
+                    name: u.fullName || u.name || 'Unknown',
+                    // If verifiedOwner is false for an owner, show 'pending'
+                    status: (u.role === 'OWNER' && !u.verifiedOwner) ? 'pending' : 'active',
+                    avatar: u.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.fullName || u.name || 'User')}&background=random`,
+                    registrationDate: registrationDate
+                };
+            });
             
             console.log('✅ Mapped Users:', mappedUsers);
             setUsers(mappedUsers);
@@ -50,11 +61,11 @@ export const useUsers = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [fetchUsers]);
 
     // Logic to calculate top card stats using real data
     const stats = useMemo(() => {
@@ -71,8 +82,13 @@ export const useUsers = () => {
         return users.filter(user => {
             const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                                 user.email.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesRole = roleFilter === 'all' || user.role === roleFilter.toUpperCase();
+            
+            // Convert roleFilter to uppercase for comparison (e.g., 'student' -> 'STUDENT')
+            const filterRoleUpper = roleFilter === 'all' ? 'all' : roleFilter.toUpperCase();
+            const matchesRole = filterRoleUpper === 'all' || user.role === filterRoleUpper;
+            
             const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
+            
             return matchesSearch && matchesRole && matchesStatus;
         });
     }, [users, searchTerm, roleFilter, statusFilter]);

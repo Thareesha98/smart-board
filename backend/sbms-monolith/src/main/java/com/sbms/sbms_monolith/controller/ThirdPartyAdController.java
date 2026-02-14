@@ -4,6 +4,8 @@ import com.sbms.sbms_monolith.dto.ads.AdCreateDTO;
 import com.sbms.sbms_monolith.dto.ads.AdResponseDTO;
 import com.sbms.sbms_monolith.model.enums.AdStatus;
 import com.sbms.sbms_monolith.service.ThirdPartyAdService;
+import com.sbms.sbms_monolith.service.AdPlanService;
+import com.sbms.sbms_monolith.dto.ads.PlanDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/ads")
+@RequestMapping("/api/admin/third-party-ads")
 public class ThirdPartyAdController {
 
     @Autowired
     private ThirdPartyAdService adService;
+
+    @Autowired
+    private AdPlanService planService;
 
     @GetMapping("/submissions")
     @PreAuthorize("hasRole('ADMIN')")
@@ -64,5 +69,36 @@ public class ThirdPartyAdController {
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteAd(@PathVariable Long id) {
         adService.deleteAd(id);
+    }
+
+    // --------------------- Plans CRUD ---------------------
+    @GetMapping("/plans")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<PlanDTO> getPlans() {
+        return planService.getAllPlans();
+    }
+
+    @GetMapping("/plans/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<PlanDTO> getActivePlans() {
+        return planService.getActivePlans();
+    }
+
+    @PostMapping("/plans")
+    @PreAuthorize("hasRole('ADMIN')")
+    public PlanDTO createPlan(@RequestBody PlanDTO dto) {
+        return planService.createPlan(dto);
+    }
+
+    @PutMapping("/plans/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public PlanDTO updatePlan(@PathVariable Long id, @RequestBody PlanDTO dto) {
+        return planService.updatePlan(id, dto);
+    }
+
+    @DeleteMapping("/plans/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deletePlan(@PathVariable Long id) {
+        planService.deletePlan(id);
     }
 }

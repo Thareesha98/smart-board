@@ -42,18 +42,19 @@ const AdminUsers = () => {
     const handleVerifyOwner = async (userId, isApproved) => {
         try {
             // Matches UserVerificationDTO.java { approved: boolean, reason: string }
-            await AdminService.verifyOwner(userId, isApproved, "Admin verified via dashboard");
-            showToast(`User ${isApproved ? 'verified' : 'rejected'} successfully`);
+            await AdminService.verifyOwner(userId, isApproved, isApproved ? "Owner approved by admin" : "Owner rejected by admin");
+            showToast(`User ${isApproved ? 'verified' : 'rejected'} successfully`, 'success');
             fetchUsers(); // Re-fetch from Spring Boot
             setSelectedUser(null);
         } catch (error) {
-            showToast('Failed to update user verification', 'error');
+            console.error('Verification error:', error);
+            showToast(`Failed to update user verification: ${error.response?.data?.message || error.message}`, 'error');
         }
     };
 
     const handleDeleteUser = (id) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
-            showToast('Delete functionality is handled via main User Service', 'info');
+        if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            showToast('User deletion feature is not yet implemented', 'info');
         }
     };
 
