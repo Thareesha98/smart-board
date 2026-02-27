@@ -96,6 +96,41 @@ const Hero = () => {
     </section>
   );
 };
+import React from 'react';
+import { Home, Building, Star, CheckCircle } from 'lucide-react';
+
+const StatsBar = () => {
+  const stats = [
+    { icon: <Home className="w-9 h-9" />, value: "2,500+", label: "Verified Properties" },
+    { icon: <Building className="w-9 h-9" />, value: "50+", label: "Partner Universities" },
+    { icon: <Star className="w-9 h-9" />, value: "4.8/5", label: "Average Rating" },
+    { icon: <CheckCircle className="w-9 h-9" />, value: "98%", label: "Verified Owners" },
+  ];
+
+  return (
+    <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white py-12 relative">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
+      
+      <div className="max-w-7xl mx-auto px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {stats.map((stat, index) => (
+            <div key={index} className="flex items-center gap-5 p-4 rounded-2xl bg-white/10 backdrop-blur-lg hover:bg-white/15 hover:-translate-y-1 transition-all">
+              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-orange-500">
+                {stat.icon}
+              </div>
+              <div>
+                <h4 className="text-3xl font-bold">{stat.value}</h4>
+                <p className="text-white/90">{stat.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 
 const SearchSection = () => {
   return (
