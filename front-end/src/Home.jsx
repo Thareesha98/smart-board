@@ -176,3 +176,79 @@ const Hero = () => {
 };
 
 export default Hero;
+import React, { useState } from 'react';
+import { Search, Home, Shield, TrendingUp, Star, MessageSquare, Headphones, Building, CheckCircle, Lock, Zap, Menu, X, Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Megaphone, Bed, Wifi, Tag, User, Users } from 'lucide-react';
+
+// Navigation Component
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <nav className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[1300px]">
+      <div className="bg-white/88 backdrop-blur-xl rounded-3xl shadow-lg border border-white/25 px-10 py-6">
+        <div className="flex justify-between items-center">
+          <a href="/" className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+              SB
+            </div>
+            <span className="text-2xl font-extrabold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+              SmartBoAD
+            </span>
+          </a>
+
+          {/* Desktop Menu */}
+          <div className="hidden lg:flex items-center gap-10">
+            <a href="#" className="text-gray-800 hover:text-red-500 font-medium transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-gradient-to-r after:from-red-500 after:to-orange-500">
+              Home
+            </a>
+            <a href="#features" className="text-gray-800 hover:text-red-500 font-medium transition-colors">
+              Features
+            </a>
+            <a href="#users" className="text-gray-800 hover:text-red-500 font-medium transition-colors">
+              Users
+            </a>
+            <a href="#advertise" className="text-gray-800 hover:text-red-500 font-medium transition-colors">
+              Advertise
+            </a>
+            <a href="#contact" className="text-gray-800 hover:text-red-500 font-medium transition-colors">
+              Contact
+            </a>
+          </div>
+
+          <div className="hidden lg:flex items-center gap-4">
+            <button className="px-6 py-3 border-2 border-red-500 text-red-500 rounded-2xl font-semibold hover:bg-red-500 hover:text-white transition-all">
+              Login
+            </button>
+            <button className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all">
+              Sign Up
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden">
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isOpen && (
+          <div className="lg:hidden mt-6 pt-6 border-t border-gray-200 flex flex-col gap-4">
+            <a href="#" className="text-gray-800 hover:text-red-500 font-medium">Home</a>
+            <a href="#features" className="text-gray-800 hover:text-red-500 font-medium">Features</a>
+            <a href="#users" className="text-gray-800 hover:text-red-500 font-medium">Users</a>
+            <a href="#advertise" className="text-gray-800 hover:text-red-500 font-medium">Advertise</a>
+            <a href="#contact" className="text-gray-800 hover:text-red-500 font-medium">Contact</a>
+            <button className="w-full px-6 py-3 border-2 border-red-500 text-red-500 rounded-2xl font-semibold">
+              Login
+            </button>
+            <button className="w-full px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl font-semibold">
+              Sign Up
+            </button>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
