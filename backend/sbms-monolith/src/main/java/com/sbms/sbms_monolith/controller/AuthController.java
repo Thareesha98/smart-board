@@ -7,6 +7,8 @@ import com.sbms.sbms_monolith.dto.user.UserRegisterDTO;
 import com.sbms.sbms_monolith.dto.user.UserResponseDTO;
 import com.sbms.sbms_monolith.model.RefreshToken;
 import com.sbms.sbms_monolith.model.User;
+import com.sbms.sbms_monolith.model.enums.UserRole;
+import com.sbms.sbms_monolith.repository.UserRepository;
 import com.sbms.sbms_monolith.security.JwtService;
 import com.sbms.sbms_monolith.service.RefreshTokenService;
 import com.sbms.sbms_monolith.service.UserService;
@@ -43,6 +45,9 @@ public class AuthController {
 
     @Autowired
     private RefreshTokenService refreshTokenService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // ---------------------------------------------------------
     // LOGIN
@@ -82,6 +87,30 @@ public class AuthController {
     })
     public Map<String, Boolean> checkAdminExists() {
         return Map.of("adminExists", userService.hasAdmins());
+    }
+
+    // 🔧 TEMPORARY: Fix admin role for existing users (for development only)
+    @PostMapping("/fix-admin-role")
+    @Operation(
+        summary = "Fix admin role (DEVELOPMENT ONLY)",
+        description = "Update a user's role to ADMIN. This endpoint should be removed in production."
+    )
+    public Map<String, String> fixAdminRole(@RequestParam String email) {
+        try {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + email));
+            user.setRole(UserRole.ADMIN);
+            userRepository.save(user);
+            return Map.of(
+                "status", "success",
+                "message", "✅ Admin role assigned to: " + email
+            );
+        } catch (Exception e) {
+            return Map.of(
+                "status", "error",
+                "message", "❌ Failed to update role: " + e.getMessage()
+            );
+        }
     }
 
     @PostMapping("/refresh")
