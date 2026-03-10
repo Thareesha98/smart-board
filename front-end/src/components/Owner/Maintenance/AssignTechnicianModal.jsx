@@ -5,7 +5,7 @@ import {
   FaMapMarkerAlt,
   FaTimes,
   FaCheck,
-  FaUser
+  FaUser,
 } from "react-icons/fa";
 import {
   searchTechnicians,
@@ -52,7 +52,7 @@ const AssignTechnicianModal = ({ request, onClose, onSuccess }) => {
       await assignTechnician(request.id, techId);
       toast.success("Technician Assigned successfully!");
       onSuccess(); // Triggers the status update in MaintenanceCard
-      onClose();   // Closes the modal
+      onClose(); // Closes the modal
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to assign.");
     }
@@ -69,7 +69,9 @@ const AssignTechnicianModal = ({ request, onClose, onSuccess }) => {
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Assign Professional</h2>
+            <h2 className="text-xl font-bold text-gray-800">
+              Assign Professional
+            </h2>
             <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider font-semibold">
               Category: {request.issueType}
             </p>
@@ -87,12 +89,16 @@ const AssignTechnicianModal = ({ request, onClose, onSuccess }) => {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-10 space-y-3">
               <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-gray-400 text-sm">Finding experts near you...</p>
+              <p className="text-gray-400 text-sm">
+                Finding experts near you...
+              </p>
             </div>
           ) : technicians.length === 0 ? (
             <div className="text-center py-12">
               <FaUser className="mx-auto text-gray-200 text-5xl mb-4" />
-              <p className="text-gray-500">No professionals available for this skill yet.</p>
+              <p className="text-gray-500">
+                No professionals available for this skill yet.
+              </p>
             </div>
           ) : (
             technicians.map((tech) => (
@@ -102,15 +108,20 @@ const AssignTechnicianModal = ({ request, onClose, onSuccess }) => {
               >
                 <img
                   src={
-                    tech.profileImageUrl
-                      ? `${BASE_IMAGE_URL}${tech.profileImageUrl}`
-                      : "https://via.placeholder.com/150?text=No+Profile"
+                    tech.profileImageUrl &&
+                    tech.profileImageUrl.startsWith("http")
+                      ? tech.profileImageUrl // ✅ Use the S3 link directly
+                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(tech.fullName)}&background=random`
                   }
                   alt={tech.fullName}
-                  className="w-16 h-16 rounded-xl object-cover bg-gray-50 border border-gray-100 shadow-sm"
-                  onError={(e) => { e.target.src = "https://via.placeholder.com/150?text=Tech"; }}
+                  className="w-16 h-16 rounded-xl object-cover border border-gray-100 shadow-sm"
+                  onError={(e) => {
+                    // Fallback if the S3 link is broken or access is denied
+                    e.target.onerror = null;
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(tech.fullName)}&background=0D8ABC&color=fff`;
+                  }}
                 />
-                
+
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <div>
@@ -118,17 +129,23 @@ const AssignTechnicianModal = ({ request, onClose, onSuccess }) => {
                         {tech.fullName}
                       </h3>
                       <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                        <FaMapMarkerAlt className="text-blue-400" /> {tech.city || "Area Not Specified"}
+                        <FaMapMarkerAlt className="text-blue-400" />{" "}
+                        {tech.city || "Area Not Specified"}
                       </div>
                     </div>
                     <span className="bg-yellow-50 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded-md border border-yellow-200 flex items-center gap-1">
-                      <FaStar /> {tech.averageRating > 0 ? tech.averageRating.toFixed(1) : "NEW"}
+                      <FaStar />{" "}
+                      {tech.averageRating > 0
+                        ? tech.averageRating.toFixed(1)
+                        : "NEW"}
                     </span>
                   </div>
 
                   <div className="mt-4 flex justify-between items-center">
                     <div>
-                      <span className="text-[10px] text-gray-400 block uppercase font-bold">Base Fee</span>
+                      <span className="text-[10px] text-gray-400 block uppercase font-bold">
+                        Base Fee
+                      </span>
                       <span className="font-bold text-lg text-blue-600">
                         LKR {tech.basePrice?.toLocaleString()}
                       </span>
