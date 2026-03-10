@@ -239,7 +239,7 @@ const LoginPage = () => {
           student: "/student",
           owner: "/owner/dashboard",
           admin: "/admin/dashboard",
-          technician: "/technician/dashboard", 
+          technician: "/technician/dashboard",
         };
         navigate(pathMap[role], { replace: true });
       } else {
@@ -312,21 +312,31 @@ const LoginPage = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {/* Reuse existing forms based on role structure */}
-            {role === "student" ? (
+            {role === "student" && (
               <StudentLoginForm
                 onSubmit={handleLogin}
                 isLoading={isLoading}
                 error={error}
               />
-            ) : (
-              // Owner and Technician share the same simple Email/Pass structure
+            )}
+
+            {role === "owner" && (
               <OwnerLoginForm
                 onSubmit={handleLogin}
                 isLoading={isLoading}
                 error={error}
               />
-            ) : (
+            )}
+
+            {role === "technician" && (
+              <OwnerLoginForm
+                onSubmit={handleLogin}
+                isLoading={isLoading}
+                error={error}
+              />
+            )}
+
+            {role === "admin" && (
               <AdminLoginForm
                 onSubmit={handleLogin}
                 isLoading={isLoading}
