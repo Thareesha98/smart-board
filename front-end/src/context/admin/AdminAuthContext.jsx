@@ -24,11 +24,12 @@ export const AdminAuthProvider = ({ children }) => {
             setCurrentUser(user);
             setIsAuthenticated(true);
           } else {
-            localStorage.clear();
+            // localStorage.clear();
           }
         } catch (e) {
           console.error("Failed to parse user data", e);
-          localStorage.clear();
+          // localStorage.clear();
+          setIsAuthenticated(false);
         }
       }
       setIsLoading(false);
@@ -90,7 +91,7 @@ export const AdminAuthProvider = ({ children }) => {
         },
       };
 
-      // ✅ Using the endpoint: /auth/register/request
+      //  Using the endpoint: /auth/register/request
       const response = await api.post(
         "/auth/register/request",
         payload,
