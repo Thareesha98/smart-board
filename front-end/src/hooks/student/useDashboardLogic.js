@@ -21,7 +21,7 @@ const useDashboardLogic = () => {
 
   const [recentActivity, setRecentActivity] = useState([]);
 
-  // ✅ IMPROVED TimeAgo Logic with Better Date Parsing
+  // ✅ FINAL TimeAgo Logic
   const getTimeAgo = (date) => {
     if (!date) return "Recently";
     
@@ -38,14 +38,6 @@ const useDashboardLogic = () => {
 
     const now = new Date();
     const diffInSeconds = Math.floor((now - past) / 1000);
-    
-    // ✅ DEBUG LOG (Remove after testing)
-    console.log('Time calculation:', {
-      now: now.toISOString(),
-      past: past.toISOString(),
-      diffInSeconds,
-      diffInMinutes: Math.floor(diffInSeconds / 60)
-    });
     
     // Handle future dates (server clock slightly ahead)
     if (diffInSeconds < -60) return "Recently";
@@ -82,23 +74,15 @@ const useDashboardLogic = () => {
           StudentService.getMyReviews(currentUser.id).catch(() => []),
         ]);
 
-      // ✅ DEBUG: Check what dates we're receiving
-      console.log('Sample Appointment Data:', appointments[0]);
-      console.log('Appointment Date Fields:', {
-        updatedAt: appointments[0]?.updatedAt,
-        createdAt: appointments[0]?.createdAt,
-        requestedStartTime: appointments[0]?.requestedStartTime
-      });
-
       // --- PROCESS APPOINTMENTS ---
       const processedAppointments = appointments.map((appt) => {
         // For scheduling (future events)
         const scheduledDate = appt.requestedStartTime || appt.appointmentDate || appt.visitDate;
         
-        // ✅ FIX: For activity feed, prefer updatedAt, but ensure it's valid
+        // For activity feed, prefer updatedAt
         let activityDate = appt.updatedAt || appt.modifiedAt || appt.lastModified || appt.createdAt || appt.createdDate || scheduledDate;
         
-        // ✅ FIX: Ensure we're using a valid date
+        // Ensure we're using a valid date
         if (!activityDate || activityDate === 'null') {
           activityDate = scheduledDate;
         }
@@ -121,7 +105,7 @@ const useDashboardLogic = () => {
         return {
           ...appt,
           scheduledDate: new Date(scheduledDate),
-          activityDate: activityDate, // ✅ Keep as string for now, parse in getTimeAgo
+          activityDate: activityDate,
           status,
           isApproved,
           isRejected,
@@ -165,7 +149,7 @@ const useDashboardLogic = () => {
 
       const feed = processedAppointments
         .map(a => {
-          // ✅ Parse the date here for filtering
+          // Parse the date for filtering
           const actDate = typeof a.activityDate === 'string' 
             ? (a.activityDate.endsWith('Z') ? new Date(a.activityDate) : new Date(a.activityDate + 'Z'))
             : new Date(a.activityDate);
@@ -174,12 +158,12 @@ const useDashboardLogic = () => {
             id: `apt-${a.id}`,
             content: a.notificationContent,
             icon: a.icon,
-            timeAgo: getTimeAgo(a.activityDate), // Pass raw date string
+            timeAgo: getTimeAgo(a.activityDate),
             rawDate: actDate,
             status: a.status
           };
         })
-        .filter(item => item.rawDate >= twoWeeksAgo) // Filter after parsing
+        .filter(item => item.rawDate >= twoWeeksAgo)
         .sort((a, b) => b.rawDate - a.rawDate);
 
       setRecentActivity(feed);
