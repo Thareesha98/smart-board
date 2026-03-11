@@ -11,5 +11,7 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
     List<SubscriptionPlan> findByActiveTrue();
 
+    List<SubscriptionPlan> findByActiveTrueOrderByCreatedAtDesc();
+
     List<SubscriptionPlan> findAllByOrderByCreatedAtDesc();
 }

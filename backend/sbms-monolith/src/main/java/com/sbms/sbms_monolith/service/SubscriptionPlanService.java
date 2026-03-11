@@ -6,8 +6,10 @@ import com.sbms.sbms_monolith.mapper.SubscriptionPlanMapper;
 import com.sbms.sbms_monolith.model.SubscriptionPlan;
 import com.sbms.sbms_monolith.repository.SubscriptionPlanRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +37,8 @@ public class SubscriptionPlanService {
     @Transactional
     public SubscriptionPlanResponseDTO updatePlan(Long id, SubscriptionPlanCreateDTO dto) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Subscription plan not found with id: " + id));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Subscription plan not found with id: " + id));
 
         subscriptionPlanMapper.updateEntity(plan, dto);
         SubscriptionPlan saved = subscriptionPlanRepository.save(plan);
@@ -48,7 +51,8 @@ public class SubscriptionPlanService {
     @Transactional
     public void deletePlan(Long id) {
         if (!subscriptionPlanRepository.existsById(id)) {
-            throw new IllegalStateException("Subscription plan not found with id: " + id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Subscription plan not found with id: " + id);
         }
         subscriptionPlanRepository.deleteById(id);
     }
@@ -67,7 +71,7 @@ public class SubscriptionPlanService {
      * Get only active subscription plans (For owners/students)
      */
     public List<SubscriptionPlanResponseDTO> getActivePlans() {
-        return subscriptionPlanRepository.findByActiveTrue()
+        return subscriptionPlanRepository.findByActiveTrueOrderByCreatedAtDesc()
                 .stream()
                 .map(subscriptionPlanMapper::toResponseDto)
                 .collect(Collectors.toList());
@@ -78,7 +82,8 @@ public class SubscriptionPlanService {
      */
     public SubscriptionPlanResponseDTO getPlanById(Long id) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("Subscription plan not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Subscription plan not found with id: " + id));
         return subscriptionPlanMapper.toResponseDto(plan);
     }
 }
