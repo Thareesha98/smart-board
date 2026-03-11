@@ -1,8 +1,12 @@
 package com.sbms.sbms_monolith.service;
 
-
-import com.sbms.sbms_monolith.dto.admin.*;
+import com.sbms.sbms_monolith.dto.admin.AdminBoardingResponseDTO;
+import com.sbms.sbms_monolith.dto.admin.AdminDashboardDTO;
+import com.sbms.sbms_monolith.dto.admin.AdminReportResponseDTO;
+import com.sbms.sbms_monolith.dto.admin.AdminUserResponseDTO;
 import com.sbms.sbms_monolith.dto.admin.AnalyticsResponseDTO;
+import com.sbms.sbms_monolith.dto.admin.ReportDecisionDTO;
+import com.sbms.sbms_monolith.dto.admin.UserVerificationDTO;
 import com.sbms.sbms_monolith.model.enums.ReportStatus;
 
 import java.util.List;
@@ -16,6 +20,7 @@ public interface AdminService {
     List<AdminUserResponseDTO> getAllUsers();
     void verifyOwner(Long userId, UserVerificationDTO dto);
     AdminUserResponseDTO promoteUserToAdmin(Long userId);
+    void deleteUser(Long userId);
 
     // Boardings
     List<AdminBoardingResponseDTO> getAllBoardings();
