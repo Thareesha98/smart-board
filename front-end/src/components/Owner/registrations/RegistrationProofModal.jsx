@@ -1,166 +1,313 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaCheck, FaTimes, FaReceipt, FaPenNib, FaUndo } from "react-icons/fa";
 import SignatureCanvas from "react-signature-canvas";
+import {
+  FaCheck,
+  FaTimes,
+  FaReceipt,
+  FaInfoCircle
+} from "react-icons/fa";
 
 const RegistrationProofModal = ({
   isOpen,
   onClose,
   registration,
-  onDecide,
+  onDecide
 }) => {
-  const [note, setNote] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const sigPad = useRef(null);
+
+  const signatureRef = useRef(null);
+
+  const [ownerNote, setOwnerNote] = useState("");
+  const [ownerSignature, setOwnerSignature] = useState(null);
+  const [processing, setProcessing] = useState(false);
 
   if (!isOpen || !registration) return null;
 
+  /* ================= SIGNATURE ================= */
+
+  const saveSignature = () => {
+    if (!signatureRef.current) return;
+
+    const base64 = signatureRef.current
+      .getCanvas()
+      .toDataURL("image/png");
+
+    setOwnerSignature(base64);
+  };
+
+  const clearSignature = () => {
+    if (!signatureRef.current) return;
+
+    signatureRef.current.clear();
+    setOwnerSignature(null);
+  };
+
+  /* ================= DECISION ================= */
+
   const handleSubmit = async (status) => {
-    // 1. Validate Signature for Approval
-    if (status === "APPROVED") {
-      if (sigPad.current.isEmpty()) {
-        alert("Please sign the agreement to approve.");
-        return;
-      }
+
+    if (processing) return;
+
+    if (status === "APPROVED" && !ownerSignature) {
+      alert("Owner signature required");
+      return;
     }
 
-    setIsSubmitting(true);
+    const approvingPendingPayment =
+      status === "APPROVED" &&
+      registration.paymentMethod !== "CARD" &&
+      registration.paymentVerified !== true;
 
-    // 2. Get Signature
-    const signature =
-      sigPad.current && !sigPad.current.isEmpty()
-        ? sigPad.current.getTrimmedCanvas().toDataURL("image/png")
-        : null;
+    const payload = {
+      status,
+      ownerNote,
+      ownerSignatureBase64:
+        status === "APPROVED" ? ownerSignature : null,
+      approveWithPendingPayment: approvingPendingPayment
+    };
 
-    // 3. Send Decision
+    setProcessing(true);
+
     const success = await onDecide(
       registration.id,
-      status,
-      note,
-      signature,
-      true,
+      payload
     );
 
-    setIsSubmitting(false);
+    setProcessing(false);
+
     if (success) {
-      setNote("");
-      if (sigPad.current) sigPad.current.clear();
+      setOwnerNote("");
+      setOwnerSignature(null);
       onClose();
     }
   };
 
-  const clearSignature = () => {
-    if (sigPad.current) sigPad.current.clear();
-  };
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
+
+      <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden relative flex flex-col max-h-[90vh]"
+          initial={{ opacity: 0, scale: .9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0 }}
+          className="w-full max-w-xl overflow-hidden bg-white shadow-2xl rounded-2xl"
         >
-          {/* Header */}
-          <div className="flex items-center gap-4 px-6 py-5 bg-primary shrink-0">
-            <div className="bg-white/20 p-2.5 rounded-xl text-white shadow-inner">
-              <FaReceipt size={24} />
-            </div>
+
+          {/* HEADER */}
+
+          <div className="flex items-center gap-4 p-6 text-white bg-primary">
+
+            <FaReceipt size={24} />
+
             <div>
-              <h3 className="mb-1 text-lg font-black leading-none text-white">
-                Verify Payment
+              <h3 className="text-lg font-black">
+                Registration Review
               </h3>
-              <p className="text-xs font-medium text-white/80">
-                Review key money & Sign agreement
+              <p className="text-xs opacity-80">
+                Approve or reject tenant registration
               </p>
             </div>
+
           </div>
 
-          <div className="p-6 space-y-5 overflow-y-auto">
-            {/* Transaction Proof */}
-            <div className="space-y-2">
-              <label className="ml-1 text-xs font-black tracking-wider uppercase text-muted">
-                Transaction Ref ({registration.paymentMethod || "N/A"})
-              </label>
-              <div className="p-4 font-mono text-sm font-bold text-center break-all border-2 border-gray-200 border-dashed text-primary bg-gray-50 rounded-xl">
-                {registration.paymentTransactionRef || "No reference provided"}
-              </div>
+
+          <div className="p-6 space-y-5">
+
+            {/* STUDENT INFO */}
+
+            <div className="space-y-1 text-sm">
+
+              <p>
+                <b>Student:</b> {registration.studentName}
+              </p>
+
+              <p>
+                <b>Boarding:</b> {registration.boardingTitle}
+              </p>
+
+              <p>
+                <b>Students:</b> {registration.numberOfStudents}
+              </p>
+
+              <p>
+                <b>Move-in:</b> {new Date(
+                  registration.moveInDate
+                ).toLocaleDateString()}
+              </p>
+
             </div>
 
-            {/* Note Input */}
-            <div className="space-y-2">
-              <label className="ml-1 text-xs font-black tracking-wider uppercase text-muted">
+            {/* PAYMENT */}
+
+            <div className="p-4 border rounded-lg bg-gray-50">
+
+              <p className="font-semibold">
+                Key Money: Rs {registration.keyMoney}
+              </p>
+
+              <p className="text-sm text-gray-600">
+                Payment Method: {registration.paymentMethod}
+              </p>
+
+            </div>
+
+            {/* BANK SLIP */}
+
+            {registration.paymentMethod === "BANK_SLIP" &&
+              registration.paymentSlipUrl && (
+
+                <div>
+
+                  <p className="mb-2 text-xs font-bold uppercase text-muted">
+                    Bank Slip
+                  </p>
+
+                  <img
+                    src={registration.paymentSlipUrl}
+                    className="border rounded-lg"
+                  />
+
+                </div>
+              )}
+
+            {/* STUDENT NOTE */}
+
+            {registration.studentNote && (
+
+              <div className="flex gap-3 p-3 border border-blue-200 rounded-lg bg-blue-50">
+
+                <FaInfoCircle className="mt-1 text-blue-500" />
+
+                <div>
+
+                  <p className="text-xs font-bold text-blue-500 uppercase">
+                    Student Note
+                  </p>
+
+                  <p className="text-sm">
+                    {registration.studentNote}
+                  </p>
+
+                </div>
+
+              </div>
+
+            )}
+
+            {/* OWNER NOTE */}
+
+            <div>
+
+              <label className="text-xs font-bold uppercase text-muted">
                 Owner Note
               </label>
+
               <textarea
-                className="w-full text-sm p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white min-h-[60px]"
-                placeholder="Message to student..."
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
+                value={ownerNote}
+                onChange={(e) =>
+                  setOwnerNote(e.target.value)
+                }
+                className="w-full p-3 mt-1 border rounded-lg"
+                placeholder="Write a note for the student"
               />
+
             </div>
 
-            {/* Signature Section (Required for Approval) */}
-            <div className="space-y-2">
-              <div className="flex items-end justify-between">
-                <label className="flex items-center gap-1 ml-1 text-xs font-black tracking-wider uppercase text-muted">
-                  <FaPenNib /> Signature (Required for Approval)
-                </label>
+            {/* SIGNATURE */}
+
+            <div>
+
+              <label className="text-xs font-bold uppercase text-muted">
+                Owner Signature *
+              </label>
+
+              <div className="mt-2 bg-gray-100 border rounded-lg">
+
+                <SignatureCanvas
+                  ref={signatureRef}
+                  penColor="black"
+                  canvasProps={{
+                    width: 600,
+                    height: 180,
+                    className: "w-full"
+                  }}
+                />
+
+              </div>
+
+              <div className="flex justify-between mt-2">
+
                 <button
                   onClick={clearSignature}
-                  className="text-[10px] text-primary font-bold flex items-center gap-1 hover:underline"
+                  className="text-sm text-red-600"
                 >
-                  <FaUndo /> Clear
+                  Clear
                 </button>
+
+                <button
+                  onClick={saveSignature}
+                  className="text-sm text-blue-600"
+                >
+                  Save Signature
+                </button>
+
               </div>
-              <div className="overflow-hidden transition-colors border-2 border-gray-200 rounded-xl bg-gray-50 hover:border-primary/50">
-                <SignatureCanvas
-                  ref={sigPad}
-                  penColor="black"
-                  canvasProps={{ className: "w-full h-32 bg-white" }}
-                />
-              </div>
-              <p className="text-[10px] text-muted leading-tight">
-                By signing, you agree to the Terms of Service and generate a
-                binding rental agreement.
-              </p>
+
+              {ownerSignature && (
+                <p className="mt-1 text-sm text-green-600">
+                  Signature captured
+                </p>
+              )}
+
             </div>
 
-            {/* Actions */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            {/* ACTIONS */}
+
+            <div className="grid grid-cols-2 gap-3 pt-3">
+
               <button
-                disabled={isSubmitting}
-                onClick={() => handleSubmit("REJECTED")} // ⚠️ Sends "REJECTED"
-                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-error/10 bg-error/5 text-error font-bold text-sm hover:bg-error hover:text-white hover:border-error transition-all disabled:opacity-50"
+                disabled={processing}
+                onClick={() =>
+                  handleSubmit("DECLINED")
+                }
+                className="flex items-center justify-center gap-2 py-3 font-bold text-white bg-red-500 rounded-lg"
               >
-                <FaTimes /> Reject
+                <FaTimes /> Decline
               </button>
+
               <button
-                disabled={isSubmitting}
-                // ✅ FIXED: Sends "APPROVED" (Matches Backend Enum)
-                onClick={() => handleSubmit("APPROVED")}
-                className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-success text-white font-bold text-sm shadow-lg shadow-success/30 hover:bg-success-dark hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                disabled={processing}
+                onClick={() =>
+                  handleSubmit("APPROVED")
+                }
+                className="flex items-center justify-center gap-2 py-3 font-bold text-white bg-green-600 rounded-lg"
               >
-                {isSubmitting ? (
-                  "Processing..."
-                ) : (
-                  <>
-                    <FaCheck /> Approve & Sign
-                  </>
-                )}
+                {processing
+                  ? "Processing..."
+                  : (
+                    <>
+                      <FaCheck />
+                      Approve
+                    </>
+                  )}
               </button>
+
             </div>
 
             <button
               onClick={onClose}
-              className="w-full py-2 mt-2 text-xs font-bold text-center text-muted hover:text-text"
+              className="w-full pt-2 text-sm text-gray-500"
             >
               Cancel
             </button>
+
           </div>
+
         </motion.div>
+
       </div>
+
     </AnimatePresence>
   );
 };
