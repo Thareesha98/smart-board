@@ -50,7 +50,7 @@ const useRegistrationsLogic = () => {
     ...b,
     tenantsList: tenantsByBoarding[b.id] || []
   }));
-};
+};``
 
 
 
