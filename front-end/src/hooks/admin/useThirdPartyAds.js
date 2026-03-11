@@ -23,16 +23,25 @@ export const useThirdPartyAds = () => {
         setLoading(true);
         setIsOffline(false);
         try {
-            // Promise.all with individual catches to ensure the UI loads even if one endpoint fails
-            const [subData, campData, planData] = await Promise.all([
-                AdminService.getSubmissions().catch(() => { throw new Error("Submissions failed"); }),
-                AdminService.getCampaigns().catch(() => { throw new Error("Campaigns failed"); }),
-                AdminService.getPlans().catch(() => { throw new Error("Plans failed"); })
+            const [subResult, campResult, planResult] = await Promise.allSettled([
+                AdminService.getSubmissions(),
+                AdminService.getCampaigns(),
+                AdminService.getPlans()
             ]);
-            
-            setSubmissions(subData || []);
-            setCampaigns(campData || []);
-            setPlans(planData || []);
+
+            setSubmissions(subResult.status === 'fulfilled' ? (subResult.value || []) : []);
+            setCampaigns(campResult.status === 'fulfilled' ? (campResult.value || []) : []);
+            setPlans(planResult.status === 'fulfilled' ? (planResult.value || []) : []);
+
+            const allFailed = [subResult, campResult, planResult].every(r => r.status === 'rejected');
+            const anyFailed = [subResult, campResult, planResult].some(r => r.status === 'rejected');
+
+            if (allFailed) {
+                setIsOffline(true);
+                showToast("Backend connection failed. Showing offline mode.", "error");
+            } else if (anyFailed) {
+                showToast("Some ad data failed to load.", "error");
+            }
         } catch (err) {
             console.error("Connection Error:", err);
             setIsOffline(true);
@@ -50,6 +59,10 @@ export const useThirdPartyAds = () => {
 
     useEffect(() => {
         fetchData();
+        
+        // Auto-refresh every 5 minutes to check for expired ads
+        const interval = setInterval(fetchData, 5 * 60 * 1000);
+        return () => clearInterval(interval);
     }, [fetchData]);
 
     // 4. STATS CALCULATION (Safe from undefined/null data)

@@ -1,5 +1,45 @@
 import api from '../api'; // Your central axios instance
 
+const tryRefreshAdminSession = async () => {
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) return false;
+
+  try {
+    const response = await api.post(
+      '/auth/refresh',
+      { refreshToken },
+      { headers: { Authorization: undefined } }
+    );
+
+    const { token, refreshToken: newRefreshToken, user } = response.data || {};
+    if (!token || !newRefreshToken || !user || user.role !== 'ADMIN') {
+      return false;
+    }
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('refresh_token', newRefreshToken);
+    localStorage.setItem('user_data', JSON.stringify(user));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const withAdminRetry = async (requestFn) => {
+  try {
+    return await requestFn();
+  } catch (error) {
+    const status = error?.response?.status;
+    if (status === 401 || status === 403) {
+      const refreshed = await tryRefreshAdminSession();
+      if (refreshed) {
+        return requestFn();
+      }
+    }
+    throw error;
+  }
+};
+
 const AdminService = {
   // ==========================================
   // 1. CORE DASHBOARD & ANALYTICS
@@ -10,7 +50,7 @@ const AdminService = {
    * Path: GET /api/admin/dashboard
    */
   getDashboardStats: async () => {
-    const response = await api.get('/admin/dashboard');
+    const response = await withAdminRetry(() => api.get('/admin/dashboard'));
     return response.data;
   },
 
@@ -62,7 +102,7 @@ const AdminService = {
    * Fetches all boarding listings for admin review.
    */
   getAllBoardings: async () => {
-    const response = await api.get('/admin/boardings');
+    const response = await withAdminRetry(() => api.get('/admin/boardings'));
     return response.data;
   },
 
@@ -94,7 +134,7 @@ const AdminService = {
    */
   getReports: async (status = null) => {
     const config = status ? { params: { status } } : {};
-    const response = await api.get('/admin/reports', config);
+    const response = await withAdminRetry(() => api.get('/admin/reports', config));
     return response.data;
   },
 
@@ -153,6 +193,14 @@ const AdminService = {
   },
 
   /**
+   * Get active plans for public ad submission form
+   */
+  getPublicPlans: async () => {
+    const response = await api.get('/third-party-ads/plans');
+    return response.data || [];
+  },
+
+  /**
    * Approve a third-party ad submission
    */
   approveAd: async (adId) => {
@@ -201,6 +249,14 @@ const AdminService = {
   },
 
   /**
+   * Delete a user by ID
+   */
+  deleteUser: async (userId) => {
+    const response = await api.delete(`/admin/users/${userId}`);
+    return response.data;
+  },
+
+  /**
    * Add a new pricing plan
    */
   addPlan: async (planData) => {
@@ -241,26 +297,89 @@ const AdminService = {
   },
 
   /**
+   * Get public active ads for home page display
+   */
+  getPublicAds: async () => {
+    const response = await api.get('/third-party-ads/public-ads');
+    return response.data || [];
+  },
+
+  getPublicSystemStatus: async () => {
+    const response = await api.get('/public/system-status');
+    return response.data || { maintenanceMode: false };
+  },
+
+  /**
    * Submit a third-party ad (from home page)
    */
   submitThirdPartyAd: async (formData) => {
-    const response = await api.post('/third-party-ads/submit', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    const response = await api.post('/third-party-ads/submit', formData);
     return response.data;
   },
 
   // ==========================================
-  // 6. ADMIN PROFILE MANAGEMENT
+  // 6. ADMIN SYSTEM SETTINGS
+  // ==========================================
+
+  getSystemSettings: async () => {
+    const response = await api.get('/admin/settings/general');
+    return response.data;
+  },
+
+  updateSystemSettings: async (payload) => {
+    const response = await api.put('/admin/settings/general', payload);
+    return response.data;
+  },
+
+  getSystemHealth: async () => {
+    const response = await api.get('/admin/settings/health');
+    return response.data;
+  },
+
+  getBackups: async () => {
+    const response = await api.get('/admin/settings/backups');
+    return response.data || [];
+  },
+
+  createBackup: async () => {
+    const response = await api.post('/admin/settings/backups');
+    return response.data;
+  },
+
+  downloadBackup: async (backupId) => {
+    const response = await api.get(`/admin/settings/backups/${backupId}/download`, {
+      responseType: 'blob'
+    });
+    return {
+      blob: response.data,
+      filename: response.headers?.['content-disposition']?.split('filename=')?.[1]?.replaceAll('"', '') || `backup-${backupId}.json`
+    };
+  },
+
+  restoreBackup: async (backupId) => {
+    const response = await api.post(`/admin/settings/backups/${backupId}/restore`);
+    return response.data;
+  },
+
+  deleteBackupFile: async (backupId) => {
+    const response = await api.delete(`/admin/settings/backups/${backupId}`);
+    return response.data;
+  },
+
+  getActivityLogs: async () => {
+    const response = await api.get('/admin/settings/logs');
+    return response.data || [];
+  },
+
+  // ==========================================
+  // 7. ADMIN PROFILE MANAGEMENT
   // ==========================================
 
   /**
    * Get admin profile details
    */
   getAdminProfile: async (adminId) => {
-    const response = await api.get(`/admin/profile/${adminId}`);
+    const response = await api.get('/admin/profile');
     return response.data;
   },
 
@@ -268,7 +387,7 @@ const AdminService = {
    * Update admin profile information
    */
   updateAdminProfile: async (adminId, profileData) => {
-    const response = await api.put(`/admin/profile/${adminId}`, profileData);
+    const response = await api.put('/admin/profile', profileData);
     return response.data;
   },
 
@@ -276,7 +395,7 @@ const AdminService = {
    * Change admin password
    */
   changeAdminPassword: async (adminId, passwordData) => {
-    const response = await api.post(`/admin/profile/${adminId}/change-password`, passwordData);
+    const response = await api.post('/admin/profile/change-password', passwordData);
     return response.data;
   },
 
@@ -287,10 +406,12 @@ const AdminService = {
   uploadAvatar: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post('/admin/profile/upload-avatar', formData, {
+    const response = await api.post('/files/upload/admin', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return response.data;
+    // backend may return either a plain string URL or an object { url: '...' }
+    if (!response || !response.data) return null;
+    return response.data.url || response.data;
   },
 
   /**

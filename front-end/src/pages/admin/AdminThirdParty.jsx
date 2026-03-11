@@ -7,6 +7,7 @@ import AdDetailsModal from '../../components/admin/thirdparty/AdDetailsModal';
 import CreateAdForm from '../../components/admin/thirdparty/CreateAdForm'; 
 import EditCampaignModal from '../../components/admin/thirdparty/EditCampaignModal';
 import PlanModal from '../../components/admin/thirdparty/PlanModal';
+import ConfirmModal from '../../components/admin/common/ConfirmModal';
 import { useThirdPartyAds } from '../../hooks/admin/useThirdPartyAds'; 
 
 const AdminThirdParty = () => {
@@ -21,6 +22,8 @@ const AdminThirdParty = () => {
 
     const [selectedAd, setSelectedAd] = useState(null);
     const [editingCampaign, setEditingCampaign] = useState(null);
+    const [deleteTargetAd, setDeleteTargetAd] = useState(null);
+    const [deletingAd, setDeletingAd] = useState(false);
     const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
     const [planToEdit, setPlanToEdit] = useState(null);
 
@@ -84,6 +87,7 @@ const AdminThirdParty = () => {
                                     onReject={handleReject}
                                     onViewDetails={setSelectedAd}
                                     onPublish={startPublishWorkflow}
+                                    onDelete={(id) => setDeleteTargetAd(id)}
                                 />
                             ))
                         ) : (
@@ -100,7 +104,7 @@ const AdminThirdParty = () => {
                         campaigns={campaigns || []} 
                         onEdit={setEditingCampaign}
                         onToggleStatus={toggleCampaignStatus}
-                        onDelete={deleteAd}
+                        onDelete={(id) => setDeleteTargetAd(id)}
                     />
                 )}
 
@@ -175,6 +179,27 @@ const AdminThirdParty = () => {
                     onSave={(data) => { updateCampaign(editingCampaign.id, data); setEditingCampaign(null); }}
                 />
             )}
+            {/* Confirm modal for deleting submissions/campaigns/plans */}
+            <ConfirmModal
+                open={!!deleteTargetAd}
+                title="Delete Item"
+                message="Are you sure you want to delete this item? This action cannot be undone."
+                onCancel={() => setDeleteTargetAd(null)}
+                onConfirm={async () => {
+                    if (!deleteTargetAd) return;
+                    setDeletingAd(true);
+                    try {
+                        await deleteAd(deleteTargetAd);
+                        setDeleteTargetAd(null);
+                    } catch (err) {
+                        console.error('Failed to delete ad/campaign', err);
+                    } finally {
+                        setDeletingAd(false);
+                    }
+                }}
+                loading={deletingAd}
+                confirmLabel="Yes, delete"
+            />
             {isPlanModalOpen && (
                 <PlanModal 
                     isOpen={isPlanModalOpen} 
