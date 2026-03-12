@@ -8,6 +8,7 @@ import {
   FaArrowRight, FaFacebookF, FaInstagram, FaLinkedinIn,
 } from 'react-icons/fa';
 import logo from './assets/logo.png';
+import backgroundImage from './assets/s5.jpg';
 import BoardingCard from './components/student/search/BoardingCard';
 
 import StudentService from './api/student/StudentService';
@@ -100,7 +101,13 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background-light font-sans flex flex-col">
+    <div className="relative min-h-screen bg-background-light font-sans flex flex-col overflow-hidden">
+      <div
+        className="absolute inset-0 bg-center bg-no-repeat bg-cover"
+        style={{ backgroundImage: `url(${backgroundImage})`, filter: 'blur(8px)', transform: 'scale(1.1)' }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/30 backdrop-blur-sm" />
+      <div className="relative z-10 flex min-h-screen flex-col">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -452,6 +459,7 @@ const Home = () => {
             </div>
           </div>
         </footer>
+      </div>
     </div>
   );
 };
