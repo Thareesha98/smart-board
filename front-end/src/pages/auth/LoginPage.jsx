@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 // --- CONTEXT IMPORTS ---
 import { useAuth as useStudentAuth } from "../../context/student/StudentAuthContext";
 import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
+import { useAdminAuth } from "../../context/admin/AdminAuthContext";
 
 // --- COMPONENT IMPORTS ---
 import UnifiedLoginForm from "../../components/auth/UnifiedLoginForm";
@@ -21,6 +22,7 @@ const LoginPage = () => {
   // AUTH HOOKS
   const { login: studentLogin } = useStudentAuth();
   const { login: ownerLogin } = useOwnerAuth();
+  const { login: adminLogin } = useAdminAuth();
 
   // HANDLER: The "Try Both" Logic
   const handleLogin = async (formData) => {
@@ -46,7 +48,15 @@ const LoginPage = () => {
         return; // Stop here if successful
       }
 
-      // 3. IF BOTH FAIL
+      // 3. IF OWNER FAILS, ATTEMPT ADMIN LOGIN
+      const adminResult = await adminLogin(email, password);
+
+      if (adminResult && adminResult.success) {
+        navigate("/admin/dashboard", { replace: true });
+        return;
+      }
+
+      // 4. IF ALL LOGIN ATTEMPTS FAIL
       setError("Login failed. Please check your email and password.");
     } catch (err) {
       console.error(err);
