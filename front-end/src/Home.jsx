@@ -438,18 +438,6 @@ const Home = () => {
                     </li>
                   ))}
                 </ul>
-
-                {/* Tech badge */}
-                <div className="rounded-xl bg-white/5 border border-white/10 p-4 space-y-1">
-                  <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Built With</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {['React', 'Spring Boot', 'PostgreSQL', 'AWS'].map(tech => (
-                      <span key={tech} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white/70">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
 
