@@ -190,4 +190,5 @@ const PublicProfileView = () => {
   );
 };
 
+
 export default PublicProfileView;
