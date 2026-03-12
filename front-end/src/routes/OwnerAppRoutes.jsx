@@ -22,6 +22,7 @@ import SubscriptionPlanPage from "../pages/owner/SubscriptionPlanPage";
 import PaymentPage from "../pages/owner/PaymentPage";
 import ChatList from "../pages/chat/ChatList";
 import ChatRoom from "../pages/chat/ChatRoom";
+import TechnicianManagementPage from "../pages/owner/TechnicianManagementPage.jsx";
 
 const OwnerAppRoutes = () => {
   return (
