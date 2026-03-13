@@ -32,7 +32,7 @@ public class RegistrationController {
     // ================= STUDENT =================
 
     @PostMapping("/student/{studentId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'STUDENT')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<RegistrationResponseDTO> register(
             @PathVariable Long studentId,
             @RequestBody RegistrationRequestDTO dto
@@ -42,7 +42,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/student/{studentId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'STUDENT')")
+    @PreAuthorize("hasRole('STUDENT')")
     public List<RegistrationResponseDTO> studentRegistrations(
             @PathVariable Long studentId
     ) {
@@ -50,7 +50,7 @@ public class RegistrationController {
     }
 
     @PutMapping("/student/{studentId}/{regId}/cancel")
-    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'STUDENT')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<RegistrationResponseDTO> cancel(
             @PathVariable Long studentId,
             @PathVariable Long regId
@@ -60,21 +60,21 @@ public class RegistrationController {
     }
 
     @PostMapping("/student/{studentId}/leave/{regId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'STUDENT')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<String> requestLeave(@PathVariable Long studentId, @PathVariable Long regId) {
         registrationService.requestLeave(studentId, regId);
         return ResponseEntity.ok("Leave request sent.");
     }
 
     @PostMapping("/owner/{ownerId}/approve-leave/{regId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'OWNER')")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<String> approveLeave(@PathVariable Long ownerId, @PathVariable Long regId) {
         registrationService.approveLeave(ownerId, regId);
         return ResponseEntity.ok("Leave approved.");
     }
 
     @GetMapping("/{regId}/dashboard")
-    @PreAuthorize("hasAnyAuthority('ROLE_STUDENT', 'STUDENT')")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<StudentBoardingDashboardDTO> dashboard(
             @PathVariable Long regId,
             Authentication authentication
@@ -90,7 +90,7 @@ public class RegistrationController {
     // ================= OWNER =================
 
     @GetMapping("/owner/{ownerId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'OWNER')")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<RegistrationResponseDTO>> ownerRegistrations(
             @PathVariable Long ownerId,
             @RequestParam(required = false) RegistrationStatus status
@@ -100,7 +100,7 @@ public class RegistrationController {
     }
 
     @PutMapping("/owner/{ownerId}/{regId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'OWNER')")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<RegistrationResponseDTO> decide(
             @PathVariable Long ownerId,
             @PathVariable Long regId,
