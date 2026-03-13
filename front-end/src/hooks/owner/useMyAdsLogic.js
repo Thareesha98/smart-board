@@ -190,6 +190,10 @@ const useMyAdsLogic = () => {
         amenities: formData.amenities,
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
+
+        distance_to_uni: parseFloat(formData.distance_to_uni) || 0,
+        size: parseInt(formData.size) || 0,
+
         nearbyPlaces: {}, 
         imageUrls: uploadedUrls,
       };
