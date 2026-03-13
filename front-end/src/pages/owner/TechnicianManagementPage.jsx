@@ -32,7 +32,10 @@ const TechnicianManagementPage = () => {
 
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportData, setReportData] = useState({ reason: "", description: "" });
+  const [reportData, setReportData] = useState({
+    reportType: "TECHNICIAN_NO_SHOW", // Default value
+    description: "",
+  });
 
   useEffect(() => {
     fetchInitialData();
@@ -134,22 +137,36 @@ const TechnicianManagementPage = () => {
   };
 
   const handleReport = async () => {
+    if (!reportData.description) return toast.error("Please provide details");
+
     try {
+      // Construct payload to match ReportCreateDTO exactly
       const payload = {
-        title: `Technician Issue: ${request.technicianName}`,
+        // General Report Fields
+        title: `Service Complaint: ${request.technicianName}`,
         description: reportData.description,
-        reportType: "safety", // Using your existing enum type
+        reportType: reportData.reportType, // TECHNICIAN_NO_SHOW or POOR_WORK_QUALITY
         severity: "HIGH",
-        boardingName: request.boardingTitle,
-        studentId: request.technicianId, // Reporting the tech
+        boardingName: request.boardingTitle, // Required by backend
+
+        // ID Mapping
+        ownerId: currentOwner?.id, // Sender
+        studentId: request.technicianId, // Reported User (Technician)
+
+        // Metadata
         incidentDate: new Date().toISOString().split("T")[0],
         allowContact: true,
       };
+
+      // Use existing service.js function with empty evidence array
       await createReport(payload, []);
-      toast.success("Report submitted to administration");
+
+      toast.success("Technician reported successfully");
       setShowReportModal(false);
     } catch (err) {
-      toast.error("Failed to submit report");
+      // If 403 occurs here, ensure OWNER role has POST access to /api/reports
+      console.error("Report submission failed", err);
+      toast.error("Failed to submit report. Please check permissions.");
     }
   };
 
@@ -290,26 +307,54 @@ const TechnicianManagementPage = () => {
       {/* Report Modal */}
       {showReportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-md p-6 bg-white rounded-2xl">
-            <h3 className="mb-4 text-xl font-bold">Report Technician</h3>
-            <textarea
-              className="w-full p-3 mb-4 border rounded-xl"
-              rows="4"
-              placeholder="Please describe the issue (e.g., did not show up, unprofessional behavior)..."
-              onChange={(e) =>
-                setReportData({ ...reportData, description: e.target.value })
-              }
-            />
+          <div className="w-full max-w-md p-6 bg-white shadow-xl rounded-2xl">
+            <h3 className="mb-4 text-xl font-bold text-gray-800">
+              Report Professional
+            </h3>
+
+            {/* --- REPORT TYPE SELECT --- */}
+            <div className="mb-4">
+              <label className="block mb-2 text-sm font-bold text-gray-700">
+                Issue Category
+              </label>
+              <select
+                className="w-full p-3 text-sm border outline-none rounded-xl focus:ring-2 focus:ring-red-500/20"
+                value={reportData.reportType}
+                onChange={(e) =>
+                  setReportData({ ...reportData, reportType: e.target.value })
+                }
+              >
+                <option value="TECHNICIAN_NO_SHOW">Technician No Show</option>
+                <option value="POOR_WORK_QUALITY">Poor Work Quality</option>
+              </select>
+            </div>
+
+            {/* --- DESCRIPTION --- */}
+            <div className="mb-4">
+              <label className="block mb-2 text-sm font-bold text-gray-700">
+                Details
+              </label>
+              <textarea
+                className="w-full p-3 text-sm border outline-none rounded-xl focus:ring-2 focus:ring-red-500/20"
+                rows="4"
+                placeholder="Describe exactly what happened..."
+                value={reportData.description}
+                onChange={(e) =>
+                  setReportData({ ...reportData, description: e.target.value })
+                }
+              />
+            </div>
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowReportModal(false)}
-                className="flex-1 py-2 text-gray-500"
+                className="flex-1 py-2 font-semibold text-gray-500 rounded-lg hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReport}
-                className="flex-1 py-2 font-bold text-white bg-red-600 rounded-lg"
+                className="flex-1 py-2 font-bold text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700"
               >
                 Submit Report
               </button>
