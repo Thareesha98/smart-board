@@ -11,7 +11,6 @@ import {
   FaFileAlt,
   FaSignOutAlt,
   FaUser,
-  FaComments,
 } from "react-icons/fa";
 import { useOwnerAuth } from "../../../context/owner/OwnerAuthContext.jsx";
 
@@ -55,15 +54,6 @@ const navItems = [
     key: "Payment",
   },
   { path: "/owner/reports", icon: FaFileAlt, label: "Reports", key: "Reports" },
-
-
-  {
-    path: "/owner/chats",
-    icon: FaComments,
-    label: "Chats",
-    key: "Chats",
-  },
-
 ];
 
 const SidebarItem = ({ path, Icon, label, currentPath }) => {
