@@ -20,10 +20,14 @@ import {
 } from "../../api/owner/service";
 import toast from "react-hot-toast";
 import ReviewTechnicianModal from "../../components/Owner/Maintenance/ReviewTechnicianModal.jsx";
+import { useOwnerAuth } from "../../context/owner/OwnerAuthContext";
 
 const TechnicianManagementPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const { currentOwner } = useOwnerAuth(); //
+
 
   const [request, setRequest] = useState(null);
   const [technicians, setTechnicians] = useState([]);
@@ -42,77 +46,36 @@ const TechnicianManagementPage = () => {
   }, [id]);
 
   const fetchInitialData = async () => {
-    try {
-      setLoading(true);
-      const allRequests = await getOwnerMaintenanceRequests();
-      const currentReq = allRequests.find((r) => r.id === parseInt(id));
+  try {
+    setLoading(true);
+    const allRequests = await getOwnerMaintenanceRequests(); //
+    const currentReq = allRequests.find((r) => r.id === parseInt(id));
 
-      if (!currentReq) {
-        toast.error("Request not found");
-        return navigate("/owner/maintenance");
-      }
-
-      // Map Java Backend DTO to UI expected keys if needed
-      const normalizedReq = {
-        ...currentReq,
-        title: currentReq.title || "General Maintenance",
-        status: currentReq.status?.toLowerCase() || "pending",
-      };
-
-      setRequest(normalizedReq);
-
-      // If pending, search for technicians automatically based on mapped Enum skill
-      if (normalizedReq.status === "pending") {
-        const issue = (normalizedReq.title || "").toUpperCase();
-        let mappedSkill = "OTHER";
-
-        // Logic to match titles to MaintenanceIssueType Enum values
-        if (
-          issue.includes("PLUMB") ||
-          issue.includes("TAP") ||
-          issue.includes("LEAK") ||
-          issue.includes("WATER")
-        ) {
-          mappedSkill = "PLUMBING";
-        } else if (
-          issue.includes("ELECT") ||
-          issue.includes("LIGHT") ||
-          issue.includes("POWER") ||
-          issue.includes("WIRE")
-        ) {
-          mappedSkill = "ELECTRICAL";
-        } else if (
-          issue.includes("FURNIT") ||
-          issue.includes("BED") ||
-          issue.includes("CHAIR") ||
-          issue.includes("TABLE")
-        ) {
-          mappedSkill = "FURNITURE";
-        } else if (
-          issue.includes("APPLIANCE") ||
-          issue.includes("FRIDGE") ||
-          issue.includes("AC") ||
-          issue.includes("FAN")
-        ) {
-          mappedSkill = "APPLIANCE";
-        } else if (issue.includes("CLEANING") || issue.includes("WASH")) {
-          mappedSkill = "CLEANING";
-        } else if (
-          issue.includes("PEST") ||
-          issue.includes("BUG") ||
-          issue.includes("ANT")
-        ) {
-          mappedSkill = "PEST";
-        }
-
-        handleSearch(mappedSkill);
-      }
-    } catch (err) {
-      toast.error("Error loading page data");
-    } finally {
-      setLoading(false);
+    if (!currentReq) {
+      toast.error("Request not found");
+      return navigate("/owner/maintenance");
     }
-  };
+
+    // DEBUG: Log the full object to see where the ID is hidden
+    console.log("Full Request Data:", currentReq);
+
+    // Some backends nest the ID inside a 'technician' object
+    const techId = currentReq.technicianId || currentReq.technician?.id; //
+
+    setRequest({
+      ...currentReq,
+      technicianId: techId // ✅ Explicitly set this
+    });
+
+    if (currentReq.status?.toLowerCase() === "pending") {
+      handleSearch(currentReq.title);
+    }
+  } catch (err) {
+    toast.error("Error loading page data");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSearch = async (skill) => {
     setSearchLoading(true);
@@ -137,38 +100,34 @@ const TechnicianManagementPage = () => {
   };
 
   const handleReport = async () => {
-    if (!reportData.description) return toast.error("Please provide details");
+  // 1. Check for missing IDs
+  if (!request?.technicianId) { //
+    return toast.error("Cannot report: Technician ID is missing from this record.");
+  }
+  if (!currentOwner?.id) { //
+    return toast.error("Session error: Sender ID not found.");
+  }
 
-    try {
-      // Construct payload to match ReportCreateDTO exactly
-      const payload = {
-        // General Report Fields
-        title: `Service Complaint: ${request.technicianName}`,
-        description: reportData.description,
-        reportType: reportData.reportType, // TECHNICIAN_NO_SHOW or POOR_WORK_QUALITY
-        severity: "HIGH",
-        boardingName: request.boardingTitle, // Required by backend
+  try {
+    const payload = {
+      title: `Technician Issue: ${request.technicianName}`,
+      description: reportData.description,
+      reportType: reportData.reportType,
+      severity: reportData.severity || "MEDIUM",
+      boardingName: request.boardingTitle || request.boardingName,
+      ownerId: currentOwner.id, //
+      studentId: request.technicianId, //
+      incidentDate: new Date().toISOString().split("T")[0],
+      allowContact: true,
+    };
 
-        // ID Mapping
-        ownerId: currentOwner?.id, // Sender
-        studentId: request.technicianId, // Reported User (Technician)
-
-        // Metadata
-        incidentDate: new Date().toISOString().split("T")[0],
-        allowContact: true,
-      };
-
-      // Use existing service.js function with empty evidence array
-      await createReport(payload, []);
-
-      toast.success("Technician reported successfully");
-      setShowReportModal(false);
-    } catch (err) {
-      // If 403 occurs here, ensure OWNER role has POST access to /api/reports
-      console.error("Report submission failed", err);
-      toast.error("Failed to submit report. Please check permissions.");
-    }
-  };
+    await createReport(payload, []); //
+    toast.success("Report submitted!");
+    setShowReportModal(false);
+  } catch (err) {
+    toast.error("Submission failed. Ensure you have permission to report.");
+  }
+};
 
   if (loading)
     return <div className="p-10 text-center">Loading Technician Portal...</div>;
