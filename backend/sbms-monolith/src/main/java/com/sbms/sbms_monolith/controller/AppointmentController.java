@@ -95,11 +95,4 @@ public class AppointmentController {
     ) {
         return appointmentService.respondToAppointment(ownerId, appointmentId, dto);
     }
-
-    // ✅ NEW ENDPOINT: Dashboard Recent Appointments
-    @GetMapping("/owner/{ownerId}/recent")
-    @PreAuthorize("hasRole('OWNER')") // Use hasAnyAuthority to avoid 403 errors
-    public List<AppointmentResponseDTO> getRecentAppointments(@PathVariable Long ownerId) {
-        return appointmentService.getRecentAppointments(ownerId);
-    }
 }
