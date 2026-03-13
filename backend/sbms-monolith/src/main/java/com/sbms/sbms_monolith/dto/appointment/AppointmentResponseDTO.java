@@ -40,7 +40,4 @@ public class AppointmentResponseDTO {
 
     private String studentNote;
     private String ownerNote;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
