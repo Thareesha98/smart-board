@@ -4,5 +4,6 @@ public enum PaymentType {
     KEY_MONEY,
     MONTHLY_RENT,
     UTILITIES,
-    SUBSCRIPTION
+    SUBSCRIPTION,
+    TECHNICIAN_FEE
 }
