@@ -36,25 +36,25 @@ export default function Dashboard() {
               <StatWidget
                 icon="fas fa-wallet"
                 title="Total Earnings"
-                mainValue={`$${stats.totalEarnings?.toLocaleString() || 0}`}
+                mainValue={`Rs.${stats.totalEarnings?.toLocaleString() || 0}`}
                 subValue="Lifetime Revenue"
               />
               <StatWidget
                 icon="fas fa-calendar-day"
                 title="This Month"
-                mainValue={`$${stats.monthlyEarnings?.toLocaleString() || 0}`}
+                mainValue={`Rs.${stats.monthlyEarnings?.toLocaleString() || 0}`}
                 subValue="Revenue"
               />
               <StatWidget
                 icon="fas fa-credit-card"
                 title="Wallet Balance"
-                mainValue={`$${stats.walletBalance?.toLocaleString() || 0}`}
+                mainValue={`Rs.${stats.walletBalance?.toLocaleString() || 0}`}
                 subValue="Available to Withdraw"
               />
               <StatWidget
                 icon="fas fa-coins"
                 title="Fees Paid"
-                mainValue={`$${stats.totalPlatformFees?.toLocaleString() || 0}`}
+                mainValue={`Rs.${stats.totalPlatformFees?.toLocaleString() || 0}`}
                 subValue="Platform Fees"
               />
             </>
