@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+  namespace: sbms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appointment-service
+  template:
+    metadata:
+      labels:
+        app: appointment-service
+    spec:
+      serviceAccountName: appointment-service-sa
+      containers:
+        - name: appointment-service
+          image: appointment-service:1.9
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080   # same as Spring Boot app
+
+          env:
+            # --------------------------------------
+            # 🌐 Activate kubernetes profile
+            # --------------------------------------
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+
+            # --------------------------------------
+            # 🗄️ Database configs (ConfigMap)
+            # --------------------------------------
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-appointment-db-config
+                  key: SPRING_DATASOURCE_URL
+
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-appointment-db-config
+                  key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-appointment-db-config
+                  key: SPRING_JPA_HIBERNATE_DDL_AUTO
+
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-appointment-db-config
+                  key: SPRING_JPA_DATABASE_PLATFORM
+
+            # --------------------------------------
+            # 🔐 Database credentials (Secret)
+            # --------------------------------------
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: sbms-appointment-db-secret
+                  key: SPRING_DATASOURCE_USERNAME
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sbms-appointment-db-secret
+                  key: SPRING_DATASOURCE_PASSWORD
+
+            # --------------------------------------
+            # 🐇 RabbitMQ configs
+            # --------------------------------------
+            - name: SPRING_RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-appointment-db-config
+                  key: SPRING_RABBITMQ_HOST
+
+            - name: SPRING_RABBITMQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-appointment-db-config
+                  key: SPRING_RABBITMQ_PORT
+
+            - name: SBMS_RABBITMQ_EXCHANGE
+              valueFrom:
+                configMapKeyRef:
+                  name: sbms-appointment-db-config
+                  key: SBMS_RABBITMQ_EXCHANGE
+
+            # --------------------------------------
+            # 🐇 RabbitMQ credentials
+            # (same as other services for now)
+            # --------------------------------------
+            - name: SPRING_RABBITMQ_USERNAME
+              value: "guest"
+
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: "guest"
+
