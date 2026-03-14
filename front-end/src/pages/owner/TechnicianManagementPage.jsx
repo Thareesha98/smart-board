@@ -26,7 +26,7 @@ const TechnicianManagementPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { currentOwner } = useOwnerAuth(); //
+  const { currentOwner } = useOwnerAuth(); 
 
 
   const [request, setRequest] = useState(null);
@@ -66,6 +66,8 @@ const TechnicianManagementPage = () => {
       ...currentReq,
       technicianId: techId // ✅ Explicitly set this
     });
+
+    
 
     if (currentReq.status?.toLowerCase() === "pending") {
       handleSearch(currentReq.title);
