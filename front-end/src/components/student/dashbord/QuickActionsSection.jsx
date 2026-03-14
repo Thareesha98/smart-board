@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
   FaSearch, FaCalendarAlt, FaCreditCard, 
-  FaTools, FaFlag, FaUserCog 
+  FaTools, FaFlag, FaUserCog, FaCrown 
 } from 'react-icons/fa';
 
 const actionButtons = [
   { path: "/student/search-boardings", icon: FaSearch, label: "Search Boardings" },
   { path: "/student/appointmentpage", icon: FaCalendarAlt, label: "View Appointments" },
   { path: "/student/billing", icon: FaCreditCard, label: "Pay Bills" },
+  { path: "/student/subscription-plans", icon: FaCrown, label: "Subscription Plans" },
 ];
 
 const manageButtons = [

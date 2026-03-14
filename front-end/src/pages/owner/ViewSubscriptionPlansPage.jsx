@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaCheck, FaStar, FaRocket, FaCrown } from "react-icons/fa";
 import toast from "react-hot-toast";
-import { getActivePlans } from "../../api/admin/subscriptionPlanService";
+import { getActivePlans } from "../../api/common/subscriptionPlanService";
 import HeaderBar from "../../components/Owner/common/HeaderBar.jsx";
 
 // Map plan index to style config for visual variety
@@ -151,3 +151,4 @@ export default function ViewSubscriptionPlansPage() {
     </div>
   );
 }
+

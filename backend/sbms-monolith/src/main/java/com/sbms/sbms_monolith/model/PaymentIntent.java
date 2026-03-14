@@ -58,6 +58,9 @@ public class PaymentIntent {
     @Column(nullable=true ,   name = "monthly_bill_id")
     private Long monthlyBillId;
 
+    @Column(nullable = true, name = "subscription_plan_id")
+    private Long subscriptionPlanId;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)

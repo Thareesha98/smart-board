@@ -35,6 +35,8 @@ public class PaymentIntentService {
      */
     public PaymentIntent create(CreatePaymentIntentDTO dto) {
 
+        validate(dto);
+
         PaymentIntent intent = new PaymentIntent();
 
         intent.setStudentId(dto.getStudentId());
@@ -44,6 +46,7 @@ public class PaymentIntentService {
         intent.setAmount(dto.getAmount());
         intent.setDescription(dto.getDescription());
         intent.setMonthlyBillId(dto.getMonthlyBillId());
+        intent.setSubscriptionPlanId(dto.getSubscriptionPlanId());
 
         intent.setStatus(PaymentIntentStatus.CREATED);
 
@@ -71,6 +74,7 @@ public class PaymentIntentService {
         return switch (dto.getType()) {
             case KEY_MONEY -> LocalDateTime.now().plusHours(24);
             case MONTHLY_RENT, UTILITIES -> LocalDateTime.now().plusDays(14);
+            case SUBSCRIPTION -> LocalDateTime.now().plusHours(2);
         };
     }
 
@@ -81,17 +85,27 @@ public class PaymentIntentService {
         if (dto.getStudentId() == null)
             throw new RuntimeException("Student ID required");
 
-        if (dto.getOwnerId() == null)
-            throw new RuntimeException("Owner ID required");
-
-        if (dto.getBoardingId() == null)
-            throw new RuntimeException("Boarding ID required");
-
         if (dto.getType() == null)
             throw new RuntimeException("Payment type required");
 
         if (dto.getAmount() == null || dto.getAmount().signum() <= 0)
             throw new RuntimeException("Invalid amount");
+
+        if (dto.getType() == PaymentType.SUBSCRIPTION) {
+            if (dto.getSubscriptionPlanId() == null)
+                throw new RuntimeException("Subscription plan ID required");
+
+            if (dto.getMonthlyBillId() != null)
+                throw new RuntimeException("Subscription payment cannot reference monthly bill");
+
+            return;
+        }
+
+        if (dto.getOwnerId() == null)
+            throw new RuntimeException("Owner ID required");
+
+        if (dto.getBoardingId() == null)
+            throw new RuntimeException("Boarding ID required");
 
         if (dto.getType() != PaymentType.KEY_MONEY && dto.getMonthlyBillId() == null)
             throw new RuntimeException("Monthly bill ID required");

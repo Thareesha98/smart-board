@@ -1,12 +1,15 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../../../../api/api";
 import StudentLayout from "../../../../../components/student/common/StudentLayout";
 
 const CardPayment = () => {
   const { intentId } = useParams();
+  const [params] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const flow = params.get("flow") || "billing";
+  const planId = params.get("planId");
 
   const payNow = async () => {
     try {
@@ -24,6 +27,8 @@ const CardPayment = () => {
           amount: res.data.amount,
           ref: res.data.transactionId,
           receiptUrl: res.data.receiptUrl || "",
+          sourceFlow: flow,
+          planId,
         },
       });
     } catch {
