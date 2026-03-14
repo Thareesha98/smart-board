@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../../../../api/api";
 import StudentLayout from "../../../../../components/student/common/StudentLayout";
+import toast from "react-hot-toast";
+import { getApiErrorMessage } from "../../../../../utils/apiError";
 
 const CardPayment = () => {
   const { intentId } = useParams();
@@ -31,8 +33,8 @@ const CardPayment = () => {
           planId,
         },
       });
-    } catch {
-      alert("Payment Failed. Please try again.");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Payment failed. Please try again."));
     } finally {
       setLoading(false);
     }

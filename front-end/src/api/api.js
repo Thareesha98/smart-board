@@ -1,9 +1,10 @@
 import axios from "axios";
 
-const baseURL = "https://smartboard.thareesha.software/api";
+const resolvedApiBase =
+  import.meta.env.VITE_API_BASE || "http://localhost:8086/api";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE,
+  baseURL: resolvedApiBase,
   headers: {
     "Content-Type": "application/json",
   },

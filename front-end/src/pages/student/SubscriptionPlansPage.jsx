@@ -9,6 +9,7 @@ import {
 } from "../../api/student/subscriptionPlanService";
 import { useAuth } from "../../context/student/StudentAuthContext";
 import { useNavigate } from "react-router-dom";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 // Map plan index to style config for visual variety
 const planStyles = [
@@ -114,7 +115,7 @@ export default function StudentSubscriptionPlansPage() {
         }
       } catch (err) {
         console.error("Failed to load subscription data:", err);
-        toast.error("Failed to load subscription plans.");
+        toast.error(getApiErrorMessage(err, "Failed to load subscription plans."));
       } finally {
         setLoading(false);
       }
@@ -131,9 +132,7 @@ export default function StudentSubscriptionPlansPage() {
       );
     } catch (err) {
       console.error("Failed to buy plan:", err);
-      toast.error(
-        err.response?.data?.message || "Failed to start subscription payment."
-      );
+      toast.error(getApiErrorMessage(err, "Failed to start subscription payment."));
     } finally {
       setBuyingPlanId(null);
     }
