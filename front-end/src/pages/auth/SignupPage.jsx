@@ -508,12 +508,12 @@ const SignupPage = () => {
                     isLoading={isLoading}
                   />
                 )}
-                {role === "technician" && (
+                {/* {role === "technician" && (
                   <TechnicianSignupForm
                     onSubmit={handleSignup}
                     isLoading={isLoading}
                   />
-                )}
+                )} */}
               </motion.div>
             )}
           </AnimatePresence>
