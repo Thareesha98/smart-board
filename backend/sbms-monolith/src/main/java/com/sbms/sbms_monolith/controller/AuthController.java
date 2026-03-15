@@ -7,9 +7,7 @@ import com.sbms.sbms_monolith.dto.user.UserRegisterDTO;
 import com.sbms.sbms_monolith.dto.user.UserResponseDTO;
 import com.sbms.sbms_monolith.model.RefreshToken;
 import com.sbms.sbms_monolith.model.User;
-import com.sbms.sbms_monolith.model.enums.UserRole;
 import com.sbms.sbms_monolith.security.JwtService;
-import com.sbms.sbms_monolith.service.AdminSettingsService;
 import com.sbms.sbms_monolith.service.RefreshTokenService;
 import com.sbms.sbms_monolith.service.UserService;
 
@@ -46,9 +44,6 @@ public class AuthController {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-    @Autowired
-    private AdminSettingsService adminSettingsService;
-
     // ---------------------------------------------------------
     // LOGIN
     // ---------------------------------------------------------
@@ -73,10 +68,6 @@ public class AuthController {
         );
 
         User user = userService.getUserEntityByEmail(dto.getEmail());
-
-        if (adminSettingsService.isMaintenanceModeEnabled() && user.getRole() != UserRole.ADMIN) {
-            throw new RuntimeException("System is in maintenance mode. Only admin users can login.");
-        }
 
         return generateAuthResponse(user);
     }
@@ -110,10 +101,6 @@ public class AuthController {
         refreshTokenService.verifyExpiration(refreshToken);
 
         User user = refreshToken.getUser();
-
-        if (adminSettingsService.isMaintenanceModeEnabled() && user.getRole() != UserRole.ADMIN) {
-            throw new RuntimeException("System is in maintenance mode. Only admin users can continue.");
-        }
 
         String jwt = generateJwt(user);
 
