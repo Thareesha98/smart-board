@@ -64,7 +64,7 @@ public class SecurityConfig {
 
              //   .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 
-                .requestMatchers("/api/payments/**").hasRole("STUDENT")
+                .requestMatchers("/api/payments/**").hasAnyRole("STUDENT", "OWNER")
 
                 .requestMatchers("/api/owner/**").hasRole("OWNER")
                 .requestMatchers("/api/boardings/owner/**").hasRole("OWNER")
@@ -74,7 +74,7 @@ public class SecurityConfig {
 
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
                 .requestMatchers("/api/bills/student/**").hasRole("STUDENT")
-                
+                .requestMatchers("/api/subscriptions/**").hasAnyRole("ADMIN", "OWNER")
 
                 .anyRequest().authenticated()
             )

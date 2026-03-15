@@ -39,14 +39,18 @@ export const OwnerAuthProvider = ({ children }) => {
           } else {
             // If the token belongs to a Student, we do NOT clear storage.
             // We just don't authenticate this specific Owner context.
-            console.warn("Found valid session, but user is not an Owner.");
+            if (import.meta.env.DEV) {
+              console.debug("Owner context skipped for non-owner role:", user.role);
+            }
           }
         }
       } catch (error) {
         console.error("Auto-login failed:", error);
         // If the refresh token is expired or invalid (401/403), clear storage
         if (error.response?.status === 401 || error.response?.status === 403) {
-          localStorage.clear();
+          console.warn("Session expired for owner context");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("user_data");
         }
       } finally {
         setIsLoading(false);
