@@ -15,6 +15,8 @@ import Notification from "../../components/student/maintenance/Notification";
 import ReviewForm from "../../components/student/boardings/ReviewForm";
 import LeaveBoardingSection from "../../components/student/boardings/LeaveBoardingSection";
 
+import EmergencyButton from "../../components/emergency/EmergencyButton";
+
 // ─── Status badge helper ───────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const map = {
@@ -202,6 +204,9 @@ const MyBoardingsPage = () => {
                                 >
                                   Download Receipt
                                 </button>
+
+
+
                               </div>
                               <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                                 <p className="text-xs text-gray-400 uppercase font-bold">Monthly Rent</p>
