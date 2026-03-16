@@ -13,21 +13,26 @@ const api = axios.create({
 // 2. Request Interceptor: ALWAYS attach the token if it exists
 api.interceptors.request.use(
   (config) => {
-    const rawToken =
-      localStorage.getItem("token") ||
-      localStorage.getItem("access_token") ||
-      localStorage.getItem("auth_token") ||
-      "";
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem("user_data");
+    
+    if (token && token !== "null" && token !== "undefined") {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-    if (rawToken && rawToken !== "null" && rawToken !== "undefined") {
-      const token = rawToken.replace(/^Bearer\s+/i, "").trim();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user?.id) {
+          config.headers["X-User-Id"] = user.id;
+        }
+      } catch (e) {
+        console.error("Failed to parse user_data");
       }
     }
 
     if (!(config.data instanceof FormData)) {
-      config.headers["Content-Type"] = "application/json";
+      config.headers['Content-Type'] = 'application/json';
     }
 
     return config;

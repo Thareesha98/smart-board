@@ -431,68 +431,75 @@ const ReportForm = ({ reportType, targetMode, onSubmit, onCancel }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-card-bg rounded-large shadow-custom p-8 border border-light"
+      className="p-6 border bg-card-bg rounded-large shadow-custom md:p-8 border-light"
     >
-      <div className="flex justify-between mb-6">
+      <div className="flex flex-col items-start justify-between gap-4 mb-6 sm:flex-row sm:items-center">
         <h2 className="text-2xl font-bold text-primary">
           Reporting: {reportType.typeName}
         </h2>
         <button
           onClick={onCancel}
-          className="flex items-center gap-2 px-3 py-1 rounded-btn bg-light text-text-dark hover:bg-accent hover:text-white"
+          className="flex items-center gap-2 px-3 py-1 text-xs font-semibold transition-all rounded-btn bg-light text-text-dark hover:bg-accent hover:text-white"
         >
           <FaSync /> Change
         </button>
       </div>
       <div className="space-y-6">
-        {targetMode === "STUDENT" ? (
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block font-semibold mb-2">Boarding</label>
-              <select
-                className="w-full p-3 border-2 rounded-btn"
-                onChange={handlePropertyChange}
-              >
-                <option value="">Select Property</option>
-                {properties.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block font-semibold mb-2">Student</label>
-              <select
-                className="w-full p-3 border-2 rounded-btn"
-                onChange={(e) =>
-                  setFormData({ ...formData, reportedUserId: e.target.value })
-                }
-              >
-                <option value="">Select Student</option>
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* --- OWNER SPECIFIC: Boarding & Student Selectors --- */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <label className="block mb-2 font-semibold text-text-dark">
+              Select Boarding <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="propertyId"
+              value={formData.propertyId}
+              onChange={handlePropertyChange}
+              disabled={loadingData}
+              className="w-full p-3 bg-white border-2 border-light rounded-btn focus:border-accent focus:outline-none"
+            >
+              <option value="">
+                {loadingData ? "Loading..." : "Select Property"}
+              </option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
           </div>
         ) : (
           <div>
-            <label className="block font-semibold mb-2">Technician ID</label>
-            <input
-              type="text"
-              className="w-full p-3 border-2 rounded-btn"
-              placeholder="Enter Technician ID"
-              onChange={(e) =>
-                setFormData({ ...formData, reportedUserId: e.target.value })
-              }
-            />
+            <label className="block mb-2 font-semibold text-text-dark">
+              Select Student <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="studentId"
+              value={formData.studentId}
+              onChange={handleChange}
+              disabled={!formData.propertyId || students.length === 0}
+              className="w-full p-3 bg-white border-2 border-light rounded-btn focus:border-accent focus:outline-none disabled:bg-gray-100"
+            >
+              <option value="">
+                {!formData.propertyId
+                  ? "Select property first"
+                  : students.length === 0
+                  ? "No students found"
+                  : "Select Student"}
+              </option>
+              {students.map((s) => (
+                // Assuming tenants API returns { id, name } or similar
+                <option key={s.id} value={s.id}>
+                  {s.name} (ID: {s.id})
+                </option>
+              ))}
+            </select>
           </div>
         )}
         <div>
-          <label className="block font-semibold mb-2">Title</label>
+          <label className="block mb-2 font-semibold text-text-dark">
+            Report Title <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
             className="w-full p-3 border-2 rounded-btn"
@@ -502,19 +509,144 @@ const ReportForm = ({ reportType, targetMode, onSubmit, onCancel }) => {
           />
         </div>
         <div>
-          <label className="block font-semibold mb-2">Description</label>
-          <textarea
-            className="w-full p-3 border-2 rounded-btn"
-            rows="4"
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
+          <label className="block mb-2 font-semibold text-text-dark">
+            Date of Incident <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            name="incidentDate"
+            value={formData.incidentDate}
+            onChange={handleChange}
+            className="w-full p-3 text-gray-500 border-2 border-light rounded-btn focus:border-accent focus:outline-none"
           />
         </div>
-        <div className="flex justify-end pt-4">
+
+        <div>
+          <label className="block mb-2 font-semibold text-text-dark">
+            Severity Level <span className="text-red-500">*</span>
+          </label>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {SEVERITY_LEVELS.map((level) => {
+              const Icon = level.icon;
+              return (
+                <label
+                  key={level.value}
+                  className="relative cursor-pointer group"
+                >
+                  <input
+                    type="radio"
+                    name="severity"
+                    value={level.value}
+                    checked={formData.severity === level.value}
+                    onChange={handleChange}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`
+                      p-3 rounded-btn font-semibold text-sm text-center transition-all duration-300
+                      border-2 flex flex-col items-center justify-center gap-2
+                      ${
+                        formData.severity === level.value
+                          ? "border-current scale-105"
+                          : "border-transparent bg-gray-50 hover:bg-gray-100"
+                      }
+                      ${
+                        formData.severity === level.value
+                          ? level.color
+                          : "text-text-muted"
+                      }
+                    `}
+                  >
+                    <Icon size={18} />
+                    {level.label}
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label className="block mb-2 font-semibold text-text-dark">
+            Description <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            name="description"
+            rows="5"
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full p-3 border-2 resize-none border-light rounded-btn focus:border-accent focus:outline-none"
+            placeholder="Provide full details..."
+          />
+        </div>
+
+        {/* --- Evidence Upload (Visuals Only) --- */}
+        <div>
+          <label className="block mb-2 font-semibold text-text-dark">
+            Evidence (Optional)
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              id="evidence"
+              accept="image/*,.pdf"
+              multiple
+              onChange={handleFileChange}
+              className="sr-only"
+            />
+            <label
+              htmlFor="evidence"
+              className="flex flex-col items-center justify-center p-8 transition-colors border-2 border-dashed cursor-pointer border-light rounded-btn hover:border-accent bg-gray-50"
+            >
+              <FaCloudUploadAlt className="mb-2 text-4xl text-text-muted" />
+              <span className="font-medium text-text-dark">
+                Click to upload files
+              </span>
+            </label>
+          </div>
+          {previews.length > 0 && (
+            <div className="flex flex-wrap gap-3 mt-4">
+              {previews.map((preview, index) => (
+                <div
+                  key={index}
+                  className="relative flex items-center justify-center w-20 h-20 overflow-hidden bg-gray-100 border rounded-lg border-light"
+                >
+                  {preview.url ? (
+                    <img
+                      src={preview.url}
+                      alt="prev"
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <FaPaperPlane />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full top-1 right-1"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-4 pt-4 border-t border-light">
           <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-3 font-semibold transition-all border-2 rounded-large border-text-muted text-text-muted hover:bg-text-muted hover:text-white"
+          >
+            Cancel
+          </button>
+          <motion.button
+            type="button"
             onClick={handleSubmit}
-            className="px-6 py-3 bg-accent text-white rounded-large font-bold shadow-md"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="flex items-center gap-2 px-6 py-3 font-semibold text-white shadow-md rounded-large bg-accent"
           >
             <FaPaperPlane className="inline mr-2" /> Submit Report
           </button>
@@ -523,4 +655,5 @@ const ReportForm = ({ reportType, targetMode, onSubmit, onCancel }) => {
     </motion.div>
   );
 };
+
 export default ReportForm;

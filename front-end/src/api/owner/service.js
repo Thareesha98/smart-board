@@ -1,5 +1,57 @@
 import api from "../api";
 
+
+// =================================================================
+// 💰 DASHBOARD & EARNINGS SERVICES
+// =================================================================
+
+// 1. Get Dashboard Summary (Stats)
+// Matches Java: @GetMapping("/api/owner/earnings/summary")
+export const getDashboardStats = async () => {
+  try {
+    const response = await api.get("/owner/earnings/summary");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    throw error;
+  }
+};
+
+// 2. Get Revenue Chart Data
+// Matches Java: @GetMapping("/api/owner/earnings/chart")
+export const getRevenueChartData = async () => {
+  try {
+    const response = await api.get("/owner/earnings/chart");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching chart data:", error);
+    return []; // Return empty array on error so chart doesn't crash
+  }
+};
+
+// 3. Get Recent Transactions (Table)
+// Matches Java: @GetMapping("/api/owner/earnings/dashboard-transactions")
+export const getDashboardTransactions = async () => {
+  try {
+    const response = await api.get("/owner/earnings/dashboard-transactions");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    return [];
+  }
+};
+
+export const getRecentAppointments = async (ownerId) => {
+  try {
+    const response = await api.get(`/appointments/owner/${ownerId}/recent`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching recent appointments:", error);
+    throw error; // Propagate error or return [] depending on preference
+  }
+};
+
+
 // =================================================================
 // 🚩 REPORT SERVICES
 // =================================================================
@@ -54,6 +106,7 @@ export const createOwnerReport = async (reportData, files) => {
   }
 };
 
+
 // =================================================================
 // 🛠️ BOARDING SERVICES (Updated)
 // =================================================================
@@ -70,15 +123,17 @@ export const getOwnerBoardings = async () => {
   }
 };
 
-// 2. Get Single Boarding (For Edit Page)
+// 2. Get Single Boarding (For Edit Page & Status Toggling)
 export const getBoardingById = async (boardingId) => {
   try {
-    // ✅ CHANGED: We now use the PUBLIC endpoint found in BoardingController.java
-    // Path is "/boardings/{id}" instead of "/boardings/owner/{id}"
-    const response = await api.get(`/boardings/${boardingId}`);
+    // ✅ CHANGED: Use the OWNER endpoint (was `/boardings/${boardingId}`)
+    // This allows fetching the ad even if it is INACTIVE, PENDING, or DRAFT.
+    const response = await api.get(`/boardings/owner/${boardingId}`);
+    
+    // Map backend fields to frontend structure
+    const data = response.data;
     
     // Quick Fix: Map the typo 'bosted' from backend to 'isBoosted' for frontend
-    const data = response.data;
     if (data.bosted !== undefined) {
         data.isBoosted = data.bosted;
     }
@@ -125,6 +180,8 @@ export const deleteBoarding = async (boardingId) => {
     throw error;
   }
 };
+
+
 
 // 6. Boost Boarding
 export const boostBoarding = async (boardingId, days) => {

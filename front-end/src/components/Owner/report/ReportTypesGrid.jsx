@@ -149,8 +149,8 @@ const ReportTypesGrid = ({ onSelectType, targetMode }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.1 }}
           whileHover={{ y: -5, borderColor: "var(--accent)" }}
-          onClick={() => onSelectType(t.type, t.title)}
-          className="bg-card-bg p-8 rounded-large shadow-custom text-center cursor-pointer border-2 border-transparent hover:shadow-xl group"
+          onClick={() => onSelectType(reportType.type, reportType.title)}
+          className="flex flex-col items-center h-full p-8 text-center transition-all duration-300 border-2 border-transparent cursor-pointer bg-card-bg rounded-large shadow-custom hover:shadow-xl group"
         >
           <motion.div
             whileHover={{
@@ -158,15 +158,20 @@ const ReportTypesGrid = ({ onSelectType, targetMode }) => {
               backgroundColor: "var(--accent)",
               color: "white",
             }}
-            className="w-20 h-20 bg-background-light rounded-full flex items-center justify-center mx-auto mb-4 text-3xl text-accent"
+            className="flex items-center justify-center w-20 h-20 mx-auto mb-4 text-3xl transition-all duration-300 rounded-full bg-background-light text-accent"
           >
             <t.icon />
           </motion.div>
-          <h3 className="text-xl font-bold text-text-dark mb-2">{t.title}</h3>
-          <p className="text-text-muted text-sm">{t.description}</p>
+          <h3 className="mb-2 text-xl font-bold text-text-dark">
+            {reportType.title}
+          </h3>
+          <p className="text-sm leading-relaxed text-text-muted">
+            {reportType.description}
+          </p>
         </motion.div>
       ))}
     </div>
   );
 };
+
 export default ReportTypesGrid;

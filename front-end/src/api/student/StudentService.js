@@ -27,7 +27,7 @@ const StudentService = {
   // ==========================================
   // 3. BOARDINGS (Search & Details)
   // ==========================================
-  searchBoardings: async (filters) => {
+  searchBoardings: async (filters, page = 0, size = 50) => {
     let backendBoardingType = null;
     if (filters.roomTypes && filters.roomTypes.length > 0) {
       const selected = filters.roomTypes[0].toLowerCase();
@@ -43,8 +43,8 @@ const StudentService = {
       genderType:
         filters.gender !== "any" ? filters.gender?.toUpperCase() : null,
       boardingType: backendBoardingType,
-      page: 0,
-      size: 50,
+      page,
+      size,
     };
 
     Object.keys(params).forEach(
@@ -159,17 +159,21 @@ const StudentService = {
   },
 
   downloadReceipt: async (regId) => {
-    const response = await api.get(`/registrations/${regId}/receipt`, {
-      responseType: "blob",
-    });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `Receipt_${regId}.pdf`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  },
+  try {
+    const response = await api.get(`/registrations/${regId}/dashboard`);
+
+    const agreementUrl = response.data.agreementPdfPath;
+
+    if (!agreementUrl) {
+      alert("Agreement not available");
+      return;
+    }
+
+    window.open(agreementUrl, "_blank"); // opens PDF in new tab
+  } catch (error) {
+    console.error("Failed to open agreement", error);
+  }
+},
 
   requestLeave: async (studentId, regId) => {
     const response = await api.post(
@@ -359,6 +363,12 @@ const StudentService = {
       return [];
     }
   },
+
+  getStudentBills: async () => {
+    const response = await api.get("/bills/student");
+    return response.data;
+  },
+  
 };
 
 export default StudentService;

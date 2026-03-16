@@ -1,69 +1,76 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import TechnicianLayout from "../../components/technician/common/TechnicianLayout";
-import HistoryItem from "../../components/technician/history/HistoryItem";
-import ReportModal from "../../components/technician/reports/ReportModal";
+import ReportModal from "../../components/technician/reports/ReportModal"; 
+import HistoryItem from "../../components/technician/history/HistoryItem"; 
 import { getTechnicianJobs } from "../../api/technician/technicianService";
-
-const normalizeJobs = (payload) => {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.content)) return payload.content;
-  if (Array.isArray(payload?.data)) return payload.data;
-  return [];
-};
+import { useTechAuth } from "../../context/technician/TechnicianAuthContext";
 
 const TechnicianHistory = () => {
-  const [jobs, setJobs] = useState([]);
+  const { authLoading } = useTechAuth();
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorText, setErrorText] = useState("");
   const [selectedJob, setSelectedJob] = useState(null);
 
   useEffect(() => {
-    const loadJobs = async () => {
-      setLoading(true);
-      setErrorText("");
+    const fetchHistory = async () => {
       try {
-        const response = await getTechnicianJobs();
-        setJobs(normalizeJobs(response));
+        console.log("🔄 Fetching History...");
+        const jobs = await getTechnicianJobs(); 
+        
+        console.log("✅ RAW DATA FROM BACKEND:", jobs);
+
+        // ✅ FILTER LOGIC:
+        // We include jobs even if status is missing (!s) so you can debug them.
+        const completedJobs = jobs.filter(job => {
+            const s = job.status;
+            return !s || ["COMPLETED", "WORK_DONE", "PAID", "ACCEPTED", "IN_PROGRESS"].includes(s);
+        });
+
+        // Sort Newest First
+        completedJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        setHistory(completedJobs);
       } catch (error) {
-        setErrorText(error?.response?.data?.message || "Failed to load history.");
+        console.error("❌ Failed to load history", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadJobs();
-  }, []);
-
-  const historyJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      const status = String(job?.status || "").toUpperCase();
-      return status.includes("COMPLETE") || status.includes("DONE") || status.includes("PAID");
-    });
-  }, [jobs]);
+    if (!authLoading) fetchHistory();
+  }, [authLoading]);
 
   return (
-    <TechnicianLayout title="Work History" subtitle="Review completed work and report issues">
+    <TechnicianLayout title="Work History" subtitle="Your completed jobs & reviews">
+      
       {loading ? (
-        <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100">Loading history...</div>
-      ) : errorText ? (
-        <div className="rounded-xl bg-red-50 text-red-700 p-6 border border-red-200">{errorText}</div>
-      ) : historyJobs.length === 0 ? (
-        <div className="rounded-xl bg-white p-6 shadow-sm border border-gray-100 text-gray-500">
-          No completed jobs yet.
-        </div>
+        <div className="p-10 text-center text-gray-500 animate-pulse">Loading work history...</div>
       ) : (
-        <div className="space-y-4">
-          {historyJobs.map((job) => (
-            <HistoryItem
-              key={job.id || job.maintenanceId}
-              job={job}
-              onReport={(pickedJob) => setSelectedJob(pickedJob)}
-            />
-          ))}
+        <div className="grid gap-6">
+          {history.length === 0 ? (
+            <div className="text-center p-10 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <p className="text-gray-400">No jobs found.</p>
+            </div>
+          ) : (
+            history.map((job, index) => (
+              <HistoryItem 
+                // ✅ USE INDEX IF ID IS MISSING (Prevents Key Warning)
+                key={job.id || index} 
+                job={job} 
+                onReport={setSelectedJob} 
+              />
+            ))
+          )}
         </div>
       )}
 
-      {selectedJob && <ReportModal job={selectedJob} onClose={() => setSelectedJob(null)} />}
+      {selectedJob && (
+        <ReportModal 
+            job={selectedJob} 
+            onClose={() => setSelectedJob(null)} 
+        />
+      )}
+
     </TechnicianLayout>
   );
 };

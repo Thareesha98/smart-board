@@ -16,6 +16,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByBoarding_Owner(User owner);
 
+    List<Appointment> findTop5ByBoarding_OwnerOrderByCreatedAtDesc(User owner);
+
     List<Appointment> findByBoarding_OwnerAndStatus(User owner, AppointmentStatus status);
 
     long deleteByStudent_Id(Long studentId);

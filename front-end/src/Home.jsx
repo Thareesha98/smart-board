@@ -29,7 +29,7 @@ const Home = () => {
   const [boardings, setBoardings] = useState([]);
   const [loadingBoardings, setLoadingBoardings] = useState(false);
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(4);
+  const [pageSize, setPageSize] = useState(12);
   const [totalPages, setTotalPages] = useState(0);
   const [filters, setFilters] = useState({
     minPrice: 0,
@@ -215,15 +215,27 @@ const Home = () => {
       const list = Array.isArray(data) ? data : (data.content || []);
       
       if (!list || list.length === 0) {
-        setBoardings(sampleBoardings.slice(0, size));
-        setTotalPages(1);
+        const fallbackStart = p * size;
+        const fallbackEnd = fallbackStart + size;
+        const fallbackPageItems = sampleBoardings.slice(fallbackStart, fallbackEnd);
+        setBoardings(fallbackPageItems);
+        setTotalPages(Math.max(1, Math.ceil(sampleBoardings.length / size)));
       } else {
-        setBoardings(list);
-        setTotalPages(data.totalPages || 1);
+        if (Array.isArray(data)) {
+          const start = p * size;
+          const end = start + size;
+          setBoardings(data.slice(start, end));
+          setTotalPages(Math.max(1, Math.ceil(data.length / size)));
+        } else {
+          setBoardings(list);
+          setTotalPages(data.totalPages || 1);
+        }
       }
     } catch (e) {
-      setBoardings(sampleBoardings.slice(0, size));
-      setTotalPages(1);
+      const fallbackStart = p * size;
+      const fallbackEnd = fallbackStart + size;
+      setBoardings(sampleBoardings.slice(fallbackStart, fallbackEnd));
+      setTotalPages(Math.max(1, Math.ceil(sampleBoardings.length / size)));
     } finally {
       setLoadingBoardings(false);
     }
