@@ -140,8 +140,14 @@ const TechnicianManagementPage = () => {
     // Simulate network delay
     setTimeout(() => {
       toast.success("Payment Successful!", { id: toastId });
+
+      // 1. Close payment modal
       setShowPaymentModal(false);
-      // Optionally refresh data if the status should change to 'paid'
+
+      // 2. Open review modal immediately after
+      setShowReviewModal(true);
+
+      // 3. Optional: Refresh data to ensure status is updated in background
       fetchInitialData();
     }, 2000);
   };
@@ -365,7 +371,7 @@ const TechnicianManagementPage = () => {
               </p>
 
               <div className="flex flex-wrap justify-center gap-4 mt-6">
-                {/* ✅ The Report button is now accessible even after work is done */}
+                {/* Report Button: Always visible if a technician is assigned */}
                 <button
                   onClick={() => setShowReportModal(true)}
                   className="flex items-center gap-2 px-6 py-3 font-bold text-red-600 border border-red-200 rounded-xl hover:bg-red-50"
@@ -373,25 +379,24 @@ const TechnicianManagementPage = () => {
                   <FaExclamationTriangle /> Report Professional
                 </button>
 
-                {/* ✅ Payment & Review Section */}
-                {["work_done"].includes(request.status?.toLowerCase()) && (
+                {/* Dynamic Payment/Review Workflow */}
+                {request.status?.toLowerCase() === "paid" ? (
                   <button
-                    onClick={() => setShowPaymentModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 font-bold text-white bg-green-600 rounded-xl hover:bg-green-700"
+                    disabled
+                    className="flex items-center gap-2 px-6 py-3 font-bold text-white bg-green-500 cursor-default rounded-xl"
                   >
-                    <FaCheckCircle /> Pay Professional
+                    <FaCheckCircle /> Payment Successful
                   </button>
-                )}
-
-                {["work_done", "paid"].includes(
-                  request.status?.toLowerCase(),
-                ) && (
-                  <button
-                    onClick={() => setShowReviewModal(true)}
-                    className="px-6 py-3 font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600"
-                  >
-                    Submit Review & Finalize
-                  </button>
+                ) : (
+                  // Show "Pay Now" button if status is WORK_DONE
+                  request.status?.toLowerCase() === "work_done" && (
+                    <button
+                      onClick={() => setShowPaymentModal(true)}
+                      className="flex items-center gap-2 px-8 py-3 font-bold text-white transition-transform bg-blue-600 shadow-lg rounded-xl hover:bg-blue-700 active:scale-95"
+                    >
+                      <FaClock /> Proceed to Payment
+                    </button>
+                  )
                 )}
               </div>
             </div>
@@ -487,7 +492,7 @@ const TechnicianManagementPage = () => {
         />
       )}
 
-      {/* Dummy Payment Modal */}
+      {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <motion.div
@@ -496,7 +501,7 @@ const TechnicianManagementPage = () => {
             className="w-full max-w-md p-6 bg-white shadow-xl rounded-2xl"
           >
             <div className="mb-6 text-center">
-              <div className="inline-flex p-3 mb-4 text-green-600 rounded-full bg-green-50">
+              <div className="inline-flex p-3 mb-4 text-blue-600 rounded-full bg-blue-50">
                 <FaTools size={24} />
               </div>
               <h3 className="text-xl font-bold text-gray-800">Final Payment</h3>
@@ -507,21 +512,21 @@ const TechnicianManagementPage = () => {
 
             <div className="p-4 mb-6 space-y-3 bg-gray-50 rounded-xl">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Service Base Price</span>
+                <span className="text-gray-500">Technician Quoted Fee</span>
                 <span className="font-mono font-bold text-gray-800">
-                  LKR {request.basePrice?.toLocaleString() || "0"}
+                  LKR {request.technicianFee?.toLocaleString() || "0.00"}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Service Charge (Fixed)</span>
+                <span className="text-gray-500">Platform Service Charge</span>
                 <span className="font-mono font-bold text-gray-800">
-                  LKR 500
+                  LKR 100.00
                 </span>
               </div>
               <div className="flex justify-between pt-3 border-t border-gray-200">
                 <span className="font-bold text-gray-800">Total Amount</span>
                 <span className="font-mono text-lg font-black text-primary">
-                  LKR {((request.basePrice || 0) + 500).toLocaleString()}
+                  LKR {((request.technicianFee || 0) + 100).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -540,10 +545,6 @@ const TechnicianManagementPage = () => {
                 Cancel
               </button>
             </div>
-
-            <p className="text-[10px] text-center text-gray-400 mt-4 uppercase tracking-widest font-bold">
-              Secure Encryption Enabled
-            </p>
           </motion.div>
         </div>
       )}
