@@ -6,10 +6,12 @@ import Home from "./Home.jsx";
 // --- CONTEXT PROVIDERS ---
 import { StudentAuthProvider } from "./context/student/StudentAuthContext.jsx";
 import { OwnerAuthProvider } from "./context/owner/OwnerAuthContext.jsx";
+import { AdminAuthProvider } from "./context/admin/AdminAuthContext.jsx";
 
 // --- ROUTE FILES ---
 import StudentAppRoutes from "./routes/StudentAppRoutes.jsx";
 import OwnerAppRoutes from "./routes/OwnerAppRoutes";
+import AdminAppRoutes from "./routes/AdminAppRoutes";
 
 // --- NEW UNIFIED PAGES ---
 // Ensure these paths match where you saved the files above
@@ -24,6 +26,7 @@ function App() {
     <>
       <StudentAuthProvider>
         <OwnerAuthProvider>
+          <AdminAuthProvider>
           <ScrollToTop />
           <Toaster
             position="top-right"
@@ -48,12 +51,16 @@ function App() {
             {/* Owner routes (Dashboard, My Ads, etc.) */}
             <Route path="/owner/*" element={<OwnerAppRoutes />} />
 
+            {/* Admin routes (Subscription Plans, etc.) */}
+            <Route path="/admin/*" element={<AdminAppRoutes />} />
+
              {/* Public Profile view */}
             <Route path="/profile/view/:id" element={<PublicProfileView />} />
 
             {/* ==================== LANDING PAGE ==================== */}
             <Route path="/" element={<Home />} />
           </Routes>
+          </AdminAuthProvider>
         </OwnerAuthProvider>
       </StudentAuthProvider>
     </>
