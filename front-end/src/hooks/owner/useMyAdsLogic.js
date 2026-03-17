@@ -184,7 +184,7 @@ const useMyAdsLogic = () => {
         pricePerMonth: parseFloat(formData.rent),
         keyMoney: parseFloat(formData.deposit) || 0,
         genderType: formData.genderType || "MIXED",
-        boardingType: formData.boardingType || "ROOM",
+        boardingType: (formData.boardingType || "ROOM").toUpperCase(),
         availableSlots: parseInt(formData.availableSlots || 1),
         maxOccupants: parseInt(formData.maxOccupants || 1),
         amenities: formData.amenities,
@@ -240,6 +240,8 @@ const useMyAdsLogic = () => {
         longitude: parseFloat(formData.longitude),
         nearbyPlaces: {}, 
         imageUrls: finalImages,
+        distance_to_uni: parseDouble(formData.distance_to_uni) || 0,
+        size: parseInt(formData.size) || 0,
         
         status: currentStatus === "Inactive" ? "INACTIVE" : "PENDING" 
       };
