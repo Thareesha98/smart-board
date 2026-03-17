@@ -1,5 +1,8 @@
 package com.sbms.sbms_monolith.service;
 
+import com.sbms.sbms_monolith.common.SubscriptionFeatureNotAllowedException;
+import com.sbms.sbms_monolith.common.SubscriptionLimitExceededException;
+import com.sbms.sbms_monolith.common.SubscriptionRequiredException;
 import com.sbms.sbms_monolith.dto.payment.CreatePaymentIntentDTO;
 import com.sbms.sbms_monolith.dto.subscription.OwnerSubscriptionRequestDTO;
 import com.sbms.sbms_monolith.dto.subscription.OwnerSubscriptionResponseDTO;
@@ -295,6 +298,55 @@ public class OwnerSubscriptionService {
                 ownerId,
                 OwnerSubscriptionStatus.ACTIVE,
                 LocalDateTime.now());
+    }
+
+    /**
+     * Hard validation for subscription-gated creation of ads.
+     * - Ensures there is an active subscription
+     * - Enforces maxAds limit when configured on the plan
+     */
+    @Transactional(readOnly = true)
+    public void validateOwnerCanCreateAd(Long ownerId) {
+        if (!hasActiveSubscriptionForOwner(ownerId)) {
+            throw new SubscriptionRequiredException("An active subscription is required to create ads.");
+        }
+
+        OwnerSubscription activeSubscription = getCurrentActiveSubscriptionEntity(ownerId);
+        if (activeSubscription == null || activeSubscription.getPlan() == null) {
+            throw new SubscriptionRequiredException("An active subscription is required to create ads.");
+        }
+
+        Integer maxAds = activeSubscription.getPlan().getMaxAds();
+        if (maxAds != null && maxAds > 0) {
+            long usedAds = boardingRepository.countByOwner_Id(ownerId);
+            if (usedAds >= maxAds) {
+                throw new SubscriptionLimitExceededException(
+                        "You have reached the maximum number of ads allowed by your subscription plan.");
+            }
+        }
+    }
+
+    /**
+     * Hard validation for subscription-gated ad boosting.
+     * - Ensures there is an active subscription
+     * - Ensures the current plan allows boosting
+     */
+    @Transactional(readOnly = true)
+    public void validateOwnerCanBoostAd(Long ownerId) {
+        if (!hasActiveSubscriptionForOwner(ownerId)) {
+            throw new SubscriptionRequiredException("An active subscription is required to boost ads.");
+        }
+
+        OwnerSubscription activeSubscription = getCurrentActiveSubscriptionEntity(ownerId);
+        if (activeSubscription == null || activeSubscription.getPlan() == null) {
+            throw new SubscriptionRequiredException("An active subscription is required to boost ads.");
+        }
+
+        Boolean boostAllowed = activeSubscription.getPlan().getBoostAllowed();
+        if (!Boolean.TRUE.equals(boostAllowed)) {
+            throw new SubscriptionFeatureNotAllowedException(
+                    "Your current subscription plan does not allow ad boosting.");
+        }
     }
 
     @Transactional(readOnly = true)

@@ -34,21 +34,8 @@ public class OwnerBoardingService {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new RuntimeException("Owner not found"));
 
-        if (!ownerSubscriptionService.hasActiveSubscriptionForOwner(ownerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "An active subscription is required before publishing ads.");
-        }
-
-        OwnerSubscription activeSubscription = ownerSubscriptionService.getCurrentActiveSubscriptionEntity(ownerId);
-        if (activeSubscription != null && activeSubscription.getPlan() != null
-                && activeSubscription.getPlan().getMaxAds() != null
-                && activeSubscription.getPlan().getMaxAds() > 0) {
-            long usedAds = boardingRepository.countByOwner_Id(ownerId);
-            if (usedAds >= activeSubscription.getPlan().getMaxAds()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Maximum ads reached for the current subscription plan.");
-            }
-        }
+        // Hard backend enforcement for subscription and ad limits
+        ownerSubscriptionService.validateOwnerCanCreateAd(ownerId);
 
         Boarding b = BoardingMapper.toEntityFromCreate(dto);
         b.setOwner(owner); // link owner
@@ -128,17 +115,8 @@ public class OwnerBoardingService {
 
     public OwnerBoardingResponseDTO boost(Long ownerId, Long boardingId, int days) {
 
-        if (!ownerSubscriptionService.hasActiveSubscriptionForOwner(ownerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "An active subscription is required before boosting ads.");
-        }
-
-        OwnerSubscription activeSubscription = ownerSubscriptionService.getCurrentActiveSubscriptionEntity(ownerId);
-        if (activeSubscription == null || activeSubscription.getPlan() == null
-            || !Boolean.TRUE.equals(activeSubscription.getPlan().getBoostAllowed())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "Your current subscription plan does not allow ad boosting.");
-        }
+        // Hard backend enforcement for subscription + plan-level boost permission
+        ownerSubscriptionService.validateOwnerCanBoostAd(ownerId);
 
         Boarding b = boardingRepository.findById(boardingId)
                 .orElseThrow(() -> new RuntimeException("Boarding not found"));

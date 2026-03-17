@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { FaStar, FaRocket, FaCrown } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { getActivePlans } from "../../api/owner/subscriptionPlanService";
@@ -176,6 +177,9 @@ export default function ViewSubscriptionPlansPage() {
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [submittingPlanId, setSubmittingPlanId] = useState(null);
   const [activePaymentPlan, setActivePaymentPlan] = useState(null);
+  const location = useLocation();
+
+  const redirectedFrom = location.state?.from || null;
 
   const mostPopularPlanId = plans.reduce((bestId, currentPlan, idx) => {
     const currentPrice = Number(currentPlan?.price) || 0;
@@ -238,6 +242,23 @@ export default function ViewSubscriptionPlansPage() {
         navBtnText="Back to Dashboard"
         navBtnPath="/owner/dashboard"
       />
+
+      {redirectedFrom && (
+        <section className="mx-4 max-w-4xl lg:mx-auto">
+          <div className="mb-4 rounded-large border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-text">
+            <p className="font-semibold text-accent">
+              You need an active subscription to access{" "}
+              <span className="underline decoration-dotted">
+                {redirectedFrom.replace("/owner/", "") || "this feature"}
+              </span>
+              .
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              Select a plan below to unlock ads, boardings, utilities and other premium features.
+            </p>
+          </div>
+        </section>
+      )}
 
       <section className="mx-4 p-8 rounded-large bg-white shadow-custom border border-gray-100 text-center max-w-4xl lg:mx-auto">
         <h2 className="text-xl font-black text-accent uppercase tracking-widest mb-3">

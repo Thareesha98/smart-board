@@ -85,9 +85,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/payments/intent/technician")
                         .hasAnyAuthority("ROLE_OWNER", "OWNER")
 
-             //   .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                
-                .requestMatchers("/api/payments/**").hasAnyRole("STUDENT", "OWNER")
+                        // -------------------------------------------------------
+                        // PAYMENTS (shared between STUDENT and OWNER)
+                        // -------------------------------------------------------
+                        .requestMatchers("/api/payments/**")
+                        .hasAnyAuthority("ROLE_STUDENT", "STUDENT", "ROLE_OWNER", "OWNER")
                         // -------------------------------------------------------
                         // TECHNICIAN ENDPOINTS
                         // -------------------------------------------------------
@@ -110,8 +112,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/bills/student/**")
                         .hasAnyAuthority("ROLE_STUDENT", "STUDENT")
                         .requestMatchers("/api/bills/student")
-                        .hasAnyAuthority("ROLE_STUDENT", "STUDENT")
-                        .requestMatchers("/api/payments/**")
                         .hasAnyAuthority("ROLE_STUDENT", "STUDENT")
                         .requestMatchers("/api/payments/history")
                         .hasAnyAuthority("ROLE_STUDENT", "STUDENT")

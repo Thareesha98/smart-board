@@ -10,6 +10,7 @@ import AppointmentItem from "../../components/Owner/dashboard/AppointmentItem";
 import DashboardSection from "../../components/Owner/dashboard/DashboardSection";
 import RecentTransactions from "../../components/Owner/dashboard/RecentTransactions";
 import RevenueChart from "../../components/Owner/dashboard/RevenueChart";
+import CurrentPlanCard from "../../components/Owner/dashboard/CurrentPlanCard";
 
 export default function Dashboard() {
   const { loading, stats, chartData, transactions, appointments, user } =
@@ -87,6 +88,8 @@ export default function Dashboard() {
           {/* RIGHT COLUMN */}
           <div className="space-y-6">
             <HeroAction />
+
+            <CurrentPlanCard />
 
             <div className="p-5 border shadow-sm bg-card-bg rounded-xl border-light">
               <h3 className="mb-4 text-xs font-black tracking-widest uppercase text-muted/50">

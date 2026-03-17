@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import OwnerProtectedRoute from "../components/Owner/common/OwnerProtectedRoute.jsx";
+import OwnerSubscriptionGuard from "../components/Owner/common/OwnerSubscriptionGuard.jsx";
 import OwnerLayout from "../layouts/OwnerLayout";
 
 // Owner Pages
@@ -49,28 +50,31 @@ const OwnerAppRoutes = () => {
           <Route path="chats" element={<ChatList />} />
           <Route path="chat/:roomId" element={<ChatRoom />} />
 
-          <Route path="myAds" element={<MyAdsPage />} />
-          <Route path="myAds/createAd" element={<CreateAdPage />} />
-          <Route path="myAds/editAd/:adId" element={<EditAdPage />} />
-          <Route path="my-ads" element={<MyAdsPage />} />
+          <Route element={<OwnerSubscriptionGuard />}>
+            <Route path="myAds" element={<MyAdsPage />} />
+            <Route path="myAds/createAd" element={<CreateAdPage />} />
+            <Route path="myAds/editAd/:adId" element={<EditAdPage />} />
+            <Route path="my-ads" element={<MyAdsPage />} />
+          </Route>
 
           <Route path="appointments" element={<AppointmentsPage />} />
           <Route path="registrations" element={<RegistrationPage />} />
-          <Route path="myboardings" element={<MyBoardingsPage />} />
-
-          {/* ==================== UTILITIES ==================== */}
-          <Route path="utility" element={<UtilityPage />} />
-          <Route path="utilities" element={<UtilityPage />} />
-          <Route path="utility/details" element={<UtilityDetails />} />
-          <Route path="utility/add" element={<AddUtility />} />
-          <Route
-            path="utility/payment-verify"
-            element={<OwnerPaymentApprovals />}
-          />
+          <Route element={<OwnerSubscriptionGuard />}>
+            <Route path="myboardings" element={<MyBoardingsPage />} />
+            <Route path="appointments" element={<AppointmentsPage />} />
+            <Route path="maintenance" element={<MaintenancePage />} />
+            <Route path="maintenance/:id/assign" element={<TechnicianManagementPage />} />
+            <Route path="utility" element={<UtilityPage />} />
+            <Route path="utilities" element={<UtilityPage />} />
+            <Route path="utility/details" element={<UtilityDetails />} />
+            <Route path="utility/add" element={<AddUtility />} />
+            <Route
+              path="utility/payment-verify"
+              element={<OwnerPaymentApprovals />}
+            />
+          </Route>
 
           {/* ==================== OTHER ==================== */}
-          <Route path="maintenance" element={<MaintenancePage />} />
-          <Route path="maintenance/:id/assign" element={<TechnicianManagementPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="payment" element={<PaymentPage />} />
 
