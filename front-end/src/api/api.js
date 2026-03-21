@@ -1,12 +1,13 @@
 import axios from "axios";
 
-const baseURL = "https://smartboard.thareesha.software/api";
+// 1. Safe Base URL
+const baseURL = import.meta.env.VITE_API_BASE || "http://localhost:8086/api";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: baseURL,
+  // headers: {
+  //   'Content-Type': 'application/json',
+  // },
 });
 
 // 2. Request Interceptor: ALWAYS attach the token if it exists
@@ -14,7 +15,7 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem("user_data");
-    
+
     if (token && token !== "null" && token !== "undefined") {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -51,5 +52,3 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-export default api;
