@@ -298,7 +298,7 @@ const Home = () => {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
       <div className="relative z-10 min-h-screen flex flex-col">
-        <div className="flex-1 flex flex-col items-stretch justify-start p-4 md:p-8">
+        <div className="flex-1 flex flex-col items-stretch justify-start p-3 sm:p-4 md:p-8">
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -309,26 +309,26 @@ const Home = () => {
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="w-full max-w-6xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 py-4 px-6 rounded-2xl mb-12 shadow-2xl flex items-center justify-between"
+              className="w-full max-w-6xl mx-auto bg-white/10 backdrop-blur-xl border border-white/20 py-3 px-4 sm:py-4 sm:px-6 rounded-2xl mb-8 md:mb-12 shadow-2xl flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3">
-                <img src={logo} alt="SmartBoAD" className="h-10 w-10 rounded-lg shadow-inner" />
-                <h1 className="text-2xl font-black text-white tracking-tight">SmartBoAD</h1>
+                <img src={logo} alt="SmartBoAD" className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg shadow-inner" />
+                <h1 className="text-lg sm:text-2xl font-black text-white tracking-tight">SmartBoAD</h1>
               </div>
               <button
                 onClick={() => navigate('/login')}
-                className="px-6 py-2 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl transition-all font-bold text-sm backdrop-blur-sm"
+                className="px-4 sm:px-6 py-2 bg-white/20 hover:bg-white/30 text-white border border-white/30 rounded-xl transition-all font-bold text-xs sm:text-sm backdrop-blur-sm"
               >
                 Login
               </button>
             </motion.div>
 
             {/* Hero Section */}
-            <motion.div variants={itemVariants} className="text-center mb-12">
-              <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg">
+            <motion.div variants={itemVariants} className="text-center mb-8 md:mb-12 px-1">
+              <h2 className="text-3xl sm:text-4xl md:text-7xl font-extrabold text-white mb-4 md:mb-6 leading-tight drop-shadow-lg">
                 Welcome To <span className="text-accent">SmartBoAD</span>
               </h2>
-              <p className="text-xl text-white/90 max-w-2xl mx-auto font-medium">
+              <p className="text-sm sm:text-base md:text-xl text-white/90 max-w-2xl mx-auto font-medium">
                 The premier destination for student boarding and property advertising.
               </p>
             </motion.div>
@@ -354,45 +354,47 @@ const Home = () => {
             
             {/* Main Layout: Left Ads Sidebar + Right Boarding Search */}
             {!maintenanceMode && (
-            <div className="flex flex-col lg:flex-row gap-6 mb-12 items-start w-full">
+            <div className="flex flex-col lg:flex-row gap-4 md:gap-6 mb-10 md:mb-12 items-start w-full">
               {/* Left: Public Ads Sidebar */}
-              <div className="w-full lg:w-56 xl:w-60 flex-shrink-0 lg:sticky lg:top-6">
+              <div className="w-full lg:w-56 xl:w-60 flex-shrink-0 lg:sticky lg:top-6 order-1 lg:order-1">
                 <PublicAdsSidebar />
               </div>
 
               {/* Right: Boarding Search Panel */}
-              <BoardingSearchPanel
-                itemVariants={itemVariants}
-                formData={formData}
-                setFormData={setFormData}
-                fetchBoardings={fetchBoardings}
-                filters={filters}
-                setFilters={setFilters}
-                setPage={setPage}
-                pageSize={pageSize}
-                loadingBoardings={loadingBoardings}
-                boardings={boardings}
-                handleOpenBoardingDetails={handleOpenBoardingDetails}
-                page={page}
-                totalPages={totalPages}
-              />
+              <div className="order-2 lg:order-2 w-full flex-1">
+                <BoardingSearchPanel
+                  itemVariants={itemVariants}
+                  formData={formData}
+                  setFormData={setFormData}
+                  fetchBoardings={fetchBoardings}
+                  filters={filters}
+                  setFilters={setFilters}
+                  setPage={setPage}
+                  pageSize={pageSize}
+                  loadingBoardings={loadingBoardings}
+                  boardings={boardings}
+                  handleOpenBoardingDetails={handleOpenBoardingDetails}
+                  page={page}
+                  totalPages={totalPages}
+                />
+              </div>
             </div>
             )}
 
             {!maintenanceMode && (
             <motion.div variants={itemVariants} className="mb-10">
-              <div className="bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 md:p-10 border border-white/20">
+              <div className="bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl p-5 sm:p-6 md:p-10 border border-white/20">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                   <div>
-                    <h3 className="text-3xl font-black text-white mb-2">Promote Your Business on SmartBoAD</h3>
-                    <p className="text-white/70 max-w-2xl">
+                    <h3 className="text-2xl md:text-3xl font-black text-white mb-2">Promote Your Business on SmartBoAD</h3>
+                    <p className="text-white/70 max-w-2xl text-sm sm:text-base">
                       Reach students actively searching for boarding and services. Publish your campaign quickly with a plan that matches your budget.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={handleOpenAdvertiseForm}
-                    className="px-8 py-4 bg-gradient-to-r from-primary to-accent text-white font-black rounded-2xl shadow-xl hover:scale-[1.02] transition-all whitespace-nowrap"
+                    className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-primary to-accent text-white font-black rounded-2xl shadow-xl hover:scale-[1.02] transition-all whitespace-nowrap"
                   >
                     Advertise Your Business
                   </button>
@@ -432,18 +434,18 @@ const Home = () => {
             )}
 
             {/* Features Grid */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 md:gap-8 mb-12 md:mb-16">
               {[
                 { icon: 'fa-search', title: 'Smart Filters', desc: 'Find exactly what you need in seconds.' },
                 { icon: 'fa-shield-alt', title: 'Verified Hosts', desc: 'We vet every owner for your safety.' },
                 { icon: 'fa-clock', title: 'Real-time', desc: 'Instant bookings and availability updates.' },
               ].map((feature, idx) => (
-                <div key={idx} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-8 text-center text-white hover:bg-white/10 transition-all shadow-xl">
-                  <div className="w-16 h-16 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-accent">
+                <div key={idx} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl p-5 sm:p-6 md:p-8 text-center text-white hover:bg-white/10 transition-all shadow-xl">
+                  <div className="w-14 h-14 md:w-16 md:h-16 bg-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 text-accent">
                     <i className={`fas ${feature.icon} text-2xl`}></i>
                   </div>
-                  <h4 className="text-xl font-bold mb-3">{feature.title}</h4>
-                  <p className="text-white/60 leading-relaxed">{feature.desc}</p>
+                  <h4 className="text-lg md:text-xl font-bold mb-2 md:mb-3">{feature.title}</h4>
+                  <p className="text-white/60 leading-relaxed text-sm md:text-base">{feature.desc}</p>
                 </div>
               ))}
             </motion.div>
@@ -451,14 +453,14 @@ const Home = () => {
         </div>
 
         {/* Footer */}
-        <motion.footer className="w-full relative overflow-hidden bg-gradient-to-b from-[#0a101c]/95 to-[#04070f]/95 backdrop-blur-md text-white/90 pt-16 pb-8 border-t border-white/10">
+        <motion.footer className="w-full relative overflow-hidden bg-gradient-to-b from-[#0a101c]/95 to-[#04070f]/95 backdrop-blur-md text-white/90 pt-12 md:pt-16 pb-8 border-t border-white/10">
           <div className="absolute inset-0 pointer-events-none opacity-40">
             <div className="absolute -top-24 left-1/4 w-72 h-72 rounded-full bg-accent/10 blur-3xl" />
             <div className="absolute -bottom-28 right-1/4 w-80 h-80 rounded-full bg-primary/10 blur-3xl" />
           </div>
 
-          <div className="relative max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-10 pb-10 border-b border-white/10">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 md:gap-10 pb-10 border-b border-white/10">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <img src={logo} alt="SmartBoAD" className="h-10 w-10 rounded-lg border border-white/20" />
@@ -510,9 +512,9 @@ const Home = () => {
               </div>
             </div>
 
-            <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/45">
+            <div className="pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/45 text-center md:text-left">
               <p>© 2026 SmartBoAD Digital. All rights reserved.</p>
-              <div className="flex items-center gap-5">
+              <div className="flex items-center gap-4 sm:gap-5 flex-wrap justify-center">
                 <span className="hover:text-white/70 cursor-pointer transition-colors">Privacy</span>
                 <span className="hover:text-white/70 cursor-pointer transition-colors">Terms</span>
                 <span className="hover:text-white/70 cursor-pointer transition-colors">Contact</span>
